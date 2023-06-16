@@ -30,7 +30,7 @@ public class KakaoLoginService {
 		// HttpBody 오브젝트 생성
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();		// MultiValueMap이 사용된 이유는 일반적인 Map을 사용했을 때와 몇 가지 차이점이 있습니다
 		params.add("grant_type", "authorization_code");							// MultiValueMap은 하나의 키에 대해 여러 개의 값을 가지는 경우를 고려한 설계입니다.
-		params.add("client_id", "8e563ebe52e0befed8d56d2dff7a1607");			// 이 예제에서는 각 키에 대해 하나의 값만을 가지지만, 여러 개의 값을 가질 수 있는 상황을 대비하여 MultiValueMap을 사용할 수 있습니다.
+		params.add("client_id", "{내 일련번호}");			// 이 예제에서는 각 키에 대해 하나의 값만을 가지지만, 여러 개의 값을 가질 수 있는 상황을 대비하여 MultiValueMap을 사용할 수 있습니다.
 		params.add("redirect_url", "http://localhost/auth/kakao/callback");		// HttpEntity나 RestTemplate 등의 Spring Framework의 일부 기능에서는 MultiValueMap을 사용하는 경우가 많습니다.
 		params.add("code", code);												// 특히 HTTP 요청의 헤더나 폼 데이터를 다룰 때 MultiValueMap이 편리하게 사용될 수 있습니다.
 																				// LinkedMultiValueMap 같은 MultiValueMap의 구현체는 키와 값의 순서를 보장합니다.
@@ -76,27 +76,27 @@ public class KakaoLoginService {
 		ResponseEntity<String> response2 = rt2.exchange("https://kapi.kakao.com/v2/user/me", HttpMethod.POST, kakaoProfileRequest, String.class);
 		
 //		{
-//		    "id":2843888591,  // 카카오에서 사용자를 고유하게 식별하기 위한 ID입니다.
+//		    "id":{아이디},  // 카카오에서 사용자를 고유하게 식별하기 위한 ID입니다.
 //		    "connected_at":"2023-06-14T21:41:37Z",  // 사용자가 카카오 계정과 앱을 연결한 시간입니다.
 //		    "properties":{  // 사용자의 프로필 정보를 포함하는 객체입니다.												어플에서 설정한 데이터
 //		        "nickname":"성민",  // 사용자의 닉네임입니다.
-//		        "profile_image":"http://k.kakaocdn.net/dn/dpk9l1/btqmGhA2lKL/Oz0wDuJn1YV2DIn92f6DVK/img_640x640.jpg",  // 사용자의 프로필 이미지 URL입니다. 640x640 크기입니다.
-//		        "thumbnail_image":"http://k.kakaocdn.net/dn/dpk9l1/btqmGhA2lKL/Oz0wDuJn1YV2DIn92f6DVK/img_110x110.jpg"  // 사용자의 프로필 썸네일 이미지 URL입니다. 110x110 크기입니다.
+//		        "profile_image":"{URL주소}",  // 사용자의 프로필 이미지 URL입니다. 640x640 크기입니다.
+//		        "thumbnail_image":"{URL주소}"  // 사용자의 프로필 썸네일 이미지 URL입니다. 110x110 크기입니다.
 //		    },
 //		    "kakao_account":{  // 사용자의 카카오 계정 정보를 포함하는 객체입니다.											계정에 설정된 데이터
 //		        "profile_nickname_needs_agreement":false,  // 사용자가 닉네임 공유에 동의했는지 여부입니다.				false가 동의??
 //		        "profile_image_needs_agreement":false,  // 사용자가 프로필 이미지 공유에 동의했는지 여부입니다.
 //		        "profile":{  // 사용자의 카카오 계정 프로필 정보를 포함하는 객체입니다.
 //		            "nickname":"성민",  // 사용자의 닉네임입니다.
-//		            "thumbnail_image_url":"http://k.kakaocdn.net/dn/dpk9l1/btqmGhA2lKL/Oz0wDuJn1YV2DIn92f6DVK/img_110x110.jpg",  // 사용자의 프로필 썸네일 이미지 URL입니다. 110x110 크기입니다.
-//		            "profile_image_url":"http://k.kakaocdn.net/dn/dpk9l1/btqmGhA2lKL/Oz0wDuJn1YV2DIn92f6DVK/img_640x640.jpg",  // 사용자의 프로필 이미지 URL입니다. 640x640 크기입니다.
+//		            "thumbnail_image_url":"{URL주소}",  // 사용자의 프로필 썸네일 이미지 URL입니다. 110x110 크기입니다.
+//		            "profile_image_url":"{URL주소}",  // 사용자의 프로필 이미지 URL입니다. 640x640 크기입니다.
 //		            "is_default_image":true  // 사용자가 기본 이미지를 사용하고 있는지 여부입니다.
 //		        },
 //		        "has_email":true,  // 사용자가 이메일 주소를 가지고 있는지 여부입니다.
 //		        "email_needs_agreement":false,  // 사용자가 이메일 주소 공유에 동의했는지 여부입니다.
 //		        "is_email_valid":true,  // 사용자의 이메일 주소가 유효한지 여부입니다.									유효하고 검증되었을 경우만 회원정보와 매칭하는것이 안전
 //		        "is_email_verified":true,  // 사용자의 이메일 주소가 검증되었는지 여부입니다.
-//		        "email":"sung0763@naver.com"  // 사용자의 이메일 주소입니다.
+//		        "email":"{이메일주소}"  // 사용자의 이메일 주소입니다.
 //		    }
 //		}
 
