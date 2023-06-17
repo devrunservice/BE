@@ -1,5 +1,6 @@
 package com.devrun.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -16,9 +17,23 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+
 @Service
 public class KakaoLoginService {
+	
+	// RestTemplate를 Non-Blocking과 비동기처리가 가능한 WebClinet로 대체
+	// RestTemplate를 Non-Blocking과 비동기처리가 가능한 WebClinet로 대체
+	// RestTemplate를 Non-Blocking과 비동기처리가 가능한 WebClinet로 대체
+	// RestTemplate를 Non-Blocking과 비동기처리가 가능한 WebClinet로 대체
+	// RestTemplate를 Non-Blocking과 비동기처리가 가능한 WebClinet로 대체
+	
+	// @Value를 이용해 application.properties에서 가져와 유지보수도 쉽고 보안성도 유지할 수 있다
+	@Value("${kakao.client_id}")
+	private String client_id;
 
+	@Value("${kakao.redirect_url}")
+	private String redirect_url;
+	
     public OAuthToken getOauthToken(String code) {
     	// https://developers.kakao.com/docs/latest/ko/kakaologin/rest-api#request-token
 		// POST방식으로 key=value 데이터를 요청(to카카오)
@@ -29,11 +44,12 @@ public class KakaoLoginService {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");	// HTTP 요청의 헤더를 설정
 		
+		
 		// HttpBody 오브젝트 생성
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();		// MultiValueMap이 사용된 이유는 일반적인 Map을 사용했을 때와 몇 가지 차이점이 있습니다
 		params.add("grant_type", "authorization_code");							// MultiValueMap은 하나의 키에 대해 여러 개의 값을 가지는 경우를 고려한 설계입니다.
-		params.add("client_id", "58d2e6694391dd33d6765a98a4e1b1ec");			// 이 예제에서는 각 키에 대해 하나의 값만을 가지지만, 여러 개의 값을 가질 수 있는 상황을 대비하여 MultiValueMap을 사용할 수 있습니다.
-		params.add("redirect_url", "http://localhost/auth/kakao/callback");		// HttpEntity나 RestTemplate 등의 Spring Framework의 일부 기능에서는 MultiValueMap을 사용하는 경우가 많습니다.
+		params.add("client_id", client_id);										// 이 예제에서는 각 키에 대해 하나의 값만을 가지지만, 여러 개의 값을 가질 수 있는 상황을 대비하여 MultiValueMap을 사용할 수 있습니다.
+		params.add("redirect_url", redirect_url);								// HttpEntity나 RestTemplate 등의 Spring Framework의 일부 기능에서는 MultiValueMap을 사용하는 경우가 많습니다.
 		params.add("code", code);												// 특히 HTTP 요청의 헤더나 폼 데이터를 다룰 때 MultiValueMap이 편리하게 사용될 수 있습니다.
 																				// LinkedMultiValueMap 같은 MultiValueMap의 구현체는 키와 값의 순서를 보장합니다.
 																				// 일반적인 HashMap은 키의 순서를 보장하지 않으므로, 순서가 중요한 경우에는 LinkedMultiValueMap을 사용할 수 있습니다.
