@@ -6,9 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import com.devrun.entity.MemberEntity;
 import com.devrun.service.SignupService;
@@ -20,6 +18,7 @@ public class SignupController {
 	SignupService signupService;
 
 	@GetMapping("/signup")
+	@ResponseBody
 	public String signup(HttpServletResponse response) {
 		
 		//Cache-Control 헤더는 클라이언트에 캐싱 지시문을 지정하는 데 사용됩니다. 이 예에서 제공되는 지시문은 다음과 같습니다.
@@ -39,7 +38,8 @@ public class SignupController {
 	}
 	
 	@PostMapping("/signup/okay")
-	public String okay(@ModelAttribute MemberEntity memberEntity) {
+	@ResponseBody
+	public String okay(@RequestBody MemberEntity memberEntity) {
 		// @ModelAttribute 어노테이션이 붙은 매개변수를 HTTP 요청 파라미터와 자동으로 바인딩하도록 지원합니다.
 		// 이 기능은 HTML form 태그의 input 필드와 Java 객체의 필드를 매핑하여 사용하게 해줍니다.
 		System.out.println(memberEntity);
