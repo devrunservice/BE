@@ -59,7 +59,8 @@ public class SignupService {
 
         // 발신 번호를 적절한 값으로 설정하세요.
         String senderPhoneNumber = "01062037049";
-
+        
+        // 6자리 인증코드 생성
         Random r = new Random();
         int smsCode = r.nextInt(900000) + 100000;
 
@@ -68,17 +69,19 @@ public class SignupService {
         
         String jsonBody = "{"
                 + "\"type\": \"SMS\","
+                + "\"contentType\": \"COMM\","
                 + "\"from\": \"" + senderPhoneNumber + "\","
-                + "\"content\": \"회원가입 인증코드.\","
+                + "\"subject\": \"회원가입 인증코드\","
+                + "\"content\": \"DEVRUN 인증코드: " + smsCode + "\","
                 + "\"messages\": ["
                 + "    {"
-                + "        \"to\": \"" + recipientPhoneNumber + "\","
-                + "        \"content\": \"DEVRUN 인증코드 : \"" + smsCode
+                + "        \"to\": \"" + recipientPhoneNumber + "\""
                 + "    }"
                 + "]"
                 + "}";
 
-        return webClient.post()
+
+        Mono<String> result = webClient.post()
                 .uri(uri)
                 .header("Content-Type", "application/json; charset=utf-8")
                 .header("x-ncp-apigw-timestamp", timestamp)
@@ -87,6 +90,7 @@ public class SignupService {
                 .body(BodyInserters.fromValue(jsonBody))
                 .retrieve()
                 .bodyToMono(String.class);
+        return result;
     }
 	
 	private static String makeSignature(String message, String secretKey) throws NoSuchAlgorithmException, InvalidKeyException {

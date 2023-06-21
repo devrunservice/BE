@@ -25,12 +25,13 @@ public class SignupController {
 	
 	@PostMapping("/signup")
 	public String signup(HttpServletResponse response) {
+		
 		return "signup";
 	}
 
-	
 	@PostMapping("/signup/auth")
 	public Mono<String> auth(@RequestParam("phonenumber") String phone) {
+		System.out.println("폰" + phone);
         return signupService.sendSmsCode(phone);
     }
 	
