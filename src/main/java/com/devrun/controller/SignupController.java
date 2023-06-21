@@ -25,7 +25,6 @@ public class SignupController {
 	
 	@PostMapping("/signup")
 	public String signup(HttpServletResponse response) {
-		
 		return "signup";
 	}
 
