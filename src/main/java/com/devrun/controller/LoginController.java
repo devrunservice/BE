@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.devrun.dto.OAuthToken;
 import com.devrun.dto.member.KakaoProfileDTO;
@@ -24,40 +26,43 @@ public class LoginController {
 	
 	@Autowired
 	private KakaoLoginService kakaoLoginService;
-
+	
+	@ResponseBody
 	@GetMapping("/index")
 	public String index() {
 		return "index";
 	}
-
+	
+	@ResponseBody
 	@GetMapping("/login")
 	public String login() {
 		return "login";
 	}
 	
+	@ResponseBody
 	@PostMapping("/login")
 	public String login(HttpServletRequest request
-						, @RequestParam("id") String id
-						, @RequestParam("password") String password) {
+						, @RequestBody MemberEntity memberEntity) {
+		
 		MemberEntity member = new MemberEntity();
 		
-		member.setId(id);
-		member.setPassword(password);
+		member.setId(memberEntity.getId());
+		member.setPassword(memberEntity.getPassword());
 		
 		boolean success = loginService.validate(member);
 		
 		if (success) {
 			HttpSession session = request.getSession();
-			session.setAttribute("id", id);
-			session.setAttribute("password", password);
+			session.setAttribute("id", memberEntity.getId());
+			session.setAttribute("password", memberEntity.getPassword());
 			return "index";
 		}else {
 			//로그인 실패
 			return "login";
 		}
-		
 	}
 	
+	@ResponseBody
 	@GetMapping("/auth/kakao/callback")
 	public String kakaoCallback(HttpServletRequest request
 								, @RequestParam(required = false) String code
@@ -89,6 +94,7 @@ public class LoginController {
 		
 	}
 	
+	@ResponseBody
 	@GetMapping("/logout")
 	public String logout(HttpServletRequest request) {
 		

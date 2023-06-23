@@ -39,8 +39,24 @@ public class SignupService {
 	
 	private final Map<String, Integer> phoneCodeMap = new ConcurrentHashMap<>();
 
+	public MemberEntity findById(String id) {
+		return memberEntityRepository.findById(id);
+	}
+	
 	public void insert(MemberEntity memberEntity) {
 		memberEntityRepository.save(memberEntity);
+	}
+	
+	public int checkID(String id) {
+		return memberEntityRepository.countById(id);
+	}
+
+	public int checkEmail(String email) {
+		return memberEntityRepository.countByEmail(email);
+	}
+	
+	public int checkphone(String phonenumber) {
+		return memberEntityRepository.countByPhonenumber(phonenumber);
 	}
 	
 	public Mono<String> sendSmsCode(String recipientPhoneNumber) {
@@ -103,6 +119,7 @@ public class SignupService {
 
     public boolean verifySmsCode(String phoneNumber, int code) {
         Integer savedCode = phoneCodeMap.get(phoneNumber);
+        System.out.println(savedCode + ":" + code);
         return savedCode != null && savedCode.equals(code);
     }
 }
