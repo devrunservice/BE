@@ -1,0 +1,89 @@
+name: deploy-auto-action
+
+on:
+  push:
+    branches:
+      - merge
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Build and package with Gradle
+        run: ./gradlew bootJar
+        
+      - name: Show structure of artifact files
+        run: ls -ahl ./build/libs/*.jar
+        
+## 빌드 아티팩트 업로드
+      - name: Upload build artifact for job
+        uses: actions/upload-artifact@v3
+        with:
+          ## 업로드 키 값 (임의지정)
+          name: project_artifact
+          ## Gradle의 경우
+          path: "./build/libs/*.jar"
+          
+  distribute:
+    ## 빌드가 선행되야함.
+  #    if: ${{ always() }}
+      needs: [ build ]
+      runs-on: ubuntu-latest
+      steps:
+      - name: Create distribute
+        run: mkdir ~/deploytemp
+        
+      - name: Download build artifact for job
+        uses: actions/download-artifact@v3
+        with:
+          name: project_artifact
+          path: deploytemp
+          
+      - name: Show structure of downloaded files
+        run: |
+          ls -alh deploytemp
+          
+      - name: Transfer JAR to EC2 server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          rm: true
+          source: "deploytemp/*.jar"
+          target: /home/ubuntu/devrun
+          strip_components: 1
+      - name: Show structure of transfer files
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/ubuntu/devrun/deploytemp
+            ls -alh
+  service_restart:
+    ## 앞 작업이 선행되고 성공해야 함
+    needs: [ build, distribute ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call service restart
+        uses: appleboy/ssh-action@master
+        with:
+          username: ubuntu
+          host: ${{ secrets.EC2_SERVER_IP }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/ubuntu/devrun
+            sudo java -jar devrun-0.0.1-SNAPSHOT.jar
+            echo "서비스 시작"
