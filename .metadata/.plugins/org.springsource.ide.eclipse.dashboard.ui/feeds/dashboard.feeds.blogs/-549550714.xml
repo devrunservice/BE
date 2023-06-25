@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Spring]]></title><description><![CDATA[Level up your Java code and explore what Spring can do for you.]]></description><link>https://spring.io</link><generator>GatsbyJS</generator><lastBuildDate>Fri, 23 Jun 2023 12:26:06 GMT</lastBuildDate><item><title><![CDATA[Spring Modulith 1.0 M1 released]]></title><link>https://spring.io/blog/2023/06/23/spring-modulith-1-0-m1-released</link><guid isPermaLink="true">https://spring.io/blog/2023/06/23/spring-modulith-1-0-m1-released</guid><dc:creator><![CDATA[Oliver Drotbohm]]></dc:creator><pubDate>Fri, 23 Jun 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;I am happy to announce the release of Spring Modulith 1.0 M1. This is an important milestone for the project and the first step on the road to promote it from an experimental to an official Spring project. This means that we ship a couple of breaking changes&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The group identifier is now &lt;code&gt;org.springframework.modulith&lt;/code&gt; (previously &lt;code&gt;org.springframework.experimental&lt;/code&gt;).&lt;/li&gt;
+&lt;li&gt;The Spring Boot baseline of the project is 3.1 (previously 3.0).&lt;/li&gt;
+&lt;li&gt;The name of the actuator endpoint exposing the application module structure is now &lt;code&gt;application-modules&lt;/code&gt; (previously &lt;code&gt;applicationmodules&lt;/code&gt;).&lt;/li&gt;
+&lt;li&gt;The previously deprecated configuration properties in the JDBC-based event registry have been removed.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Also, note that milestone releases need to be obtained from our Artifactory repository under &lt;a href=&quot;https://repo.spring.io/milestone&quot;&gt;https://repo.spring.io/milestone&lt;/a&gt;. The release also includes a couple of bug fixes and new features over 0.6, which can be found in the official &lt;a href=&quot;https://github.com/spring-projects/spring-modulith/releases/tag/1.0.0-M1&quot;&gt;change log&lt;/a&gt;. A comprehensive overview about the project can be found in the &lt;a href=&quot;https://docs.spring.io/spring-modulith/docs/1.0.0-M1/reference/html/&quot;&gt;reference documentation&lt;/a&gt;.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Improved Testcontainers Support in Spring Boot 3.1]]></title><link>https://spring.io/blog/2023/06/23/improved-testcontainers-support-in-spring-boot-3-1</link><guid isPermaLink="true">https://spring.io/blog/2023/06/23/improved-testcontainers-support-in-spring-boot-3-1</guid><dc:creator><![CDATA[Moritz Halbritter]]></dc:creator><pubDate>Fri, 23 Jun 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;There&apos;s been support for &lt;a href=&quot;https://testcontainers.com/&quot;&gt;Testcontainers&lt;/a&gt; in Spring Boot for some time now, and Spring Boot 3.1 improves it further.
+But first, let&apos;s take a look at what Testcontainers is and how it&apos;s usually used.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Testcontainers is an open source framework for providing throwaway, lightweight instances of databases, message brokers, web browsers, or just about anything that can run in a Docker container.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;If you have used Testcontainers in the past, there&apos;s a high chance that you have been using them in integration tests:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-java&quot;&gt;@SpringBootTest
+@Testcontainers
+class MyIntegrationTests {
+
+    @Container
+    static Neo4jContainer&amp;#x3C;?&gt; neo4j = new Neo4jContainer&amp;#x3C;&gt;(&quot;neo4j:5&quot;);
+
+    @Test
+    void myTest() {
+        // ...
+    }
+
+    @DynamicPropertySource
+    static void neo4jProperties(DynamicPropertyRegistry registry) {
+        registry.add(&quot;spring.neo4j.uri&quot;, neo4j::getBoltUrl);
+    }
+
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In this integration test, a Neo4j database is started inside a Testcontainer, and a &lt;code&gt;@DynamicPropertySource&lt;/code&gt; is put in place to configure Spring Boot to use the Neo4j database running in the container.&lt;/p&gt;
+&lt;p&gt;With Spring Boot 3.1, we&apos;ve added two new features related to Testcontainers.
+Both of those features have been implemented on top of the &lt;code&gt;ConnectionDetails&lt;/code&gt; abstraction, which we &lt;a href=&quot;https://spring.io/blog/2023/06/19/spring-boot-31-connectiondetails-abstraction&quot;&gt;featured in a separate blog post&lt;/a&gt;.
+In case you haven&apos;t read it, please do so now. The rest of this blog post will then make more sense.&lt;/p&gt;
+&lt;p&gt;The first of the features makes integration testing with Testcontainers easier.
+The new &lt;code&gt;@ServiceConnection&lt;/code&gt; annotation can be used on the container instance fields of your tests:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-java&quot;&gt;@SpringBootTest
+@Testcontainers
+class MyIntegrationTests {
+
+    @Container
+    @ServiceConnection
+    static Neo4jContainer&amp;#x3C;?&gt; neo4j = new Neo4jContainer&amp;#x3C;&gt;(&quot;neo4j:5&quot;);
+
+    @Test
+    void myTest() {
+        // ...
+    }
+
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This replaces the need for the &lt;code&gt;@DynamicPropertySource&lt;/code&gt; code, so you can just remove it.&lt;/p&gt;
+&lt;p&gt;Under the covers, &lt;code&gt;@ServiceConnection&lt;/code&gt; discovers the type of container that is annotated and creates a &lt;code&gt;ConnectionDetails&lt;/code&gt; bean for it.
+In our example, the bean would be a &lt;code&gt;Neo4jConnectionDetails&lt;/code&gt;.
+The Spring Boot auto-configuration for Neo4j consumes this bean and configures the driver to connect to the Neo4j server running in the Testcontainer.
+This &lt;a href=&quot;https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.testing.testcontainers.service-connections&quot;&gt;works for many of the different container types supported by Testcontainers&lt;/a&gt;.
+If you&apos;re using &lt;code&gt;GenericContainer&lt;/code&gt;, we&apos;ll take a look at the image name to infer the type of container.
+If you&apos;re using a custom image whose name we don&apos;t recognize, you can use the &lt;code&gt;name&lt;/code&gt; attribute of the &lt;code&gt;@ServiceConnection&lt;/code&gt; annotation to point us in the right direction.&lt;/p&gt;
+&lt;p&gt;Annotating the container fields with &lt;code&gt;@ServiceConnection&lt;/code&gt; has several advantages. First, you have to type less code.
+Second, there&apos;s no more &quot;stringly&quot; typed coupling between your integration tests and the Spring Boot auto-configurations through the properties.
+And third, you don&apos;t have to look up (or remember) the property names.&lt;/p&gt;
+&lt;p&gt;We think this is quite a nifty feature and enough of a reason to upgrade to Spring Boot 3.1.
+In case you&apos;re not convinced yet, let us show you another great feature: Testcontainers at development time.&lt;/p&gt;
+&lt;h2&gt;Testcontainers at development time&lt;/h2&gt;
+&lt;p&gt;Most applications need some kind of external service, for example, a PostgreSQL database, a Redis server, or a Zipkin backend.
+Usually, these services are provided by either running some &lt;code&gt;docker run&lt;/code&gt; commands from the readme before touching the code, or you use something like Docker Compose (for which Spring Boot 3.1 &lt;a href=&quot;https://spring.io/blog/2023/06/21/docker-compose-support-in-spring-boot-3-1&quot;&gt;added some cool new features, too&lt;/a&gt;).&lt;/p&gt;
+&lt;p&gt;With Testcontainers at development time, you now get another tool in your toolbox.
+Why should you use Testcontainers only for integration tests?
+Technically, nothing is stopping you from starting Testcontainers in your production code and then putting properties in place to connect to those containers.
+This works right now, even with Spring Boot before 3.1.&lt;/p&gt;
+&lt;p&gt;The downside of that approach is that you now need to have the Testcontainers dependency on your compile classpath, and there&apos;s a high chance that this dependency is then included in your fat JAR, too.
+With Spring Boot 3.1, there&apos;s a better way: leave the Testcontainers dependency in the &lt;code&gt;test&lt;/code&gt; scope.
+All you need to do is to create a new &lt;code&gt;main&lt;/code&gt; method inside your &lt;strong&gt;test&lt;/strong&gt; code:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-java&quot;&gt;public class TestMyApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.from(MyApplication::main).run(args);
+    }
+
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This test-&lt;code&gt;main&lt;/code&gt; method uses the new &lt;code&gt;SpringApplication.from&lt;/code&gt; method to delegate to your &quot;real&quot; main method in production code.&lt;/p&gt;
+&lt;p&gt;You can now create a &lt;code&gt;@TestConfiguration&lt;/code&gt; which defines beans for the Testcontainers you need while developing your application:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-java&quot;&gt;@TestConfiguration(proxyBeanMethods = false)
+class MyContainersConfiguration {
+
+    @Bean
+    @ServiceConnection
+    Neo4jContainer&amp;#x3C;?&gt; neo4jContainer() {
+        return new Neo4jContainer&amp;#x3C;&gt;(&quot;neo4j:5&quot;);
+    }
+
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Please note that this bean method is annotated with &lt;code&gt;@ServiceConnection&lt;/code&gt; so that Spring Boot automatically establishes a connection to the service running in the container.
+The lifecycle of this container is managed by Spring Boot. We start the container on application start-up and shut it down when the application is stopped.&lt;/p&gt;
+&lt;p&gt;With that in place, go back to your test-&lt;code&gt;main&lt;/code&gt; method and point it to the newly created &lt;code&gt;@TestConfiguration&lt;/code&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-java&quot;&gt;public class TestMyApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.from(MyApplication::main)
+            .with(MyContainersConfiguration.class)
+            .run(args);
+    }
+
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now you can start this test-&lt;code&gt;main&lt;/code&gt; method from your IDE and the containers automatically start up and Spring Boot establishes connections to them.
+You don&apos;t have to set any configuration properties, and Spring Boot makes sure to shut down the containers when your application is stopped.
+If you prefer to run your application from the terminal, we&apos;ve got you covered there, too.
+The Spring Boot plugins for Gradle and Maven learned to run this test-&lt;code&gt;main&lt;/code&gt; method.
+With Gradle, it&apos;s &lt;code&gt;./gradlew bootTestRun&lt;/code&gt;, with Maven it&apos;s &lt;code&gt;./mvnw spring-boot:test-run&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;One thing to note is that your containers shut down every time you restart your application, and with that, they lose their data.
+This can be solved in two ways:
+The first one is to use the Spring Boot devtools, and then annotate the bean methods for your container with &lt;code&gt;@RestartScope&lt;/code&gt;.
+Such containers are &lt;strong&gt;not&lt;/strong&gt; restarted when devtools restarts your application.
+That means you don&apos;t have to wait for container startup every time you change something in your application and the containers keep their data.&lt;/p&gt;
+&lt;p&gt;The second way is a feature in Testcontainers named &lt;a href=&quot;https://java.testcontainers.org/features/reuse/&quot;&gt;reusable containers&lt;/a&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-java&quot;&gt;@TestConfiguration(proxyBeanMethods = false)
+public class MyContainersConfiguration {
+
+    @Bean
+    @ServiceConnection
+    public Neo4jContainer&amp;#x3C;?&gt; neo4jContainer() {
+        return new Neo4jContainer&amp;#x3C;&gt;(&quot;neo4j:5&quot;).withReuse(true);
+    }
+
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Such containers are not stopped when the application is shut down.
+This is an &lt;strong&gt;experimental&lt;/strong&gt; Testcontainers feature, so use it at your own risk.&lt;/p&gt;
+&lt;p&gt;For completeness, here&apos;s the list of containers we support at the moment:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;CassandraContainer&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;CouchbaseContainer&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ElasticsearchContainer&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;GenericContainer&lt;/code&gt; using &lt;code&gt;redis&lt;/code&gt; or &lt;code&gt;openzipkin/zipkin&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;JdbcDatabaseContainer&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;KafkaContainer&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;MongoDBContainer&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;MariaDBContainer&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;MSSQLServerContainer&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;MySQLContainer&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Neo4jContainer&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;OracleContainer&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;PostgreSQLContainer&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;RabbitMQContainer&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;RedpandaContainer&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We hope you like these new features and that they&apos;ll help you write even more awesome applications.
+Please read the &lt;a href=&quot;https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#features.testing.testcontainers&quot;&gt;documentation&lt;/a&gt; to get started,
+and if you find any problems or have ideas to improve this further, &lt;a href=&quot;https://github.com/spring-projects/spring-boot/issues&quot;&gt;please get in contact&lt;/a&gt;!&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Spring Boot 3.1.1 available now]]></title><link>https://spring.io/blog/2023/06/22/spring-boot-3-1-1-available-now</link><guid isPermaLink="true">https://spring.io/blog/2023/06/22/spring-boot-3-1-1-available-now</guid><dc:creator><![CDATA[Andy Wilkinson]]></dc:creator><pubDate>Thu, 22 Jun 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;On behalf of the team and everyone who has contributed, I&apos;m happy to announce that Spring Boot &lt;code&gt;3.1.1&lt;/code&gt; has been released and is now available from Maven Central.&lt;/p&gt;
+&lt;p&gt;This release includes &lt;a href=&quot;https://github.com/spring-projects/spring-boot/releases/tag/v3.1.1&quot;&gt;89 bug fixes, documentation improvements, and dependency upgrades&lt;/a&gt;. Thanks to all those who have contributed with issue reports and pull requests.&lt;/p&gt;
+&lt;h3&gt;How can you help?&lt;/h3&gt;
+&lt;p&gt;If you&apos;re interested in helping out, check out the &lt;a href=&quot;https://github.com/spring-projects/spring-boot/labels/status%3A%20ideal-for-contribution&quot;&gt;&quot;ideal for contribution&quot; tag&lt;/a&gt; in the issue repository. If you have general questions, please ask on &lt;a href=&quot;https://stackoverflow.com&quot;&gt;stackoverflow.com&lt;/a&gt; using the &lt;a href=&quot;https://stackoverflow.com/tags/spring-boot&quot;&gt;&lt;code&gt;spring-boot&lt;/code&gt; tag&lt;/a&gt; or chat with the community on &lt;a href=&quot;https://gitter.im/spring-projects/spring-boot&quot;&gt;Gitter&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://spring.io/projects/spring-boot/&quot;&gt;Project Page&lt;/a&gt; | &lt;a href=&quot;https://github.com/spring-projects/spring-boot&quot;&gt;GitHub&lt;/a&gt; | &lt;a href=&quot;https://github.com/spring-projects/spring-boot/issues&quot;&gt;Issues&lt;/a&gt; | &lt;a href=&quot;https://docs.spring.io/spring-boot/docs/3.1.1/reference/html&quot;&gt;Documentation&lt;/a&gt; | &lt;a href=&quot;https://stackoverflow.com/questions/tagged/spring-boot&quot;&gt;Stack Overflow&lt;/a&gt; | &lt;a href=&quot;https://gitter.im/spring-projects/spring-boot&quot;&gt;Gitter&lt;/a&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Spring Boot 3.0.8 available now]]></title><link>https://spring.io/blog/2023/06/22/spring-boot-3-0-8-available-now</link><guid isPermaLink="true">https://spring.io/blog/2023/06/22/spring-boot-3-0-8-available-now</guid><dc:creator><![CDATA[Andy Wilkinson]]></dc:creator><pubDate>Thu, 22 Jun 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;On behalf of the team and everyone who has contributed, I&apos;m happy to announce that Spring Boot &lt;code&gt;3.0.8&lt;/code&gt; has been released and is now available from Maven Central.&lt;/p&gt;
+&lt;p&gt;This release includes &lt;a href=&quot;https://github.com/spring-projects/spring-boot/releases/tag/v3.0.8&quot;&gt;51 bug fixes, documentation improvements, and dependency upgrades&lt;/a&gt;. Thanks to all those who have contributed with issue reports and pull requests.&lt;/p&gt;
+&lt;h3&gt;How can you help?&lt;/h3&gt;
+&lt;p&gt;If you&apos;re interested in helping out, check out the &lt;a href=&quot;https://github.com/spring-projects/spring-boot/labels/status%3A%20ideal-for-contribution&quot;&gt;&quot;ideal for contribution&quot; tag&lt;/a&gt; in the issue repository. If you have general questions, please ask on &lt;a href=&quot;https://stackoverflow.com&quot;&gt;stackoverflow.com&lt;/a&gt; using the &lt;a href=&quot;https://stackoverflow.com/tags/spring-boot&quot;&gt;&lt;code&gt;spring-boot&lt;/code&gt; tag&lt;/a&gt; or chat with the community on &lt;a href=&quot;https://gitter.im/spring-projects/spring-boot&quot;&gt;Gitter&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://spring.io/projects/spring-boot/&quot;&gt;Project Page&lt;/a&gt; | &lt;a href=&quot;https://github.com/spring-projects/spring-boot&quot;&gt;GitHub&lt;/a&gt; | &lt;a href=&quot;https://github.com/spring-projects/spring-boot/issues&quot;&gt;Issues&lt;/a&gt; | &lt;a href=&quot;https://docs.spring.io/spring-boot/docs/3.0.8/reference/html&quot;&gt;Documentation&lt;/a&gt; | &lt;a href=&quot;https://stackoverflow.com/questions/tagged/spring-boot&quot;&gt;Stack Overflow&lt;/a&gt; | &lt;a href=&quot;https://gitter.im/spring-projects/spring-boot&quot;&gt;Gitter&lt;/a&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Spring Boot 2.7.13 available now]]></title><link>https://spring.io/blog/2023/06/22/spring-boot-2-7-13-available-now</link><guid isPermaLink="true">https://spring.io/blog/2023/06/22/spring-boot-2-7-13-available-now</guid><dc:creator><![CDATA[Andy Wilkinson]]></dc:creator><pubDate>Thu, 22 Jun 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;On behalf of the team and everyone who has contributed, I&apos;m happy to announce that Spring Boot &lt;code&gt;2.7.13&lt;/code&gt; has been released and is now available from Maven Central.&lt;/p&gt;
+&lt;p&gt;This release includes &lt;a href=&quot;https://github.com/spring-projects/spring-boot/releases/tag/v2.7.13&quot;&gt;26 bug fixes, documentation improvements, and dependency upgrades&lt;/a&gt;. Thanks to all those who have contributed with issue reports and pull requests.&lt;/p&gt;
+&lt;h3&gt;How can you help?&lt;/h3&gt;
+&lt;p&gt;If you&apos;re interested in helping out, check out the &lt;a href=&quot;https://github.com/spring-projects/spring-boot/labels/status%3A%20ideal-for-contribution&quot;&gt;&quot;ideal for contribution&quot; tag&lt;/a&gt; in the issue repository. If you have general questions, please ask on &lt;a href=&quot;https://stackoverflow.com&quot;&gt;stackoverflow.com&lt;/a&gt; using the &lt;a href=&quot;https://stackoverflow.com/tags/spring-boot&quot;&gt;&lt;code&gt;spring-boot&lt;/code&gt; tag&lt;/a&gt; or chat with the community on &lt;a href=&quot;https://gitter.im/spring-projects/spring-boot&quot;&gt;Gitter&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://spring.io/projects/spring-boot/&quot;&gt;Project Page&lt;/a&gt; | &lt;a href=&quot;https://github.com/spring-projects/spring-boot&quot;&gt;GitHub&lt;/a&gt; | &lt;a href=&quot;https://github.com/spring-projects/spring-boot/issues&quot;&gt;Issues&lt;/a&gt; | &lt;a href=&quot;https://docs.spring.io/spring-boot/docs/2.7.13/reference/html&quot;&gt;Documentation&lt;/a&gt; | &lt;a href=&quot;https://stackoverflow.com/questions/tagged/spring-boot&quot;&gt;Stack Overflow&lt;/a&gt; | &lt;a href=&quot;https://gitter.im/spring-projects/spring-boot&quot;&gt;Gitter&lt;/a&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[A Bootiful Podcast: Micrometer lead Tommy Ludwig]]></title><link>https://spring.io/blog/2023/06/22/a-bootiful-podcast-micrometer-lead-tommy-ludwig-from-spring-io-2023</link><guid isPermaLink="true">https://spring.io/blog/2023/06/22/a-bootiful-podcast-micrometer-lead-tommy-ludwig-from-spring-io-2023</guid><dc:creator><![CDATA[Josh Long]]></dc:creator><pubDate>Thu, 22 Jun 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;Hi, Spring fans! In this installment, &lt;a href=&quot;https://youtube.com/@coffesoftware&quot;&gt;Josh Long&lt;/a&gt; talks to &lt;a href=&quot;https://micrometer.io&quot;&gt;Micrometer &lt;/a&gt; lead &lt;a href=&quot;https://twitter.com/TommyLudwig&quot;&gt;Tommy Ludwig&lt;/a&gt;, recorded from beautiful Barcelona, Spain during the fabulous Spring I/O event!&lt;/p&gt;
+&lt;iframe title=&quot;Micrometer lead Tommy Ludwig&quot; allowtransparency=&quot;true&quot; height=&quot;150&quot; width=&quot;100%&quot; style=&quot;border: none; min-width: min(100%, 430px);&quot; scrolling=&quot;no&quot; data-name=&quot;pb-iframe-player&quot; src=&quot;https://www.podbean.com/player-v2/?i=ejr4s-143c38d-pb&amp;from=pb6admin&amp;share=1&amp;download=1&amp;rtl=0&amp;fonts=Arial&amp;skin=1&amp;font-color=&amp;logo_link=episode_page&amp;btn-skin=7&quot;&gt;&lt;/iframe&gt;</content:encoded></item><item><title><![CDATA[Docker Compose Support in Spring Boot 3.1]]></title><link>https://spring.io/blog/2023/06/21/docker-compose-support-in-spring-boot-3-1</link><guid isPermaLink="true">https://spring.io/blog/2023/06/21/docker-compose-support-in-spring-boot-3-1</guid><dc:creator><![CDATA[Moritz Halbritter]]></dc:creator><pubDate>Wed, 21 Jun 2023 00:00:00 GMT</pubDate><content:encoded>&lt;blockquote&gt;
+&lt;p&gt;Docker Compose support in Spring Boot 3.1 builds on top of the &lt;code&gt;ConnectionDetails&lt;/code&gt; abstraction, which &lt;a href=&quot;https://spring.io/blog/2023/06/19/spring-boot-31-connectiondetails-abstraction&quot;&gt;we&apos;ve featured in a separate blog post&lt;/a&gt;.
+If you haven&apos;t already read it, please do so before reading this post.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Docker Compose &lt;a href=&quot;https://docs.docker.com/compose/&quot;&gt;&quot;is a tool for defining and running multi-container Docker applications&quot;&lt;/a&gt;.
+A Docker Compose configuration file, usually named &lt;code&gt;docker-compose.yaml&lt;/code&gt; or &lt;code&gt;compose.yaml&lt;/code&gt;, allows you to define services.
+Such services must have a name and a Docker image.
+Optionally you can also define environment variables, exposed ports, labels, how services relate to one another, and so on.&lt;/p&gt;
+&lt;p&gt;Here&apos;s a typical example of a simple Docker Compose file:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-yaml&quot;&gt;services:
+  database:
+    image: &apos;postgres:15.2&apos;
+    ports:
+    - &apos;5432&apos;
+    environment:
+    - &apos;POSTGRES_USER=myuser&apos;
+    - &apos;POSTGRES_DB=mydatabase&apos;
+    - &apos;POSTGRES_PASSWORD=secret&apos;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;It defines one service named &lt;code&gt;database&lt;/code&gt;, which uses the &lt;code&gt;postgres:15.2&lt;/code&gt; Docker image.
+It exposes the container port &lt;code&gt;5432&lt;/code&gt; (which is the default PostgreSQL port), and Docker will choose a random host port on startup.
+Additionally, it defines some environment variables which configure the user, password, and database name.&lt;/p&gt;
+&lt;p&gt;If you run &lt;code&gt;docker compose up&lt;/code&gt; in the directory where this file resides, Docker Compose will first check if this service is already running.
+If not, it will start a new container using the &lt;code&gt;postgres:15.2&lt;/code&gt; image and configure it.&lt;/p&gt;
+&lt;p&gt;You can now run &lt;code&gt;docker compose ps&lt;/code&gt; and see that the container has been started:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ docker compose ps
+NAME                             IMAGE               COMMAND                  SERVICE             CREATED             STATUS              PORTS
+docker-compose-test-database-1   postgres:15.2       &quot;docker-entrypoint.s…&quot;   database            7 seconds ago       Up 6 seconds        0.0.0.0:32768-&gt;5432/tcp, :::32768-&gt;5432/tcp
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;To develop against that service in a pre-Spring Boot 3.1 application, you have to put some configuration properties in place, maybe in some kind of &quot;developer&quot; profile:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-properties&quot;&gt;spring.datasource.url=jdbc:postgresql://localhost:32768/mydatabase
+spring.datasource.username=myuser
+spring.datasource.password=secret
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This configures Spring Boot to use the PostgreSQL database running inside the Docker container (connecting on the host port &lt;code&gt;32768&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;When you&apos;re done using the service, you&apos;ll typically run &lt;code&gt;docker compose down&lt;/code&gt; to stop and destroy the containers.
+But when you start them again, you&apos;ll see that the dynamic port has changed:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ docker compose ps
+NAME                             IMAGE               COMMAND                  SERVICE             CREATED             STATUS              PORTS
+docker-compose-test-database-1   postgres:15.2       &quot;docker-entrypoint.s…&quot;   database            4 minutes ago       Up 1 second         0.0.0.0:32769-&gt;5432/tcp, :::32769-&gt;5432/tcp
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Oh no, that means you&apos;ll now have to update the application configuration!&lt;/p&gt;
+&lt;p&gt;Luckily, Docker Compose has a solution for that.
+Don&apos;t use random ports, use a fixed host port:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-yaml&quot;&gt;services:
+  database:
+    image: &apos;postgres:15.2&apos;
+    ports:
+      - &apos;5432:15432&apos;
+    environment:
+      - &apos;POSTGRES_USER=myuser&apos;
+      - &apos;POSTGRES_DB=mydatabase&apos;
+      - &apos;POSTGRES_PASSWORD=secret&apos;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now, every time you start the container, it&apos;s reachable on &lt;code&gt;localhost:15432&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;This works, but there&apos;s a different problem.
+If you&apos;re developing multiple applications where each application has their own database (which is quite common in microservice architectures), you have to remember to use different host ports.
+If you don&apos;t, some &lt;code&gt;docker compose up&lt;/code&gt; commands fail because the port is already in use.&lt;/p&gt;
+&lt;p&gt;And now the good news. With Spring Boot 3.1, this gets a lot easier for you. You can continue to use random host ports but you don&apos;t have to specify configuration properties and you don&apos;t have to duplicate usernames, passwords, and so on in multiple places. You also don&apos;t have to remember to run &lt;code&gt;docker compose up&lt;/code&gt; before starting the application.&lt;/p&gt;
+&lt;p&gt;Spring Boot 3.1 will detect that there&apos;s a Docker Compose file present, and will run &lt;code&gt;docker compose up&lt;/code&gt; for you before connecting to the services.
+If the services are already running, it will detect that, too, and will use them.
+It will also run &lt;code&gt;docker compose stop&lt;/code&gt; when the application shuts down - gone are the days of lingering Docker containers eating your precious memory.&lt;/p&gt;
+&lt;p&gt;The images started by Docker Compose are automatically detected and used to create &lt;code&gt;ConnectionDetails&lt;/code&gt; beans pointing to the services.
+That means you don&apos;t have to put properties in your configuration, you don&apos;t have to remember how to construct PostgreSQL JDBC URLs, and so on.&lt;/p&gt;
+&lt;p&gt;With Spring Boot 3.1, all you need to do is to provide the &lt;code&gt;compose.yaml&lt;/code&gt; file and let Spring Boot figure out the rest.
+It just works!&lt;/p&gt;
+&lt;p&gt;At the time of writing, we support &lt;a href=&quot;https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#features.docker-compose.service-connections&quot;&gt;the following Docker images&lt;/a&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Cassandra - &lt;a href=&quot;https://hub.docker.com/_/cassandra&quot;&gt;&lt;code&gt;cassandra&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Elasticsearch - &lt;a href=&quot;https://hub.docker.com/_/elasticsearch&quot;&gt;&lt;code&gt;elasticsearch&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Oracle database - &lt;a href=&quot;https://hub.docker.com/r/gvenzl/oracle-xe&quot;&gt;&lt;code&gt;gvenzl/oracle-xe&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;MariaDB - &lt;a href=&quot;https://hub.docker.com/_/mariadb&quot;&gt;&lt;code&gt;mariadb&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Microsoft SQL server - &lt;a href=&quot;https://hub.docker.com/_/microsoft-mssql-server&quot;&gt;&lt;code&gt;mssql/server&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;MySQL - &lt;a href=&quot;https://hub.docker.com/_/mysql&quot;&gt;&lt;code&gt;mysql&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;PostgreSQL - &lt;a href=&quot;https://hub.docker.com/_/postgres&quot;&gt;&lt;code&gt;postgres&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;MongoDB - &lt;a href=&quot;https://hub.docker.com/_/mongo&quot;&gt;&lt;code&gt;mongo&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;RabbitMQ - &lt;a href=&quot;https://hub.docker.com/_/rabbitmq&quot;&gt;&lt;code&gt;rabbitmq&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Redis - &lt;a href=&quot;https://hub.docker.com/_/redis&quot;&gt;&lt;code&gt;redis&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Zipkin - &lt;a href=&quot;https://hub.docker.com/r/openzipkin/zipkin&quot;&gt;&lt;code&gt;openzipkin/zipkin&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Want to try this yourself? We&apos;ve &lt;a href=&quot;https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#features.docker-compose&quot;&gt;prepared some documentation to get you started&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;We have also added support for Docker Compose to &lt;a href=&quot;https://start.spring.io/&quot;&gt;start.spring.io&lt;/a&gt; to get you started even faster!
+For example, if you generate  a project with &quot;Docker Compose support&quot; and &quot;PostgreSQL driver&quot; dependencies, you&apos;ll get a sensible &lt;code&gt;compose.yaml&lt;/code&gt; for free!
+Isn&apos;t that absolutely awesome?!&lt;/p&gt;
+&lt;p&gt;&quot;Okay, okay&quot;, I hear you say, &quot;but what about my custom Redis image we use at our company?&quot;.
+We have you covered: you can build your own image, &lt;a href=&quot;https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#features.docker-compose.custom-images&quot;&gt;put a label on it&lt;/a&gt; and Spring Boot will pretend that it&apos;s the official image.
+Just make sure that you use the same environment variable names as the official image.&lt;/p&gt;
+&lt;p&gt;We also support &lt;a href=&quot;https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#features.docker-compose.skipping&quot;&gt;ignoring services&lt;/a&gt;, Docker Compose &lt;a href=&quot;https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#features.docker-compose.specific-file&quot;&gt;files with unusual names&lt;/a&gt;, and Docker Compose &lt;a href=&quot;https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#features.docker-compose.profiles&quot;&gt;profiles&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;We really hope you like the new Docker Compose features!
+If you want to see more services supported, or have other ideas how to improve things, &lt;a href=&quot;https://github.com/spring-projects/spring-boot/issues&quot;&gt;please get in touch&lt;/a&gt;.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Spring Security 6.1.1, 6.0.4, 5.8.4, 5.7.9, 5.6.11 Released]]></title><link>https://spring.io/blog/2023/06/20/spring-security-6-1-1-6-0-4-5-8-4-5-7-9-5-6-11-released</link><guid isPermaLink="true">https://spring.io/blog/2023/06/20/spring-security-6-1-1-6-0-4-5-8-4-5-7-9-5-6-11-released</guid><dc:creator><![CDATA[Rob Winch]]></dc:creator><pubDate>Tue, 20 Jun 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;On behalf of the team and everyone who has contributed, I am pleased to announce that Spring Security 6.1.1, 6.0.4, 5.8.4, 5.7.9, and 5.6.11 are available now. The releases are mostly composed of bug fixes, dependency upgrades, and documentation improvements.&lt;/p&gt;
+&lt;p&gt;To learn more, please visit the &lt;a href=&quot;https://github.com/spring-projects/spring-security/releases/tag/6.1.1&quot;&gt;6.1.1&lt;/a&gt;, &lt;a href=&quot;https://github.com/spring-projects/spring-security/releases/tag/6.0.4&quot;&gt;6.0.4&lt;/a&gt;, &lt;a href=&quot;https://github.com/spring-projects/spring-security/releases/tag/5.8.4&quot;&gt;5.8.4&lt;/a&gt;, &lt;a href=&quot;https://github.com/spring-projects/spring-security/releases/tag/5.7.9&quot;&gt;5.7.9&lt;/a&gt;, and &lt;a href=&quot;https://github.com/spring-projects/spring-security/releases/tag/5.6.11&quot;&gt;5.6.11&lt;/a&gt; release summaries.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;http://projects.spring.io/spring-security/&quot;&gt;Project Site&lt;/a&gt; | &lt;a href=&quot;https://docs.spring.io/spring-security/reference/&quot;&gt;Reference&lt;/a&gt; | &lt;a href=&quot;http://stackoverflow.com/questions/tagged/spring-security&quot;&gt;Help&lt;/a&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Spring Authorization Server 1.1.1, 1.0.3 and 0.4.3 available now]]></title><link>https://spring.io/blog/2023/06/20/spring-authorization-server-1-1-1-1-0-3-and-0-4-3-available-now</link><guid isPermaLink="true">https://spring.io/blog/2023/06/20/spring-authorization-server-1-1-1-1-0-3-and-0-4-3-available-now</guid><dc:creator><![CDATA[Joe Grandja]]></dc:creator><pubDate>Tue, 20 Jun 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;On behalf of the team and everyone who has contributed, it is my pleasure to announce the general availability of Spring Authorization Server 1.1.1, 1.0.3 and 0.4.3.&lt;/p&gt;
+&lt;p&gt;See the &lt;a href=&quot;https://github.com/spring-projects/spring-authorization-server/releases/tag/1.1.1&quot;&gt;1.1.1&lt;/a&gt;, &lt;a href=&quot;https://github.com/spring-projects/spring-authorization-server/releases/tag/1.0.3&quot;&gt;1.0.3&lt;/a&gt; and &lt;a href=&quot;https://github.com/spring-projects/spring-authorization-server/releases/tag/0.4.3&quot;&gt;0.4.3&lt;/a&gt; release notes for complete details.&lt;/p&gt;
+&lt;p&gt;To get started using Spring Authorization Server, see the &lt;a href=&quot;https://docs.spring.io/spring-authorization-server/docs/current/reference/html/getting-started.html&quot;&gt;Getting Started&lt;/a&gt; chapter of the reference documentation and the &lt;a href=&quot;https://github.com/spring-projects/spring-authorization-server/tree/1.1.x/samples&quot;&gt;samples&lt;/a&gt; to become familiar with setup and configuration.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://spring.io/projects/spring-authorization-server&quot;&gt;Project Page&lt;/a&gt; | &lt;a href=&quot;https://github.com/spring-projects/spring-authorization-server/issues&quot;&gt;GitHub Issues&lt;/a&gt; | &lt;a href=&quot;https://github.com/orgs/spring-projects/projects/8/views/21&quot;&gt;Project Board&lt;/a&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Spring for GraphQL 1.1.5 and 1.2.1 released]]></title><link>https://spring.io/blog/2023/06/20/spring-for-graphql-1-1-5-and-1-2-1-released</link><guid isPermaLink="true">https://spring.io/blog/2023/06/20/spring-for-graphql-1-1-5-and-1-2-1-released</guid><dc:creator><![CDATA[Brian Clozel]]></dc:creator><pubDate>Tue, 20 Jun 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;I&apos;m pleased to announce that the Spring for GraphQL 1.1.5 and 1.2.1 maintenance versions are now available on Maven Central.&lt;/p&gt;
+&lt;p&gt;Spring for GraphQL 1.1.5 includes &lt;a href=&quot;https://github.com/spring-projects/spring-graphql/releases/tag/v1.1.5&quot;&gt;11 fixes and documentation improvements&lt;/a&gt;. This version will be shipped with Spring Boot 3.0.8, &lt;a href=&quot;https://calendar.spring.io/&quot;&gt;to be released this Thursday&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Spring for GraphQL 1.2.1 includes &lt;a href=&quot;https://github.com/spring-projects/spring-graphql/releases/tag/v1.2.1&quot;&gt;10 fixes and documentation improvements&lt;/a&gt;. This version will be shipped with Spring Boot 3.1.1, &lt;a href=&quot;https://calendar.spring.io/&quot;&gt;to be released this Thursday&lt;/a&gt; as well.&lt;/p&gt;
+&lt;h3&gt;How can you help?&lt;/h3&gt;
+&lt;p&gt;If you have general questions, please ask on &lt;a href=&quot;https://stackoverflow.com&quot;&gt;stackoverflow.com&lt;/a&gt; using the &lt;a href=&quot;https://stackoverflow.com/tags/spring-graphql&quot;&gt;&lt;code&gt;spring-graphql&lt;/code&gt; tag&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://spring.io/projects/spring-graphql/&quot;&gt;Project Page&lt;/a&gt; | &lt;a href=&quot;https://github.com/spring-projects/spring-graphql&quot;&gt;GitHub&lt;/a&gt; | &lt;a href=&quot;https://github.com/spring-projects/spring-graphql/issues&quot;&gt;Issues&lt;/a&gt; | &lt;a href=&quot;https://docs.spring.io/spring-graphql/docs/1.2.1/reference/html&quot;&gt;Documentation&lt;/a&gt; | &lt;a href=&quot;https://stackoverflow.com/questions/tagged/spring-graphql&quot;&gt;Stack Overflow&lt;/a&gt;&lt;/p&gt;</content:encoded></item></channel></rss>
