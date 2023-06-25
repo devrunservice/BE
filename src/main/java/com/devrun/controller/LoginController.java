@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.devrun.dto.OAuthToken;
@@ -15,6 +16,8 @@ import com.devrun.dto.member.LogoutResponse;
 import com.devrun.entity.MemberEntity;
 import com.devrun.service.KakaoLoginService;
 import com.devrun.service.LoginService;
+
+import java.util.Map;
 
 @Controller
 public class LoginController {
@@ -25,10 +28,6 @@ public class LoginController {
 	@Autowired
 	private KakaoLoginService kakaoLoginService;
 
-	@GetMapping("/index")
-	public String index() {
-		return "index";
-	}
 
 	@GetMapping("/login")
 	public String login() {
@@ -37,19 +36,18 @@ public class LoginController {
 	
 	@PostMapping("/login")
 	public String login(HttpServletRequest request
-						, @RequestParam("id") String id
-						, @RequestParam("password") String password) {
+						, @RequestBody Map<String , String> map) {
 		MemberEntity member = new MemberEntity();
 		
-		member.setId(id);
-		member.setPassword(password);
+		member.setId(map.get("id"));
+		member.setPassword(map.get("password"));
 		
 		boolean success = loginService.validate(member);
 		
 		if (success) {
 			HttpSession session = request.getSession();
-			session.setAttribute("id", id);
-			session.setAttribute("password", password);
+			session.setAttribute("id", map.get("id"));
+			session.setAttribute("password", map.get("password"));
 			return "index";
 		}else {
 			//로그인 실패

@@ -36,11 +36,10 @@ public class User {
     @Column(name = "phonenumber", length = 13, nullable = false)
     private String phoneNumber;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 10, nullable = false)
     private String status;
 
-    @Enumerated(EnumType.STRING)
+
     @Column(name = "role", length = 10, nullable = false)
     private String role;
 
