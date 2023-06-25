@@ -106,6 +106,6 @@ jobs:
           host: ${{ secrets.EC2_SERVER_IP }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /home/ubuntu/devrun
-            sudo java -jar devrun-0.0.1-SNAPSHOT.jar
+            cd /home/ubuntu
+            sh deploy_devrun.sh
             echo "서비스 시작"
