@@ -8,12 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.devrun.dto.member.SignupDTO;
 import com.devrun.entity.MemberEntity;
 import com.devrun.service.SignupService;
 
@@ -33,36 +33,42 @@ public class SignupController {
 
 	@PostMapping("/checkID")
 	@ResponseBody
-    public String checkID(@RequestParam("id") String id) {
+    public String checkID(@RequestBody SignupDTO signupDTO) {
+		String id = signupDTO.getId();
         int result = signupService.checkID(id);
         return result + "";
     }
 	
 	@PostMapping("/checkEmail")
 	@ResponseBody
-    public String checkEmail(@RequestParam("email") String email) {
-        int result = signupService.checkEmail(email);
+    public String checkEmail(@RequestBody SignupDTO signupDTO) {
+		String email = signupDTO.getEmail();
+		int result = signupService.checkEmail(email);
         return result + "";
     }
 
 	@PostMapping("/checkPhone")
 	@ResponseBody
-	public String checkPhone(@RequestParam("phone") String phonenumber) {
+	public String checkPhone(@RequestBody SignupDTO signupDTO) {
+		String phonenumber = signupDTO.getPhonenumber();
 		int result = signupService.checkphone(phonenumber);
 		return result + "";
 	}
-	
-	@ResponseBody
+
 	@PostMapping("/signup/auth")
-	public Mono<String> auth(@RequestParam("phonenumber") String phone) {
-		System.out.println("폰" + phone);
-        return signupService.sendSmsCode(phone);
+	@ResponseBody
+	public Mono<String> auth(@RequestBody SignupDTO signupDTO) {
+		String phonenumber = signupDTO.getPhonenumber();
+		System.out.println("폰" + phonenumber);
+        return signupService.sendSmsCode(phonenumber);
     }
 	
 	@ResponseBody
 	@PostMapping("/verify")
-    public ResponseEntity<?> verify(@RequestParam("phonenumber") String phone, @RequestParam("code") int code) {
-        if (signupService.verifySmsCode(phone, code)) {
+	 public ResponseEntity<?> verify(@RequestBody SignupDTO signupDTO) {
+		String phonenumber = signupDTO.getPhonenumber();
+		int code = signupDTO.getCode();
+        if (signupService.verifySmsCode(phonenumber, code)) {
         	// 200 인증성공
             return ResponseEntity.ok("Verification successful");
         } else {
