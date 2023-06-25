@@ -107,7 +107,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/ubuntu
-            nohup sh deploy_devrun.sh &      
+            sh deploy_devrun.sh     
             echo "서비스 시작"
-            PID=$!
-            wait $PID
