@@ -6,11 +6,7 @@ build/
 !**/src/test/**/build/
 
 ### STS ###
-<<<<<<< HEAD
 application.properties
-=======
-**/application.properties
->>>>>>> SeongMin
 .apt_generated
 .classpath
 .factorypath
