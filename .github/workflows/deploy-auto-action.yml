@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - merge
-
+## 빌드
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,7 +18,29 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
-
+  ## 빌드 전 ENV 설정
+      - name : write env
+        run: |
+          echo "spring.datasource.driver-class-name=${{ secrets.DATASOURCE_DRIVER_CLASS_NAME }}" >> application.properties
+          echo "spring.datasource.url=${{ secrets.DATASOURCE_URL }}" >> application.properties
+          echo "spring.datasource.username=${{ secrets.DATASOURCE_USERNAME }}" >> application.properties
+          echo "spring.datasource.password=${{ secrets.DATASOURCE_PASSWORD }}" >> application.properties
+          echo "" >> application.properties
+          echo "server.port=8080" >> application.properties
+          echo "" >> application.properties
+          echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MariaDB103Dialect" >> application.properties
+          echo "spring.jpa.hibernate.ddl-auto=update" >> application.properties
+          echo "spring.jpa.properties.hibernate.format_sql=true" >> application.properties
+          echo "spring.jpa.properties.hibernate.show_sql=true" >> application.properties
+          echo "" >> application.properties
+          echo "sens.accessKey=${{ secrets.SENS_ACCESSKEY }}" >> application.properties
+          echo "sens.secretKey=${{ secrets.SENS_SECRETKEY }}" >> application.properties
+          echo "sens.serviceId=${{ secrets.SENS_SERVICEID }}" >> application.properties
+          echo "" >> application.properties
+          echo "kakao.client_id=${{ secrets.KAKAO_CLIENT_ID }}" >> application.properties
+          echo "kakao.redirect_url=${{ secrets.KAKAO_REDIRECT_URL }}" >> application.properties
+        working-directory : ./src/main/resources
+        
       - name: Build and package with Gradle
         run: ./gradlew bootJar
         
