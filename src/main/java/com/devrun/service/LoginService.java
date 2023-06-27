@@ -1,11 +1,13 @@
 package com.devrun.service;
 
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.devrun.dto.member.LoginDTO.LoginStatus;
+import com.devrun.dto.member.MemberDTO;
 import com.devrun.dto.member.MemberDTO.Status;
-import com.devrun.entity.MemberEntity;
 import com.devrun.repository.LoginRepository;
 import com.devrun.repository.MemberEntityRepository;
 
@@ -21,18 +23,21 @@ public class LoginService {
 	private LoginStatus loginStatus;
 
 	// 마지막 로그인 날짜 수정
-	public void save(MemberEntity memberEntity) {
-		memberEntityRepository.save(memberEntity);
+	public void setLastLogin(MemberDTO memberDTO) {
+		Date currentDate = new Date();
+    	System.out.println("현재시간 : " + currentDate);
+    	memberDTO.setLastlogin(currentDate);
+		memberEntityRepository.save(memberDTO);
 	}
-	public LoginStatus validate(MemberEntity member) {
-		MemberEntity existingMember = loginRepository.findById(member.getId());
+	public LoginStatus validate(MemberDTO memberDTO) {
+		MemberDTO existingMember = loginRepository.findById(memberDTO.getId());
 		System.out.println(existingMember);
 		
 		if (existingMember == null) {
 		    return LoginStatus.USER_NOT_FOUND;
 		} else if (existingMember.getLogintry() >= 5) {
 		    return LoginStatus.LOGIN_TRIES_EXCEEDED;
-		} else if (!existingMember.getPassword().equals(member.getPassword())) {
+		} else if (!existingMember.getPassword().equals(memberDTO.getPassword())) {
 		    existingMember.setLogintry(existingMember.getLogintry() + 1);
 		    memberEntityRepository.save(existingMember);
 		    return LoginStatus.PASSWORD_MISMATCH;
