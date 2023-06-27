@@ -31,37 +31,37 @@ public class MemberEntity {
 	private int userNo;
 	
 	@Column(name = "name"
-//			, nullable = false
+			, nullable = false
 			, length = 20)
 	@Comment("유저 이름")
 	private String name;
 	
 	@Column(name = "email"
-//			, nullable = false
+			, nullable = false
 			, length = 50)
 	@Comment("유저 이메일")
 	private String email;
 	
 	@Column(name = "id"
-//			, nullable = false
-			, length = 15)
+			, nullable = false
+			, length = 15, unique = true)
 	@Comment("유저 아이디")
 	private String id;
 	
 	@Column(name = "password"
-//			, nullable = false
+			, nullable = false
 			, columnDefinition = "TEXT")
 	@Comment("유저 비밀번호")
 	private String password;
 	
 	@Column(name = "phonenumber"
-//			, nullable = false
+			, nullable = false
 			, length = 11)
 	@Comment("유저 연락처")
 	private String phonenumber;
 	
 	@Column(name = "birthday"
-//			, nullable = false
+			, nullable = false
 			)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	@Comment("유저 생일(생일 축하 쿠폰 발급)")
@@ -69,20 +69,20 @@ public class MemberEntity {
 	
 	@Enumerated(EnumType.STRING)
 	@Column(name = "role"
-//	, nullable = false
+	, nullable = false
 	, length = 7)
 	@Comment("유저 역할 - STUDENT / MENTO / ADMIN")
 	private Role role = Role.STUDENT;							// 기본값 설정
 	
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status"
-//	, nullable = false
+	, nullable = false
 	, length = 9)
 	@Comment("활성 : ACTIVE / 휴면 : INACTIVE / 탈퇴 : WITHDRAWN")
 	private Status status = Status.ACTIVE;
 	
 	@Column(name = "signup"
-//			, nullable = false
+			, nullable = false
 			)
 	@Comment("유저 가입일")
 	private Date signup;
