@@ -25,6 +25,7 @@ public class LoginService {
 	}
 	public LoginStatus validate(MemberEntity member) {
 		MemberEntity existingMember = loginRepository.findById(member.getId());
+		System.out.println(existingMember);
 		
 		if (existingMember == null) {
 		    return LoginStatus.USER_NOT_FOUND;
