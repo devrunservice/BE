@@ -45,11 +45,12 @@ public class LoginService {
 		    return LoginStatus.ACCOUNT_INACTIVE;
 		} else if (existingMember.getStatus() == Status.WITHDRAWN) {
 		    return LoginStatus.ACCOUNT_WITHDRAWN;
-		} else {
+		} else if(existingMember.getPassword().equals(member.getPassword())){
 		    existingMember.setLogintry(0); // reset login tries on successful login
 		    memberEntityRepository.save(existingMember);
 		    return LoginStatus.SUCCESS;
 		}
+		return loginStatus;
 	}	
 
 }
