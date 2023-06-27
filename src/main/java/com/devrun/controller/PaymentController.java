@@ -22,10 +22,10 @@ import com.devrun.service.PaymentService;
 public class PaymentController {
 	private final PaymentService paymentService;
 	
-	@Value("${iamport.KEY}")
+	@Value("${iamport_KEY}")
 	private String KEY;
 	
-	@Value("${iamport.SECRET_Key}")
+	@Value("${iamport_SECRET}")
 	private String SECRET;
 	
 
