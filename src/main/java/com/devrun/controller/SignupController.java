@@ -70,9 +70,12 @@ public class SignupController {
 		int code = signupDTO.getCode();
         if (signupService.verifySmsCode(phonenumber, code)) {
         	// 200 인증성공
+        	// ResponseEntity.ok()는 HTTP 상태 코드 200을 의미
             return ResponseEntity.ok("Verification successful");
         } else {
         	// 401 인증실패
+        	// HttpStatus.UNAUTHORIZED는 HTTP 상태 코드 401을 의미
+        	// .body("Verification failed")는 응답 본문에 "Verification failed"라는 텍스트 메시지를 추가
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Verification failed");
         }
     }
@@ -85,15 +88,24 @@ public class SignupController {
 		System.out.println(memberEntity);
 		System.out.println(memberEntity.getEmail());
 		
+		// 가입일자 저장
 		Date currentDate = new Date();
 		memberEntity.setSignup(currentDate);
-		memberEntity.setLastlogin(currentDate);
 		
+		// 회원정보 입력
 		signupService.insert(memberEntity);
 		
-		return "okay";
+		if (signupService.validateId(memberEntity.getId()) 
+				&& signupService.validateEmail(memberEntity.getEmail()) 
+//				&& signupService.validatePassword(memberEntity.getPassword())
+				) {
+			System.out.println("회원가입 성공");
+			signupService.insert(memberEntity);
+			return "okay";
+		}else {
+			System.out.println("회원가입 실패");
+			return "login";
+		}
 	}
-	
-	
 	
 }

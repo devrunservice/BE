@@ -83,7 +83,7 @@ public class MemberEntity {
 	
 	@Column(name = "loginTry", length = 2)
 	@Comment("로그인 시도 횟수")
-	private int loginTry;
+	private int loginTry = 0;
 	
 //	데이터베이스에 Enum 값을 저장할 때, 일반적으로 두 가지 전략을 사용할 수 있습니다:
 //
