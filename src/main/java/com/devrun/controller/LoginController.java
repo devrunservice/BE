@@ -54,11 +54,14 @@ public class LoginController {
 		
 		member.setId(memberEntity.getId());
 		member.setPassword(memberEntity.getPassword());
-		
+		System.out.println("1단계");
 		LoginStatus status = loginService.validate(member);
+		System.out.println("2단계");
 
 	    switch (status) {
+	    
 	        case SUCCESS:
+	        	System.out.println("3단계");
 	            // 로그인 성공 처리
 	        	Date currentDate = new Date();
 				memberEntity.setLastlogin(currentDate);
