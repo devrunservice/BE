@@ -1,5 +1,7 @@
 package com.devrun.controller;
 
+import java.util.Date;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -18,7 +20,7 @@ import com.devrun.dto.member.KakaoProfileDTO;
 import com.devrun.dto.member.LoginDTO;
 import com.devrun.dto.member.LoginDTO.LoginStatus;
 import com.devrun.dto.member.LogoutResponse;
-import com.devrun.dto.member.MemberDTO;
+import com.devrun.entity.MemberEntity;
 import com.devrun.service.KakaoLoginService;
 import com.devrun.service.LoginService;
 
@@ -46,12 +48,14 @@ public class LoginController {
 	@ResponseBody
 	@PostMapping("/login")
 	public ResponseEntity<LoginDTO> login(HttpServletRequest request
-						, @RequestBody MemberDTO memberDTO) {
+						, @RequestBody MemberEntity memberEntity) {
 		
-		memberDTO.setId(memberDTO.getId());
-		memberDTO.setPassword(memberDTO.getPassword());
+		MemberEntity member = new MemberEntity();
+		
+		member.setId(memberEntity.getId());
+		member.setPassword(memberEntity.getPassword());
 		System.out.println("1단계");
-		LoginStatus status = loginService.validate(memberDTO);
+		LoginStatus status = loginService.validate(member);
 		System.out.println("2단계");
 
 	    switch (status) {
@@ -59,10 +63,10 @@ public class LoginController {
 	        case SUCCESS:
 	        	System.out.println("3단계");
 	            // 로그인 성공 처리
-				loginService.setLastLogin(memberDTO);
+				loginService.setLastLogin(memberEntity);
 				
 				HttpSession session = request.getSession();
-				session.setAttribute("id", memberDTO.getId());
+				session.setAttribute("id", memberEntity.getId());
 				
 				// 로그인 성공 200
 				return new ResponseEntity<>(new LoginDTO(status, "Login successful"), HttpStatus.OK);

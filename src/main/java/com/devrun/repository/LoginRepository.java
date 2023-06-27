@@ -9,6 +9,6 @@ import com.devrun.entity.MemberEntity;
 @Repository
 public interface LoginRepository extends JpaRepository<MemberEntity, Long> {
 
-	MemberDTO findById(String id);
+	MemberEntity findById(String id);
 
 }

@@ -12,8 +12,8 @@ import lombok.Setter;
 public class MemberDTO {
 	
 	private String name, email, id, password, phonenumber;
-	private int userNo, logintry;
-	private Date birthday, signup, lastlogin;
+	private int userNo;
+	private Date birthday, signup;
 	private Status status;
 	private Role role;
 	
