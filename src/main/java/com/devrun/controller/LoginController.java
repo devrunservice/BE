@@ -1,7 +1,5 @@
 package com.devrun.controller;
 
-import java.util.Date;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -21,6 +19,7 @@ import com.devrun.dto.member.LoginDTO;
 import com.devrun.dto.member.LoginDTO.LoginStatus;
 import com.devrun.dto.member.LogoutResponse;
 import com.devrun.entity.MemberEntity;
+import com.devrun.repository.LoginRepository;
 import com.devrun.service.KakaoLoginService;
 import com.devrun.service.LoginService;
 
@@ -32,6 +31,9 @@ public class LoginController {
 	
 	@Autowired
 	private KakaoLoginService kakaoLoginService;
+	
+	@Autowired
+	private LoginRepository loginRepository;
 	
 	@ResponseBody
 	@GetMapping("/index")
@@ -57,11 +59,14 @@ public class LoginController {
 		System.out.println("1단계");
 		LoginStatus status = loginService.validate(member);
 		System.out.println("2단계");
+		System.out.println("status : " + status);
 
 	    switch (status) {
 	    
 	        case SUCCESS:
-	        	System.out.println("3단계");
+	        	
+	        	memberEntity = loginRepository.findById(member.getId());
+	        	System.out.println("3단계" + memberEntity);
 	            // 로그인 성공 처리
 				loginService.setLastLogin(memberEntity);
 				
