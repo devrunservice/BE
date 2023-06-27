@@ -37,10 +37,11 @@ public class PayController {
 			, @PathVariable(value= "imp_uid") String imp_uid) throws IamportResponseException, IOException
 	{	
 		// 아임포트 나의 정보 값 넣기
-			this.api = new IamportClient(KEY,SECRET);
+			this.api = new IamportClient(KEY,SECRET);			
+			
 		//아임포트 서버에 imp_uid를 통해 값 받아와서 우리 서버랑 비교 후 같으면 결제 진행.
-
-			return api.paymentByImpUid(imp_uid);
+		return api.paymentByImpUid(imp_uid);
+		
 	}
 	
 	
