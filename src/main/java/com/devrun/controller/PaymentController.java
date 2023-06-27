@@ -41,7 +41,7 @@ public class PaymentController {
 	 }
 	 
 	 
-	 @PostMapping("/index")
+	 @PostMapping("/payment")
 	 public void refundPay(@RequestBody Map<String,Object> refundData) {
 		  
 		 //rest방식으로 api 호출 준비
