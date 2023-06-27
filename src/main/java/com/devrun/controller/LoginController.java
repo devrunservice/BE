@@ -64,11 +64,11 @@ public class LoginController {
 	    switch (status) {
 	    
 	        case SUCCESS:
-	        	
+	        	// 로그인 성공 처리
 	        	memberEntity = loginRepository.findById(member.getId());
 	        	System.out.println("3단계" + memberEntity);
-	            // 로그인 성공 처리
-				loginService.setLastLogin(memberEntity);
+
+	        	loginService.setLastLogin(memberEntity);
 				
 				HttpSession session = request.getSession();
 				session.setAttribute("id", memberEntity.getId());
