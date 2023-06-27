@@ -100,6 +100,7 @@ public class LoginController {
 	        	// 로그인 실패 401: 기타 실패 사례
 	            return new ResponseEntity<>(new LoginDTO(LoginStatus.USER_NOT_FOUND, "Unknown error"), HttpStatus.UNAUTHORIZED);
 	    }
+	    
 	}
 	
 	@ResponseBody
