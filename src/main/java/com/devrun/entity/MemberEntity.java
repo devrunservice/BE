@@ -44,7 +44,7 @@ public class MemberEntity {
 	
 	@Column(name = "id"
 			, nullable = false
-			, length = 15, unique = true)
+			, length = 15)
 	@Comment("유저 아이디")
 	private String id;
 	
