@@ -19,10 +19,10 @@ import com.siot.IamportRestClient.response.Payment;
 
 @RestController
 public class PayController {
-	@Value("${iamport.KEY}")
+	@Value("${iamport_KEY}")
 	private String KEY;
 	
-	@Value("${iamport.SECRET_Key}")
+	@Value("${iamport_SECRET}")
 	private String SECRET;
 	
 	private  IamportClient api;	
