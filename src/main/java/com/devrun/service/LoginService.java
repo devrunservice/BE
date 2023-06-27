@@ -28,10 +28,10 @@ public class LoginService {
 		
 		if (existingMember == null) {
 		    return LoginStatus.USER_NOT_FOUND;
-		} else if (existingMember.getLoginTry() >= 5) {
+		} else if (existingMember.getLogintry() >= 5) {
 		    return LoginStatus.LOGIN_TRIES_EXCEEDED;
 		} else if (!existingMember.getPassword().equals(member.getPassword())) {
-		    existingMember.setLoginTry(existingMember.getLoginTry() + 1);
+		    existingMember.setLogintry(existingMember.getLogintry() + 1);
 		    memberEntityRepository.save(existingMember);
 		    return LoginStatus.PASSWORD_MISMATCH;
 		} else if (existingMember.getStatus() == Status.INACTIVE) {
@@ -39,7 +39,7 @@ public class LoginService {
 		} else if (existingMember.getStatus() == Status.WITHDRAWN) {
 		    return LoginStatus.ACCOUNT_WITHDRAWN;
 		} else {
-		    existingMember.setLoginTry(0); // reset login tries on successful login
+		    existingMember.setLogintry(0); // reset login tries on successful login
 		    memberEntityRepository.save(existingMember);
 		    return LoginStatus.SUCCESS;
 		}

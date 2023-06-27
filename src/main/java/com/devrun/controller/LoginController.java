@@ -64,12 +64,12 @@ public class LoginController {
 	        	System.out.println("3단계");
 	            // 로그인 성공 처리
 	        	Date currentDate = new Date();
+	        	System.out.println("현재시간 : " + currentDate);
 				memberEntity.setLastlogin(currentDate);
 				loginService.save(memberEntity);
 				
 				HttpSession session = request.getSession();
 				session.setAttribute("id", memberEntity.getId());
-				session.setAttribute("password", memberEntity.getPassword());
 				
 				// 로그인 성공 200
 				return new ResponseEntity<>(new LoginDTO(status, "Login successful"), HttpStatus.OK);
