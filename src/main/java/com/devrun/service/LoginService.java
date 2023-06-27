@@ -15,6 +15,7 @@ public class LoginService {
 	@Autowired
 	private LoginRepository loginRepository;
 	
+	@Autowired
 	private MemberEntityRepository memberEntityRepository;
 	
 	private LoginStatus loginStatus;
