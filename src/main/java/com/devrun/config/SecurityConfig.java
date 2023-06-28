@@ -22,13 +22,12 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
             .csrf().disable()
             .authorizeRequests(authorize -> authorize
-//                .antMatchers("/bbc").authenticated() // 인증이 필요한 /bbc 엔드포인트
+                .antMatchers("/react1").authenticated() // 인증이 필요한 /bbc 엔드포인트
                 .anyRequest().permitAll())
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
             .build();
