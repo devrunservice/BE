@@ -99,6 +99,7 @@ public class SignupController {
 				&& signupService.checkphone(memberEntity.getPhonenumber()) == 0
 				) {
 			
+			// 회원가입 성공
 			if (signupService.validateId(memberEntity.getId()) 
 					&& signupService.validateEmail(memberEntity.getEmail()) 
 	//				&& signupService.validatePassword(memberEntity.getPassword())
@@ -107,9 +108,10 @@ public class SignupController {
 				signupService.insert(memberEntity);
 				return ResponseEntity.ok("Signup successful");
 				
+			// 회원가입 실패 (잘못된 입력 데이터)
 			} else {
-				System.out.println("회원가입 실패");
-				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Signup failed");
+				System.out.println("유효하지 않은 데이터");
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input data");
 			}
 			
 		// 중복된 아이디
@@ -123,6 +125,7 @@ public class SignupController {
 		// 중복된 핸드폰번호
 		} else if(signupService.checkphone(memberEntity.getPhonenumber()) != 0) {
 		    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Phone number already registered");
+		    
 		// 기타 오류 500
 		} else {
 		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
