@@ -82,7 +82,7 @@ public class SignupController {
 	
 	@ResponseBody
 	@PostMapping("/signup/okay")
-	public String okay(@RequestBody MemberEntity memberEntity) {
+	public ResponseEntity<?> okay(@RequestBody MemberEntity memberEntity) {
 		// @ModelAttribute 어노테이션이 붙은 매개변수를 HTTP 요청 파라미터와 자동으로 바인딩하도록 지원합니다.
 		// 이 기능은 HTML form 태그의 input 필드와 Java 객체의 필드를 매핑하여 사용하게 해줍니다.
 		System.out.println(memberEntity);
@@ -94,18 +94,40 @@ public class SignupController {
 		
 		// 회원정보 입력
 		signupService.insert(memberEntity);
-		
-		if (signupService.validateId(memberEntity.getId()) 
-				&& signupService.validateEmail(memberEntity.getEmail()) 
-//				&& signupService.validatePassword(memberEntity.getPassword())
+		if (signupService.checkID(memberEntity.getId()) == 0 
+				&& signupService.checkEmail(memberEntity.getEmail()) == 0
+				&& signupService.checkphone(memberEntity.getPhonenumber()) == 0
 				) {
-			System.out.println("회원가입 성공");
-			signupService.insert(memberEntity);
-			return "okay";
-		}else {
-			System.out.println("회원가입 실패");
-			return "login";
+			
+			if (signupService.validateId(memberEntity.getId()) 
+					&& signupService.validateEmail(memberEntity.getEmail()) 
+	//				&& signupService.validatePassword(memberEntity.getPassword())
+					) {
+				System.out.println("회원가입 성공");
+				signupService.insert(memberEntity);
+				return ResponseEntity.ok("Signup successful");
+				
+			} else {
+				System.out.println("회원가입 실패");
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Signup failed");
+			}
+			
+		// 중복된 아이디
+		} else if(signupService.checkID(memberEntity.getId()) != 0) {
+		    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Username already taken");
+		
+		// 중복된 이메일
+		} else if(signupService.checkEmail(memberEntity.getEmail()) != 0) {
+		    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email already registered");
+		
+		// 중복된 핸드폰번호
+		} else if(signupService.checkphone(memberEntity.getPhonenumber()) != 0) {
+		    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Phone number already registered");
+		// 기타 오류 500
+		} else {
+		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
 		}
+
 	}
 	
 }
