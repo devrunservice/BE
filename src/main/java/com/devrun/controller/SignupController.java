@@ -97,7 +97,7 @@ public class SignupController {
 		
 		if (signupService.validateId(memberEntity.getId()) 
 				&& signupService.validateEmail(memberEntity.getEmail()) 
-				&& signupService.validatePassword(memberEntity.getPassword())
+//				&& signupService.validatePassword(memberEntity.getPassword())
 				) {
 			System.out.println("회원가입 성공");
 			signupService.insert(memberEntity);
