@@ -91,11 +91,11 @@ public class MemberEntity {
 	@Comment("유저 탈퇴일(탈퇴 테이블로 분리할지 고민)")
 	private Date export;
 	
-	@Column(name = "lastlogin")
+	@Column(name = "lastlogin", nullable = true)
 	@Comment("마지막 로그인 날짜 ( 휴면 전환은 서버의 온오프로 발생 )")
 	private Date lastlogin;
 
-	@Column(name = "kakaoEmailId", length = 50)
+	@Column(name = "kakaoEmailId", length = 50, nullable = true)
 	@Comment("카카오 간편로그인 Email + ID")
 	private String kakaoEmailId;
 	

@@ -4,6 +4,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -22,6 +24,7 @@ import com.devrun.entity.MemberEntity;
 import com.devrun.repository.LoginRepository;
 import com.devrun.service.KakaoLoginService;
 import com.devrun.service.LoginService;
+import com.devrun.util.JWTUtil;
 
 @Controller
 public class LoginController {
@@ -60,21 +63,36 @@ public class LoginController {
 		LoginStatus status = loginService.validate(member);
 		System.out.println("2단계");
 		System.out.println("status : " + status);
-
+		
 	    switch (status) {
 	    
+//			프론트 예시	    
+//			// 로그인 성공 시 토큰 저장
+//			localStorage.setItem("token", "YOUR_JWT_TOKEN");
+//			
+//			// API 요청 보내기
+//			fetch('https://example.com/api', {
+//			headers: {
+//			'Authorization': 'Bearer ' + localStorage.getItem("token")
+//			}
+//			})
 	        case SUCCESS:
 	        	// 로그인 성공 처리
 	        	memberEntity = loginRepository.findById(member.getId());
 	        	System.out.println("3단계" + memberEntity);
 
+	        	// JWT토큰
+	        	String token = JWTUtil.generateToken(memberEntity.getId());
+	        	HttpHeaders responseHeaders = new HttpHeaders();
+	            responseHeaders.set("Authorization", "Bearer " + token);
+	            
 	        	loginService.setLastLogin(memberEntity);
 				
 				HttpSession session = request.getSession();
 				session.setAttribute("id", memberEntity.getId());
 				
 				// 로그인 성공 200
-				return new ResponseEntity<>(new LoginDTO(status, "Login successful"), HttpStatus.OK);
+				return new ResponseEntity<>(new LoginDTO(status, "Login successful"), responseHeaders, HttpStatus.OK);
 				
 	        case USER_NOT_FOUND:
 	        	//로그인 실패 401 : 해당 유저가 존재하지 않음

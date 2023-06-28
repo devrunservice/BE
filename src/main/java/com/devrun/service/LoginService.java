@@ -50,6 +50,6 @@ public class LoginService {
 		    memberEntityRepository.save(existingMember);
 		    return LoginStatus.SUCCESS;
 		}
-	}	
+	}
 
 }
