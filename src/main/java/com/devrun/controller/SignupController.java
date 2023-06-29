@@ -116,7 +116,7 @@ public class SignupController {
 			
 		// 중복된 아이디
 		} else if(signupService.checkID(memberEntity.getId()) != 0) {
-		    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Username already taken");
+		    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User Id already taken");
 		
 		// 중복된 이메일
 		} else if(signupService.checkEmail(memberEntity.getEmail()) != 0) {

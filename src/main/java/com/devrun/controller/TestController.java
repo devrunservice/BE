@@ -10,6 +10,7 @@ import com.devrun.service.SignupService;
 
 @RestController
 public class TestController {
+	
 	@Autowired
 	SignupService signupService;
 	
