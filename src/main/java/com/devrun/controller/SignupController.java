@@ -97,7 +97,7 @@ public class SignupController {
 		// 회원정보 입력
 		if (signupService.checkID(memberEntity.getId()) == 0 
 				&& signupService.checkEmail(memberEntity.getEmail()) == 0
-				&& signupService.checkphone(memberEntity.getPhonenumber()) == 0
+//				&& signupService.checkphone(memberEntity.getPhonenumber()) == 0					테스트 기간에만 중복확인 x
 				) {
 			
 			// 회원가입 성공
