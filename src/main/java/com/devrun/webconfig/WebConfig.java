@@ -16,9 +16,7 @@ public class WebConfig implements WebMvcConfigurer {
                 // 모든 HTTP 메소드(GET, POST, PUT, DELETE 등)를 허용
         		.allowedMethods("*")
         		// Authorization라는 Header 사용을 허용
-        		.allowedHeaders("Authorization")
-        		
-        		.allowedOrigins("http://devrun.s3-website.ap-northeast-2.amazonaws.com", "http://localhost:80", "http://localhost:8080")
+//        		.allowedHeaders("Authorization")
         		;
     }
     
