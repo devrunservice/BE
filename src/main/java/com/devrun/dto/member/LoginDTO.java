@@ -12,7 +12,7 @@ public class LoginDTO {
     private LoginStatus status;
     private String message;
     private String username;
-    private String token;
+    private String Authorization;
     
     // Status와 Message만 받는 생성자
     public LoginDTO(LoginStatus status, String message) {

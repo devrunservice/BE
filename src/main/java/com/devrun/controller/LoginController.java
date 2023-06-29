@@ -60,16 +60,6 @@ public class LoginController {
 		
 	    switch (status) {
 	    
-//			프론트 예시	    
-//			// 로그인 성공 시 토큰 저장
-//			localStorage.setItem("token", "YOUR_JWT_TOKEN");
-//			
-//			// API 요청 보내기
-//			fetch('https://example.com/api', {
-//			headers: {
-//			'Authorization': 'Bearer ' + localStorage.getItem("token")
-//			}
-//			})
 	        case SUCCESS:
 	        	// 로그인 성공 처리
 	        	memberEntity = loginRepository.findById(member.getId());
@@ -91,7 +81,7 @@ public class LoginController {
 	        	LoginDTO loginDTO = new LoginDTO(status, "Login successful", memberEntity.getName());
 				
 	        	// 토큰을 응답 본문에 추가
-	            loginDTO.setToken("Bearer " + token);
+	            loginDTO.setAuthorization("Bearer " + token);
 	        	
 	        	// 로그인 성공 200
 				return new ResponseEntity<>(loginDTO, HttpStatus.OK);
