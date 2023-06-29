@@ -15,7 +15,6 @@ public class IndexController {
 	@ResponseBody
 	@ApiOperation("Get a greeting message")
 	public String home() {
-
 		return "react 환영합니다.";
 
 	}

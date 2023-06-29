@@ -48,6 +48,7 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	// 스프링 시큐리티
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	// SWAGGER
 	implementation "io.springfox:springfox-boot-starter:3.0.0"
 	
 }

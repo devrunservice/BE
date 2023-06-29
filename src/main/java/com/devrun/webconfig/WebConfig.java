@@ -15,8 +15,7 @@ public class WebConfig implements WebMvcConfigurer {
         		.allowedOrigins("*")
                 // 모든 HTTP 메소드(GET, POST, PUT, DELETE 등)를 허용
         		.allowedMethods("*")
-        		// Authorization라는 Header 사용을 허용
-//        		.allowedHeaders("Authorization")
+        		.allowedHeaders("Content-Type", "Authorization")
         		;
     }
     
