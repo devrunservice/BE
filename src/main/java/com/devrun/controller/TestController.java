@@ -16,7 +16,6 @@ public class TestController {
 	
 	@GetMapping("/tmi")
 	public MemberEntity tmi(@RequestParam("id") String id) {
-		System.out.println("컨트롤러");
         return signupService.findById(id);
 	}
 }

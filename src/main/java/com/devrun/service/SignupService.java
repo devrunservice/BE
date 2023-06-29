@@ -127,7 +127,7 @@ public class SignupService {
     
     public boolean validateId(String id) {
     	// 영어, 숫자를 포함한 5자 이상 13자 이하
-    	Pattern pattern = Pattern.compile("^(?=.[a-zA-Z])(?=.[0-9])[a-zA-Z0-9]{5,13}$", Pattern.CASE_INSENSITIVE);
+    	Pattern pattern = Pattern.compile("^(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9]{5,13}$", Pattern.CASE_INSENSITIVE);
     	Matcher matcher = pattern.matcher(id);
     	return matcher.find();
     }

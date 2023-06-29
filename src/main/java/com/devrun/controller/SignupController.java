@@ -91,7 +91,9 @@ public class SignupController {
 		// 가입일자 저장
 		Date currentDate = new Date();
 		memberEntity.setSignup(currentDate);
-		
+		System.out.println("아이디 유효성 검사 : " + signupService.validateId(memberEntity.getId()));
+		System.out.println("이메일 유효성 검사 : " + signupService.validateEmail(memberEntity.getEmail()));
+		System.out.println("비밀번호 유효성 검사" + signupService.validatePassword(memberEntity.getPassword()));
 		// 회원정보 입력
 		if (signupService.checkID(memberEntity.getId()) == 0 
 				&& signupService.checkEmail(memberEntity.getEmail()) == 0
@@ -101,7 +103,7 @@ public class SignupController {
 			// 회원가입 성공
 			if (signupService.validateId(memberEntity.getId()) 
 					&& signupService.validateEmail(memberEntity.getEmail()) 
-	//				&& signupService.validatePassword(memberEntity.getPassword())
+					&& signupService.validatePassword(memberEntity.getPassword())
 					) {
 				System.out.println("회원가입 성공");
 				signupService.insert(memberEntity);
