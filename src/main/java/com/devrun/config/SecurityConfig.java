@@ -27,7 +27,7 @@ public class SecurityConfig {
         return http
             .csrf().disable()
             .authorizeRequests(authorize -> authorize
-                .antMatchers("/tmi").authenticated() // 인증이 필요한 /bbc 엔드포인트
+            	.antMatchers("/tmi").authenticated() // 인증이 필요한 /bbc 엔드포인트
                 .anyRequest().permitAll())
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
             .build();

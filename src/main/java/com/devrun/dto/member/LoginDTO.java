@@ -11,7 +11,14 @@ public class LoginDTO {
 
     private LoginStatus status;
     private String message;
-
+    private String username;
+    
+    // Status와 Message만 받는 생성자
+    public LoginDTO(LoginStatus status, String message) {
+        this.status = status;
+        this.message = message;
+    }
+    
     public enum LoginStatus {
         SUCCESS,
         USER_NOT_FOUND,

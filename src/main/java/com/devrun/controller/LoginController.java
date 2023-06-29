@@ -39,12 +39,6 @@ public class LoginController {
 	private LoginRepository loginRepository;
 	
 	@ResponseBody
-	@GetMapping("/index")
-	public String index() {
-		return "index";
-	}
-	
-	@ResponseBody
 	@GetMapping("/login")
 	public String login() {
 		return "login";
@@ -85,14 +79,19 @@ public class LoginController {
 	        	String token = JWTUtil.generateToken(memberEntity.getId());
 	        	HttpHeaders responseHeaders = new HttpHeaders();
 	            responseHeaders.set("Authorization", "Bearer " + token);
+	            responseHeaders.set("Username", memberEntity.getName());
 	            
+	            // 마지막 로그인 날짜 저장
 	        	loginService.setLastLogin(memberEntity);
 				
-				HttpSession session = request.getSession();
-				session.setAttribute("id", memberEntity.getId());
+//				HttpSession session = request.getSession();
+//				session.setAttribute("id", memberEntity.getId());
+	        	
+	        	// 로그인한 아이디의 이름 전달
+	        	LoginDTO loginDTO = new LoginDTO(status, "Login successful", memberEntity.getName());
 				
-				// 로그인 성공 200
-				return new ResponseEntity<>(new LoginDTO(status, "Login successful"), responseHeaders, HttpStatus.OK);
+	        	// 로그인 성공 200
+				return new ResponseEntity<>(loginDTO, responseHeaders, HttpStatus.OK);
 				
 	        case USER_NOT_FOUND:
 	        	//로그인 실패 401 : 해당 유저가 존재하지 않음
