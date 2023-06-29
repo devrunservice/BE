@@ -93,7 +93,6 @@ public class SignupController {
 		memberEntity.setSignup(currentDate);
 		
 		// 회원정보 입력
-		signupService.insert(memberEntity);
 		if (signupService.checkID(memberEntity.getId()) == 0 
 				&& signupService.checkEmail(memberEntity.getEmail()) == 0
 				&& signupService.checkphone(memberEntity.getPhonenumber()) == 0
@@ -108,7 +107,7 @@ public class SignupController {
 				signupService.insert(memberEntity);
 				return ResponseEntity.ok("Signup successful");
 				
-			// 회원가입 실패 (잘못된 입력 데이터)
+			// 회원가입 실패 (잘못된 입력 데이터) 400
 			} else {
 				System.out.println("유효하지 않은 데이터");
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input data");
@@ -116,7 +115,7 @@ public class SignupController {
 			
 		// 중복된 아이디
 		} else if(signupService.checkID(memberEntity.getId()) != 0) {
-		    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User Id already taken");
+		    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("UserId already taken");
 		
 		// 중복된 이메일
 		} else if(signupService.checkEmail(memberEntity.getEmail()) != 0) {
