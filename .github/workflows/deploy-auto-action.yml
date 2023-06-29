@@ -41,6 +41,8 @@ jobs:
           echo "kakao.redirect_url=${{ secrets.KAKAO_REDIRECT_URL }}" >> application.properties
           echo "iamport_KEY=${{ secrets.iamport_KEY }}" >> application.properties
           echo "iamport_SECRET=${{ secrets.iamport_SECRET_KEY }}" >> application.properties
+          echo "jwt.secretKey=${{ secrets.JWT_SECRET_KEY }}" >> application.properties
+
 
         working-directory : ./src/main/resources
         
