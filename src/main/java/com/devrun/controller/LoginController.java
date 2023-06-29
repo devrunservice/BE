@@ -77,9 +77,9 @@ public class LoginController {
 
 	        	// JWT토큰
 	        	String token = JWTUtil.generateToken(memberEntity.getId());
-	        	HttpHeaders responseHeaders = new HttpHeaders();
-	            responseHeaders.set("Authorization", "Bearer " + token);
-	            responseHeaders.set("Username", memberEntity.getName());
+//	        	HttpHeaders responseHeaders = new HttpHeaders();
+//	            responseHeaders.set("Authorization", "Bearer " + token);
+//	            responseHeaders.set("Username", memberEntity.getName());
 	            
 	            // 마지막 로그인 날짜 저장
 	        	loginService.setLastLogin(memberEntity);
@@ -90,8 +90,11 @@ public class LoginController {
 	        	// 로그인한 아이디의 이름 전달
 	        	LoginDTO loginDTO = new LoginDTO(status, "Login successful", memberEntity.getName());
 				
+	        	// 토큰을 응답 본문에 추가
+	            loginDTO.setToken("Bearer " + token);
+	        	
 	        	// 로그인 성공 200
-				return new ResponseEntity<>(loginDTO, responseHeaders, HttpStatus.OK);
+				return new ResponseEntity<>(loginDTO, HttpStatus.OK);
 				
 	        case USER_NOT_FOUND:
 	        	//로그인 실패 401 : 해당 유저가 존재하지 않음
