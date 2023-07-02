@@ -10,12 +10,12 @@ import com.devrun.service.SignupService;
 
 @RestController
 public class TestController {
+	
 	@Autowired
 	SignupService signupService;
 	
 	@GetMapping("/tmi")
 	public MemberEntity tmi(@RequestParam("id") String id) {
-		System.out.println("컨트롤러");
         return signupService.findById(id);
 	}
 }

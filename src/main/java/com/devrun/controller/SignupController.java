@@ -90,44 +90,52 @@ public class SignupController {
 		// 가입일자 저장
 		Date currentDate = new Date();
 		memberEntity.setSignup(currentDate);
+		System.out.println("아이디 유효성 검사 : " + signupService.validateId(memberEntity.getId()));
+		System.out.println("이메일 유효성 검사 : " + signupService.validateEmail(memberEntity.getEmail()));
+		System.out.println("비밀번호 유효성 검사" + signupService.validatePassword(memberEntity.getPassword()));
 		
 		// 회원정보 입력
-		signupService.insert(memberEntity);
 		if (signupService.checkID(memberEntity.getId()) == 0 
 				&& signupService.checkEmail(memberEntity.getEmail()) == 0
-				&& signupService.checkphone(memberEntity.getPhonenumber()) == 0
+//				&& signupService.checkphone(memberEntity.getPhonenumber()) == 0					테스트 기간에만 중복확인 x
 				) {
 			
 			// 회원가입 성공
 			if (signupService.validateId(memberEntity.getId()) 
 					&& signupService.validateEmail(memberEntity.getEmail()) 
-	//				&& signupService.validatePassword(memberEntity.getPassword())
+					&& signupService.validatePassword(memberEntity.getPassword())
 					) {
 				System.out.println("회원가입 성공");
 				signupService.insert(memberEntity);
-				return ResponseEntity.ok("Signup successful");
+				return new ResponseEntity<>("Signup successful", HttpStatus.OK);
+						//ResponseEntity.ok("Signup successful");
 				
-			// 회원가입 실패 (잘못된 입력 데이터)
+			// 회원가입 실패 (잘못된 입력 데이터) 400
 			} else {
 				System.out.println("유효하지 않은 데이터");
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input data");
+				return new ResponseEntity<>("Invalid input data", HttpStatus.BAD_REQUEST);
+						//ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input data");				response.data에 담겨있던 것을 response.data.massage로 변경
 			}
 			
 		// 중복된 아이디
 		} else if(signupService.checkID(memberEntity.getId()) != 0) {
-		    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Username already taken");
+		    return new ResponseEntity<>("UserId already taken", HttpStatus.UNAUTHORIZED);
+		    		//ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("UserId already taken");
 		
 		// 중복된 이메일
 		} else if(signupService.checkEmail(memberEntity.getEmail()) != 0) {
-		    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email already registered");
+		    return new ResponseEntity<>("UserId already taken", HttpStatus.UNAUTHORIZED);
+		    		//ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email already registered");
 		
 		// 중복된 핸드폰번호
 		} else if(signupService.checkphone(memberEntity.getPhonenumber()) != 0) {
-		    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Phone number already registered");
+		    return new ResponseEntity<>("Phone number already registered", HttpStatus.UNAUTHORIZED);
+		    		//ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Phone number already registered");
 		    
 		// 기타 오류 500
 		} else {
-		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
+		    return new ResponseEntity<>("An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
+		    		//ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
 		}
 
 	}

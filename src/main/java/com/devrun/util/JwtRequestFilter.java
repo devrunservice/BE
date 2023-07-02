@@ -47,7 +47,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-    	
     	// HTTP 요청 헤더에서 "Authorization" 헤더 값을 가져옴
         final String authorizationHeader = request.getHeader("Authorization");
 
@@ -59,11 +58,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             jwt = authorizationHeader.substring(7);
             username = extractUsername(jwt);
         }
-
+        // 이전에 SecurityContextHolder에 저장된 토큰값과 유저정보를 초기화.
+        SecurityContextHolder.clearContext();
         // 토큰에서 추출한 아이디가 null이 아니고, 현재 Security Context에 인증 정보가 없는 경우
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-           
             // 토큰이 유효한 경우 Security Context에 인증 정보를 설정
             if (validateToken(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(

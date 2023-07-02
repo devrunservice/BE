@@ -6,9 +6,11 @@ import java.util.Locale;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,19 +31,28 @@ public class PayController {
 
 	@ResponseBody
 	// 아임포트 api 문서를 예시로 값 넣어주기
-	@RequestMapping(value="/verifyIamport/{imp_uid}")
-	public IamportResponse<Payment> paymentByImpUid(
-			Model model
-			, Locale locale
-			, HttpSession session
-			, @PathVariable(value= "imp_uid") String imp_uid) throws IamportResponseException, IOException
-	{	
-		// 아임포트 나의 정보 값 넣기
-			this.api = new IamportClient(KEY,SECRET);			
-			
-		//아임포트 서버에 imp_uid를 통해 값 받아와서 우리 서버랑 비교 후 같으면 결제 진행.
-		return api.paymentByImpUid(imp_uid);
-		
+	@PostMapping("/verifyIamport/{imp_uid}")
+	public ResponseEntity<?> paymentByImpUid(
+	        Model model,
+	        Locale locale,
+	        HttpSession session,
+	        @PathVariable(value = "imp_uid") String imp_uid) {
+	    try {
+			// 아임포트 나의 정보 값 넣기
+	        this.api = new IamportClient(KEY, SECRET);
+	        
+			//아임포트 서버에 imp_uid를 통해 값 받아와서 우리 서버랑 비교 후 같으면 결제 진행.
+	        IamportResponse<Payment> response = api.paymentByImpUid(imp_uid);
+	        return ResponseEntity.ok(response);
+	    } catch (IamportResponseException e) {
+	        // 아임포트 API 호출 중에 예외가 발생한 경우
+	        String errorMessage = "아임포트 API 오류: " + e.getMessage();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage);
+	    } catch (IOException e) {
+	        // 입출력 예외가 발생한 경우
+	        String errorMessage = "입출력 오류: " + e.getMessage();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage);
+	    }
 	}
 	
 	

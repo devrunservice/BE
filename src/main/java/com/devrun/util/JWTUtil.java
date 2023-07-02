@@ -11,9 +11,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 @Component
 public class JWTUtil {
 
-    private static String SECRET_KEY
-//    = "D2mypmbWSgHfj7pkblhE45DfZNIV0ZksSdWoAxXnahA="
-    ;
+    private static String SECRET_KEY;
 	
     @Value("${jwt.secretKey}")
     public void setSecretKey(String secretKey) {
@@ -21,7 +19,7 @@ public class JWTUtil {
     }
     
 	// 토큰 만료시간 설정
-    private static final long EXPIRATION_TIME = 86400000; // 1 day in milliseconds
+    private static final long EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 1 day in milliseconds, 시간 * 분* 초 * 밀리초 = 1일 * 1시간 * 1분 * 1초
 
     public static String generateToken(String username) {
         return Jwts.builder()
