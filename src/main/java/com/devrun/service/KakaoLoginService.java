@@ -63,6 +63,7 @@ public class KakaoLoginService {
 																											// 실제로 HTTP 요청을 보내는 부분입니다.
 																											// 카카오의 토큰 발급 서버에 POST 요청을 보내고, 응답을 ResponseEntity<String> 타입으로 받습니다.
 		// JSON > Object
+		// JSON parse를 하지 않아도 된다
 		ObjectMapper objectMapper = new ObjectMapper();
 		OAuthToken oauthToken = null;
 		try {

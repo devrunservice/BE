@@ -7,6 +7,8 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -121,5 +123,26 @@ public class SignupService {
         Integer savedCode = phoneCodeMap.get(phoneNumber);
         System.out.println(savedCode + ":" + code);
         return savedCode != null && savedCode.equals(code);
+    }
+    
+    public boolean validateId(String id) {
+    	// 영어, 숫자를 포함한 5자 이상 13자 이하
+    	Pattern pattern = Pattern.compile("^(?=.[a-zA-Z])(?=.[0-9])[a-zA-Z0-9]{5,13}$", Pattern.CASE_INSENSITIVE);
+    	Matcher matcher = pattern.matcher(id);
+    	return matcher.find();
+    }
+    
+    public boolean validateEmail(String email) {
+    	// 이메일 형식
+        Pattern pattern = Pattern.compile("^[^\\s@]+@[^\\s@]+.[^\\s@]+$", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.find();
+    }
+
+    public boolean validatePassword(String password) {
+    	// 숫자, 영문, 특수문자를 포함한 8자 이상 15이하
+        Pattern pattern = Pattern.compile("^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&]).{8,15}$");
+        Matcher matcher = pattern.matcher(password);
+        return matcher.find();
     }
 }
