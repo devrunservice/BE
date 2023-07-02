@@ -103,21 +103,24 @@ public class MemberEntity {
 	@Comment("로그인 시도 횟수")
 	private int logintry = 0;
 	
-	@Column(name = "ageConsent", nullable = false)
+	// boolean은 null값을 가질 수 없고 Boolean은 null값이 허용된다
+	// 약관동의 로직이 완성되지 않은채로 테스트하려면 Boolean을 사용해야 한다
+	
+	@Column(name = "ageConsent", nullable = false, columnDefinition = "TINYINT(1)")
 	@Comment("나이 동의")
-	private boolean ageConsent;
+	private Boolean ageConsent;
 	
-	@Column(name = "serviceConsent", nullable = false)
+	@Column(name = "serviceConsent", nullable = false, columnDefinition = "TINYINT(1)")
 	@Comment("서비스 동의")
-	private boolean termsOfService;
+	private Boolean termsOfService;
 	
-	@Column(name = "privacyConsent", nullable = false)
+	@Column(name = "privacyConsent", nullable = false, columnDefinition = "TINYINT(1)")
 	@Comment("개인정보 동의")
-	private boolean privacyConsent;
+	private Boolean privacyConsent;
 	
-	@Column(name = "marketingConsent", nullable = false)
+	@Column(name = "marketingConsent", nullable = false, columnDefinition = "TINYINT(1)")
 	@Comment("광고, 마케팅 동의")
-	private boolean marketConsent;
+	private Boolean marketConsent;
 	
 	
 	

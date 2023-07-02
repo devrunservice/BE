@@ -80,7 +80,7 @@ public class LoginController {
 	        	System.out.println("3단계" + memberEntity);
 
 	        	// JWT토큰
-	        	String access_token = JWTUtil.generateToken(memberEntity.getId());
+	        	String access_token = JWTUtil.generateToken(memberEntity.getId(), memberEntity.getName());
 	            
 	            // 마지막 로그인 날짜 저장
 	        	loginService.setLastLogin(memberEntity);

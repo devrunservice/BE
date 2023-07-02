@@ -13,4 +13,6 @@ public interface MemberEntityRepository extends JpaRepository<MemberEntity, Long
 	int countByPhonenumber(String phonenumber);
 
 	MemberEntity findById(String id);
+
+	String deleteById(String id);
 }
