@@ -87,7 +87,7 @@ public class MemberEntity {
 	@Comment("유저 가입일")
 	private Date signup;
 	
-	@Column(name = "export")
+	@Column(name = "export", nullable = true)
 	@Comment("유저 탈퇴일(탈퇴 테이블로 분리할지 고민)")
 	private Date export;
 	
@@ -99,9 +99,27 @@ public class MemberEntity {
 	@Comment("카카오 간편로그인 Email + ID")
 	private String kakaoEmailId;
 	
-	@Column(name = "logintry", length = 2)
+	@Column(name = "logintry", nullable = false, length = 2)
 	@Comment("로그인 시도 횟수")
 	private int logintry = 0;
+	
+	@Column(name = "ageConsent", nullable = false)
+	@Comment("나이 동의")
+	private boolean ageConsent;
+	
+	@Column(name = "serviceConsent", nullable = false)
+	@Comment("서비스 동의")
+	private boolean termsOfService;
+	
+	@Column(name = "privacyConsent", nullable = false)
+	@Comment("개인정보 동의")
+	private boolean privacyConsent;
+	
+	@Column(name = "marketingConsent", nullable = false)
+	@Comment("광고, 마케팅 동의")
+	private boolean marketConsent;
+	
+	
 	
 //	데이터베이스에 Enum 값을 저장할 때, 일반적으로 두 가지 전략을 사용할 수 있습니다:
 //

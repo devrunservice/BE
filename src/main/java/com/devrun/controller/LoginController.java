@@ -46,7 +46,7 @@ public class LoginController {
 	
 	@ResponseBody
 	@PostMapping("/login")
-	public ResponseEntity<LoginDTO> login(HttpServletRequest request
+	public ResponseEntity<?> login(HttpServletRequest request
 						, @RequestBody MemberEntity memberEntity) {
 		
 		MemberEntity member = new MemberEntity();
@@ -80,49 +80,67 @@ public class LoginController {
 	        	System.out.println("3단계" + memberEntity);
 
 	        	// JWT토큰
-	        	String token = JWTUtil.generateToken(memberEntity.getId());
-//	        	HttpHeaders responseHeaders = new HttpHeaders();
-//	            responseHeaders.set("Authorization", "Bearer " + token);
-//	            responseHeaders.set("Username", memberEntity.getName());
+	        	String access_token = JWTUtil.generateToken(memberEntity.getId());
 	            
 	            // 마지막 로그인 날짜 저장
 	        	loginService.setLastLogin(memberEntity);
 				
-//				HttpSession session = request.getSession();
-//				session.setAttribute("id", memberEntity.getId());
-	        	
 	        	// 로그인한 아이디의 이름 전달
 	        	LoginDTO loginDTO = new LoginDTO(status, "Login successful", memberEntity.getName());
 				
 	        	// 토큰을 응답 본문에 추가
-	            loginDTO.setAuthorization("Bearer " + token);
-	        	
+	            loginDTO.setAuthorization("Bearer " + access_token);
+	            
 	        	// 로그인 성공 200
 				return new ResponseEntity<>(loginDTO, HttpStatus.OK);
 				
 	        case USER_NOT_FOUND:
 	        	//로그인 실패 401 : 해당 유저가 존재하지 않음
-	            return new ResponseEntity<>(new LoginDTO(status, "User not found"), HttpStatus.UNAUTHORIZED);
+	            return new ResponseEntity<>(
+//	            		new LoginDTO(status, 
+	            				"User not found"
+//	            				)
+	            		, HttpStatus.UNAUTHORIZED);
 	            
 	        case PASSWORD_MISMATCH:
 	        	//로그인 실패 401 : 비밀번호가 일치하지 않음
-	            return new ResponseEntity<>(new LoginDTO(status, "Incorrect password"), HttpStatus.UNAUTHORIZED);
+	            return new ResponseEntity<>(
+//	            		new LoginDTO(status,
+	            				"Incorrect password"
+//	            				)
+	            		, HttpStatus.UNAUTHORIZED);
 	            
 	        case ACCOUNT_INACTIVE:
 	        	//로그인 실패 401 : 회원 비활성화 상태
-	            return new ResponseEntity<>(new LoginDTO(status, "Account is inactive"), HttpStatus.UNAUTHORIZED);
+	            return new ResponseEntity<>(
+//	            		new LoginDTO(status,
+	            				"Account is inactive"
+//	            				)
+	            		, HttpStatus.UNAUTHORIZED);
 	            
 	        case ACCOUNT_WITHDRAWN:
 	        	//로그인 실패 401 : 탈퇴한 회원
-	            return new ResponseEntity<>(new LoginDTO(status, "Account has been withdrawn"), HttpStatus.UNAUTHORIZED);
+	            return new ResponseEntity<>(
+//	            		new LoginDTO(status,
+	            				"Account has been withdrawn"
+//	            				)
+	            		, HttpStatus.UNAUTHORIZED);
 	            
 	        case LOGIN_TRIES_EXCEEDED:
 	        	//로그인 실패 401 : 로그인 5회이상 시도
-	            return new ResponseEntity<>(new LoginDTO(status, "Login attempts exceeded"), HttpStatus.UNAUTHORIZED);
+	            return new ResponseEntity<>(
+//	            		new LoginDTO(status, 
+	            				"Login attempts exceeded"
+//	            				)
+	            		, HttpStatus.UNAUTHORIZED);
 	            
 	        default:
 	        	// 로그인 실패 401: 기타 실패 사례
-	            return new ResponseEntity<>(new LoginDTO(LoginStatus.USER_NOT_FOUND, "Unknown error"), HttpStatus.UNAUTHORIZED);
+	            return new ResponseEntity<>(
+//	            		new LoginDTO(LoginStatus.USER_NOT_FOUND,
+	            				"Unknown error"
+//	            				)
+	            		, HttpStatus.UNAUTHORIZED);
 	    }
 	    
 	}
