@@ -2,6 +2,7 @@ package com.devrun.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,10 +26,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-        		.cors().disable()
-            .csrf().disable()
             .authorizeRequests(authorize -> authorize
-            	.antMatchers("/tmi").authenticated() // 인증이 필요한 /tmi 엔드포인트
+                    .antMatchers(HttpMethod.OPTIONS, "/**/*").permitAll()
+                    .antMatchers("/tmi").authenticated()// 인증이 필요한 /tmi 엔드포인트
                 .anyRequest().permitAll())
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
             .build();

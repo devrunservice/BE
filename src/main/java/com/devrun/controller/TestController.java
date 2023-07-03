@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +14,7 @@ import com.devrun.service.SignupService;
 import com.devrun.service.TestService;
 
 @RestController
+
 public class TestController {
 	
 	@Autowired
@@ -20,7 +22,8 @@ public class TestController {
 	
 	@Autowired
 	TestService testService;
-	
+
+	@CrossOrigin(origins = "localhost:3000" , allowedHeaders = {"GET"})
 	@GetMapping("/tmi")
 	public MemberEntity tmi(@RequestParam("id") String id) {
         return signupService.findById(id);
