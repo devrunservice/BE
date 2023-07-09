@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.devrun.dto.OAuthToken;
 import com.devrun.dto.member.KakaoProfileDTO;
@@ -43,6 +44,12 @@ public class LoginController {
 	
 	@Autowired
 	private LoginRepository loginRepository;
+	
+	@Value("${kakao.client_id}")
+	private String client_id;
+
+	@Value("${kakao.redirect_url}")
+	private String redirect_uri;
 	
 	@ResponseBody
 	@GetMapping("/login")
@@ -83,12 +90,49 @@ public class LoginController {
 	//	    결국, 로그인과 같이 토큰을 생성하거나 교환하는 데 필요한 정보를 보낼 때는 바디를 사용하고, 일단 토큰을 받아 인증이 필요한 API 요청을 할 때는 헤더에 토큰을 담아 전송하는 것이 일반적인 패턴입니다.
 	
 		    	case SUCCESS:
-		        	// 로그인 성공 처리
+		    		
+		    		
+		        	
+		    		// 공사중 --------------------------------------------------------------------------------------------------
+		    		
+					
+		    		// 임시 토큰이 헤더에 있는지 확인
+		    		String easyloginToken = request.getHeader("Easylogin_token");
+		    		// 임시 토큰을 사용해 사용자 식별하고 로그인 과정 진행
+		    		String kakaoId = JWTUtil.getUserIdFromToken(easyloginToken);
+		    		String kakaoEmail = JWTUtil.getEmailFromEasyloginToken(easyloginToken);
+		    		
+		    		// 여러개의 아이디에 연동하는 것을 막기위해 한번 더 체크
+		    		memberEntity = loginRepository.findByKakaoEmailId(kakaoId + kakaoEmail);
+		    		
+		    		System.out.println("이지로그인 토큰 : " + easyloginToken);
+		    		if (easyloginToken != null && !easyloginToken.isEmpty() && JWTUtil.validateToken(easyloginToken)) {
+		    			if (memberEntity == null) {
+			    			
+			    			// 로그인 성공 처리
+				        	memberEntity = loginRepository.findById(member.getId());
+				        	System.out.println("3단계" + memberEntity);
+			    			
+			    			memberEntity.setKakaoEmailId(kakaoId + kakaoEmail);
+			    			System.out.println("간편로그인 아이디 설정 : " + memberEntity);
+			    			
+			    			loginService.saveKakaoId(memberEntity);
+			    			
+			    			
+			    		} else {
+			    			// 400 연동 실패 : 이미 연동된 계정이 있음
+			    			return new ResponseEntity<>("Already linked to another user", HttpStatus.BAD_REQUEST);
+			    		}
+					}
+		    		
+		    		// -------------------------------------------------------------------------------------------------- 공사중
+		    		
+		    		// 로그인 성공 처리
 		        	memberEntity = loginRepository.findById(member.getId());
 		        	System.out.println("3단계" + memberEntity);
-	
+		    		
 		        	// JWT토큰
-		        	String access_token = JWTUtil.generateToken(memberEntity.getId(), memberEntity.getName());
+		        	String access_token = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName());
 		            
 		        	// JWT refresh 토큰
 		            String refresh_token = JWTUtil.generateRefreshToken(memberEntity.getId());
@@ -98,30 +142,20 @@ public class LoginController {
 		        	loginService.setLastLogin(memberEntity);
 					
 		        	// 로그인한 아이디의 이름 전달
-		        	LoginDTO loginDTO = new LoginDTO(status, "Login successful", memberEntity.getName());
+		        	LoginDTO loginDTO = new LoginDTO(status, "Login successful");
 					
 		        	// 토큰을 응답 본문에 추가
 		            loginDTO.setAccess_token("Bearer " + access_token);
-		            loginDTO.setRefresh_token(refresh_token);
+		            loginDTO.setRefresh_token("Bearer " + refresh_token);
 		            
 		        	// 로그인 성공 200
 					return new ResponseEntity<>(loginDTO, HttpStatus.OK);
 					
-		        case USER_NOT_FOUND:
-		        	// 로그인 실패 401 : 해당 유저가 존재하지 않음
-		            return new ResponseEntity<>(
-	//	            		new LoginDTO(status, 
-		            				"User not found"
-	//	            				)
-		            		, HttpStatus.UNAUTHORIZED);
-		            
+		    	case USER_NOT_FOUND:
 		        case PASSWORD_MISMATCH:
-		        	//로그인 실패 401 : 비밀번호가 일치하지 않음
-		            return new ResponseEntity<>(
-	//	            		new LoginDTO(status,
-		            				"Incorrect password"
-	//	            				)
-		            		, HttpStatus.UNAUTHORIZED);
+		            // 401 로그인 실패 : 해당 유저가 존재하지 않음 or 비밀번호 불일치
+		            return new ResponseEntity<>("User not found or Incorrect password", HttpStatus.UNAUTHORIZED);
+
 		            
 		        case ACCOUNT_INACTIVE:
 		        	//로그인 실패 401 : 회원 비활성화 상태
@@ -132,28 +166,28 @@ public class LoginController {
 		            		, HttpStatus.UNAUTHORIZED);
 		            
 		        case ACCOUNT_WITHDRAWN:
-		        	//로그인 실패 401 : 탈퇴한 회원
+		        	//로그인 실패 403 : 탈퇴한 회원
 		            return new ResponseEntity<>(
 	//	            		new LoginDTO(status,
 		            				"Account has been withdrawn"
 	//	            				)
-		            		, HttpStatus.UNAUTHORIZED);
+		            		, HttpStatus.FORBIDDEN);
 		            
 		        case LOGIN_TRIES_EXCEEDED:
-		        	//로그인 실패 401 : 로그인 5회이상 시도
+		        	//로그인 실패 403 : 로그인 5회이상 시도
 		            return new ResponseEntity<>(
 	//	            		new LoginDTO(status, 
 		            				"Login attempts exceeded"
 	//	            				)
-		            		, HttpStatus.UNAUTHORIZED);
+		            		, HttpStatus.FORBIDDEN);
 		            
 		        default:
-		        	// 로그인 실패 401 : 기타 실패 사례
+		        	// 로그인 실패 500 : 기타 실패 사례
 		            return new ResponseEntity<>(
 	//	            		new LoginDTO(LoginStatus.USER_NOT_FOUND,
 		            				"Unknown error"
 	//	            				)
-		            		, HttpStatus.UNAUTHORIZED);
+		            		, HttpStatus.INTERNAL_SERVER_ERROR);
 		    }
 		} else {
 			// 로그인 실패 401 : 아이디 또는 비밀번호 유효성 검사 실패
@@ -170,18 +204,18 @@ public class LoginController {
 
 	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
 	    if (refreshToken == null || refreshToken.isEmpty()) {
-	    	// 502 : Refresh token 없음
+	    	// 400 : Refresh token 없음
 	        return new ResponseEntity<>("Refresh token is required", HttpStatus.BAD_REQUEST);
 	    }
 
 	    // Refresh Token 검증
-	    if (!JWTUtil.validateRefreshToken(refreshToken)) {
+	    if (!JWTUtil.validateToken(refreshToken)) {
 	    	// 401 : 유효하지 않은 Refresh token
 	        return new ResponseEntity<>("Invalid refresh token", HttpStatus.UNAUTHORIZED);
 	    }
 
 	    // 사용자 식별
-	    String userId = JWTUtil.getUserIdFromRefreshToken(refreshToken);
+	    String userId = JWTUtil.getUserIdFromToken(refreshToken);
 
 	    // 사용자 존재 여부 확인
 	    MemberEntity memberEntity = loginRepository.findById(userId);
@@ -191,11 +225,13 @@ public class LoginController {
 	    }
 
 	    // 새로운 Access Token 생성
-	    String newAccessToken = JWTUtil.generateToken(memberEntity.getId(), memberEntity.getName());
+	    String newAccessToken = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName());
 
 	    // 새로운 Access Token 응답으로 전송
 	    Map<String, String> responseBody = new HashMap<>();
 	    responseBody.put("Access_token", "Bearer " + newAccessToken);
+	    
+	    // 200 : Access_token 발급
 	    return new ResponseEntity<>(responseBody, HttpStatus.OK);
 	}
 	
@@ -208,21 +244,27 @@ public class LoginController {
 
 	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
 	    if (refreshToken == null || refreshToken.isEmpty()) {
-	    	// 502 : Refresh token 없음
+	    	
+	    	// 400 : Refresh token 없음
 	        return new ResponseEntity<>("Refresh token is required", HttpStatus.BAD_REQUEST);
+	    }
+	    
+	    // Refresh Token 검증
+	    if (!JWTUtil.validateToken(refreshToken)) {
+	        // 401 : 유효하지 않은 Refresh token
+	        return new ResponseEntity<>("Invalid refresh token", HttpStatus.UNAUTHORIZED);
 	    }
 
         // 토큰을 블랙리스트에 추가합니다.
         TokenBlacklist.blacklistToken(refreshToken);
 
-        // 로그아웃 성공 메시지를 반환합니다.
+        // 200 : 로그아웃 성공
         return new ResponseEntity<>("Logout successful", HttpStatus.OK);
     }
 	
 	@ResponseBody
 	@GetMapping("/auth/kakao/callback")
-	public String kakaoCallback(HttpServletRequest request
-								, @RequestParam(required = false) String code
+	public ResponseEntity<?> kakaoCallback(@RequestParam(required = false) String code
 								, @RequestParam(required = false) String error) {
 		
 		// 성공했을 경우 code라는 파라미터값이 생성되고 실패했을 경우 error라는 파라미터값이 생성된다
@@ -230,41 +272,129 @@ public class LoginController {
 			
 			// oauthToken 가져오기
 			OAuthToken oauthToken = kakaoLoginService.getOauthToken(code);
+			
+			if (oauthToken == null || oauthToken.getAccess_token() == null) {
+				// 500 : 엑세스 토큰을 가져오지 못 함
+	            return new ResponseEntity<>("Failed to retrieve access token", HttpStatus.INTERNAL_SERVER_ERROR);
+	        }
+			
 	        System.out.println("카카오 엑세스 토큰 : " + oauthToken.getAccess_token());
-	        HttpSession session = request.getSession();
 	        // kakaoProfile 가져오기
 			KakaoProfileDTO kakaoProfile = kakaoLoginService.getKakaoProfile(oauthToken);
+			
+			if (kakaoProfile == null || kakaoProfile.getId() == null) {
+				// 500 : 카카오 프로필을 가져오지 못 함
+	            return new ResponseEntity<>("Failed to retrieve profile information", HttpStatus.INTERNAL_SERVER_ERROR);
+	        }
+			
 			System.out.println("카카오 ID : " + kakaoProfile.getId());
 			System.out.println("카카오 Email : " + kakaoProfile.getKakao_account().getEmail());
 			
-			session.setAttribute("Access_token", oauthToken.getAccess_token());
-			session.setAttribute("id", kakaoProfile.getId());
-			session.setAttribute("nickname", kakaoProfile.getProperties().getNickname());
 			
-			return "redirect:/index";
+			String kakaoId = kakaoProfile.getId().toString();				// 2843888591
+			String kakaoEmail = kakaoProfile.getKakao_account().getEmail();	// sung0763@naver.com
+			
+			String KakaoEmailId = kakaoId + kakaoEmail;
+			
+			
+			// 공사중 -------------------------------------------------------------------------------------
+			
+			
+			
+			MemberEntity memberEntity = new MemberEntity();
+			
+			memberEntity = loginRepository.findByKakaoEmailId(KakaoEmailId);
+			System.out.println("3단계" + memberEntity);
+			
+			if (memberEntity == null) {
+				
+				// 카카오 계정에 연동된 아이디가 없는 경우
+			    // 카카오 아이디와 이메일을 포함한 토큰 생성
+	        	String easylogin_token = JWTUtil.generateEasyloginToken(kakaoId, kakaoEmail);
+				System.out.println("이지로그인 토큰 : " + easylogin_token);
+				
+				
+				// 여기서 로그인을 통해 memberEntity을 다시 설정, 그렇지 않을 경우 memberEntity는 비어있음
+	        	
+				// 대충 로그인하는 과정
+	        	
+				// Kakao 간편로그인 연결이 되어있지 않은 경우
+//				memberEntity.setKakaoEmailId(KakaoEmailId);
+//				loginService.saveKakaoId(memberEntity);
+				
+				// 대충 로그인 성공하는 과정
+				// 아마 여기서 해결하지않고 다른곳으로 이동하는게 좋아보임
+				// 로그인하고 다시 돌아오는게 쉽지않네 어케하지
+				
+				// 여기이후 로직은 서비스로 돌리고 연동된 아이디가 있는경우와 없는경우로 분기를 나눠서 진행하면 될 것 같다 아마 ㅠㅠ
+				
+				Map<String, String> response = new HashMap<>();
+		        response.put("Easylogin_token", "Bearer " + easylogin_token);
+		        response.put("message", "No linked account found. Please link your account.");
+		        System.out.println("간편로그인 리스폰스 : " + response);
+		        
+		        // 303 : 연동된 계정이 존재하지 않음
+		        return new ResponseEntity<>(response, HttpStatus.SEE_OTHER);
+			} else {
+				
+				
+				// JWT토큰
+				String access_token = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName());
+				
+				// JWT refresh 토큰
+				String refresh_token = JWTUtil.generateRefreshToken(memberEntity.getId());
+				
+				// 마지막 로그인 날짜 저장
+				loginService.setLastLogin(memberEntity);
+				
+				
+				LoginStatus status = loginService.validate(memberEntity);
+				
+				
+				// 로그인한 아이디의 이름 전달
+				LoginDTO loginDTO = new LoginDTO(status, "KakaoLogin successful");
+				
+				// 토큰을 응답 본문에 추가
+				loginDTO.setAccess_token("Bearer " + access_token);
+				loginDTO.setRefresh_token("Bearer " + refresh_token);
+				
+				// 로그인 성공 200
+				return new ResponseEntity<>(loginDTO, HttpStatus.OK);
+				
+				
+				// --------------------------------------------------------------------------------- 공사중
+				
+				
+			}
+			
 		} else if(error != null) {
-			return "error";
+			
+			// 400 로그인 에러
+			return new ResponseEntity<>("KakaoLogin failed", HttpStatus.BAD_REQUEST);
 		} else {
-			// code, error 둘다 null 값인 경우 페이지
-			return "error";
+			// 400 code, error 둘다 null 값인 경우
+			return new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST);
 		}
 		
 	}
 	
 	@ResponseBody
 	@GetMapping("/kakao/logout")
-	public String kakaoLogout(HttpServletRequest request) {
+	public ResponseEntity<?> kakaoLogout(HttpServletRequest request, LoginDTO loginDTO) {
 		
-		String token = (String) request.getSession().getAttribute("Access_token");
-		Long id = (Long) request.getSession().getAttribute("id");
+		String token = request.getHeader("Access_token");
+		Long id = Long.parseLong(loginDTO.getId());
 		LogoutResponse kakaoLogout = kakaoLoginService.kakaoLogout(token, id);
 		
-		// 세션 무효화
-		HttpSession session = request.getSession();
-	    if (session != null) {
-	        session.invalidate();
-	    }
-		
-		return "redirect:/login";
+		return new ResponseEntity<>(kakaoLogout.toString() + " KakaoLogout successful", HttpStatus.OK);
 	}
+	
+	@ResponseBody
+	@GetMapping("/kakao/login")
+	public RedirectView testLogin() {
+		String test = "https://kauth.kakao.com/oauth/authorize?client_id=" + client_id + "&redirect_uri=" + redirect_uri + "&response_type=code";
+		return new RedirectView(test);
+	}
+	
+	
 }

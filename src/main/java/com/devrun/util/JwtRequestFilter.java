@@ -44,37 +44,53 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		JwtRequestFilter.SECRET_KEY = secretKey;
 	}
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
-    	// HTTP 요청 헤더에서 "Authorization" 헤더 값을 가져옴
-        final String authorizationHeader = request.getHeader("Authorization");
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+	        throws ServletException, IOException {
+		// HTTP 요청 헤더에서 헤더 값을 가져옴
+	    String accessTokenHeader = request.getHeader("Access_Token");
+	    String refreshTokenHeader = request.getHeader("Refresh_Token");
+	    String easyloginTokenHeader = request.getHeader("Easylogin_Token");
 
-        String username = null;
-        String jwt = null;
+	    
+	    if (accessTokenHeader != null && accessTokenHeader.startsWith("Bearer ")) {
+	        processToken(accessTokenHeader, chain, request, response);
+	    }
+	    
+	    if (refreshTokenHeader != null && refreshTokenHeader.startsWith("Bearer ")) {
+	        processToken(refreshTokenHeader, chain, request, response);
+	    }
+	    
+	    if (easyloginTokenHeader != null && easyloginTokenHeader.startsWith("Bearer ")) {
+	        processToken(easyloginTokenHeader, chain, request, response);
+	    }
 
-        // "Authorization" 헤더 값이 "Bearer "로 시작하는 경우, 실제 토큰을 추출
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            jwt = authorizationHeader.substring(7);
-            username = extractUsername(jwt);
-        }
-        // 이전에 SecurityContextHolder에 저장된 토큰값과 유저정보를 초기화.
-        SecurityContextHolder.clearContext();
-        // 토큰에서 추출한 아이디가 null이 아니고, 현재 Security Context에 인증 정보가 없는 경우
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-            // 토큰이 유효한 경우 Security Context에 인증 정보를 설정
-            if (validateToken(jwt, userDetails)) {
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                usernamePasswordAuthenticationToken
-                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-            }
-        }
-        // 필터 체인을 계속해서 다음 필터로 요청과 응답을 전달
-        chain.doFilter(request, response);
-    }
+	    chain.doFilter(request, response);
+	}
+
+	private void processToken(String tokenHeader, FilterChain chain, HttpServletRequest request, HttpServletResponse response)
+	        throws ServletException, IOException {
+		// 각각의 헤더 값이 "Bearer "로 시작하는 경우, 실제 토큰을 추출
+	    String jwt = tokenHeader.substring(7);
+	    String username = extractUsername(jwt);
+	    
+	    // 이전에 SecurityContextHolder에 저장된 토큰값과 유저정보를 초기화
+	    SecurityContextHolder.clearContext();
+	    
+	    // 토큰에서 추출한 아이디가 null이 아니고, 현재 Security Context에 인증 정보가 없는 경우
+	    if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+	        UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+	        
+	        // 토큰이 유효한 경우 Security Context에 인증 정보를 설정
+	        if (validateToken(jwt, userDetails)) {
+	            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+	                    userDetails, null, userDetails.getAuthorities());
+	            usernamePasswordAuthenticationToken
+	                    .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+	            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+	        }
+	    }
+	}
 
     // 토큰에서 아이디를 추출하는 메서드
     private String extractUsername(String token) {

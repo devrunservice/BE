@@ -51,5 +51,8 @@ public class LoginService {
 		    return LoginStatus.SUCCESS;
 		}
 	}
+	public void saveKakaoId(MemberEntity memberEntity) {
+		memberEntityRepository.save(memberEntity);
+	}
 
 }

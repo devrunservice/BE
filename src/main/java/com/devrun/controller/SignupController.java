@@ -69,13 +69,10 @@ public class SignupController {
 		int code = signupDTO.getCode();
         if (signupService.verifySmsCode(phonenumber, code)) {
         	// 200 인증성공
-        	// ResponseEntity.ok()는 HTTP 상태 코드 200을 의미
-            return ResponseEntity.ok("Verification successful");
+        	return new ResponseEntity<>("Verification successful", HttpStatus.OK);
         } else {
-        	// 401 인증실패
-        	// HttpStatus.UNAUTHORIZED는 HTTP 상태 코드 401을 의미
-        	// .body("Verification failed")는 응답 본문에 "Verification failed"라는 텍스트 메시지를 추가
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Verification failed");
+        	// 403 인증실패
+        	return new ResponseEntity<>("Verification failed", HttpStatus.FORBIDDEN);
         }
     }
 	
@@ -87,9 +84,7 @@ public class SignupController {
 		System.out.println(memberEntity);
 		System.out.println(memberEntity.getEmail());
 
-		// 가입일자 저장
-		Date currentDate = new Date();
-		memberEntity.setSignup(currentDate);
+		
 		System.out.println("아이디 유효성 검사 : " + signupService.validateId(memberEntity.getId()));
 		System.out.println("이메일 유효성 검사 : " + signupService.validateEmail(memberEntity.getEmail()));
 		System.out.println("비밀번호 유효성 검사" + signupService.validatePassword(memberEntity.getPassword()));
@@ -105,7 +100,12 @@ public class SignupController {
 					&& signupService.validatePassword(memberEntity.getPassword())
 					) {
 				System.out.println("회원가입 성공");
-				signupService.insert(memberEntity);
+				
+				// 가입일자 저장
+				Date currentDate = new Date();
+				memberEntity.setSignup(currentDate);
+		    	signupService.insert(memberEntity);
+			    	
 				return new ResponseEntity<>("Signup successful", HttpStatus.OK);
 						//ResponseEntity.ok("Signup successful");
 				
@@ -116,20 +116,27 @@ public class SignupController {
 						//ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input data");				response.data에 담겨있던 것을 response.data.massage로 변경
 			}
 			
-		// 중복된 아이디
+		// 409 중복된 아이디
 		} else if(signupService.checkID(memberEntity.getId()) != 0) {
-		    return new ResponseEntity<>("UserId already taken", HttpStatus.UNAUTHORIZED);
+		    return new ResponseEntity<>("UserId already taken", HttpStatus.CONFLICT);
 		    		//ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("UserId already taken");
 		
-		// 중복된 이메일
+		// 409 중복된 이메일
 		} else if(signupService.checkEmail(memberEntity.getEmail()) != 0) {
-		    return new ResponseEntity<>("UserId already taken", HttpStatus.UNAUTHORIZED);
+		    return new ResponseEntity<>("Email already registered", HttpStatus.CONFLICT);
 		    		//ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email already registered");
 		
-		// 중복된 핸드폰번호
+		// 409 중복된 핸드폰번호
 		} else if(signupService.checkphone(memberEntity.getPhonenumber()) != 0) {
-		    return new ResponseEntity<>("Phone number already registered", HttpStatus.UNAUTHORIZED);
+		    return new ResponseEntity<>("Phone number already registered", HttpStatus.CONFLICT);
 		    		//ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Phone number already registered");
+		
+		// 403 약관 미동의    
+		} else if (!memberEntity.isAgeConsent() 
+		           || !memberEntity.isTermsOfService() 
+		           || !memberEntity.isPrivacyConsent()) {
+			
+			return new ResponseEntity<>("User has not agreed to the terms", HttpStatus.FORBIDDEN);
 		    
 		// 기타 오류 500
 		} else {

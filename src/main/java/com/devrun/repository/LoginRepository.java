@@ -11,4 +11,6 @@ public interface LoginRepository extends JpaRepository<MemberEntity, Long> {
 
 	MemberEntity findById(String id);
 
+	MemberEntity findByKakaoEmailId(String kakaoEmailId);
+
 }

@@ -3,6 +3,8 @@ package com.devrun.util;
 import java.util.Date;
 import java.util.UUID;
 
+import javax.security.auth.Subject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -22,12 +24,12 @@ public class JWTUtil {
     }
     
 	// 토큰 만료시간 설정
-    private static final long EXPIRATION_TIME = 24 * 60 * 60 * 1000;				// refresh token을 만들면 ACCESS_TOKEN_EXPIRATION_TIME으로 대체
-//    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 15 * 60 * 1000;		// 15분				테스트는 1초로 할 것
+    private static final long EASYLOGIN_TOKEN_EXPIRATION_TIME = 5 * 60 * 1000;						// 5분
+    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 15 * 60 * 1000;		// 15분				테스트는 1초로 할 것
     private static final long REFRESH_TOKEN_EXPIRATION_TIME = 24 * 60 * 60 * 1000;	// 24시간, 24시간/일 * 60분/시간 * 60초/분 * 1000밀리초/초
     
     // ACCESS_TOKEN 생성
-    public static String generateToken(String userId, String name) {
+    public static String generateAccessToken(String userId, String name) {
     		   // 새로운 JWT를 생성하기 위한 Builder 객체를 초기화
         return Jwts.builder()
         		// JWT의 sub (subject) 필드를 설정합니다. 이 필드는 토큰이 대상이 되는 주체(일반적으로 사용자)를 식별
@@ -37,7 +39,7 @@ public class JWTUtil {
                 // WT의 jti (JWT ID) 필드를 설정합니다. 이 필드는 토큰의 고유 식별자로 사용됩니다. 이를 통해 토큰이 한 번만 사용되도록 할 수 있으며, 랜덤한 UUID를 생성하여 이를 ID로 사용
                 .setId(UUID.randomUUID().toString())  // 랜덤한 UUID를 jti (JWT ID)로 사용
                 // JWT의 exp (expiration time) 필드를 설정
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TIME))
                 // WT를 서명하는 데 사용될 알고리즘과 시크릿 키를 설정
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
                 // 최종적으로 생성된 JWT를 직렬화하여 문자열 형태로 반환
@@ -55,7 +57,7 @@ public class JWTUtil {
     }
     
     // 주어진 token이 유효한지 확인합니다. 유효하면 true를, 그렇지 않으면 false를 반환
-    public static boolean validateRefreshToken(String token) {
+    public static boolean validateToken(String token) {
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
             return claims.getBody().getExpiration().after(new Date());
@@ -64,10 +66,26 @@ public class JWTUtil {
         }
     }
 
-    // 메서드는 주어진 refresh token으로부터 사용자 ID를 추출
-    public static String getUserIdFromRefreshToken(String token) {
+    // 메서드는 주어진 token으로부터 사용자 ID를 추출
+    public static String getUserIdFromToken(String token) {
         Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
         return claims.getSubject();
     }
     
+    // EASYLOGIN_TOKEN 생성
+    public static String generateEasyloginToken(String userId, String email) {
+        return Jwts.builder()
+                .setSubject(userId)
+                .claim("email", email)
+                .setId(UUID.randomUUID().toString())
+                .setExpiration(new Date(System.currentTimeMillis() + EASYLOGIN_TOKEN_EXPIRATION_TIME))
+                .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
+                .compact();
+    }
+    
+    public static String getEmailFromEasyloginToken(String token) {
+        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+        return claims.get("email", String.class);
+    }
+
 }
