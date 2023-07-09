@@ -38,7 +38,7 @@ public class CouponController {
 
     @PostMapping("/coupon/registrate")
     @ResponseBody
-    @ApiOperation("유저가 쿠폰 코드를 입력하면 쿠폰을 검증하고, 쿠폰을 획득합니다.")
+    @ApiOperation("유저가 쿠폰 코드를 입력하면 쿠폰을 검증하고, 쿠폰을 등록합니다.")
     @ApiImplicitParam(name = "map"
             , value = "json타입 / 키값 : code => 쿠폰 코드 , 키값: id => 추후 헤더 토큰값으로 추출 예정(테스트용)"
             )
@@ -54,4 +54,17 @@ public class CouponController {
         }
     }
 
+    @PostMapping("/coupon/shreder")
+    @ResponseBody
+    @ApiOperation("관리자 계정으로, 특정 쿠폰을 사용 정지 처리하거나 복구합니다.")
+    @ApiImplicitParam(name = "map"
+            , value = "json타입 / 키값 : code => 쿠폰 코드 , 키값: able => 1(사용 정지) or 0(복구)"
+    )
+    public String couponremove(@RequestBody Map<String , String> map){
+        String targetcode = map.get("code");
+        int able = Integer.valueOf(map.get("able"));
+        String res = couponSerivce.removecode(targetcode , able);
+
+        return res;
+    }
 }

@@ -64,4 +64,9 @@ public class CouponSerivce {
         String res = couponregicodeRepository.getCouponStatus(code , user);
         return res;
     }
+
+    public String removecode(String removecoupon , int able) {
+        String res = couponregicodeRepository.removecode(removecoupon, able);
+        return res;
+    }
 }

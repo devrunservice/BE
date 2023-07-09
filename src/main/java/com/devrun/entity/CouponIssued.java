@@ -23,7 +23,7 @@ public class CouponIssued {
     private Date expirydate; // 쿠폰 일괄 만료일
     private int validityperiod; // 쿠폰 유효 기간(일단위)
     private int quantity; // 쿠폰 발행 수량
-    private int remaining; // 남은 쿠폰 개수
+    private int remove; // 삭제 여부
     private String target; // 쿠폰 적용 대상 (특정 강의 번호 또는 특정 강사 번호 또는 카테고리
 
     private enum coupontype{
