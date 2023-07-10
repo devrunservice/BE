@@ -52,12 +52,6 @@ public class LoginController {
 	private String redirect_uri;
 	
 	@ResponseBody
-	@GetMapping("/login")
-	public String login() {
-		return "login";
-	}
-	
-	@ResponseBody
 	@PostMapping("/login")
 	public ResponseEntity<?> login(HttpServletRequest request
 						, @RequestBody MemberEntity memberEntity) {
