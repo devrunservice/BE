@@ -98,15 +98,15 @@ public class LoginController {
 					
 		    		// 임시 토큰이 헤더에 있는지 확인
 		    		String easyloginToken = request.getHeader("Easylogin_token");
-		    		// 임시 토큰을 사용해 사용자 식별하고 로그인 과정 진행
-		    		String kakaoId = JWTUtil.getUserIdFromToken(easyloginToken);
-		    		String kakaoEmail = JWTUtil.getEmailFromEasyloginToken(easyloginToken);
-		    		
-		    		// 여러개의 아이디에 연동하는 것을 막기위해 한번 더 체크
-		    		memberEntity = loginRepository.findByKakaoEmailId(kakaoId + kakaoEmail);
 		    		
 		    		System.out.println("이지로그인 토큰 : " + easyloginToken);
 		    		if (easyloginToken != null && !easyloginToken.isEmpty() && JWTUtil.validateToken(easyloginToken)) {
+		    			// 임시 토큰을 사용해 사용자 식별하고 로그인 과정 진행
+		    			String kakaoId = JWTUtil.getUserIdFromToken(easyloginToken);
+		    			String kakaoEmail = JWTUtil.getEmailFromEasyloginToken(easyloginToken);
+		    			
+		    			// 여러개의 아이디에 연동하는 것을 막기위해 한번 더 체크
+		    			memberEntity = loginRepository.findByKakaoEmailId(kakaoId + kakaoEmail);
 		    			if (memberEntity == null) {
 			    			
 			    			// 로그인 성공 처리

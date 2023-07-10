@@ -18,5 +18,4 @@ public class WebConfig implements WebMvcConfigurer {
         		// 모든 헤더 허용
         		.allowedHeaders("*");
     }
-    
 }
