@@ -48,9 +48,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 	        throws ServletException, IOException {
 		// HTTP 요청 헤더에서 헤더 값을 가져옴
-	    String accessTokenHeader = request.getHeader("Access_Token");
-	    String refreshTokenHeader = request.getHeader("Refresh_Token");
-	    String easyloginTokenHeader = request.getHeader("Easylogin_Token");
+	    String accessTokenHeader = request.getHeader("Access_token");
+	    String refreshTokenHeader = request.getHeader("Refresh_token");
+	    String easyloginTokenHeader = request.getHeader("Easylogin_token");
 
 	    
 	    if (accessTokenHeader != null && accessTokenHeader.startsWith("Bearer ")) {

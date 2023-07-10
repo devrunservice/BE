@@ -232,10 +232,10 @@ public class LoginController {
 	@ResponseBody
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {
-		
+		System.out.println("dd");
 		// refreshToken이 헤더에 있는지 확인
 	    String refreshToken = request.getHeader("Refresh_token");
-
+	    System.out.println("리프레시 있냐 없냐 : " + refreshToken == null || refreshToken.isEmpty());
 	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
 	    if (refreshToken == null || refreshToken.isEmpty()) {
 	    	
@@ -328,7 +328,8 @@ public class LoginController {
 		        System.out.println("간편로그인 리스폰스 : " + response);
 		        
 		        // 303 : 연동된 계정이 존재하지 않음
-		        return new ResponseEntity<>(response, HttpStatus.SEE_OTHER);
+		        return new ResponseEntity<>(response, HttpStatus.OK);
+		        
 			} else {
 				
 				

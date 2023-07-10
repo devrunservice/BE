@@ -26,13 +26,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-        		.csrf().disable()
+        		
                 .csrf().disable()
             .authorizeRequests(authorize -> authorize
                     .antMatchers(HttpMethod.OPTIONS, "/**/*").permitAll()
                     .antMatchers("/tmi").authenticated()// 인증이 필요한 /tmi 엔드포인트
                 .anyRequest().permitAll())
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
+            .logout().disable()
             .build();
     }
+    
 }
