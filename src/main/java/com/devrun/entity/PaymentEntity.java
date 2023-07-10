@@ -20,11 +20,7 @@ public class PaymentEntity {
 	@Column(name = "user_no", length = 5)
 	@Comment("유저 구분 번호")
 	private int user_no;
-
-	@Column(name = "buyerAddr", nullable = true, length = 100)	
-	@Comment("구매자 주소")
-	private String buyer_addr;
-
+	
 	@Column(name = "buyerEmail", nullable = true, length = 100)
 	@Comment("구매자 이메일")
 	private String buyer_email;
@@ -41,7 +37,7 @@ public class PaymentEntity {
 	@Comment("상품 가격")
 	private String paid_amount;
 	
-	@Column(name = "merchantUid", nullable = true, length = 100)
+	@Column(name = "merchant_uid", nullable = true, length = 100)
 	@Comment("주문번호")
 	private String merchant_uid;
 	
@@ -49,9 +45,9 @@ public class PaymentEntity {
 	@Comment("주문번호")
 	private String imp_uid;
 	
-	@Column(name = "cancelAmount", nullable = true, length = 100)
-	@Comment("환불 가격")
-	private int cancel_amount;	
+	@Column(name = "payment_Date", nullable = true, length = 100)
+	@Comment("결제 일자")
+	private String paymentDate;	
 	
 	
 

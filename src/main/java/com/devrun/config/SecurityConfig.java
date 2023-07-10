@@ -26,7 +26,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
+<<<<<<< HEAD
         		.csrf().disable()
+=======
+                .csrf().disable()
+>>>>>>> branch 'merge' of https://github.com/devrunservice/BE.git
             .authorizeRequests(authorize -> authorize
                     .antMatchers(HttpMethod.OPTIONS, "/**/*").permitAll()
                     .antMatchers("/tmi").authenticated()// 인증이 필요한 /tmi 엔드포인트
