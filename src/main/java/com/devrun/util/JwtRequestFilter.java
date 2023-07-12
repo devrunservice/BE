@@ -53,19 +53,49 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	    String easyloginTokenHeader = request.getHeader("Easylogin_token");
 
 	    
-	    if (accessTokenHeader != null && accessTokenHeader.startsWith("Bearer ")) {
-	        processToken(accessTokenHeader, chain, request, response);
+	    try {
+	        if (accessTokenHeader != null && accessTokenHeader.startsWith("Bearer ")) {
+	            processToken(accessTokenHeader, chain, request, response);
+	        }
+	        
+	        if (refreshTokenHeader != null && refreshTokenHeader.startsWith("Bearer ")) {
+	            processToken(refreshTokenHeader, chain, request, response);
+	        }
+	        
+	        if (easyloginTokenHeader != null && easyloginTokenHeader.startsWith("Bearer ")) {
+	            processToken(easyloginTokenHeader, chain, request, response);
+	        }
+	        chain.doFilter(request, response);
+	        
+	    } catch (io.jsonwebtoken.ExpiredJwtException e) {
+	    	
+	        // 401 : 이 부분은 JWT 토큰의 유효기간이 만료된 경우에 실행됩니다.
+	        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	        response.getWriter().write("Token has expired");
+	        
+	    } catch (io.jsonwebtoken.SignatureException e) {
+	    	
+	        // 401 : 이 부분은 JWT 토큰의 서명이 유효하지 않은 경우에 실행됩니다. 
+	        // 서명은 JWT 토큰의 내용이 변조되지 않았음을 보증하는 요소입니다.
+	        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	        response.getWriter().write("Invalid token signature");
+	        
+	    } catch (io.jsonwebtoken.MalformedJwtException e) {
+	    	
+	        // 401 : 이 부분은 JWT 토큰의 구조가 잘못된 경우에 실행됩니다. 
+	        // 예를 들어, JWT 토큰의 헤더, 페이로드, 서명의 구조가 적절하지 않을 경우 발생합니다.
+	        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	        response.getWriter().write("Malformed token");
+	        
+	    } catch (Exception e) {
+	    	
+	        // 500 : 이 부분은 위의 세 가지 예외 이외에 발생할 수 있는 모든 예외를 처리합니다. 
+	        // 이는 서버 내부의 에러, 예기치 못한 상황, 그 외의 다른 예외 상황에 대비한 것입니다.
+	        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	        response.getWriter().write("Internal server error");
+	        
 	    }
 	    
-	    if (refreshTokenHeader != null && refreshTokenHeader.startsWith("Bearer ")) {
-	        processToken(refreshTokenHeader, chain, request, response);
-	    }
-	    
-	    if (easyloginTokenHeader != null && easyloginTokenHeader.startsWith("Bearer ")) {
-	        processToken(easyloginTokenHeader, chain, request, response);
-	    }
-
-	    chain.doFilter(request, response);
 	}
 
 	private void processToken(String tokenHeader, FilterChain chain, HttpServletRequest request, HttpServletResponse response)

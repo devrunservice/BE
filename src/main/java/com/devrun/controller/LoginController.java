@@ -328,7 +328,7 @@ public class LoginController {
 		        System.out.println("간편로그인 리스폰스 : " + response);
 		        
 		        // 303 : 연동된 계정이 존재하지 않음
-		        return new ResponseEntity<>(response, HttpStatus.OK);
+		        return new ResponseEntity<>(response, HttpStatus.SEE_OTHER);
 		        
 			} else {
 				
