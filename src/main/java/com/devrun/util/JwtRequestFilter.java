@@ -2,6 +2,8 @@ package com.devrun.util;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 import javax.servlet.FilterChain;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.devrun.service.CustomUserDetailsService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -49,6 +52,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 	        throws ServletException, IOException {
+		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			// HTTP 요청 헤더에서 헤더 값을 가져옴
 		    String accessTokenHeader = request.getHeader("Access_token");
@@ -66,19 +70,40 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	            processToken(easyloginTokenHeader, chain, request, response);
 	        }
 	        chain.doFilter(request, response);
-		} catch (ExpiredJwtException e) {
-	        // JWT 토큰이 만료되었을 때의 처리
-	        logger.error("Token is expired", e);
-	        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Token is expired");
-	    } catch (SignatureException e) {
-	        // JWT 토큰이 조작되었을 때의 처리
-	        logger.error("Signature validation failed", e);
-	        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Signature validation failed");
-	    } catch (Exception e) {
-	        // 그 외 예외 처리
-	        logger.error("Unexpected server error occurred", e);
-	        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected server error occurred");
-	    }
+//		} catch (ExpiredJwtException e) {
+//	        // JWT 토큰이 만료되었을 때의 처리
+//	        logger.error("Token is expired", e);
+//	        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Token is expired");
+//	    } catch (SignatureException e) {
+//	        // JWT 토큰이 조작되었을 때의 처리
+//	        logger.error("Signature validation failed", e);
+//	        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Signature validation failed");
+//	    } catch (Exception e) {
+//	        // 그 외 예외 처리
+//	        logger.error("Unexpected server error occurred", e);
+//	        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected server error occurred");
+//	    }
+		}catch (ExpiredJwtException e) {
+	            logger.error("Token is expired", e);
+	            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+	            Map<String, String> error = new HashMap<>();
+	            error.put("message", "Token is expired");
+	            response.getWriter().write(objectMapper.writeValueAsString(error));
+	        } catch (SignatureException e) {
+	            // ...
+	            logger.error("Signature validation failed", e);
+	            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	            Map<String, String> error = new HashMap<>();
+	            error.put("message", "Signature validation failed");
+	            response.getWriter().write(objectMapper.writeValueAsString(error));
+	        } catch (Exception e) {
+	            // ...
+	            logger.error("Unexpected server error occurred", e);
+	            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	            Map<String, String> error = new HashMap<>();
+	            error.put("message", "Unexpected server error occurred");
+	            response.getWriter().write(objectMapper.writeValueAsString(error));
+	        }
 	}
 
 	private void processToken(String tokenHeader, FilterChain chain, HttpServletRequest request, HttpServletResponse response)
