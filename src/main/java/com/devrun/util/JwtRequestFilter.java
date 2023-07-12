@@ -82,28 +82,43 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	}
 
 	private void processToken(String tokenHeader, FilterChain chain, HttpServletRequest request, HttpServletResponse response)
-	        throws ServletException, IOException {
-		// 각각의 헤더 값이 "Bearer "로 시작하는 경우, 실제 토큰을 추출
-	    String jwt = tokenHeader.substring(7);
-	    String username = extractUsername(jwt);
-	    
-	    // 이전에 SecurityContextHolder에 저장된 토큰값과 유저정보를 초기화
-	    SecurityContextHolder.clearContext();
-	    
-	    // 토큰에서 추출한 아이디가 null이 아니고, 현재 Security Context에 인증 정보가 없는 경우
-	    if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-	        UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-	        
-	        // 토큰이 유효한 경우 Security Context에 인증 정보를 설정
-	        if (validateToken(jwt, userDetails)) {
-	            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-	                    userDetails, null, userDetails.getAuthorities());
-	            usernamePasswordAuthenticationToken
-	                    .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-	            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-	        }
-	    }
-	}
+		    throws ServletException, IOException {
+		    try {
+		        // 각각의 헤더 값이 "Bearer "로 시작하는 경우, 실제 토큰을 추출
+		        String jwt = tokenHeader.substring(7);
+		        String username = extractUsername(jwt);
+		        
+		        // 이전에 SecurityContextHolder에 저장된 토큰값과 유저정보를 초기화
+		        SecurityContextHolder.clearContext();
+		        
+		        // 토큰에서 추출한 아이디가 null이 아니고, 현재 Security Context에 인증 정보가 없는 경우
+		        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+		            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+		            
+		            // 토큰이 유효한 경우 Security Context에 인증 정보를 설정
+		            if (validateToken(jwt, userDetails)) {
+		                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+		                        userDetails, null, userDetails.getAuthorities());
+		                usernamePasswordAuthenticationToken
+		                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+		                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+		            }
+		        }
+		    } catch (ExpiredJwtException e) {
+		        logger.error("Token is expired", e);
+		        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is expired");
+		        throw e; // 추가
+		    } catch (SignatureException e) {
+		        logger.error("Signature validation failed", e);
+		        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Signature validation failed");
+		        throw e; // 추가
+		    } catch (Exception e) {
+		        logger.error("Unexpected server error occurred", e);
+		        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected server error occurred");
+		        throw e; // 추가
+		    }
+		}
+
 
     // 토큰에서 아이디를 추출하는 메서드
     private String extractUsername(String token) {
