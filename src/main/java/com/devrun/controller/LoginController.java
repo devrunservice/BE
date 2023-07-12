@@ -249,7 +249,7 @@ public class LoginController {
 	        return new ResponseEntity<>("Invalid refresh token", HttpStatus.UNAUTHORIZED);
 	    }
 
-        // 토큰을 블랙리스트에 추가합니다.
+        // 토큰을 블랙리스트에 추가합니다
         TokenBlacklist.blacklistToken(refreshToken);
 
         // 200 : 로그아웃 성공
