@@ -2,6 +2,7 @@ package com.devrun.service;
 
 import java.util.Map;
 import org.json.simple.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -21,13 +22,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class RefundService {
-	 private final RefundRepository refundRepository;
-	    private final PaymentRepository paymentRepository;
-
-	    public RefundService(RefundRepository refundRepository, PaymentRepository paymentRepository) {
-	        this.refundRepository = refundRepository;
-	        this.paymentRepository = paymentRepository;
-	    }
+	@Autowired
+	 private RefundRepository refundRepository;
+	@Autowired
+	 private PaymentRepository paymentRepository;
 
     public void refundPayment(Map<String, Object> refundData, String KEY, String SECRET) throws Exception {        
     	try {
