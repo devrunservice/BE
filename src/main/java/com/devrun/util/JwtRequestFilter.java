@@ -21,7 +21,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.devrun.service.CustomUserDetailsService;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureException;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -47,13 +49,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 	        throws ServletException, IOException {
-		// HTTP 요청 헤더에서 헤더 값을 가져옴
-	    String accessTokenHeader = request.getHeader("Access_token");
-	    String refreshTokenHeader = request.getHeader("Refresh_token");
-	    String easyloginTokenHeader = request.getHeader("Easylogin_token");
-
-	    
-	    try {
+		try {
+			// HTTP 요청 헤더에서 헤더 값을 가져옴
+		    String accessTokenHeader = request.getHeader("Access_token");
+		    String refreshTokenHeader = request.getHeader("Refresh_token");
+		    String easyloginTokenHeader = request.getHeader("Easylogin_token");
 	        if (accessTokenHeader != null && accessTokenHeader.startsWith("Bearer ")) {
 	            processToken(accessTokenHeader, chain, request, response);
 	        }
@@ -66,36 +66,19 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	            processToken(easyloginTokenHeader, chain, request, response);
 	        }
 	        chain.doFilter(request, response);
-	        
-	    } catch (io.jsonwebtoken.ExpiredJwtException e) {
-	    	
-	        // 401 : 이 부분은 JWT 토큰의 유효기간이 만료된 경우에 실행됩니다.
-	        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-	        response.getWriter().write("Token has expired");
-	        
-	    } catch (io.jsonwebtoken.SignatureException e) {
-	    	
-	        // 401 : 이 부분은 JWT 토큰의 서명이 유효하지 않은 경우에 실행됩니다. 
-	        // 서명은 JWT 토큰의 내용이 변조되지 않았음을 보증하는 요소입니다.
-	        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-	        response.getWriter().write("Invalid token signature");
-	        
-	    } catch (io.jsonwebtoken.MalformedJwtException e) {
-	    	
-	        // 401 : 이 부분은 JWT 토큰의 구조가 잘못된 경우에 실행됩니다. 
-	        // 예를 들어, JWT 토큰의 헤더, 페이로드, 서명의 구조가 적절하지 않을 경우 발생합니다.
-	        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-	        response.getWriter().write("Malformed token");
-	        
+		} catch (ExpiredJwtException e) {
+	        // JWT 토큰이 만료되었을 때의 처리
+	        logger.error("Token is expired", e);
+	        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is expired");
+	    } catch (SignatureException e) {
+	        // JWT 토큰이 조작되었을 때의 처리
+	        logger.error("Signature validation failed", e);
+	        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Signature validation failed");
 	    } catch (Exception e) {
-	    	
-	        // 500 : 이 부분은 위의 세 가지 예외 이외에 발생할 수 있는 모든 예외를 처리합니다. 
-	        // 이는 서버 내부의 에러, 예기치 못한 상황, 그 외의 다른 예외 상황에 대비한 것입니다.
-	        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-	        response.getWriter().write("Internal server error");
-	        
+	        // 그 외 예외 처리
+	        logger.error("Unexpected server error occurred", e);
+	        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected server error occurred");
 	    }
-	    
 	}
 
 	private void processToken(String tokenHeader, FilterChain chain, HttpServletRequest request, HttpServletResponse response)

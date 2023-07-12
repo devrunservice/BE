@@ -3,8 +3,6 @@ package com.devrun.util;
 import java.util.Date;
 import java.util.UUID;
 
-import javax.security.auth.Subject;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
