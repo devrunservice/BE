@@ -55,7 +55,9 @@ public class LoginController {
 	@PostMapping("/login")
 	public ResponseEntity<?> login(HttpServletRequest request
 						, @RequestBody MemberEntity memberEntity) {
-		
+		System.out.println("Request URL: " + request.getRequestURL().toString());
+		System.out.println("Remote Address: " + request.getRemoteAddr());
+
 		MemberEntity member = new MemberEntity();
 		
 		member.setId(memberEntity.getId());

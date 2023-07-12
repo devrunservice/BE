@@ -69,7 +69,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		} catch (ExpiredJwtException e) {
 	        // JWT 토큰이 만료되었을 때의 처리
 	        logger.error("Token is expired", e);
-	        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is expired");
+	        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Token is expired");
 	    } catch (SignatureException e) {
 	        // JWT 토큰이 조작되었을 때의 처리
 	        logger.error("Signature validation failed", e);
@@ -83,7 +83,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
 	private void processToken(String tokenHeader, FilterChain chain, HttpServletRequest request, HttpServletResponse response)
 		    throws ServletException, IOException {
-		    try {
 		        // 각각의 헤더 값이 "Bearer "로 시작하는 경우, 실제 토큰을 추출
 		        String jwt = tokenHeader.substring(7);
 		        String username = extractUsername(jwt);
@@ -104,19 +103,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 		            }
 		        }
-		    } catch (ExpiredJwtException e) {
-		        logger.error("Token is expired", e);
-		        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is expired");
-		        throw e; // 추가
-		    } catch (SignatureException e) {
-		        logger.error("Signature validation failed", e);
-		        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Signature validation failed");
-		        throw e; // 추가
-		    } catch (Exception e) {
-		        logger.error("Unexpected server error occurred", e);
-		        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected server error occurred");
-		        throw e; // 추가
-		    }
 		}
 
 
