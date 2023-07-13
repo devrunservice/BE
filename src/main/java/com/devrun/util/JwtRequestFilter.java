@@ -67,15 +67,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	        }
 	        chain.doFilter(request, response);
 		} catch (ExpiredJwtException e) {
-	        // JWT 토큰이 만료되었을 때의 처리
+	        // 401 : JWT 토큰이 만료되었을 때
 	        logger.error("Token is expired", e);
-	        // 원래 401이지만 코드로 구분하기 위해 임시 408
-	        response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT, "Token is expired");
+	        // 2.3 릴리스 이후 SpringBoot에서 오류메시지를 포함하지 않는다는 말이 있다
+	        // 로컬에서 테스트할 때는 message가 정상적으로 포함되지만 AWS EC2를 사용하면 message가 사라진다
+	        // 이때는 application.properties에 server.error.include-message=always를 추가해주면 message가 정상적으로 포함된다
+	        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is expired");
 	    } catch (SignatureException e) {
-	        // JWT 토큰이 조작되었을 때의 처리
+	        // 403 : JWT 토큰이 조작되었을 때
 	        logger.error("Signature validation failed", e);
-	        // 원래 401 또는 403이지만 코드로 구분하기 위해 임시 400
-	        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Signature validation failed");
+	        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Signature validation failed");
 	    } catch (Exception e) {
 	        // 500 : 그 외 예외 처리
 	        logger.error("Unexpected server error occurred", e);
