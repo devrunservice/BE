@@ -35,7 +35,7 @@ public class PaymentEntity {
 	
 	@Column(name = "paidAmount", nullable = true, length = 20)
 	@Comment("상품 가격")
-	private int paid_amount;
+	private String paid_amount;
 	
 	@Column(name = "merchant_uid", nullable = true, length = 100)
 	@Comment("주문번호")
@@ -47,9 +47,7 @@ public class PaymentEntity {
 	
 	@Column(name = "payment_Date", nullable = true, length = 100)
 	@Comment("결제 일자")
-	private String paymentDate;
-	
-	
+	private String paymentDate;	
 	
 	
 
