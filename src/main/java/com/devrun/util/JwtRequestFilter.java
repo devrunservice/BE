@@ -68,14 +68,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	        chain.doFilter(request, response);
 		} catch (ExpiredJwtException e) {
 	        // JWT 토큰이 만료되었을 때의 처리
-	        logger.error(e.getMessage());
-	        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is expired");
+	        logger.error("Token is expired", e);
+	        // 원래 401이지만 코드로 구분하기 위해 임시 408
+	        response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT, "Token is expired");
 	    } catch (SignatureException e) {
 	        // JWT 토큰이 조작되었을 때의 처리
 	        logger.error("Signature validation failed", e);
-	        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Signature validation failed");
+	        // 원래 401 또는 403이지만 코드로 구분하기 위해 임시 400
+	        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Signature validation failed");
 	    } catch (Exception e) {
-	        // 그 외 예외 처리
+	        // 500 : 그 외 예외 처리
 	        logger.error("Unexpected server error occurred", e);
 	        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected server error occurred");
 	    }
