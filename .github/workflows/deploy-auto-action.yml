@@ -43,6 +43,7 @@ jobs:
           echo "iamport_SECRET=${{ secrets.iamport_SECRET_KEY }}" >> application.properties
           echo "jwt.secretKey=${{ secrets.JWT_SECRETKEY }}" >> application.properties
           echo "spring.mvc.pathmatch.matching-strategy=${{ secrets.SWAGGER_PATHMATCH_OPTION }}" >> application.properties
+          echo "server.error.include-message=always" >> application.properties
 
 
         working-directory : ./src/main/resources
