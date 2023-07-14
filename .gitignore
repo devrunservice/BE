@@ -7,7 +7,6 @@ build/
 
 ### STS ###
 application.properties
-
 .apt_generated
 .classpath
 .factorypath
