@@ -96,7 +96,9 @@ public class LoginController {
 		    		String easyloginToken = request.getHeader("Easylogin_token");
 		    		
 		    		System.out.println("이지로그인 토큰 : " + easyloginToken);
-		    		if (easyloginToken != null && !easyloginToken.isEmpty() && JWTUtil.validateToken(easyloginToken)) {
+		    		if (easyloginToken != null && !easyloginToken.isEmpty() 
+//		    				&& JWTUtil.validateToken(easyloginToken)
+		    				) {
 		    			// 임시 토큰을 사용해 사용자 식별하고 로그인 과정 진행
 		    			String kakaoId = JWTUtil.getUserIdFromToken(easyloginToken);
 		    			String kakaoEmail = JWTUtil.getEmailFromEasyloginToken(easyloginToken);
@@ -131,7 +133,7 @@ public class LoginController {
 		        	String access_token = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName());
 		            
 		        	// JWT refresh 토큰
-		            String refresh_token = JWTUtil.generateRefreshToken(memberEntity.getId());
+		            String refresh_token = JWTUtil.generateRefreshToken(memberEntity.getId(), memberEntity.getName());
 
 		        	
 		            // 마지막 로그인 날짜 저장
@@ -197,18 +199,18 @@ public class LoginController {
 		
 		// refreshToken이 헤더에 있는지 확인
 	    String refreshToken = request.getHeader("Refresh_token");
+//
+//	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
+//	    if (refreshToken == null || refreshToken.isEmpty()) {
+//	    	// 400 : Refresh token 없음
+//	        return new ResponseEntity<>("Refresh token is required", HttpStatus.BAD_REQUEST);
+//	    }
 
-	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
-	    if (refreshToken == null || refreshToken.isEmpty()) {
-	    	// 400 : Refresh token 없음
-	        return new ResponseEntity<>("Refresh token is required", HttpStatus.BAD_REQUEST);
-	    }
-
-	    // Refresh Token 검증
-	    if (!JWTUtil.validateToken(refreshToken)) {
-	    	// 401 : 유효하지 않은 Refresh token
-	        return new ResponseEntity<>("Invalid refresh token", HttpStatus.UNAUTHORIZED);
-	    }
+//	    // Refresh Token 검증
+//	    if (!JWTUtil.validateToken(refreshToken)) {
+//	    	// 401 : 유효하지 않은 Refresh token
+//	        return new ResponseEntity<>("Invalid refresh token", HttpStatus.UNAUTHORIZED);
+//	    }
 
 	    // 사용자 식별
 	    String userId = JWTUtil.getUserIdFromToken(refreshToken);
@@ -238,18 +240,18 @@ public class LoginController {
 		// refreshToken이 헤더에 있는지 확인
 	    String refreshToken = request.getHeader("Refresh_token");
 	    System.out.println("리프레시 있냐 없냐 : " + refreshToken == null || refreshToken.isEmpty());
-	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
-	    if (refreshToken == null || refreshToken.isEmpty()) {
-	    	
-	    	// 400 : Refresh token 없음
-	        return new ResponseEntity<>("Refresh token is required", HttpStatus.BAD_REQUEST);
-	    }
-	    
-	    // Refresh Token 검증
-	    if (!JWTUtil.validateToken(refreshToken)) {
-	        // 401 : 유효하지 않은 Refresh token
-	        return new ResponseEntity<>("Invalid refresh token", HttpStatus.UNAUTHORIZED);
-	    }
+//	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
+//	    if (refreshToken == null || refreshToken.isEmpty()) {
+//	    	
+//	    	// 400 : Refresh token 없음
+//	        return new ResponseEntity<>("Refresh token is required", HttpStatus.BAD_REQUEST);
+//	    }
+//	    
+//	    // Refresh Token 검증
+//	    if (!JWTUtil.validateToken(refreshToken)) {
+//	        // 401 : 유효하지 않은 Refresh token
+//	        return new ResponseEntity<>("Invalid refresh token", HttpStatus.UNAUTHORIZED);
+//	    }
 
         // 토큰을 블랙리스트에 추가합니다
         TokenBlacklist.blacklistToken(refreshToken);
@@ -339,7 +341,7 @@ public class LoginController {
 				String access_token = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName());
 				
 				// JWT refresh 토큰
-				String refresh_token = JWTUtil.generateRefreshToken(memberEntity.getId());
+				String refresh_token = JWTUtil.generateRefreshToken(memberEntity.getId(), memberEntity.getName());
 				
 				// 마지막 로그인 날짜 저장
 				loginService.setLastLogin(memberEntity);

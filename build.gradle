@@ -50,9 +50,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	// SWAGGER
 	implementation "io.springfox:springfox-boot-starter:3.0.0"
-	// https://mvnrepository.com/artifact/com.sun.mail/javax.mail
-	implementation group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
-	implementation 'org.springframework.boot:spring-boot-starter-mail'
 }
 
 tasks.named('test') {

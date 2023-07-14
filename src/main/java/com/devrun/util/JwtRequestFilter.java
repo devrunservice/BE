@@ -49,60 +49,79 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 	        throws ServletException, IOException {
+		
 		try {
+			
 			// HTTP 요청 헤더에서 헤더 값을 가져옴
 		    String accessTokenHeader = request.getHeader("Access_token");
 		    String refreshTokenHeader = request.getHeader("Refresh_token");
 		    String easyloginTokenHeader = request.getHeader("Easylogin_token");
+		    
 	        if (accessTokenHeader != null && accessTokenHeader.startsWith("Bearer ")) {
 	            processToken(accessTokenHeader, chain, request, response);
 	        }
 	        
 	        if (refreshTokenHeader != null && refreshTokenHeader.startsWith("Bearer ")) {
+	        	System.out.println("여기냐1");
 	            processToken(refreshTokenHeader, chain, request, response);
 	        }
 	        
 	        if (easyloginTokenHeader != null && easyloginTokenHeader.startsWith("Bearer ")) {
 	            processToken(easyloginTokenHeader, chain, request, response);
 	        }
+	        
+	        System.out.println("통과해?");
 	        chain.doFilter(request, response);
+	        
 		} catch (ExpiredJwtException e) {
+			
 	        // 401 : JWT 토큰이 만료되었을 때
 	        logger.error("Token is expired", e);
 	        // 2.3 릴리스 이후 SpringBoot에서 오류메시지를 포함하지 않는다는 말이 있다
 	        // 로컬에서 테스트할 때는 message가 정상적으로 포함되지만 AWS EC2를 사용하면 message가 사라진다
 	        // 이때는 application.properties에 server.error.include-message=always를 추가해주면 message가 정상적으로 포함된다
+	        // Starting from the 2.3 version, Spring Boot doesn't include an error message on the default error page. 
+	        // The reason is to reduce the risk of leaking information to a client
+	        // spring boot 2.3 버전 부터는 클라이언트에 정보가 누수될까봐, 기본 에러페이지에 에러메세지를 담지 않는다고 한다.
+	        // https://stackoverflow.com/questions/65019051/not-getting-message-in-spring-internal-exception
 	        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is expired");
+	        
 	    } catch (SignatureException e) {
 	        // 403 : JWT 토큰이 조작되었을 때
 	        logger.error("Signature validation failed", e);
 	        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Signature validation failed");
+	        
 	    } catch (Exception e) {
 	        // 500 : 그 외 예외 처리
 	        logger.error("Unexpected server error occurred", e);
 	        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected server error occurred");
 	    }
+		
 	}
 
 	private void processToken(String tokenHeader, FilterChain chain, HttpServletRequest request, HttpServletResponse response)
 		    throws ServletException, IOException {
+		
 		        // 각각의 헤더 값이 "Bearer "로 시작하는 경우, 실제 토큰을 추출
 		        String jwt = tokenHeader.substring(7);
+		        System.out.println(jwt + "잘리냐");
 		        String username = extractUsername(jwt);
 		        
 		        // 이전에 SecurityContextHolder에 저장된 토큰값과 유저정보를 초기화
 		        SecurityContextHolder.clearContext();
-		        
+		        System.out.println("여기냐2" + username);
 		        // 토큰에서 추출한 아이디가 null이 아니고, 현재 Security Context에 인증 정보가 없는 경우
 		        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 		            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-		            
+		            System.out.println("여기냐3");
 		            // 토큰이 유효한 경우 Security Context에 인증 정보를 설정
 		            if (validateToken(jwt, userDetails)) {
+		            	System.out.println("여기냐4" + validateToken(jwt, userDetails));
 		                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
 		                        userDetails, null, userDetails.getAuthorities());
 		                usernamePasswordAuthenticationToken
 		                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+		                System.out.println(usernamePasswordAuthenticationToken + "너냐5");
 		                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 		            }
 		        }
