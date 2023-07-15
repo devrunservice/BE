@@ -14,7 +14,7 @@ public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
 		    PaymentEntity findByMerchantUid(@Param("merchant_uid") String merchant_uid);
 		 
 		 @Query("SELECT p FROM PaymentEntity p WHERE p.paid_amount = :paid_amount")
-		 PaymentEntity findByPaidAmount(String imp_uid);
+		 PaymentEntity findByPaidAmount(@Param("paid_amount") String imp_uid);
 
 	
 
