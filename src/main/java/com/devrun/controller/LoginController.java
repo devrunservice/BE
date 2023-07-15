@@ -224,10 +224,13 @@ public class LoginController {
 
 	    // 새로운 Access Token 생성
 	    String newAccessToken = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName());
-
+	    String newRefreshToken = JWTUtil.generateRefreshToken(memberEntity.getId(), memberEntity.getName());
+	    
 	    // 새로운 Access Token 응답으로 전송
 	    Map<String, String> responseBody = new HashMap<>();
 	    responseBody.put("Access_token", "Bearer " + newAccessToken);
+	    responseBody.put("Refresh_token", "Bearer " + newRefreshToken);
+	    
 	    
 	    // 200 : Access_token 발급
 	    return new ResponseEntity<>(responseBody, HttpStatus.OK);
