@@ -39,11 +39,11 @@ public class PayController {
 	
 	private  IamportClient api;	
 	
-//	@Autowired
-//	private CouponIssuedRepository CouponIssuedRepository;
-//	
-//	@Autowired
-//	private PaymentRepository PaymentRepository;
+	@Autowired
+	private CouponIssuedRepository CouponIssuedRepository;
+	
+	@Autowired
+	private PaymentRepository PaymentRepository;
 
 	@ResponseBody
 	// 아임포트 api 문서를 예시로 값 넣어주기
@@ -53,7 +53,7 @@ public class PayController {
 	        Locale locale,
 	        HttpSession session,
 	        @PathVariable(value = "imp_uid") String imp_uid
-//	        ,@RequestParam(value = "couponCode") String couponCode
+	        ,@RequestParam(value = "couponCode") String couponCode
 	        ) {
 	    try {
 	    	System.err.println(imp_uid);
@@ -67,15 +67,15 @@ public class PayController {
 	        
 	        
 	        //쿠폰 적용시
-//	        if(couponCode !=null) {
-//	            CouponIssued couponIssued = CouponIssuedRepository.findByDiscountrate(couponCode);
-//		        PaymentEntity paymentEntity = PaymentRepository.findByPaidAmount(imp_uid);
-//
-//	            int orgAmount =paymentEntity.getPaid_amount();	            		
-//	            int discountAmount =couponIssued.getDiscountrate();
-//	            int finallyAmount = orgAmount - discountAmount;
-//	            paymentEntity.setPaid_amount(finallyAmount);
-//	        }
+	        if(couponCode !=null) {
+	            CouponIssued couponIssued = CouponIssuedRepository.findByDiscountrate(couponCode);
+		        PaymentEntity paymentEntity = PaymentRepository.findByPaidAmount(imp_uid);
+
+	            int orgAmount =paymentEntity.getPaid_amount();	            		
+	            int discountAmount =couponIssued.getDiscountrate();
+	            int finallyAmount = orgAmount - discountAmount;
+	            paymentEntity.setPaid_amount(finallyAmount);
+	        }
 	        
 	        return ResponseEntity.ok(response);
 
