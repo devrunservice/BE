@@ -19,10 +19,10 @@ public class RefundController {
 	@Autowired
 	private RefundService refundService;
 	
-	@Value("${iamport_KEY}")
+	@Value("${IAMPORT_KEY}")
 	private String KEY;
 	
-	@Value("${iamport_SECRET}")
+	@Value("${IAMPORT_SECRET}")
 	private String SECRET;	
 	
 	

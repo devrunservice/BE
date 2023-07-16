@@ -28,14 +28,11 @@ import com.siot.IamportRestClient.response.Payment;
 @RestController
 public class PayController {
 	
-//	@Value("${iamport_KEY}")
-//	private String KEY;
-//	
-//	@Value("${iamport_SECRET}")
-//	private String SECRET;
+	@Value("${IAMPORT_KEY}")
+	private String KEY;
 	
-	private String KEY="4540181673513222";
-	private String SECRET="DIgkSQTsMXqTRNmRsTzZtDmFPesaS7XfGBiOzOYWE7OKEHyTpdlqr7hxhObgMsdAV9NkyytcVmXXJ1Si";
+	@Value("${IAMPORT_SECRET}")
+	private String SECRET;	
 	
 	private  IamportClient api;	
 	
@@ -66,7 +63,7 @@ public class PayController {
 	        IamportResponse<Payment> response = api.paymentByImpUid(imp_uid);
 	        
 	        
-	        //쿠폰 적용시
+	       // 쿠폰 적용시
 	        if(couponCode !=null) {
 	            CouponIssued couponIssued = CouponIssuedRepository.findByDiscountrate(couponCode);
 		        PaymentEntity paymentEntity = PaymentRepository.findByPaidAmount(imp_uid);
