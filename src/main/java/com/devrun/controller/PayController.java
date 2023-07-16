@@ -27,6 +27,7 @@ import com.siot.IamportRestClient.response.Payment;
 
 @RestController
 public class PayController {
+	
 	@Value("${iamport_KEY}")
 	private String KEY;
 	
@@ -54,9 +55,12 @@ public class PayController {
 	    try {
 			// 아임포트 나의 정보 값 넣기
 	        this.api = new IamportClient(KEY, SECRET);
+	        System.err.println(KEY);
+	        System.err.println(SECRET);
 	        
 			//아임포트 서버에 imp_uid를 통해 값 받아와서 우리 서버랑 비교 후 같으면 결제 진행.
 	        IamportResponse<Payment> response = api.paymentByImpUid(imp_uid);
+	        
 	        
 	        //쿠폰 적용시
 //	        if(couponCode !=null) {
