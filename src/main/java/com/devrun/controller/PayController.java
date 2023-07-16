@@ -28,11 +28,14 @@ import com.siot.IamportRestClient.response.Payment;
 @RestController
 public class PayController {
 	
-	@Value("${iamport_KEY}")
-	private String KEY;
+//	@Value("${iamport_KEY}")
+//	private String KEY;
+//	
+//	@Value("${iamport_SECRET}")
+//	private String SECRET;
 	
-	@Value("${iamport_SECRET}")
-	private String SECRET;
+	private String KEY="4540181673513222";
+	private String SECRET="DIgkSQTsMXqTRNmRsTzZtDmFPesaS7XfGBiOzOYWE7OKEHyTpdlqr7hxhObgMsdAV9NkyytcVmXXJ1Si";
 	
 	private  IamportClient api;	
 	
@@ -53,7 +56,8 @@ public class PayController {
 //	        ,@RequestParam(value = "couponCode") String couponCode
 	        ) {
 	    try {
-			// 아임포트 나의 정보 값 넣기
+	    	System.err.println(imp_uid);
+			// 아임포트 나의 정보 값 넣기	    
 	        this.api = new IamportClient(KEY, SECRET);
 	        System.err.println(KEY);
 	        System.err.println(SECRET);
