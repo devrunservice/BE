@@ -39,8 +39,8 @@ jobs:
           echo "" >> application.properties
           echo "kakao.client_id=${{ secrets.KAKAO_CLIENT_ID }}" >> application.properties
           echo "kakao.redirect_url=${{ secrets.KAKAO_REDIRECT_URL }}" >> application.properties
-          echo "iamport_KEY=${{ secrets.iamport_KEY }}" >> application.properties
-          echo "iamport_SECRET=${{ secrets.iamport_SECRET_KEY }}" >> application.properties
+          echo "IAMPORT_KEY=${{ secrets.IAMPORT_KEY }}" >> application.properties
+          echo "IAMPORT_SECRET=${{ secrets.IAMPORT_SECRET }}" >> application.properties
           echo "jwt.secretKey=${{ secrets.JWT_SECRETKEY }}" >> application.properties
           echo "spring.mvc.pathmatch.matching-strategy=${{ secrets.SWAGGER_PATHMATCH_OPTION }}" >> application.properties
           echo "server.error.include-message=always" >> application.properties
