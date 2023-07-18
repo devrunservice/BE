@@ -1,12 +1,14 @@
 package com.devrun.controller;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.devrun.dto.CouponDTO;
 import com.devrun.entity.CouponViewEntity;
 import com.devrun.repository.CouponViewRepository;
+
 
 @RestController
 public class DiscountController {
@@ -14,8 +16,14 @@ public class DiscountController {
 	private CouponViewRepository couponViewRepository;
 
 	@PostMapping("/applyCoupon")
-	public ResponseEntity<?> applyCoupon(@RequestParam("CouponCode") String couponcode,
-			@RequestParam("amount") int amount) {
+	public ResponseEntity<?> applyCoupon(@RequestBody CouponDTO couponDTO) {
+		System.err.println(couponDTO);
+		
+	    String couponcode = couponDTO.getCouponCode();
+	    int amount = couponDTO.getamount();
+	    
+	   System.err.println(couponcode);
+	   System.err.println(amount);
 		
 		// 쿠폰 코드를 사용하여 할인율 조회
 		CouponViewEntity coupon = couponViewRepository.findByCouponcode(couponcode);

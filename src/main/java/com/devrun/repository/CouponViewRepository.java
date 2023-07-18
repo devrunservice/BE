@@ -9,4 +9,5 @@ public interface CouponViewRepository extends JpaRepository<CouponViewEntity, Lo
 
 	CouponViewEntity findByCouponcode(String couponcode);
 
+
 }
