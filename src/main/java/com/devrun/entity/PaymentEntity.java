@@ -42,8 +42,8 @@ public class PaymentEntity {
 	private String merchant_uid;
 	
 	@Column(name = "impUid", nullable = true, length = 100)
-	@Comment("주문번호")
-	private String imp_uid;
+	@Comment("결제고유번호")
+	private String imp_uid;	
 	
 	@Column(name = "payment_Date", nullable = true, length = 100)
 	@Comment("결제 일자")
