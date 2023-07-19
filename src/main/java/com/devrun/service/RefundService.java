@@ -1,5 +1,8 @@
 package com.devrun.service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Map;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,8 +127,11 @@ public class RefundService {
 			String merchantUid = refundData.get("merchant_uid").toString();
 		    int cancelRequestAmount = Integer.parseInt(refundData.get("cancel_request_amount").toString());
 		    String reason = refundData.get("reason").toString();
+		    LocalDateTime dateTime = LocalDateTime.now();
+		    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 a hh:mm:ss", new Locale("ko"));
+		    String refunddate = dateTime.format(formatter);
 		    
-		    RefundEntity refundEntity = new RefundEntity(merchantUid, cancelRequestAmount, reason);
+		    RefundEntity refundEntity = new RefundEntity(merchantUid, cancelRequestAmount, reason, refunddate);
 			System.out.println(refundEntity);
 			System.err.println(refundData);
 			refundRepository.save(refundEntity);		
