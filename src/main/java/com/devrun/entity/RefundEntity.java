@@ -32,10 +32,15 @@ public class RefundEntity {
 	@Comment("환불 이유")
 	private String reason;		
 	
+	@Column(name = "payment_Date", nullable = true, length = 100)
+	@Comment("환불 일자")
+	private String refunddate;
 	
-	 public RefundEntity(String merchant_uid, int cancel_request_amount, String reason) {
+	
+	 public RefundEntity(String merchant_uid, int cancel_request_amount, String reason, String refunddate) {
 	        this.merchant_uid = merchant_uid;
 	        this.cancel_request_amount = cancel_request_amount;
 	        this.reason = reason;
+	        this.refunddate = refunddate;
 	    }
 }
