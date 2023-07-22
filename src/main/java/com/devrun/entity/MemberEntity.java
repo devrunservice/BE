@@ -10,6 +10,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.AssertTrue;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Comment;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -34,30 +37,35 @@ public class MemberEntity {
 			, nullable = false
 			, length = 20)
 	@Comment("유저 이름")
+	@NotBlank(message = "information cannot be null or empty")
 	private String name;
 	
 	@Column(name = "email"
 			, nullable = false
 			, length = 50)
 	@Comment("유저 이메일")
+	@NotBlank(message = "information cannot be null or empty")
 	private String email;
 	
 	@Column(name = "id"
 			, nullable = false
 			, length = 15)
 	@Comment("유저 아이디")
+	@NotBlank(message = "information cannot be null or empty")
 	private String id;
 	
 	@Column(name = "password"
 			, nullable = false
 			, columnDefinition = "TEXT")
 	@Comment("유저 비밀번호")
+	@NotBlank(message = "information cannot be null or empty")
 	private String password;
 	
 	@Column(name = "phonenumber"
 			, nullable = false
 			, length = 11)
 	@Comment("유저 연락처")
+	@NotBlank(message = "information cannot be null or empty")
 	private String phonenumber;
 	
 	@Column(name = "birthday"
@@ -65,6 +73,7 @@ public class MemberEntity {
 			)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	@Comment("유저 생일(생일 축하 쿠폰 발급)")
+	@NotNull(message = "information cannot be null or empty")
 	private Date birthday;
 	
 	@Enumerated(EnumType.STRING)
@@ -103,16 +112,19 @@ public class MemberEntity {
 	@Comment("로그인 시도 횟수")
 	private int logintry = 0;
 	
-	@Column(name = "ageConsent", nullable = false, columnDefinition = "TINYINT(1)")				// 약관 적용 될 때까지 주석처리
+	@Column(name = "ageConsent", nullable = false, columnDefinition = "TINYINT(1)")
 	@Comment("나이 동의")
+	@AssertTrue(message = "User has not agreed to the terms")
 	private boolean ageConsent;
 	
 	@Column(name = "serviceConsent", nullable = false, columnDefinition = "TINYINT(1)")
 	@Comment("서비스 동의")
+	@AssertTrue(message = "User has not agreed to the terms")
 	private boolean termsOfService;
 	
 	@Column(name = "privacyConsent", nullable = false, columnDefinition = "TINYINT(1)")
 	@Comment("개인정보 동의")
+	@AssertTrue(message = "User has not agreed to the terms")
 	private boolean privacyConsent;
 	
 	@Column(name = "marketingConsent", nullable = false, columnDefinition = "TINYINT(1)")

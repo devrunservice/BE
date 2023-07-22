@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.devrun.dto.CustomUserDetails;
 import com.devrun.service.CustomUserDetailsService;
 
 import io.jsonwebtoken.Claims;
@@ -49,8 +50,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 	        throws ServletException, IOException {
+		String requestPath = request.getRequestURI();
 		
-		try {
+		 //login 경로에 대한 요청인 경우 필터를 건너뛰도록 설정합니다.
+	    if (!"/tmi".equals(requestPath)) {
+	        chain.doFilter(request, response);
+	        return;
+	    }
+		
 			
 			// HTTP 요청 헤더에서 헤더 값을 가져옴
 		    String accessTokenHeader = request.getHeader("Access_token");
@@ -58,48 +65,25 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		    String easyloginTokenHeader = request.getHeader("Easylogin_token");
 		    
 	        if (accessTokenHeader != null && accessTokenHeader.startsWith("Bearer ")) {
-	            processToken(accessTokenHeader, chain, request, response);
-	        }
-	        
-	        if (refreshTokenHeader != null && refreshTokenHeader.startsWith("Bearer ")) {
+	            processToken(accessTokenHeader, "Access_token", chain, request, response);
+	        } else if (refreshTokenHeader != null && refreshTokenHeader.startsWith("Bearer ")) {
 	        	System.out.println("여기냐1");
-	            processToken(refreshTokenHeader, chain, request, response);
-	        }
-	        
-	        if (easyloginTokenHeader != null && easyloginTokenHeader.startsWith("Bearer ")) {
-	            processToken(easyloginTokenHeader, chain, request, response);
-	        }
+	            processToken(refreshTokenHeader, "Refresh_token", chain, request, response);
+	        } else if (easyloginTokenHeader != null && easyloginTokenHeader.startsWith("Bearer ")) {
+	            processToken(easyloginTokenHeader, "Easylogin_token", chain, request, response);
+	        } 
+//	        else {
+//	        	// 400 : 올바르지 않은 토큰
+//	            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No or invalid token provided");
+//	            return;
+//	        }
 	        
 	        System.out.println("통과해?");
 	        chain.doFilter(request, response);
 	        
-		} catch (ExpiredJwtException e) {
-			
-	        // 401 : JWT 토큰이 만료되었을 때
-	        logger.error("Token is expired", e);
-	        // 2.3 릴리스 이후 SpringBoot에서 오류메시지를 포함하지 않는다는 말이 있다
-	        // 로컬에서 테스트할 때는 message가 정상적으로 포함되지만 AWS EC2를 사용하면 message가 사라진다
-	        // 이때는 application.properties에 server.error.include-message=always를 추가해주면 message가 정상적으로 포함된다
-	        // Starting from the 2.3 version, Spring Boot doesn't include an error message on the default error page. 
-	        // The reason is to reduce the risk of leaking information to a client
-	        // spring boot 2.3 버전 부터는 클라이언트에 정보가 누수될까봐, 기본 에러페이지에 에러메세지를 담지 않는다고 한다.
-	        // https://stackoverflow.com/questions/65019051/not-getting-message-in-spring-internal-exception
-	        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is expired");
-	        
-	    } catch (SignatureException e) {
-	        // 403 : JWT 토큰이 조작되었을 때
-	        logger.error("Signature validation failed", e);
-	        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Signature validation failed");
-	        
-	    } catch (Exception e) {
-	        // 500 : 그 외 예외 처리
-	        logger.error("Unexpected server error occurred", e);
-	        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected server error occurred");
-	    }
-		
 	}
 
-	private void processToken(String tokenHeader, FilterChain chain, HttpServletRequest request, HttpServletResponse response)
+	private void processToken(String tokenHeader, String headerName, FilterChain chain, HttpServletRequest request, HttpServletResponse response)
 		    throws ServletException, IOException {
 		
 		        // 각각의 헤더 값이 "Bearer "로 시작하는 경우, 실제 토큰을 추출
@@ -110,53 +94,135 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		        // 이전에 SecurityContextHolder에 저장된 토큰값과 유저정보를 초기화
 		        SecurityContextHolder.clearContext();
 		        System.out.println("여기냐2" + username);
-		        // 토큰에서 추출한 아이디가 null이 아니고, 현재 Security Context에 인증 정보가 없는 경우
-		        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-		            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-		            System.out.println("여기냐3");
-		            // 토큰이 유효한 경우 Security Context에 인증 정보를 설정
-		            if (validateToken(jwt, userDetails)) {
-		            	System.out.println("여기냐4" + validateToken(jwt, userDetails));
-		                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-		                        userDetails, null, userDetails.getAuthorities());
-		                usernamePasswordAuthenticationToken
-		                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-		                System.out.println(usernamePasswordAuthenticationToken + "너냐5");
-		                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-		            }
-		        }
+		        
+		        try {
+		        
+			        // 토큰에서 추출한 아이디가 null이 아니고, 현재 Security Context에 인증 정보가 없는 경우
+			        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+			            UserDetails loadedUserDetails = this.userDetailsService.loadUserByUsername(username);
+			            CustomUserDetails userDetails = (CustomUserDetails) loadedUserDetails;
+			            System.out.println("여기냐3");
+			            
+			            if (headerName.equals("Access_token") || headerName.equals("Easylogin_token")) {
+				            // 토큰이 유효한 경우 Security Context에 인증 정보를 설정
+				            if (validateAccessToken(jwt, userDetails) || validateEasyLoginToken(jwt, userDetails)) {
+				            	System.out.println("여기냐4" + validateAccessToken(jwt, userDetails));
+				            	// UsernamePasswordAuthenticationToken은 Spring Security에서 제공하는 Authentication의 구현체로
+				            	// 사용자의 인증 정보를 나타냄 이 객체는 주로 사용자의 ID, 비밀번호, 그리고 권한 정보를 포함
+				                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken 
+				                // new WebAuthenticationDetailsSource().buildDetails(request)는 요청에 대한 세부 정보를 생성하는 역할. 이 정보는 후속 보안 작업에서 사용
+				                = new UsernamePasswordAuthenticationToken(
+				                        userDetails, null, userDetails.getAuthorities());
+				                usernamePasswordAuthenticationToken
+				                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+				                System.out.println(usernamePasswordAuthenticationToken + "너냐5");
+				                // SecurityContext에 Authentication 객체를 설정하는 역할. Authentication 객체는 Spring Security의 다른 부분에서 현재 사용자의 인증 정보를 접근하는데 사용
+				                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+				            }
+			            } else if(headerName.equals("Refresh_token")) {
+			            	System.out.println("여기까진오나?");
+			            	if(!validateRefreshToken(jwt, userDetails)) {
+			            		System.out.println("여기까진오나?2");
+			            		throw new SignatureException("Invalid refresh token");
+			            	}else if(validateRefreshToken(jwt, userDetails)) {
+			            		System.out.println("여기까진오나?3");
+			            	}
+			            }
+			        }
+			        
+		        } catch (ExpiredJwtException e) {
+					
+			        // 401 : JWT 토큰이 만료되었을 때
+			        logger.error("Token is expired", e);
+			        // 2.3 릴리스 이후 SpringBoot에서 오류메시지를 포함하지 않는다는 말이 있다
+			        // 로컬에서 테스트할 때는 message가 정상적으로 포함되지만 AWS EC2를 사용하면 message가 사라진다
+			        // 이때는 application.properties에 server.error.include-message=always를 추가해주면 message가 정상적으로 포함된다
+			        // Starting from the 2.3 version, Spring Boot doesn't include an error message on the default error page. 
+			        // The reason is to reduce the risk of leaking information to a client
+			        // spring boot 2.3 버전 부터는 클라이언트에 정보가 누수될까봐, 기본 에러페이지에 에러메세지를 담지 않는다고 한다.
+			        // https://stackoverflow.com/questions/65019051/not-getting-message-in-spring-internal-exception
+			        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is expired");
+			        
+			    } catch (SignatureException e) {
+			        // 403 : JWT 토큰이 조작되었을 때
+			        logger.error("Signature validation failed", e);
+			        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Signature validation failed");
+			        
+			    } catch (Exception e) {
+			        // 500 : 그 외 예외 처리
+			        logger.error("Unexpected server error occurred", e);
+			        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected server error occurred");
+			    }
 		}
 
 
-    // 토큰에서 아이디를 추출하는 메서드
+    // Access 토큰에서 아이디를 추출하는 메서드
     private String extractUsername(String token) {
         return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().getSubject();
     }
 
-    // 토큰이 유효한지 검증하는 메서드
-    private Boolean validateToken(String token, UserDetails userDetails) {
+    // Access 토큰이 유효한지 검증하는 메서드
+    private Boolean validateAccessToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-    // 토큰의 만료 여부를 확인하는 메서드
+    // Access 토큰의 만료 여부를 확인하는 메서드
     private Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
     
-    // 토큰에서 만료 시간을 추출하는 메서드
+    // Access 토큰에서 만료 시간을 추출하는 메서드
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    // 토큰에서 클레임을 추출하는 메서드
+    // Access 토큰에서 클레임을 추출하는 메서드
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
-    // 토큰에서 모든 클레임을 추출하는 메서드
+    // Access 토큰에서 모든 클레임을 추출하는 메서드
     private Claims extractAllClaims(String token) {
         return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
     }
+    
+    // Refresh 토큰의 유효성을 검사하는 메소드
+    private Boolean validateRefreshToken(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername()) && !isRefreshTokenExpired(token));
+    }
+
+    // Refresh 토큰의 만료 여부를 확인하는 메소드
+    private Boolean isRefreshTokenExpired(String token) {
+        return extractRefreshTokenExpiration(token).before(new Date());
+    }
+
+    // Refresh 토큰에서 만료 시간을 추출하는 메소드
+    private Date extractRefreshTokenExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+    
+    // EasyLogin_token에서 userId와 email을 추출하는 메소드
+    public static String getUserIdFromEasyloginToken(String token) {
+        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+        return claims.getSubject();
+    }
+
+    public static String getEmailFromEasyloginToken(String token) {
+        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+        return claims.get("email", String.class);
+    }
+
+ // EasyLogin_token을 검증하는 메소드
+    private Boolean validateEasyLoginToken(String token, CustomUserDetails userDetails) {
+        final String username = getUserIdFromEasyloginToken(token);
+        final String email = getEmailFromEasyloginToken(token);
+        // 여기서 userDetails는 우리가 DB 등에서 로드한 사용자의 정보를 가진 객체입니다.
+        return username.equals(userDetails.getUsername()) && email.equals(userDetails.getEmail()) && !isTokenExpired(token);
+    }
+
+
+
 }

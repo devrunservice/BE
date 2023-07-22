@@ -21,7 +21,7 @@ public class TestController {
 	@Autowired
 	TestService testService;
 //	122.41.29.73
-	@CrossOrigin(origins = "localhost:3000" , allowedHeaders = {"GET"})
+//	@CrossOrigin(origins = "localhost:3000" , allowedHeaders = {"GET"})
 	@GetMapping("/tmi")
 	public MemberEntity tmi(@RequestParam("id") String id) {
 		

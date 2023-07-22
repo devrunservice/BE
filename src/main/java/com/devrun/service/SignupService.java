@@ -39,7 +39,7 @@ public class SignupService {
 
 	private final MemberEntityRepository memberEntityRepository;
 	
-	private final Map<String, Integer> phoneCodeMap = new ConcurrentHashMap<>();
+	private final Map<String, String> phoneCodeMap = new ConcurrentHashMap<>();
 
 	public MemberEntity findById(String id) {
 		return memberEntityRepository.findById(id);
@@ -80,7 +80,7 @@ public class SignupService {
         
         // 6자리 인증코드 생성
         Random r = new Random();
-        int smsCode = r.nextInt(900000) + 100000;
+        String smsCode = Integer.toString(r.nextInt(900000) + 100000);
 
         // Save the code for verification later
         phoneCodeMap.put(recipientPhoneNumber, smsCode);
@@ -89,7 +89,7 @@ public class SignupService {
                 + "\"type\": \"SMS\","
                 + "\"contentType\": \"COMM\","
                 + "\"from\": \"" + senderPhoneNumber + "\","
-                + "\"subject\": \"회원가입 인증코드\","
+                + "\"subject\": \"인증코드 발송\","
                 + "\"content\": \"DEVRUN 인증코드: " + smsCode + "\","
                 + "\"messages\": ["
                 + "    {"
@@ -111,6 +111,51 @@ public class SignupService {
         return result;
     }
 	
+	public Mono<String> sendSmsFindid(String recipientPhoneNumber, String id) {
+		WebClient webClient = WebClient.create("https://sens.apigw.ntruss.com");
+		System.out.println("여기냐1");
+		String method = "POST";
+		String uri = "/sms/v2/services/" + serviceId + "/messages";
+		String timestamp = String.valueOf(System.currentTimeMillis());
+		String message = method + " " + uri + "\n" + timestamp + "\n" + accessKey;
+		String signature;
+		try {
+			signature = makeSignature(message, secretKey);
+		} catch (NoSuchAlgorithmException | InvalidKeyException e) {
+			return Mono.error(e);
+		}
+		System.out.println("여기냐2" + id);
+		
+		// 발신 번호를 적절한 값으로 설정하세요.
+		String senderPhoneNumber = "01062037049";
+		
+		String jsonBody = "{"
+				+ "\"type\": \"SMS\","
+				+ "\"contentType\": \"COMM\","
+				+ "\"from\": \"" + senderPhoneNumber + "\","
+				+ "\"subject\": \"아이디 찾기\","
+				+ "\"content\": \"DEVRUN에 가입하신 아이디는 " + id + " 입니다.\","
+				+ "\"messages\": ["
+				+ "    {"
+				+ "        \"to\": \"" + recipientPhoneNumber + "\""
+				+ "    }"
+				+ "]"
+				+ "}";
+		
+		
+		Mono<String> result = webClient.post()
+				.uri(uri)
+				.header("Content-Type", "application/json; charset=utf-8")
+				.header("x-ncp-apigw-timestamp", timestamp)
+				.header("x-ncp-iam-access-key", accessKey)
+				.header("x-ncp-apigw-signature-v2", signature)
+				.body(BodyInserters.fromValue(jsonBody))
+				.retrieve()
+				.bodyToMono(String.class);
+		System.out.println("결과");
+		return result;
+	}
+	
 	private static String makeSignature(String message, String secretKey) throws NoSuchAlgorithmException, InvalidKeyException {
 	    SecretKeySpec signingKey = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
 	    Mac mac = Mac.getInstance("HmacSHA256");
@@ -119,10 +164,14 @@ public class SignupService {
 	    return Base64.getEncoder().encodeToString(mac.doFinal(message.getBytes(StandardCharsets.UTF_8)));
 	}
 
-    public boolean verifySmsCode(String phoneNumber, int code) {
-        Integer savedCode = phoneCodeMap.get(phoneNumber);
+    public boolean verifySmsCode(String phoneNumber, String code) {
+        String savedCode = phoneCodeMap.get(phoneNumber);
         System.out.println(savedCode + ":" + code);
         return savedCode != null && savedCode.equals(code);
+    }
+    
+    public void removeSmsCode(String phoneNumber) {
+    	phoneCodeMap.remove(phoneNumber);
     }
     
     public boolean validateId(String id) {

@@ -31,6 +31,7 @@ public class SecurityConfig {
                     .antMatchers(HttpMethod.OPTIONS, "/**/*").permitAll()
                     .antMatchers("/tmi").authenticated()// 인증이 필요한 /tmi 엔드포인트
                     .antMatchers("/token/refresh").permitAll()// 인증이 필요한 /token/refresh 엔드포인트
+                    .antMatchers("/logout").permitAll()// 인증이 필요한 /token/refresh 엔드포인트
                 .anyRequest().permitAll())
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
             .logout().disable()

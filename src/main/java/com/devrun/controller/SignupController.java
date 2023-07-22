@@ -3,14 +3,15 @@ package com.devrun.controller;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.devrun.dto.member.SignupDTO;
 import com.devrun.entity.MemberEntity;
@@ -18,7 +19,7 @@ import com.devrun.service.SignupService;
 
 import reactor.core.publisher.Mono;
 
-@Controller
+@RestController
 public class SignupController {
 	
 	@Autowired
@@ -54,9 +55,9 @@ public class SignupController {
 		return result + "";
 	}
 
-	@PostMapping("/signup/auth")
+	@PostMapping("/auth/phone")
 	@ResponseBody
-	public Mono<String> auth(@RequestBody SignupDTO signupDTO) {
+	public Mono<String> authPhonenumber(@RequestBody SignupDTO signupDTO) {
 		String phonenumber = signupDTO.getPhonenumber();
 		System.out.println("폰" + phonenumber);
         return signupService.sendSmsCode(phonenumber);
@@ -66,7 +67,7 @@ public class SignupController {
 	@PostMapping("/verify")
 	 public ResponseEntity<?> verify(@RequestBody SignupDTO signupDTO) {
 		String phonenumber = signupDTO.getPhonenumber();
-		int code = signupDTO.getCode();
+		String code = signupDTO.getCode();
         if (signupService.verifySmsCode(phonenumber, code)) {
         	// 200 인증성공
         	return new ResponseEntity<>("Verification successful", HttpStatus.OK);
@@ -77,25 +78,31 @@ public class SignupController {
     }
 	
 	@ResponseBody
-	@PostMapping("/signup/okay")
-	public ResponseEntity<?> okay(@RequestBody MemberEntity memberEntity) {
-		// @ModelAttribute 어노테이션이 붙은 매개변수를 HTTP 요청 파라미터와 자동으로 바인딩하도록 지원합니다.
-		// 이 기능은 HTML form 태그의 input 필드와 Java 객체의 필드를 매핑하여 사용하게 해줍니다.
+	@PostMapping("/signup/okay")												// code는 파라미터로
+	public ResponseEntity<?> okay(@RequestBody @Valid MemberEntity memberEntity, String code) {
+		// @Valid 어노테이션이 있는 경우, Spring은 요청 본문을 MemberEntity 객체로 변환하기 전에 Bean Validation API를 사용하여 유효성 검사를 수행
 		System.out.println(memberEntity);
 		System.out.println(memberEntity.getEmail());
 
-		
+		System.out.println("트루가 맞냐" + memberEntity.isAgeConsent());
 		System.out.println("아이디 유효성 검사 : " + signupService.validateId(memberEntity.getId()));
 		System.out.println("이메일 유효성 검사 : " + signupService.validateEmail(memberEntity.getEmail()));
 		System.out.println("비밀번호 유효성 검사" + signupService.validatePassword(memberEntity.getPassword()));
 		// 회원정보 입력
 		if (signupService.checkID(memberEntity.getId()) == 0 
 				&& signupService.checkEmail(memberEntity.getEmail()) == 0
-//				&& signupService.checkphone(memberEntity.getPhonenumber()) == 0					테스트 기간에만 중복확인 x
+				&& signupService.checkphone(memberEntity.getPhonenumber()) == 0
+				&& signupService.verifySmsCode(memberEntity.getPhonenumber(), code)
 				) {
-			
+//			// 403 약관 미동의    
+//			if (!memberEntity.isAgeConsent() 
+//			           || !memberEntity.isTermsOfService() 
+//			           || !memberEntity.isPrivacyConsent()) {
+//				return new ResponseEntity<>("User has not agreed to the terms", HttpStatus.FORBIDDEN);
+//			}
 			// 회원가입 성공
-			if (signupService.validateId(memberEntity.getId()) 
+//			else 
+				if (signupService.validateId(memberEntity.getId()) 
 					&& signupService.validateEmail(memberEntity.getEmail()) 
 					&& signupService.validatePassword(memberEntity.getPassword())
 					) {
@@ -105,7 +112,10 @@ public class SignupController {
 				Date currentDate = new Date();
 				memberEntity.setSignup(currentDate);
 		    	signupService.insert(memberEntity);
-			    	
+		    	
+		    	// 메모리에 저장된 전화번호와 인증코드 제거
+				signupService.removeSmsCode(memberEntity.getPhonenumber());
+				
 				return new ResponseEntity<>("Signup successful", HttpStatus.OK);
 						//ResponseEntity.ok("Signup successful");
 				
@@ -131,13 +141,10 @@ public class SignupController {
 		    return new ResponseEntity<>("Phone number already registered", HttpStatus.CONFLICT);
 		    		//ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Phone number already registered");
 		
-		// 403 약관 미동의    
-		} else if (!memberEntity.isAgeConsent() 
-		           || !memberEntity.isTermsOfService() 
-		           || !memberEntity.isPrivacyConsent()) {
+		// 403 인증되지 않은 전화번호
+		} else if(!signupService.verifySmsCode(memberEntity.getPhonenumber(), code)) {
 			
-			return new ResponseEntity<>("User has not agreed to the terms", HttpStatus.FORBIDDEN);
-		    
+			return new ResponseEntity<>("Verification failed Phonenumber", HttpStatus.FORBIDDEN);
 		// 기타 오류 500
 		} else {
 		    return new ResponseEntity<>("An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR);

@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -22,15 +21,9 @@ public class JWTUtil {
     }
     
 	// 토큰 만료시간 설정
-    private static final long EASYLOGIN_TOKEN_EXPIRATION_TIME = 
-//    		5 *
-    		60 * 1000;		// 5분
-    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 
-//    		15 * 
-    		60 * 1000;		// 15분				테스트는 1초로 할 것
-    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 
-//    		24 * 60 * 
-    	2 *	60 * 1000;	// 24시간, 24시간/일 * 60분/시간 * 60초/분 * 1000밀리초/초
+    private static final long EASYLOGIN_TOKEN_EXPIRATION_TIME = 15 * 60 * 1000;		// 5분
+    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 15 * 60 * 1000;		// 15분				테스트는 1초로 할 것
+    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 24 * 60 *	60 * 1000;	// 24시간, 24시간/일 * 60분/시간 * 60초/분 * 1000밀리초/초
     
     // ACCESS_TOKEN 생성
     public static String generateAccessToken(String userId, String name) {
