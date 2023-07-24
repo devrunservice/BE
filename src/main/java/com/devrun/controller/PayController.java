@@ -29,7 +29,6 @@ public class PayController {
 	
 	private  IamportClient api;		
 
-
 	@ResponseBody
 	// 아임포트 api 문서를 예시로 값 넣어주기
 	@PostMapping("/verifyIamport/{imp_uid}")

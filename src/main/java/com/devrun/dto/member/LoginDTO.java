@@ -3,13 +3,14 @@ package com.devrun.dto.member;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
+//@AllArgsConstructor
+@NoArgsConstructor
 public class LoginDTO {
 
 	// null값인경우 response에 포함시키지 않는다

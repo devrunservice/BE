@@ -368,13 +368,17 @@ public class LoginController {
 	}
 	
 	@ResponseBody
-	@GetMapping("/kakao/logout")
-	public ResponseEntity<?> kakaoLogout(HttpServletRequest request, LoginDTO loginDTO) {
+	@PostMapping("/kakao/logout")
+	public ResponseEntity<?> kakaoLogout(HttpServletRequest request, @RequestBody LoginDTO loginDTO) {
 		
 		String token = request.getHeader("Access_token");
+		System.out.println(loginDTO.getId());
+		if (loginDTO.getId() == null) {
+	        return new ResponseEntity<>("ID is null", HttpStatus.BAD_REQUEST);
+	    }
 		Long id = Long.parseLong(loginDTO.getId());
 		LogoutResponse kakaoLogout = kakaoLoginService.kakaoLogout(token, id);
-		
+		// LogoutResponse(id=2904941580) KakaoLogout successful
 		return new ResponseEntity<>(kakaoLogout.toString() + " KakaoLogout successful", HttpStatus.OK);
 	}
 	
