@@ -33,6 +33,10 @@ public class PaymentEntity {
 	@Comment("구매자 연락처")
 	private String buyer_tel;
 	
+	@Column(name = "name", nullable = true, length = 20)
+	@Comment("강의 이름")
+	private String name;
+	
 	@Column(name = "paidAmount", nullable = true, length = 20)
 	@Comment("상품 가격")
 	private int paid_amount;
@@ -49,7 +53,9 @@ public class PaymentEntity {
 	@Comment("결제 일자")
 	private String paymentDate;
 	
-	
+	@Column(name = "receipt_url", nullable = true, length = 255)
+	@Comment("전자 영수증")
+	private String receipt_url;
 	
 	
 
