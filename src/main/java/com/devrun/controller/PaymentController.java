@@ -33,7 +33,7 @@ public class PaymentController {
 			LocalDateTime dateTime = LocalDateTime.now();
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd a hh:mm:ss", new Locale("ko"));
 			String paymentDate = dateTime.format(formatter);
-			paymentEntity.setPaymentDate(paymentDate);			
+			paymentEntity.setPaymentDate(paymentDate);
 			paymentService.savePaymentInfo(paymentEntity);
 			return ResponseEntity.ok("결제 정보가 성공적으로 저장되었습니다.");
 		} catch (Exception e) {

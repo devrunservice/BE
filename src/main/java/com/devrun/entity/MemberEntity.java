@@ -1,15 +1,10 @@
 package com.devrun.entity;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -24,7 +19,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "api_test")
+@Table(name = "user")
 public class MemberEntity {
 	
 	@Id
@@ -130,7 +125,7 @@ public class MemberEntity {
 	@Column(name = "marketingConsent", nullable = false, columnDefinition = "TINYINT(1)")
 	@Comment("광고, 마케팅 동의")
 	private boolean marketConsent;
-	
+
 	
 	
 //	데이터베이스에 Enum 값을 저장할 때, 일반적으로 두 가지 전략을 사용할 수 있습니다:
