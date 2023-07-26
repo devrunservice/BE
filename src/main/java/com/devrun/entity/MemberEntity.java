@@ -40,7 +40,6 @@ public class MemberEntity {
 	@NotBlank(message = "information cannot be null or empty")
 	private String name;
 	
-	
 	@Column(name = "email"
 			, nullable = false
 			, length = 50)
