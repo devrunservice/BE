@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.devrun.dto.member.SignupDTO;
 import com.devrun.entity.MemberEntity;
-import com.devrun.service.SignupService;
+import com.devrun.service.MemberService;
 
 import reactor.core.publisher.Mono;
 
@@ -25,7 +25,7 @@ import reactor.core.publisher.Mono;
 public class SignupController {
 	
 	@Autowired
-	SignupService signupService;
+	MemberService signupService;
 	
 	@ResponseBody
 	@PostMapping("/signup")

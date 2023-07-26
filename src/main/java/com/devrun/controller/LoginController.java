@@ -27,7 +27,7 @@ import com.devrun.entity.MemberEntity;
 import com.devrun.repository.LoginRepository;
 import com.devrun.service.KakaoLoginService;
 import com.devrun.service.LoginService;
-import com.devrun.service.SignupService;
+import com.devrun.service.MemberService;
 import com.devrun.util.JWTUtil;
 import com.devrun.util.TokenBlacklist;
 
@@ -40,7 +40,7 @@ public class LoginController {
 	private LoginService loginService;
 	
 	@Autowired
-	private SignupService signupService;
+	private MemberService signupService;
 	
 	@Autowired
 	private KakaoLoginService kakaoLoginService;
