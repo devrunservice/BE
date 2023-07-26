@@ -57,6 +57,11 @@ public class PaymentEntity {
 	@Comment("전자 영수증")
 	private String receipt_url;
 	
+	// 주고 받는 형식이 Json이라 boolean X
+	@Column(name = "status", nullable = true, length = 1)
+	@Comment("환불 상태 /환불완료:1/기본:0")
+	private String status;
+	
 	
 
 }
