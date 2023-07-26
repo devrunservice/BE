@@ -24,7 +24,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "api_test")
+@Table(name = "user")
 public class MemberEntity {
 	
 	@Id
@@ -39,6 +39,7 @@ public class MemberEntity {
 	@Comment("유저 이름")
 	@NotBlank(message = "information cannot be null or empty")
 	private String name;
+	
 	
 	@Column(name = "email"
 			, nullable = false
