@@ -3,7 +3,10 @@ package com.devrun.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,9 +26,18 @@ public class TestController {
 //	122.41.29.73
 //	@CrossOrigin(origins = "localhost:3000" , allowedHeaders = {"GET"})
 	@GetMapping("/tmi")
-	public MemberEntity tmi(@RequestParam("id") String id) {
-        return signupService.findById(id);
+	public ResponseEntity<?> tmi(@RequestParam("id") String id) {
+	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	    String userId = authentication.getName();
+	    if (userId.equals(id)) {
+	        MemberEntity member = signupService.findById(id);
+	        return ResponseEntity.ok(member);
+	    } else {
+	    	// 401 토큰의 사용자와 요청한 사용자 불일치
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
+	    }
 	}
+
 	
 	@GetMapping("/findAll")
 	public List<MemberEntity> findAll() {

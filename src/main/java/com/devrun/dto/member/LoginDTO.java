@@ -22,6 +22,8 @@ public class LoginDTO {
     private String id;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
     private String username;
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String phonenumber;
     
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("Access_token")

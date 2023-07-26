@@ -2,6 +2,9 @@ package com.devrun.service;
 
 import java.util.Date;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +56,42 @@ public class LoginService {
 	}
 	public void saveKakaoId(MemberEntity memberEntity) {
 		memberEntityRepository.save(memberEntity);
+	}
+	
+	public boolean verifyPhone(String id, String phonenumber) {
+	    MemberEntity member = memberEntityRepository.findById(id);
+	    if (member == null) {
+	        return false;
+	    }
+	    return member.getPhonenumber().equals(phonenumber);
+	}
+	
+	// 로그아웃에 필요한 SNS Access_token 생성
+	public void setEasycookie(HttpServletResponse response, String token, Long id) {
+		
+		Cookie SNSaccessToken = new Cookie("Access_token_easy", token);
+		SNSaccessToken.setHttpOnly(true);
+		SNSaccessToken.setPath("/sns/logout");
+	    response.addCookie(SNSaccessToken);
+	    
+	    Cookie userId = new Cookie("User_Id", id.toString());
+	    userId.setHttpOnly(true);
+	    userId.setPath("/sns/logout");
+	    response.addCookie(userId);
+	}
+	
+	// 로그아웃에 필요한 SNS Access_token 삭제
+	public void deleteEasycookie(HttpServletResponse response) {
+		
+		Cookie SNSaccessToken = new Cookie("Access_token_easy", null); // Same name and path
+		SNSaccessToken.setPath("/sns/logout");
+		SNSaccessToken.setMaxAge(0); // Set Max-Age to 0
+	    response.addCookie(SNSaccessToken);
+	    
+	    Cookie userId = new Cookie("User_Id", null);
+	    userId.setPath("/sns/logout");
+	    userId.setMaxAge(0);
+	    response.addCookie(userId);
 	}
 
 }

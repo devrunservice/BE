@@ -57,29 +57,28 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	        chain.doFilter(request, response);
 	        return;
 	    }
-		
 			
-			// HTTP 요청 헤더에서 헤더 값을 가져옴
-		    String accessTokenHeader = request.getHeader("Access_token");
-		    String refreshTokenHeader = request.getHeader("Refresh_token");
-		    String easyloginTokenHeader = request.getHeader("Easylogin_token");
-		    
-	        if (accessTokenHeader != null && accessTokenHeader.startsWith("Bearer ")) {
-	            processToken(accessTokenHeader, "Access_token", chain, request, response);
-	        } else if (refreshTokenHeader != null && refreshTokenHeader.startsWith("Bearer ")) {
-	        	System.out.println("여기냐1");
-	            processToken(refreshTokenHeader, "Refresh_token", chain, request, response);
-	        } else if (easyloginTokenHeader != null && easyloginTokenHeader.startsWith("Bearer ")) {
-	            processToken(easyloginTokenHeader, "Easylogin_token", chain, request, response);
-	        } 
+		// HTTP 요청 헤더에서 헤더 값을 가져옴
+	    String accessTokenHeader = request.getHeader("Access_token");
+	    String refreshTokenHeader = request.getHeader("Refresh_token");
+	    String easyloginTokenHeader = request.getHeader("Easylogin_token");
+	    
+        if (accessTokenHeader != null && accessTokenHeader.startsWith("Bearer ")) {
+            processToken(accessTokenHeader, "Access_token", chain, request, response);
+        } else if (refreshTokenHeader != null && refreshTokenHeader.startsWith("Bearer ")) {
+        	System.out.println("여기냐1");
+            processToken(refreshTokenHeader, "Refresh_token", chain, request, response);
+        } else if (easyloginTokenHeader != null && easyloginTokenHeader.startsWith("Bearer ")) {
+            processToken(easyloginTokenHeader, "Easylogin_token", chain, request, response);
+        } 
 //	        else {
 //	        	// 400 : 올바르지 않은 토큰
 //	            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No or invalid token provided");
 //	            return;
 //	        }
-	        
-	        System.out.println("통과해?");
-	        chain.doFilter(request, response);
+        
+        System.out.println("통과해?");
+        chain.doFilter(request, response);
 	        
 	}
 
@@ -215,7 +214,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         return claims.get("email", String.class);
     }
 
- // EasyLogin_token을 검증하는 메소드
+    // EasyLogin_token을 검증하는 메소드
     private Boolean validateEasyLoginToken(String token, CustomUserDetails userDetails) {
         final String username = getUserIdFromEasyloginToken(token);
         final String email = getEmailFromEasyloginToken(token);

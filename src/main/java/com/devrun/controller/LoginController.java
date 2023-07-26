@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,7 +57,8 @@ public class LoginController {
 	@ResponseBody
 	@PostMapping("/login")
 	public ResponseEntity<?> login(HttpServletRequest request
-						, @RequestBody MemberEntity memberEntity) {
+								, HttpServletResponse response
+								, @RequestBody MemberEntity memberEntity) {
 		System.out.println("Request URL: " + request.getRequestURL().toString());
 		System.out.println("Remote Address: " + request.getRemoteAddr());
 
@@ -118,8 +120,11 @@ public class LoginController {
 			    			
 			    			loginService.saveKakaoId(memberEntity);
 			    			
-			    			
 			    		} else {
+			    			
+			    			// 앞에서 생성된 로그아웃에 필요한 쿠키 삭제
+			    			loginService.deleteEasycookie(response);
+			    			
 			    			// 400 연동 실패 : 이미 연동된 계정이 있음
 			    			return new ResponseEntity<>("Already linked to another user", HttpStatus.BAD_REQUEST);
 			    		}
@@ -267,7 +272,8 @@ public class LoginController {
 	@ResponseBody
 	@GetMapping("/auth/kakao/callback")
 	public ResponseEntity<?> kakaoCallback(@RequestParam(required = false) String code
-								, @RequestParam(required = false) String error) {
+								, @RequestParam(required = false) String error
+								, HttpServletResponse response) {
 		System.out.println("코드" + code);
 		// 성공했을 경우 code라는 파라미터값이 생성되고 실패했을 경우 error라는 파라미터값이 생성된다
 		if (code != null) {
@@ -302,7 +308,8 @@ public class LoginController {
 			
 			// 공사중 -------------------------------------------------------------------------------------
 			
-			
+			// SNS Access_token 생성
+			loginService.setEasycookie(response, oauthToken.getAccess_token(), kakaoProfile.getId());
 			
 			MemberEntity memberEntity = new MemberEntity();
 			
@@ -316,10 +323,10 @@ public class LoginController {
 	        	String easylogin_token = JWTUtil.generateEasyloginToken(kakaoId, kakaoEmail);
 				System.out.println("이지로그인 토큰 : " + easylogin_token);
 				
-				Map<String, String> response = new HashMap<>();
-		        response.put("Easylogin_token", "Bearer " + easylogin_token);
-		        response.put("message", "No linked account found. Please link your account.");
-		        System.out.println("간편로그인 리스폰스 : " + response);
+				Map<String, String> response2 = new HashMap<>();
+		        response2.put("Easylogin_token", "Bearer " + easylogin_token);
+		        response2.put("message", "No linked account found. Please link your account.");
+		        System.out.println("간편로그인 리스폰스 : " + response2);
 		        
 		        // 303 : 연동된 계정이 존재하지 않음
 		        return new ResponseEntity<>(response, HttpStatus.SEE_OTHER);
@@ -336,11 +343,9 @@ public class LoginController {
 				// 마지막 로그인 날짜 저장
 				loginService.setLastLogin(memberEntity);
 				
-				
 				LoginStatus status = loginService.validate(memberEntity);
 				
-				
-				// 로그인한 아이디의 이름 전달
+				// 로그인 정보 전달 객체 생성
 				LoginDTO loginDTO = new LoginDTO(status, "KakaoLogin successful");
 				
 				// 토큰을 응답 본문에 추가
@@ -368,18 +373,28 @@ public class LoginController {
 	}
 	
 	@ResponseBody
-	@PostMapping("/kakao/logout")
-	public ResponseEntity<?> kakaoLogout(HttpServletRequest request, @RequestBody LoginDTO loginDTO) {
+	@PostMapping("/sns/logout/kakao")
+	public ResponseEntity<?> kakaoLogout(HttpServletRequest request) {
 		
-		String token = request.getHeader("Access_token");
-		System.out.println(loginDTO.getId());
-		if (loginDTO.getId() == null) {
+		String token = request.getHeader("Access_token_easy");
+		String userIdString = request.getHeader("User_Id");
+		
+		if (token == null) {
+			// 400 토큰 null
+	        return new ResponseEntity<>("Access_token_easy is null", HttpStatus.BAD_REQUEST);
+	    }
+		
+		if (userIdString == null) {
+			// 400 id null
 	        return new ResponseEntity<>("ID is null", HttpStatus.BAD_REQUEST);
 	    }
-		Long id = Long.parseLong(loginDTO.getId());
+		
+		Long id = Long.parseLong(userIdString);
 		LogoutResponse kakaoLogout = kakaoLoginService.kakaoLogout(token, id);
-		// LogoutResponse(id=2904941580) KakaoLogout successful
-		return new ResponseEntity<>(kakaoLogout.toString() + " KakaoLogout successful", HttpStatus.OK);
+		
+		System.out.println("로그아웃 성공 ID : " + kakaoLogout.getId());
+		
+		return new ResponseEntity<>("KakaoLogout successful", HttpStatus.OK);
 	}
 	
 //	@ResponseBody
@@ -413,22 +428,34 @@ public class LoginController {
 	@ResponseBody
 	@PostMapping("/find/password")
 	public ResponseEntity<?> findpw(@RequestBody SignupDTO signupDTO){
+		MemberEntity memberEntity = loginRepository.findById(signupDTO.getId());
 		if (signupService.verifySmsCode(signupDTO.getPhonenumber(), signupDTO.getCode())
 				&& signupService.validatePassword(signupDTO.getPassword())
+				&& !memberEntity.getPassword().equals(signupDTO.getPassword())
 				) {
-			MemberEntity memberEntity = loginRepository.findById(signupDTO.getId());
 			memberEntity.setPassword(signupDTO.getPassword());
 			loginRepository.save(memberEntity);
 			signupService.removeSmsCode(signupDTO.getPhonenumber());
 			return new ResponseEntity<>("Password change successful", HttpStatus.OK);
-		} else if(!signupService.verifySmsCode(signupDTO.getPhonenumber(), signupDTO.getCode())){
+		} else if (!signupService.verifySmsCode(signupDTO.getPhonenumber(), signupDTO.getCode())){
 			// 403 인증되지 않은 전화번호
 			return new ResponseEntity<>("Verification failed Phonenumber", HttpStatus.FORBIDDEN);
+		} else if (memberEntity.getPassword().equals(signupDTO.getPassword())){
+			// 400 현재 비밀번호와 같음
+			return new ResponseEntity<>("Same as current password", HttpStatus.BAD_REQUEST);
 		} else {
 			// 400 비밀번호 유효성검사 실패
 			return new ResponseEntity<>("Invalid input data", HttpStatus.BAD_REQUEST);
 		}
-		
+	}
+	
+	@ResponseBody
+	@PostMapping("/verifyPhone")
+	public boolean verifyPhone(@RequestBody LoginDTO loginDTO) {
+		String id = loginDTO.getId();
+		String phone = loginDTO.getPhonenumber();
+		boolean isPhoneVerified = loginService.verifyPhone(id, phone);
+	    return isPhoneVerified;
 	}
 	
 }
