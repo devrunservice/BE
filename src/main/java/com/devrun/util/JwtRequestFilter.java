@@ -53,10 +53,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		String requestPath = request.getRequestURI();
 		
 		//login 경로에 대한 요청인 경우 필터를 건너뛰도록 설정합니다.
-	    if (!"/tmi".equals(requestPath)) {
-	        chain.doFilter(request, response);
-	        return;
-	    }
+		if (!"/tmi".equals(requestPath) && !"/savePaymentInfo".equals(requestPath)) {
+		    chain.doFilter(request, response);
+		    return;
+		}
 	    
 	    try {
 			// HTTP 요청 헤더에서 헤더 값을 가져옴

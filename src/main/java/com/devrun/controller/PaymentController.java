@@ -33,7 +33,8 @@ public class PaymentController {
 			LocalDateTime dateTime = LocalDateTime.now();
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd a hh:mm:ss", new Locale("ko"));
 			String paymentDate = dateTime.format(formatter);
-			paymentEntity.setPaymentDate(paymentDate);			
+			paymentEntity.setPaymentDate(paymentDate);
+			paymentEntity.setStatus("0");
 			paymentService.savePaymentInfo(paymentEntity);
 			return ResponseEntity.ok("결제 정보가 성공적으로 저장되었습니다.");
 		} catch (Exception e) {
@@ -41,9 +42,9 @@ public class PaymentController {
 		}
 	}
 	
-	// 강사 수익 확인 
+	// 결제 정보
 	
-	@GetMapping("/moneycheck")
+	@GetMapping("/PaymentInfo")
 	public ResponseEntity<List<PaymentEntity>> getAllPayments() {
 		List<PaymentEntity> payments = paymentRepository.findAll();
 		return ResponseEntity.ok(payments);

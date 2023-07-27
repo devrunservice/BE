@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.devrun.entity.MemberEntity;
 import com.devrun.service.MemberService;
 import com.devrun.service.TestService;
-import com.devrun.util.JWTUtil;
 
 @RestController
 public class TestController {
