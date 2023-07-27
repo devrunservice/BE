@@ -12,6 +12,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -84,6 +85,7 @@ public class SignupController {
 	
 	@ResponseBody
 	@PostMapping("/signup/okay")												// code는 파라미터로
+	@Transactional
 	public ResponseEntity<?> okay(@RequestBody @Valid MemberEntity memberEntity, String code) {
 		// @Valid 어노테이션이 있는 경우, Spring은 요청 본문을 MemberEntity 객체로 변환하기 전에 Bean Validation API를 사용하여 유효성 검사를 수행
 		System.out.println(memberEntity);
@@ -169,40 +171,49 @@ public class SignupController {
 					    	MemberEntity m = memberService.insert(memberEntity);
 					    	
 					    	if (m != null) {
+					    		
 					    		// 회원가입 축하 포인트 지급
 					    		PointEntity point = new PointEntity();
 					    		point.setMypoint(3000);
+					    		
+					    		// PointEntity 객체에 MemberEntity 객체를 설정
 						    	point.setMemberEntity(m);
+						    	
 						    	System.out.println("멤버"+m);
 						    	System.out.println("포인트"+point);
 						    	
 						    	// PointEntity에 MemberEntity가 제대로 설정되었는지 검사
 						        if (point.getUserNo() != -1) {
-						            // 포인트 정보 등록 시도
+						        	
+						        	// 포인트 정보 등록 시도 실패 시
 						            if (memberService.insert(point) == null) {
-						                // 포인트 정보 등록 실패 시
 						                return new ResponseEntity<>("Failed to save the user's point information", HttpStatus.INTERNAL_SERVER_ERROR);
 						            }
+						            
+					            // MemberEntity 설정 실패 시
 						        } else {
-						            // MemberEntity 설정 실패 시
 						            return new ResponseEntity<>("Failed to set the user's information to the point entity", HttpStatus.INTERNAL_SERVER_ERROR);
 						        }
+						        
+					        // 사용자 등록 실패 시
 						    } else {
-						        // 사용자 등록 실패 시
 						        return new ResponseEntity<>("Failed to register the user", HttpStatus.INTERNAL_SERVER_ERROR);
 						    }
+					    	
+				    	// 기타 데이터베이스 오류 발생 시
 						} catch (Exception e) {
 							System.out.println("Error: " + e.getMessage());
-						    // 기타 데이터베이스 오류 발생 시
 						    return new ResponseEntity<>("An error occurred while processing the signup request", HttpStatus.INTERNAL_SERVER_ERROR);
 						}
+					    
 					    // 메모리에 저장된 전화번호와 인증코드 제거
 					    memberService.removeSmsCode(memberEntity.getPhonenumber());
 					    
 					    return new ResponseEntity<>("Signup successful", HttpStatus.OK);
 					    //ResponseEntity.ok("Signup successful");
+					    
+				    // 400 19세 미만
 					} else {
-						// 400 19세 미만
 					    return new ResponseEntity<>("User is under 19 years old", HttpStatus.BAD_REQUEST);
 					}
 					
