@@ -52,7 +52,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	        throws ServletException, IOException {
 		String requestPath = request.getRequestURI();
 		
-		 //login 경로에 대한 요청인 경우 필터를 건너뛰도록 설정합니다.
+		//login 경로에 대한 요청인 경우 필터를 건너뛰도록 설정합니다.
 	    if (!"/tmi".equals(requestPath)) {
 	        chain.doFilter(request, response);
 	        return;
@@ -80,6 +80,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	        
 	        System.out.println("통과해?");
 	        chain.doFilter(request, response);
+	        
 	    } catch (ExpiredJwtException e) {
 			
 	        // 401 : JWT 토큰이 만료되었을 때
@@ -94,11 +95,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is expired");
 	        
 	    } catch (SignatureException e) {
+	    	
 	        // 403 : JWT 토큰이 조작되었을 때
 	        logger.error("Signature validation failed", e);
 	        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Signature validation failed");
 	        
 	    } catch (Exception e) {
+	    	
 	        // 500 : 그 외 예외 처리
 	        logger.error("Unexpected server error occurred", e);
 	        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected server error occurred");
@@ -148,7 +151,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             		
             		throw new SignatureException("Invalid refresh token");
             		
-            	}else if(validateRefreshToken(jwt, userDetails)) {
+            	} else if(validateRefreshToken(jwt, userDetails)) {
             		System.out.println("여기까진오나?3");
             	}
             }
