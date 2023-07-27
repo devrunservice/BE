@@ -84,8 +84,11 @@ public class SignupController {
     }
 	
 	@ResponseBody
-	@PostMapping("/signup/okay")												// code는 파라미터로
-	@Transactional
+	@PostMapping("/signup/okay")
+	// @Transactional이 적용된 메소드나 클래스는 Spring에 의해 트랜잭션 경계가 설정되고, 
+	// 해당 트랜잭션 내에서 실행되는 모든 데이터베이스 작업은 단일 트랜잭션으로 묶입니다. 
+	// 이렇게 하면 데이터 무결성이 보장되며, 예외가 발생하면 트랜잭션이 롤백되어 데이터베이스 상태가 이전 상태로 복원됩니다.
+	@Transactional																// code는 파라미터로													
 	public ResponseEntity<?> okay(@RequestBody @Valid MemberEntity memberEntity, String code) {
 		// @Valid 어노테이션이 있는 경우, Spring은 요청 본문을 MemberEntity 객체로 변환하기 전에 Bean Validation API를 사용하여 유효성 검사를 수행
 		System.out.println(memberEntity);
@@ -99,7 +102,7 @@ public class SignupController {
 		if (memberService.checkID(memberEntity.getId()) == 0 
 				&& memberService.checkEmail(memberEntity.getEmail()) == 0
 				&& memberService.checkphone(memberEntity.getPhonenumber()) == 0
-//				&& memberService.verifySmsCode(memberEntity.getPhonenumber(), code)
+				&& memberService.verifySmsCode(memberEntity.getPhonenumber(), code)
 				) {
 //			// 403 약관 미동의    
 //			if (!memberEntity.isAgeConsent() 
