@@ -57,102 +57,104 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	        chain.doFilter(request, response);
 	        return;
 	    }
-			
-		// HTTP 요청 헤더에서 헤더 값을 가져옴
-	    String accessTokenHeader = request.getHeader("Access_token");
-	    String refreshTokenHeader = request.getHeader("Refresh_token");
-	    String easyloginTokenHeader = request.getHeader("Easylogin_token");
 	    
-        if (accessTokenHeader != null && accessTokenHeader.startsWith("Bearer ")) {
-            processToken(accessTokenHeader, "Access_token", chain, request, response);
-        } else if (refreshTokenHeader != null && refreshTokenHeader.startsWith("Bearer ")) {
-        	System.out.println("여기냐1");
-            processToken(refreshTokenHeader, "Refresh_token", chain, request, response);
-        } else if (easyloginTokenHeader != null && easyloginTokenHeader.startsWith("Bearer ")) {
-            processToken(easyloginTokenHeader, "Easylogin_token", chain, request, response);
-        } 
-//	        else {
-//	        	// 400 : 올바르지 않은 토큰
-//	            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No or invalid token provided");
-//	            return;
-//	        }
-        
-        System.out.println("통과해?");
-        chain.doFilter(request, response);
+	    try {
+			// HTTP 요청 헤더에서 헤더 값을 가져옴
+		    String accessTokenHeader = request.getHeader("Access_token");
+		    String refreshTokenHeader = request.getHeader("Refresh_token");
+		    String easyloginTokenHeader = request.getHeader("Easylogin_token");
+		    
+	        if (accessTokenHeader != null && accessTokenHeader.startsWith("Bearer ")) {
+	            processToken(accessTokenHeader, "Access_token", chain, request, response);
+	        } else if (refreshTokenHeader != null && refreshTokenHeader.startsWith("Bearer ")) {
+	        	System.out.println("여기냐1");
+	            processToken(refreshTokenHeader, "Refresh_token", chain, request, response);
+	        } else if (easyloginTokenHeader != null && easyloginTokenHeader.startsWith("Bearer ")) {
+	            processToken(easyloginTokenHeader, "Easylogin_token", chain, request, response);	
+	        }
+	//	        else {
+	//	        	// 400 : 올바르지 않은 토큰
+	//	            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No or invalid token provided");
+	//	            return;
+	//	        }
 	        
+	        System.out.println("통과해?");
+	        chain.doFilter(request, response);
+	    } catch (ExpiredJwtException e) {
+			
+	        // 401 : JWT 토큰이 만료되었을 때
+	        logger.error("Token is expired", e);
+	        // 2.3 릴리스 이후 SpringBoot에서 오류메시지를 포함하지 않는다는 말이 있다
+	        // 로컬에서 테스트할 때는 message가 정상적으로 포함되지만 AWS EC2를 사용하면 message가 사라진다
+	        // 이때는 application.properties에 server.error.include-message=always를 추가해주면 message가 정상적으로 포함된다
+	        // Starting from the 2.3 version, Spring Boot doesn't include an error message on the default error page. 
+	        // The reason is to reduce the risk of leaking information to a client
+	        // spring boot 2.3 버전 부터는 클라이언트에 정보가 누수될까봐, 기본 에러페이지에 에러메세지를 담지 않는다고 한다.
+	        // https://stackoverflow.com/questions/65019051/not-getting-message-in-spring-internal-exception
+	        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is expired");
+	        
+	    } catch (SignatureException e) {
+	        // 403 : JWT 토큰이 조작되었을 때
+	        logger.error("Signature validation failed", e);
+	        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Signature validation failed");
+	        
+	    } catch (Exception e) {
+	        // 500 : 그 외 예외 처리
+	        logger.error("Unexpected server error occurred", e);
+	        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected server error occurred");
+	    }   
 	}
 
 	private void processToken(String tokenHeader, String headerName, FilterChain chain, HttpServletRequest request, HttpServletResponse response)
 		    throws ServletException, IOException {
 		
-		        // 각각의 헤더 값이 "Bearer "로 시작하는 경우, 실제 토큰을 추출
-		        String jwt = tokenHeader.substring(7);
-		        System.out.println(jwt + "잘리냐");
-		        String username = extractUsername(jwt);
+    	// 각각의 헤더 값이 "Bearer "로 시작하는 경우, 실제 토큰을 추출
+    	String jwt = tokenHeader.substring(7);
+    	System.out.println(jwt + "잘리냐");
+    	String username = extractUsername(jwt);
+    	
+    	// 이전에 SecurityContextHolder에 저장된 토큰값과 유저정보를 초기화
+    	SecurityContextHolder.clearContext();
+    	System.out.println("여기냐2" + username);
+    	
+        // 토큰에서 추출한 아이디가 null이 아니고, 현재 Security Context에 인증 정보가 없는 경우
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails loadedUserDetails = this.userDetailsService.loadUserByUsername(username);
+            CustomUserDetails userDetails = (CustomUserDetails) loadedUserDetails;
+            System.out.println("여기냐3");
+            
+            if (headerName.equals("Access_token") || headerName.equals("Easylogin_token")) {
+	            // 토큰이 유효한 경우 Security Context에 인증 정보를 설정
+	            if (validateAccessToken(jwt, userDetails) || validateEasyLoginToken(jwt, userDetails)) {
+	            	System.out.println("여기냐4" + validateAccessToken(jwt, userDetails));
+	            	// UsernamePasswordAuthenticationToken은 Spring Security에서 제공하는 Authentication의 구현체로
+	            	// 사용자의 인증 정보를 나타냄 이 객체는 주로 사용자의 ID, 비밀번호, 그리고 권한 정보를 포함
+	                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken 
+	                // new WebAuthenticationDetailsSource().buildDetails(request)는 요청에 대한 세부 정보를 생성하는 역할. 이 정보는 후속 보안 작업에서 사용
+	                = new UsernamePasswordAuthenticationToken(
+	                        userDetails, null, userDetails.getAuthorities());
+	                usernamePasswordAuthenticationToken
+	                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+	                System.out.println(usernamePasswordAuthenticationToken + "너냐5");
+	                // SecurityContext에 Authentication 객체를 설정하는 역할. Authentication 객체는 Spring Security의 다른 부분에서 현재 사용자의 인증 정보를 접근하는데 사용
+	                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+	            }
+	            
+            } else if(headerName.equals("Refresh_token")) {
+            	System.out.println("여기까진오나?");
+            	
+            	if(!validateRefreshToken(jwt, userDetails)) {
+            		System.out.println("여기까진오나?2");
+            		
+            		throw new SignatureException("Invalid refresh token");
+            		
+            	}else if(validateRefreshToken(jwt, userDetails)) {
+            		System.out.println("여기까진오나?3");
+            	}
+            }
+        }
 		        
-		        // 이전에 SecurityContextHolder에 저장된 토큰값과 유저정보를 초기화
-		        SecurityContextHolder.clearContext();
-		        System.out.println("여기냐2" + username);
-		        
-		        try {
-		        
-			        // 토큰에서 추출한 아이디가 null이 아니고, 현재 Security Context에 인증 정보가 없는 경우
-			        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-			            UserDetails loadedUserDetails = this.userDetailsService.loadUserByUsername(username);
-			            CustomUserDetails userDetails = (CustomUserDetails) loadedUserDetails;
-			            System.out.println("여기냐3");
-			            
-			            if (headerName.equals("Access_token") || headerName.equals("Easylogin_token")) {
-				            // 토큰이 유효한 경우 Security Context에 인증 정보를 설정
-				            if (validateAccessToken(jwt, userDetails) || validateEasyLoginToken(jwt, userDetails)) {
-				            	System.out.println("여기냐4" + validateAccessToken(jwt, userDetails));
-				            	// UsernamePasswordAuthenticationToken은 Spring Security에서 제공하는 Authentication의 구현체로
-				            	// 사용자의 인증 정보를 나타냄 이 객체는 주로 사용자의 ID, 비밀번호, 그리고 권한 정보를 포함
-				                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken 
-				                // new WebAuthenticationDetailsSource().buildDetails(request)는 요청에 대한 세부 정보를 생성하는 역할. 이 정보는 후속 보안 작업에서 사용
-				                = new UsernamePasswordAuthenticationToken(
-				                        userDetails, null, userDetails.getAuthorities());
-				                usernamePasswordAuthenticationToken
-				                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-				                System.out.println(usernamePasswordAuthenticationToken + "너냐5");
-				                // SecurityContext에 Authentication 객체를 설정하는 역할. Authentication 객체는 Spring Security의 다른 부분에서 현재 사용자의 인증 정보를 접근하는데 사용
-				                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-				            }
-			            } else if(headerName.equals("Refresh_token")) {
-			            	System.out.println("여기까진오나?");
-			            	if(!validateRefreshToken(jwt, userDetails)) {
-			            		System.out.println("여기까진오나?2");
-			            		throw new SignatureException("Invalid refresh token");
-			            	}else if(validateRefreshToken(jwt, userDetails)) {
-			            		System.out.println("여기까진오나?3");
-			            	}
-			            }
-			        }
-			        
-		        } catch (ExpiredJwtException e) {
-					
-			        // 401 : JWT 토큰이 만료되었을 때
-			        logger.error("Token is expired", e);
-			        // 2.3 릴리스 이후 SpringBoot에서 오류메시지를 포함하지 않는다는 말이 있다
-			        // 로컬에서 테스트할 때는 message가 정상적으로 포함되지만 AWS EC2를 사용하면 message가 사라진다
-			        // 이때는 application.properties에 server.error.include-message=always를 추가해주면 message가 정상적으로 포함된다
-			        // Starting from the 2.3 version, Spring Boot doesn't include an error message on the default error page. 
-			        // The reason is to reduce the risk of leaking information to a client
-			        // spring boot 2.3 버전 부터는 클라이언트에 정보가 누수될까봐, 기본 에러페이지에 에러메세지를 담지 않는다고 한다.
-			        // https://stackoverflow.com/questions/65019051/not-getting-message-in-spring-internal-exception
-			        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is expired");
-			        
-			    } catch (SignatureException e) {
-			        // 403 : JWT 토큰이 조작되었을 때
-			        logger.error("Signature validation failed", e);
-			        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Signature validation failed");
-			        
-			    } catch (Exception e) {
-			        // 500 : 그 외 예외 처리
-			        logger.error("Unexpected server error occurred", e);
-			        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected server error occurred");
-			    }
-		}
+	}
 
 
     // Access 토큰에서 아이디를 추출하는 메서드

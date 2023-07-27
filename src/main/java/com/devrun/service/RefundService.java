@@ -134,7 +134,12 @@ public class RefundService {
 		    RefundEntity refundEntity = new RefundEntity(merchantUid, cancelRequestAmount, reason, refunddate);
 			System.out.println(refundEntity);
 			System.err.println(refundData);
-			refundRepository.save(refundEntity);		
+			refundRepository.save(refundEntity);
+			
+			PaymentEntity paymentEntity = paymentRepository.findByMerchantUid(merchantUid);  
+		    paymentEntity.setStatus("1");	        
+		    paymentRepository.save(paymentEntity);
+			
 		}
 
 }
