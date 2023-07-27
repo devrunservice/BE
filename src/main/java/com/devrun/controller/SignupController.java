@@ -1,6 +1,8 @@
 package com.devrun.controller;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.devrun.dto.member.SignupDTO;
 import com.devrun.entity.MemberEntity;
+import com.devrun.entity.PointEntity;
 import com.devrun.service.MemberService;
 
 import reactor.core.publisher.Mono;
@@ -94,7 +97,7 @@ public class SignupController {
 		if (memberService.checkID(memberEntity.getId()) == 0 
 				&& memberService.checkEmail(memberEntity.getEmail()) == 0
 				&& memberService.checkphone(memberEntity.getPhonenumber()) == 0
-				&& memberService.verifySmsCode(memberEntity.getPhonenumber(), code)
+//				&& memberService.verifySmsCode(memberEntity.getPhonenumber(), code)
 				) {
 //			// 403 약관 미동의    
 //			if (!memberEntity.isAgeConsent() 
@@ -142,24 +145,62 @@ public class SignupController {
 					// 현재 날짜가 사용자의 생년월일로부터 19년 후의 날짜 이후라면 19세 이상
 					// currentDate.isEqual(after19Years) : 생일 당일도 19세로 인정
 					if (localCurrentDate.isAfter(after19Years) || localCurrentDate.isEqual(after19Years)) {
-					    // 회원가입 처리
-						System.out.println("회원가입 성공");
 						
-						// 가입일자 저장
-						Date currentDate = Date.from(localCurrentDate
-								// .atStartOfDay(): LocalDate 객체에서 해당 날짜의 시작 시간(00:00:00)을 나타내는 LocalDateTime 객체를 생성
-								.atStartOfDay(ZoneId.systemDefault()).toInstant());
-						// 이러한 메서드들을 연결하여 사용함으로써, Date에서 LocalDate로 변환하거나, LocalDate에서 Date로 변환하는 등의 작업을 수행할 수 있습니다.
-						// 이는 Java 8에서 도입된 새로운 날짜/시간 API와 이전의 Date 클래스 사이의 호환성을 유지하기 위해 필요한 작업입니다.
-						
-					    memberEntity.setSignup(currentDate);
-						memberService.insert(memberEntity);
-						
-						// 메모리에 저장된 전화번호와 인증코드 제거
-						memberService.removeSmsCode(memberEntity.getPhonenumber());
-						
-						return new ResponseEntity<>("Signup successful", HttpStatus.OK);
-						//ResponseEntity.ok("Signup successful");
+					    try {
+					    	// 가입일자 설정
+					    	// 현재 날짜와 시간을 LocalDateTime 형식으로 가져오기
+					    	LocalDateTime localCurrentDateTime = LocalDateTime.now();
+
+					    	// LocalDateTime을 Instant로 변환하기
+					    	Instant currentInstant = localCurrentDateTime
+					    			// atZone() 메서드를 사용하여 시스템 기본 시간대를 사용
+					    			.atZone(ZoneId.systemDefault())
+					    			// toInstant() 메서드를 사용하여 Instant로 변환
+					    			.toInstant();
+
+					    	// Instant를 java.util.Date 객체로 변환
+					    	// 이를 위해 Date.from() 메서드를 사용
+					    	Date currentDate = Date.from(currentInstant);
+
+					    	// 가입일자를 현재 날짜와 시간으로 설정
+					    	memberEntity.setSignup(currentDate);
+							
+					    	// 사용자 등록 시도
+					    	MemberEntity m = memberService.insert(memberEntity);
+					    	
+					    	if (m != null) {
+					    		// 회원가입 축하 포인트 지급
+					    		PointEntity point = new PointEntity();
+					    		point.setMypoint(3000);
+						    	point.setMemberEntity(m);
+						    	System.out.println("멤버"+m);
+						    	System.out.println("포인트"+point);
+						    	
+						    	// PointEntity에 MemberEntity가 제대로 설정되었는지 검사
+						        if (point.getUserNo() != -1) {
+						            // 포인트 정보 등록 시도
+						            if (memberService.insert(point) == null) {
+						                // 포인트 정보 등록 실패 시
+						                return new ResponseEntity<>("Failed to save the user's point information", HttpStatus.INTERNAL_SERVER_ERROR);
+						            }
+						        } else {
+						            // MemberEntity 설정 실패 시
+						            return new ResponseEntity<>("Failed to set the user's information to the point entity", HttpStatus.INTERNAL_SERVER_ERROR);
+						        }
+						    } else {
+						        // 사용자 등록 실패 시
+						        return new ResponseEntity<>("Failed to register the user", HttpStatus.INTERNAL_SERVER_ERROR);
+						    }
+						} catch (Exception e) {
+							System.out.println("Error: " + e.getMessage());
+						    // 기타 데이터베이스 오류 발생 시
+						    return new ResponseEntity<>("An error occurred while processing the signup request", HttpStatus.INTERNAL_SERVER_ERROR);
+						}
+					    // 메모리에 저장된 전화번호와 인증코드 제거
+					    memberService.removeSmsCode(memberEntity.getPhonenumber());
+					    
+					    return new ResponseEntity<>("Signup successful", HttpStatus.OK);
+					    //ResponseEntity.ok("Signup successful");
 					} else {
 						// 400 19세 미만
 					    return new ResponseEntity<>("User is under 19 years old", HttpStatus.BAD_REQUEST);

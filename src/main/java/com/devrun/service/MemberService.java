@@ -22,6 +22,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.devrun.entity.MemberEntity;
+import com.devrun.entity.PointEntity;
 import com.devrun.repository.MemberEntityRepository;
 import com.devrun.util.JWTUtil;
 
@@ -49,8 +50,12 @@ public class MemberService {
 		return memberEntityRepository.findById(id);
 	}
 	
-	public void insert(MemberEntity memberEntity) {
-		memberEntityRepository.save(memberEntity);
+	public MemberEntity insert(MemberEntity memberEntity) {
+		return memberEntityRepository.save(memberEntity);
+	}
+	
+	public PointEntity insert(PointEntity point) {
+		return memberEntityRepository.save(point);
 	}
 	
 	public int checkID(String id) {
@@ -210,4 +215,5 @@ public class MemberService {
 		String id = JWTUtil.getUserIdFromToken(jwt);
         return id;
     }
+
 }

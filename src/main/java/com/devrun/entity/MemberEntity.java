@@ -9,6 +9,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
@@ -130,6 +131,12 @@ public class MemberEntity {
 	@Column(name = "marketingConsent", nullable = false, columnDefinition = "TINYINT(1)")
 	@Comment("광고, 마케팅 동의")
 	private boolean marketConsent;
+	
+//	// OneToOne 어노테이션을 사용하여 1:1 관계 설정
+//    @OneToOne(mappedBy = "memberEntity")
+//    private PointEntity pointEntity;
+    
+	
 	
 //	데이터베이스에 Enum 값을 저장할 때, 일반적으로 두 가지 전략을 사용할 수 있습니다:
 //
