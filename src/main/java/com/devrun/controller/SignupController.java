@@ -25,7 +25,7 @@ import reactor.core.publisher.Mono;
 public class SignupController {
 	
 	@Autowired
-	MemberService signupService;
+	MemberService memberService;
 	
 	@ResponseBody
 	@PostMapping("/signup")
@@ -37,7 +37,7 @@ public class SignupController {
 	@ResponseBody
     public String checkID(@RequestBody SignupDTO signupDTO) {
 		String id = signupDTO.getId();
-        int result = signupService.checkID(id);
+        int result = memberService.checkID(id);
         return result + "";
     }
 	
@@ -45,7 +45,7 @@ public class SignupController {
 	@ResponseBody
     public String checkEmail(@RequestBody SignupDTO signupDTO) {
 		String email = signupDTO.getEmail();
-		int result = signupService.checkEmail(email);
+		int result = memberService.checkEmail(email);
         return result + "";
     }
 
@@ -53,7 +53,7 @@ public class SignupController {
 	@ResponseBody
 	public String checkPhone(@RequestBody SignupDTO signupDTO) {
 		String phonenumber = signupDTO.getPhonenumber();
-		int result = signupService.checkphone(phonenumber);
+		int result = memberService.checkphone(phonenumber);
 		return result + "";
 	}
 
@@ -62,7 +62,7 @@ public class SignupController {
 	public Mono<String> authPhonenumber(@RequestBody SignupDTO signupDTO) {
 		String phonenumber = signupDTO.getPhonenumber();
 		System.out.println("폰" + phonenumber);
-        return signupService.sendSmsCode(phonenumber);
+        return memberService.sendSmsCode(phonenumber);
     }
 	
 	@ResponseBody
@@ -70,7 +70,7 @@ public class SignupController {
 	 public ResponseEntity<?> verify(@RequestBody SignupDTO signupDTO) {
 		String phonenumber = signupDTO.getPhonenumber();
 		String code = signupDTO.getCode();
-        if (signupService.verifySmsCode(phonenumber, code)) {
+        if (memberService.verifySmsCode(phonenumber, code)) {
         	// 200 인증성공
         	return new ResponseEntity<>("Verification successful", HttpStatus.OK);
         } else {
@@ -87,14 +87,14 @@ public class SignupController {
 		System.out.println(memberEntity.getEmail());
 
 		System.out.println("트루가 맞냐" + memberEntity.isAgeConsent());
-		System.out.println("아이디 유효성 검사 : " + signupService.validateId(memberEntity.getId()));
-		System.out.println("이메일 유효성 검사 : " + signupService.validateEmail(memberEntity.getEmail()));
-		System.out.println("비밀번호 유효성 검사" + signupService.validatePassword(memberEntity.getPassword()));
+		System.out.println("아이디 유효성 검사 : " + memberService.validateId(memberEntity.getId()));
+		System.out.println("이메일 유효성 검사 : " + memberService.validateEmail(memberEntity.getEmail()));
+		System.out.println("비밀번호 유효성 검사" + memberService.validatePassword(memberEntity.getPassword()));
 		// 회원정보 입력
-		if (signupService.checkID(memberEntity.getId()) == 0 
-				&& signupService.checkEmail(memberEntity.getEmail()) == 0
-				&& signupService.checkphone(memberEntity.getPhonenumber()) == 0
-				&& signupService.verifySmsCode(memberEntity.getPhonenumber(), code)
+		if (memberService.checkID(memberEntity.getId()) == 0 
+				&& memberService.checkEmail(memberEntity.getEmail()) == 0
+				&& memberService.checkphone(memberEntity.getPhonenumber()) == 0
+				&& memberService.verifySmsCode(memberEntity.getPhonenumber(), code)
 				) {
 //			// 403 약관 미동의    
 //			if (!memberEntity.isAgeConsent() 
@@ -104,9 +104,9 @@ public class SignupController {
 //			}
 			// 회원가입 성공
 //			else 
-				if (signupService.validateId(memberEntity.getId()) 
-					&& signupService.validateEmail(memberEntity.getEmail()) 
-					&& signupService.validatePassword(memberEntity.getPassword())
+				if (memberService.validateId(memberEntity.getId()) 
+					&& memberService.validateEmail(memberEntity.getEmail()) 
+					&& memberService.validatePassword(memberEntity.getPassword())
 					) {
 					
 					//LocalDate와 Date는 둘 다 Java에서 날짜를 표현하는 클래스입니다. 그러나 사용 방식과 기능에는 몇 가지 중요한 차이점이 있습니다.
@@ -153,10 +153,10 @@ public class SignupController {
 						// 이는 Java 8에서 도입된 새로운 날짜/시간 API와 이전의 Date 클래스 사이의 호환성을 유지하기 위해 필요한 작업입니다.
 						
 					    memberEntity.setSignup(currentDate);
-						signupService.insert(memberEntity);
+						memberService.insert(memberEntity);
 						
 						// 메모리에 저장된 전화번호와 인증코드 제거
-						signupService.removeSmsCode(memberEntity.getPhonenumber());
+						memberService.removeSmsCode(memberEntity.getPhonenumber());
 						
 						return new ResponseEntity<>("Signup successful", HttpStatus.OK);
 						//ResponseEntity.ok("Signup successful");
@@ -173,22 +173,22 @@ public class SignupController {
 			}
 			
 		// 409 중복된 아이디
-		} else if(signupService.checkID(memberEntity.getId()) != 0) {
+		} else if(memberService.checkID(memberEntity.getId()) != 0) {
 		    return new ResponseEntity<>("UserId already taken", HttpStatus.CONFLICT);
 		    		//ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("UserId already taken");
 		
 		// 409 중복된 이메일
-		} else if(signupService.checkEmail(memberEntity.getEmail()) != 0) {
+		} else if(memberService.checkEmail(memberEntity.getEmail()) != 0) {
 		    return new ResponseEntity<>("Email already registered", HttpStatus.CONFLICT);
 		    		//ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email already registered");
 		
 		// 409 중복된 핸드폰번호
-		} else if(signupService.checkphone(memberEntity.getPhonenumber()) != 0) {
+		} else if(memberService.checkphone(memberEntity.getPhonenumber()) != 0) {
 		    return new ResponseEntity<>("Phone number already registered", HttpStatus.CONFLICT);
 		    		//ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Phone number already registered");
 		
 		// 403 인증되지 않은 전화번호
-		} else if(!signupService.verifySmsCode(memberEntity.getPhonenumber(), code)) {
+		} else if(!memberService.verifySmsCode(memberEntity.getPhonenumber(), code)) {
 			
 			return new ResponseEntity<>("Verification failed Phonenumber", HttpStatus.FORBIDDEN);
 		// 기타 오류 500

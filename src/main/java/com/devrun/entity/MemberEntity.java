@@ -131,8 +131,6 @@ public class MemberEntity {
 	@Comment("광고, 마케팅 동의")
 	private boolean marketConsent;
 	
-	
-	
 //	데이터베이스에 Enum 값을 저장할 때, 일반적으로 두 가지 전략을 사용할 수 있습니다:
 //
 //	ORDINAL: Enum 값의 순서(0부터 시작)를 데이터베이스에 저장합니다. 
