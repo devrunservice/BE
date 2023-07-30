@@ -36,10 +36,10 @@ public class PointController {
 	            )
 	        ,
 	            @ApiImplicitParam(
-	                name = "userNo"
+	                name = "id"
 	                , value = "사용자 구분"
 	                , required = true
-	                , dataType = "int"
+	                , dataType = "String"
 	                , paramType = "path"
 	                , defaultValue = ""
 	            )
