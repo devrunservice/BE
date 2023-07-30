@@ -213,7 +213,7 @@ public class LoginController {
 //	        return new ResponseEntity<>("Refresh token is required", HttpStatus.BAD_REQUEST);
 //	    }
 
-//	    // Refresh Token 검증
+	    // Refresh Token 검증
 //	    if (!JWTUtil.validateToken(refreshToken)) {
 //	    	// 401 : 유효하지 않은 Refresh token
 //	        return new ResponseEntity<>("Invalid refresh token", HttpStatus.UNAUTHORIZED);

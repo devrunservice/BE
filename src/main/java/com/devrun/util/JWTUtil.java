@@ -4,11 +4,10 @@ import java.util.Date;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -61,7 +60,8 @@ public class JWTUtil {
     // 주어진 token이 유효한지 확인합니다. 유효하면 true를, 그렇지 않으면 false를 반환
 //    public static boolean validateToken(String token) {
 //        try {
-//            Jws<Claims> claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
+//        	String subToken = token.substring(7);
+//            Jws<Claims> claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken);
 //            return claims.getBody().getExpiration().after(new Date());
 //        } catch (Exception e) {
 //        	System.out.println("로그아웃 에러 메시지 : " + e);
@@ -74,6 +74,7 @@ public class JWTUtil {
     public static String getUserIdFromToken(String token) {
     	String subToken = token.substring(7);
         Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken).getBody();
+        System.out.println("사용자 아이디 : " + claims.getSubject());
         return claims.getSubject();
     }
     

@@ -54,7 +54,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		String requestPath = request.getRequestURI();
 		
 		//login 경로에 대한 요청인 경우 필터를 건너뛰도록 설정합니다.
-		if (!"/tmi".equals(requestPath) && !"/savePaymentInfo".equals(requestPath)) {
+		if (!"/tmi".equals(requestPath) 
+				&& !"/savePaymentInfo".equals(requestPath)
+				&& !"/token/refresh".equals(requestPath)
+				) {
 		    chain.doFilter(request, response);
 		    return;
 		}
