@@ -9,6 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import org.hibernate.annotations.Comment;
 
 import lombok.Data;
@@ -16,6 +17,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "Point")
+
 public class PointEntity {
 	
 	@Id
@@ -25,6 +27,7 @@ public class PointEntity {
 	//외래 키가 대상이 되는 테이블에 있는 경우
 	@OneToOne
 	@JoinColumn(name = "user_no") //외래키 컬럼명
+	@JsonBackReference
     private MemberEntity memberEntity; //주 테이블의 PK값
 
 

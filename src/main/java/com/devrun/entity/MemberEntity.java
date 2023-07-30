@@ -7,6 +7,7 @@ import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.hibernate.annotations.Comment;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -19,7 +20,7 @@ import lombok.ToString;
 @Data
 @Entity
 @Table(name = "user")
-@ToString(exclude={"pointEntity"})
+
 public class MemberEntity {
 	
 	@Id

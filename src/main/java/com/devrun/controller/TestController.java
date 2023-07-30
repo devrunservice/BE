@@ -33,12 +33,13 @@ public class TestController {
 	public ResponseEntity<?> tmi(HttpServletRequest request) {
 		// refreshToken이 헤더에 있는지 확인
 	    String accessToken = request.getHeader("Access_token");
-//
+
 //	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
 	    if (accessToken == null || accessToken.isEmpty()) {
 	    	// 400 : Access token 없음
 	        return new ResponseEntity<>("Access token is required", HttpStatus.BAD_REQUEST);
 	    }
+	    
 		String id = memberService.getIdFromToken(request);
 	    if (memberService.isUserIdEquals(id)) {
 	        MemberEntity member = memberService.findById(id);
