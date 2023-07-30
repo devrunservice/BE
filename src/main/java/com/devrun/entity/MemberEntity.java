@@ -132,9 +132,6 @@ public class MemberEntity {
 	@Comment("광고, 마케팅 동의")
 	private boolean marketConsent;
 	
-//	// OneToOne 어노테이션을 사용하여 1:1 관계 설정
-//    @OneToOne(mappedBy = "memberEntity")
-//    private PointEntity pointEntity;
     
 	
 	

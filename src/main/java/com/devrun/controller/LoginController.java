@@ -332,13 +332,13 @@ public class LoginController {
 	        	String easylogin_token = JWTUtil.generateEasyloginToken(kakaoId, kakaoEmail);
 				System.out.println("이지로그인 토큰 : " + easylogin_token);
 				
-				Map<String, String> response2 = new HashMap<>();
-		        response2.put("Easylogin_token", "Bearer " + easylogin_token);
-		        response2.put("message", "No linked account found. Please link your account.");
-		        System.out.println("간편로그인 리스폰스 : " + response2);
+				Map<String, String> tokenMap = new HashMap<>();
+				tokenMap.put("Easylogin_token", "Bearer " + easylogin_token);
+				tokenMap.put("message", "No linked account found. Please link your account.");
+		        System.out.println("간편로그인 리스폰스 : " + tokenMap);
 		        
 		        // 303 : 연동된 계정이 존재하지 않음
-		        return new ResponseEntity<>(response, HttpStatus.SEE_OTHER);
+		        return new ResponseEntity<>(tokenMap, HttpStatus.SEE_OTHER);
 		        
 			} else {
 				
