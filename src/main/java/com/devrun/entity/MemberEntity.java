@@ -7,6 +7,7 @@ import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.hibernate.annotations.Comment;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -20,7 +21,6 @@ import lombok.ToString;
 @Data
 @Entity
 @Table(name = "user")
-
 public class MemberEntity {
 	
 	@Id
@@ -126,11 +126,11 @@ public class MemberEntity {
 	@Column(name = "marketingConsent", nullable = false, columnDefinition = "TINYINT(1)")
 	@Comment("광고, 마케팅 동의")
 	private boolean marketConsent;
-	
+
 	// OneToOne 어노테이션을 사용하여 1:1 관계 설정
-    @OneToOne(mappedBy = "memberEntity")
-	@JsonManagedReference
-    private PointEntity pointEntity;
+//    @OneToOne(mappedBy = "memberEntity")
+//    private PointEntity pointEntity;
+
 
     
 	
