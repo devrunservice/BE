@@ -2,15 +2,7 @@ package com.devrun.entity;
 
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -22,10 +14,12 @@ import com.devrun.dto.member.MemberDTO.Role;
 import com.devrun.dto.member.MemberDTO.Status;
 
 import lombok.Data;
+import lombok.ToString;
 
 @Data
 @Entity
 @Table(name = "user")
+@ToString(exclude={"pointEntity"})
 public class MemberEntity {
 	
 	@Id
@@ -132,8 +126,10 @@ public class MemberEntity {
 	@Comment("광고, 마케팅 동의")
 	private boolean marketConsent;
 	
-    
-	
+//	// OneToOne 어노테이션을 사용하여 1:1 관계 설정
+//    @OneToOne(mappedBy = "memberEntity")
+//    private PointEntity pointEntity;
+
 	
 //	데이터베이스에 Enum 값을 저장할 때, 일반적으로 두 가지 전략을 사용할 수 있습니다:
 //
