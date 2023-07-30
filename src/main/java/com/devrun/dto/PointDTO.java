@@ -7,16 +7,16 @@ import lombok.ToString;
 @NoArgsConstructor
 public class PointDTO {
 	
-    private int userNo;
+    private String id;
     private int amount;
     private int userPoint;
 
-    public int getUserNo() {
-        return userNo;
+    public String getid() {
+        return id;
     }
 
-    public void setUserNo(int userNo) {
-        this.userNo = userNo;
+    public void setUserNo(String id) {
+        this.id = id;
     }
     
     public int getAmount() {

@@ -53,12 +53,12 @@ public class PointController {
 	        })
 	public ResponseEntity<?> applyPoint(@RequestBody PointDTO pointDTO) {
 		
-	    int userno = pointDTO.getUserNo();
+		String id = pointDTO.getid();
 	    int amount = pointDTO.getAmount();
 	    int userPoint = pointDTO.getUserPoint(); 
 
 	    // 사용자의 포인트 정보를 조회
-		PointEntity pointEntity = pointRepository.findByMemberEntity_UserNo(userno);
+		PointEntity pointEntity = pointRepository.findByMemberEntity_id(id);
 	    if (pointEntity == null) {
 	        // 사용자의 포인트 정보가 없을 경우 에러 응답 반환
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Point information not found for the user");
