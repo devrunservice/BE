@@ -190,12 +190,12 @@ public class SignupController {
 						        	
 						        	// 포인트 정보 등록 시도 실패 시
 						            if (memberService.insert(point) == null) {
-						                return new ResponseEntity<>("Failed to save the user's point information", HttpStatus.INTERNAL_SERVER_ERROR);
+						                return new ResponseEntity<>("Failed to save point", HttpStatus.INTERNAL_SERVER_ERROR);
 						            }
 						            
 					            // MemberEntity 설정 실패 시
 						        } else {
-						            return new ResponseEntity<>("Failed to set the user's information to the point entity", HttpStatus.INTERNAL_SERVER_ERROR);
+						            return new ResponseEntity<>("Failed to set point entity", HttpStatus.INTERNAL_SERVER_ERROR);
 						        }
 						        
 					        // 사용자 등록 실패 시
@@ -206,7 +206,7 @@ public class SignupController {
 				    	// 기타 데이터베이스 오류 발생 시
 						} catch (Exception e) {
 							System.out.println("Error: " + e.getMessage());
-						    return new ResponseEntity<>("An error occurred while processing the signup request", HttpStatus.INTERNAL_SERVER_ERROR);
+						    return new ResponseEntity<>("Failed to register for database", HttpStatus.INTERNAL_SERVER_ERROR);
 						}
 					    
 					    // 메모리에 저장된 전화번호와 인증코드 제거
