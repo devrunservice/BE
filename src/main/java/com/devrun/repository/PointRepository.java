@@ -8,7 +8,9 @@ import com.devrun.entity.PointEntity;
 public interface PointRepository extends JpaRepository<PointEntity, Long> {
 
 
-	PointEntity findByUserNo(int userno);
+	//PointEntity findByUserNo(int userno);
 
 
+	PointEntity findByMemberEntity_UserNo(int userno);
+	//findBy+(fk키의 주인 entity의 필드명에서 첫글자 대문자)+_+(fk키의 주인 entity의 식별자(PK값)필드명에서 첫글자 대문자)
 }
