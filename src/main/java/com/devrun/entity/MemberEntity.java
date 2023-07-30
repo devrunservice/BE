@@ -15,6 +15,7 @@ import com.devrun.dto.member.MemberDTO.Role;
 import com.devrun.dto.member.MemberDTO.Status;
 
 import lombok.Data;
+import lombok.ToString;
 
 @Data
 @Entity
