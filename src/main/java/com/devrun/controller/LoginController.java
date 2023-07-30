@@ -69,7 +69,7 @@ public class LoginController {
 		System.out.println("1단계");
 		if (signupService.validateId(member.getId()) && signupService.validatePassword(member.getPassword())) {
 			
-			LoginStatus status = loginService.validate(member);
+			LoginStatus status = loginService.validateMember(member);
 			System.out.println("2단계");
 			System.out.println("status : " + status);
 			
@@ -343,7 +343,7 @@ public class LoginController {
 				// 마지막 로그인 날짜 저장
 				loginService.setLastLogin(memberEntity);
 				
-				LoginStatus status = loginService.validate(memberEntity);
+				LoginStatus status = loginService.validateMember(memberEntity);
 				
 				// 로그인 정보 전달 객체 생성
 				LoginDTO loginDTO = new LoginDTO(status, "KakaoLogin successful");

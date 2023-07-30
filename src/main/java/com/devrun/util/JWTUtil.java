@@ -25,7 +25,9 @@ public class JWTUtil {
 	// 토큰 만료시간 설정
     private static final long EASYLOGIN_TOKEN_EXPIRATION_TIME = 15 * 60 * 1000;		// 5분
     private static final long ACCESS_TOKEN_EXPIRATION_TIME = 15 * 60 * 1000;		// 15분				테스트는 1초로 할 것
-    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 24 * 60 *	60 * 1000;	// 24시간, 24시간/일 * 60분/시간 * 60초/분 * 1000밀리초/초
+    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 
+//    		24 * 60 * 60 * 
+    		1000;	// 24시간, 24시간/일 * 60분/시간 * 60초/분 * 1000밀리초/초
     
     // ACCESS_TOKEN 생성
     public static String generateAccessToken(String userId, String name) {
@@ -70,7 +72,8 @@ public class JWTUtil {
 
     // 메서드는 주어진 token으로부터 사용자 ID를 추출
     public static String getUserIdFromToken(String token) {
-        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+    	String subToken = token.substring(7);
+        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken).getBody();
         return claims.getSubject();
     }
     
