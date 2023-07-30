@@ -48,6 +48,9 @@ public class LoginController {
 	@Autowired
 	private LoginRepository loginRepository;
 	
+	@Autowired
+	MemberService memberService;
+	
 	@Value("${kakao.client_id}")
 	private String client_id;
 
@@ -208,10 +211,12 @@ public class LoginController {
 	    String refreshToken = request.getHeader("Refresh_token");
 //
 //	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
-//	    if (refreshToken == null || refreshToken.isEmpty()) {
-//	    	// 400 : Refresh token 없음
-//	        return new ResponseEntity<>("Refresh token is required", HttpStatus.BAD_REQUEST);
-//	    }
+	    if (refreshToken == null || refreshToken.isEmpty()) {
+	    	// 400 : Refresh token 없음
+	        return new ResponseEntity<>("Refresh token is required", HttpStatus.BAD_REQUEST);
+	    }
+	    String id = memberService.getIdFromToken(request);
+	    if (memberService.isUserIdEquals(id)) {
 
 	    // Refresh Token 검증
 //	    if (!JWTUtil.validateToken(refreshToken)) {
@@ -240,6 +245,10 @@ public class LoginController {
 	    
 	    // 200 : Access_token 발급
 	    return new ResponseEntity<>(responseBody, HttpStatus.OK);
+	    } else {
+	    	// 401 토큰의 사용자와 요청한 사용자 불일치
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
+	    }
 	}
 	
 	@ResponseBody
