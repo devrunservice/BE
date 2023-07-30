@@ -51,7 +51,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 	        throws ServletException, IOException {
-		String requestPath = request.getRequestURI();
+		
+//		String requestPath = request.getRequestURI();
 		
 		//login 경로에 대한 요청인 경우 필터를 건너뛰도록 설정합니다.
 		if (
