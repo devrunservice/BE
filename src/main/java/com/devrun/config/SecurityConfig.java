@@ -30,9 +30,11 @@ public class SecurityConfig {
             .authorizeRequests(authorize -> authorize
                     .antMatchers(HttpMethod.OPTIONS, "/**/*").permitAll()
                     .antMatchers("/tmi").authenticated()// 인증이 필요한 /tmi 엔드포인트
+                    .antMatchers("/api/*").authenticated()
                     .antMatchers("/token/refresh").permitAll()
                     .antMatchers("/logout").permitAll()
                 .anyRequest().permitAll())
+
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
             .logout().disable()
             .build();
