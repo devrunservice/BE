@@ -43,6 +43,7 @@ public class PaymentController {
 			System.err.println(paymentDTOList);
 			
 			  // 사용자의 포인트 정보를 조회
+			//2개이상 구매시 구매자는 이름이 같으니깐, 첫번째 배열에 있는 이름으로 point찾음.
 		    String name = paymentDTOList.get(0).getBuyer_name();
 		    System.err.println(name);
 		    PointEntity pointEntity = pointRepository.findByMemberEntity_name(name);
