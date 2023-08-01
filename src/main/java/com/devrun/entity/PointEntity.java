@@ -29,8 +29,6 @@ public class PointEntity {
 	@JoinColumn(name = "user_no") //외래키 컬럼명
     private MemberEntity memberEntity; //주 테이블의 PK값
 
-
-
 	// UserNo에 접근하는 메소드
 	public int getUserNo() {
 	    if (this.memberEntity != null) {

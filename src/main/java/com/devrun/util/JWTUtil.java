@@ -24,9 +24,7 @@ public class JWTUtil {
 	// 토큰 만료시간 설정
     private static final long EASYLOGIN_TOKEN_EXPIRATION_TIME = 15 * 60 * 1000;		// 5분
     private static final long ACCESS_TOKEN_EXPIRATION_TIME = 15 * 60 * 1000;		// 15분				테스트는 1초로 할 것
-    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 
-//    		24 * 60 * 60 * 
-    		1000;	// 24시간, 24시간/일 * 60분/시간 * 60초/분 * 1000밀리초/초
+    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 24 * 60 * 60 * 1000;	// 24시간, 24시간/일 * 60분/시간 * 60초/분 * 1000밀리초/초
     
     // ACCESS_TOKEN 생성
     public static String generateAccessToken(String userId, String name) {
@@ -58,17 +56,17 @@ public class JWTUtil {
     }
     
     // 주어진 token이 유효한지 확인합니다. 유효하면 true를, 그렇지 않으면 false를 반환
-//    public static boolean validateToken(String token) {
-//        try {
-//        	String subToken = token.substring(7);
-//            Jws<Claims> claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken);
-//            return claims.getBody().getExpiration().after(new Date());
-//        } catch (Exception e) {
-//        	System.out.println("로그아웃 에러 메시지 : " + e);
-//        	e.printStackTrace();
-//            return false;
-//        }
-//    }
+    public static boolean validateToken(String token) {
+        try {
+        	String subToken = token.substring(7);
+            Jws<Claims> claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken);
+            return claims.getBody().getExpiration().after(new Date());
+        } catch (Exception e) {
+        	System.out.println("로그아웃 에러 메시지 : " + e);
+        	e.printStackTrace();
+            return false;
+        }
+    }
 
     // 메서드는 주어진 token으로부터 사용자 ID를 추출
     public static String getUserIdFromToken(String token) {
@@ -90,7 +88,8 @@ public class JWTUtil {
     }
     
     public static String getEmailFromEasyloginToken(String token) {
-        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+    	String subToken = token.substring(7);
+        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken).getBody();
         return claims.get("email", String.class);
     }
 
