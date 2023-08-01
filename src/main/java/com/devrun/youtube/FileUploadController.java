@@ -46,7 +46,7 @@ public class FileUploadController {
             // 저장할 비디오 정보에 추가 정보를 설정
             // 예를 들어 비디오 제목, 재생 시간, 비디오 링크 등 추가 가능
             video.setVideoTitle("예시 비디오 제목");
-            video.setTotalPlayTime(0); // 재생 시간 초기값 0 설정
+            video.setTotalPlayTime("0"); // 재생 시간 초기값 0 설정
             video.setVideoLink("https://www.youtube.com/watch?v=" + videoinfo.getvideoId());
 
             

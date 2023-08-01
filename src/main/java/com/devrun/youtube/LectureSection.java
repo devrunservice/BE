@@ -22,15 +22,16 @@ public class LectureSection {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private int SectionNumber;
     
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String SectionTitle;
 
-    
-    @ManyToOne
-    @JoinColumn(name = "lecture_id")
-    private Lecture lecture;
+	public void setLecture(Lecture lecture) {
+		
+	}
 
+
+  
 }

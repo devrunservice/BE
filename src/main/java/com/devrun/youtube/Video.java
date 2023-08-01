@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -30,7 +32,7 @@ import lombok.Setter;
 	    private String videoId;
 	
 	    @Column(nullable = true)
-	    private Integer totalPlayTime;
+	    private String totalPlayTime;
 	
 	    @Column(nullable = true)
 	    private String videoLink;
@@ -38,8 +40,13 @@ import lombok.Setter;
 	    @Column(nullable = true)
 	    private String videoTitle;
 	    
+	    @ManyToOne
+	    @JoinColumn(name = "lecture_id")
+	    private Lecture lecture;
 	    
-	 
+	    @ManyToOne
+	    @JoinColumn(name = "lecture_section_id")
+	    private LectureSection lectureSection;
 	    
 	    
 	}

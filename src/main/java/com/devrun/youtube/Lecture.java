@@ -9,6 +9,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import lombok.Data;
@@ -56,7 +58,16 @@ public class Lecture {
     @ElementCollection
     private List<String> lectureTag;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "lecture")
-    private List<LectureSection> lectureSections;
+    @ManyToOne
+    @JoinColumn(name = "categoryNo")
+    private Lecturecategory lectureCategory;
+    
+    @OneToMany(mappedBy = "lecture", cascade = CascadeType.ALL)
+    private List<Video> videos;
+
+	public void setLectureSection(List<LectureSection> sections) {
+	}
+
+	
 }
 
