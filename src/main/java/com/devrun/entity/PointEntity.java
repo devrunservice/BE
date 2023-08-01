@@ -8,9 +8,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.hibernate.annotations.Comment;
 
 import lombok.Data;
@@ -41,7 +38,7 @@ public class PointEntity {
 	}
 	
 	@Column(name = "mypoint", nullable = true, length = 10)
-	@Comment("구매자 이메일")
+	@Comment("보유한 총 포인트 ")
 	private int mypoint;
 	
 }
