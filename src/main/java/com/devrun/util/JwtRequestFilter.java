@@ -242,6 +242,4 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 //        return !isTokenExpired(token);
 //    }
 
-
-
 }
