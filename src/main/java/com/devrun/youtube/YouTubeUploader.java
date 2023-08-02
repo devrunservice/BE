@@ -110,8 +110,8 @@ public class YouTubeUploader {
     	    .setCredentialDataStore(credentialStore)
     	    .build();
 
-    // 로컬 서버를 빌드하고 포트 9000에 바인딩합니다.
-    LocalServerReceiver localReceiver = new LocalServerReceiver.Builder().setPort(80).build();
+    // 로컬 서버를 빌드하고 포트 8080에 바인딩합니다.
+    LocalServerReceiver localReceiver = new LocalServerReceiver.Builder().setPort(8080).build();
 
     // 승인합니다.
     return new AuthorizationCodeInstalledApp(flow, localReceiver).authorize("user");
@@ -133,23 +133,6 @@ public class YouTubeUploader {
 	    try {
 	        // 권한 부여.
 	        Credential credential = authorize(scopes);
-	        
-
-	     // 특정 페이지로 이동하기 전에 구글 인증 상태를 확인하고, 인증되지 않은 경우 구글 로그인 페이지로 이동합니다.
-//	        if (credential == null) {
-//	            String redirectUrl = "http://localhost/youtubeupload"; // 로그인 후 이동할 특정 페이지 URL을 지정합니다. 원하는 URL로 변경하세요.
-//
-//	            String loginUrl = "https://accounts.google.com/o/oauth2/auth?scope=https://www.googleapis.com/auth/youtube.upload"
-//	                    + "&redirect_uri=" + URLEncoder.encode(redirectUrl, "UTF-8") // URL 인코딩이 필요합니다.
-//	                    + "&response_type=code&client_id=385481592077-6irgmtusl13jsreqis43b8e76pck582a.apps.googleusercontent.com&access_type=offline"; // 프로젝트에 등록된 클라이언트 ID로 변경하세요.
-//
-//	            // 로그인 페이지로 이동합니다 (response.sendRedirect()를 사용한 예시).
-//	            // 이 때, 해당 페이지에서 인증을 완료하면 redirectUrl로 리다이렉트됩니다.
-//	            response.sendRedirect(loginUrl);
-//
-//	            // 업로드 페이지로 가지 않으므로 null을 반환합니다.
-//	            return null;
-//	        }
 	        
 	        // 모든 API 요청을 수행하는 YouTube 객체.
 	        youtube = new YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
