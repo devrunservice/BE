@@ -18,4 +18,6 @@ public interface MemberEntityRepository extends JpaRepository<MemberEntity, Long
 	String deleteById(String id);
 
 	PointEntity save(PointEntity point);
+
+	MemberEntity findByName(String name);
 }

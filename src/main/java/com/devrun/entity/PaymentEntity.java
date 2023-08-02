@@ -6,6 +6,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.hibernate.annotations.Comment;
 import lombok.Data;
@@ -17,9 +19,9 @@ public class PaymentEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "user_no", length = 5)
+	@Column(name = "pay_no", length = 5)
 	@Comment("유저 구분 번호")
-	private int user_no;
+	private int pay_no;
 	
 	@Column(name = "buyerEmail", nullable = true, length = 100)
 	@Comment("구매자 이메일")
@@ -61,6 +63,11 @@ public class PaymentEntity {
 	@Column(name = "status", nullable = true, length = 1)
 	@Comment("환불 상태 /환불완료:1/기본:0")
 	private String status;
+	
+	//외래 키가 대상이 되는 테이블에 있는 경우
+		@OneToOne
+		@JoinColumn(name = "user_no") //외래키 컬럼명
+	    private MemberEntity memberEntity; //주 테이블의 PK값
 	
 	
 
