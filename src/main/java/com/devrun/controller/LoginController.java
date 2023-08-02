@@ -100,17 +100,15 @@ public class LoginController {
 		    		String easyloginToken = request.getHeader("Easylogin_token");
 		    		
 		    		System.out.println("이지로그인 토큰 : " + easyloginToken);
-		    		if (easyloginToken != null && !easyloginToken.isEmpty() 
-//		    				&& JWTUtil.validateToken(easyloginToken)
+		    		if (easyloginToken != null && !easyloginToken.isEmpty()
+		    				&& JWTUtil.validateToken(easyloginToken)
 		    				) {
 		    			// 임시 토큰을 사용해 사용자 식별하고 로그인 과정 진행
 		    			String kakaoId = JWTUtil.getUserIdFromToken(easyloginToken);
 		    			String kakaoEmail = JWTUtil.getEmailFromEasyloginToken(easyloginToken);
-		    			
 		    			// 여러개의 아이디에 연동하는 것을 막기위해 한번 더 체크
 		    			memberEntity = loginRepository.findByKakaoEmailId(kakaoId + kakaoEmail);
 		    			if (memberEntity == null) {
-			    			
 			    			// 로그인 성공 처리
 				        	memberEntity = loginRepository.findById(member.getId());
 				        	System.out.println("3단계" + memberEntity);
@@ -301,8 +299,8 @@ public class LoginController {
 			System.out.println("카카오 ID : " + kakaoProfile.getId());
 			System.out.println("카카오 Email : " + kakaoProfile.getKakao_account().getEmail());
 			
-			String kakaoId = kakaoProfile.getId().toString();				// 2843888591
-			String kakaoEmail = kakaoProfile.getKakao_account().getEmail();	// sung0763@naver.com
+			String kakaoId = kakaoProfile.getId().toString();
+			String kakaoEmail = kakaoProfile.getKakao_account().getEmail();
 			String KakaoEmailId = kakaoId + kakaoEmail;
 			
 			
