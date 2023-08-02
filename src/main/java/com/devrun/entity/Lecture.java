@@ -17,7 +17,7 @@ public class Lecture {
     private Integer lno;
 
     @Column(name = "category")
-    private Integer category;
+    private String category;
 
     @Column(name = "intro", length = 300)
     private String intro;
@@ -34,7 +34,7 @@ public class Lecture {
     @Column(name = "edit")
     private Date edit;
 
-    @Column(name = "discount")
+    @Column(name = "ablediscount")
     private boolean discount;
 
     @Column(name = "discountrate", nullable = false)

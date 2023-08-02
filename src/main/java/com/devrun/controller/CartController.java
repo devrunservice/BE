@@ -1,20 +1,32 @@
 package com.devrun.controller;
 
+import com.devrun.dto.CartDTO;
 import com.devrun.entity.Cart;
 import com.devrun.entity.Lecture;
 import com.devrun.entity.MemberEntity;
+import com.devrun.exception.CommonErrorCode;
+import com.devrun.exception.RestApiException;
+import com.devrun.exception.UserErrorCode;
 import com.devrun.repository.CartRepo;
+import com.devrun.service.CartService;
 import com.devrun.service.MemberService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Type;
+import java.util.*;
 
 @Controller
 @Api(tags = "Devrun.Cart")
@@ -26,7 +38,10 @@ public class CartController {
     @Autowired
     private MemberService memberService;
 
-    @GetMapping("/api/cart")
+    @Autowired
+    private CartService cartService;
+
+    @PostMapping("/api/cartinsert")
     @ResponseBody
     @ApiOperation("장바구니에 강의를 추가합니다.")
     @ApiImplicitParam(name = "lno"
@@ -34,42 +49,38 @@ public class CartController {
     )
     public String putCart(@RequestParam(name = "lno") int lno) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String msg = cartService.putInCart("title");
 
+        return  msg;
+    }
 
+    @PostMapping("/api/cartdelete")
+    @ResponseBody
+    public String deleteInCart(@RequestParam(name = "lecturetitle") String lecturetitle){
 
-
-        String msg;
-        String userid = authentication.getName();
-        System.out.println("유저 이름은 : " + userid);
-
-        MemberEntity memberEntity = memberService.findById(userid);
-        if(memberEntity.getId() != null){
-            Cart cart = new Cart();
-            Lecture lecture = new Lecture();
-            lecture.setLno(1);
-            cart.setLecture(lecture);
-            cart.setMemberEntity(memberEntity);
-            //cartRepo.save(cart);
-            msg = "저장 성공";
-
-        } else {
-            msg = "저장 실패";
-        }
+        lecturetitle = "1";
+        String msg = cartService.deleteInCart(lecturetitle);
 
         return msg;
     }
 
-    @GetMapping("/api/cartdelete")
+    @GetMapping("/cart")
     @ResponseBody
-    public String deleteInCart(@RequestParam(name = "lecturetitle") String lecturetitle){
+    public ResponseEntity<?> cartopen(HttpServletRequest request){
+         String token = request.getHeader("Access_token");
+         if(token == null || token.isEmpty()){
+             throw new RestApiException(CommonErrorCode.INTERNAL_SERVER_ERROR);
+         }
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userid = authentication.getName();
-        System.out.println("유저 이름은 : " + userid);
 
-        //cartRepo.deleteInCart(userid , lecturetitle);
+        CartDTO result = cartService.showCartInfo("seokhwan1");
 
-        return "삭제 성공";
+        return ResponseEntity.ok().body(result);
     }
+
+//    @GetMapping("/users/test")
+//    public String getUser() {
+//        throw new RestApiException(UserErrorCode.INACTIVE_USER);
+//    }
+
 }

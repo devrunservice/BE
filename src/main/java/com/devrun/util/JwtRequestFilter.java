@@ -50,13 +50,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 	        throws ServletException, IOException {
+        System.out.println("JWT 필터 시작");
 		String requestPath = request.getRequestURI();
-		
+        System.out.println("요청 URI" + requestPath);
 		 //login 경로에 대한 요청인 경우 필터를 건너뛰도록 설정합니다.
-	    if (!"/tmi".equals(requestPath)) {
-	        chain.doFilter(request, response);
-	        return;
-	    }
+//	    if (!"/tmi".equals(requestPath)) {
+//	        chain.doFilter(request, response);
+//	        return;
+//	    }
 	    
 	    try {
 			// HTTP 요청 헤더에서 헤더 값을 가져옴
