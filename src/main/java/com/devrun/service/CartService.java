@@ -5,6 +5,8 @@ import com.devrun.dto.CartDTO;
 import com.devrun.entity.Cart;
 import com.devrun.entity.Lecture;
 import com.devrun.entity.MemberEntity;
+import com.devrun.exception.RestApiException;
+import com.devrun.exception.UserErrorCode;
 import com.devrun.repository.CartRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -25,7 +27,7 @@ public class CartService {
     @Autowired
     private MemberService memberService;
 
-    public CartDTO showCartInfo(String userid){
+    public CartDTO showCartInfo(String userid) {
 
         List<Cart> Carts = cartRepo.findAllByMemberEntity_id(userid);
         CartDTO result = new CartDTO();
@@ -51,9 +53,9 @@ public class CartService {
 
         result.setLectureInfo(lecutreInfo);
 
-        String userPhonumber = memberService.findById("seokhwan1").getPhonenumber();
-        String userEmail = memberService.findById("seokhwan1").getEmail();
-        String username = memberService.findById("seokhwan1").getName();
+        String userPhonumber = memberService.findById(userid).getPhonenumber();
+        String userEmail = memberService.findById(userid).getEmail();
+        String username = memberService.findById(userid).getName();
 
         result.setUserPhonenumber(userPhonumber);
         result.setUserEmail(userEmail);
@@ -61,7 +63,6 @@ public class CartService {
 
         result.setUserPoint(500);
         result.setAbleCouponCount(1);
-
         return result;
 
     }

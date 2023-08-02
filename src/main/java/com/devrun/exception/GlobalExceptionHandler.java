@@ -45,5 +45,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .build();
     }
 
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<Object> nullex(final NullPointerException e) {
+
+        return ResponseEntity.badRequest().body("Can't Find Data, Check Your Request -By DevRun");
+    }
+
 
 }
