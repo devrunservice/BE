@@ -125,13 +125,13 @@ public class RefundService {
 		public void saveRefund(Map<String, Object> refundData) {
 			
 			String merchantUid = refundData.get("merchant_uid").toString();
-		    int cancelRequestAmount = Integer.parseInt(refundData.get("cancel_request_amount").toString());
+		    int amount = Integer.parseInt(refundData.get("amount").toString());
 		    String reason = refundData.get("reason").toString();
 		    LocalDateTime dateTime = LocalDateTime.now();
 		    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 a hh:mm:ss", new Locale("ko"));
 		    String refunddate = dateTime.format(formatter);
 		    
-		    RefundEntity refundEntity = new RefundEntity(merchantUid, cancelRequestAmount, reason, refunddate);
+		    RefundEntity refundEntity = new RefundEntity(merchantUid, amount, reason, refunddate);
 			System.out.println(refundEntity);
 			System.err.println(refundData);
 			refundRepository.save(refundEntity);
