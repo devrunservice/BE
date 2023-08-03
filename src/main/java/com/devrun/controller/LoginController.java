@@ -94,7 +94,6 @@ public class LoginController {
 	
 		    	case SUCCESS:
 		    		
-		    		
 		        	
 		    		// 공사중 --------------------------------------------------------------------------------------------------
 		    		
@@ -123,7 +122,7 @@ public class LoginController {
 			    			
 			    		} else {
 			    			
-			    			// 앞에서 생성된 로그아웃에 필요한 쿠키 삭제
+			    			// 이전에 생성된 로그아웃에 필요한 쿠키 삭제
 			    			loginService.deleteEasycookie(response);
 			    			
 			    			// 400 연동 실패 : 이미 연동된 계정이 있음
@@ -316,7 +315,7 @@ public class LoginController {
 			// 공사중 -------------------------------------------------------------------------------------
 			
 			// SNS Access_token 생성
-			loginService.setEasycookie(response, oauthToken.getAccess_token(), kakaoProfile.getId());
+//			loginService.setEasycookie(response, oauthToken.getAccess_token(), kakaoProfile.getId());
 			
 			MemberEntity memberEntity = new MemberEntity();
 			
