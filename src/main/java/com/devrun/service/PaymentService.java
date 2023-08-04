@@ -20,12 +20,6 @@ public class PaymentService {
 		
 	}	
 
-//    public void savePaymentInfo(PaymentEntity paymentEntity) {
-//        paymentRepository.save(paymentEntity);
-//    }
-
-	
-
 		
 	}
     

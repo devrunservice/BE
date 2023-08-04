@@ -1,5 +1,6 @@
 package com.devrun.repository;
 
+import com.devrun.entity.PointEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.devrun.entity.MemberEntity;
@@ -15,4 +16,9 @@ public interface MemberEntityRepository extends JpaRepository<MemberEntity, Long
 	MemberEntity findById(String id);
 
 	String deleteById(String id);
+
+	PointEntity save(PointEntity point);
+
+	MemberEntity findByName(String name);
+
 }
