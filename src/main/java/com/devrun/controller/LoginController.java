@@ -48,9 +48,6 @@ public class LoginController {
 	@Autowired
 	private LoginRepository loginRepository;
 	
-	@Autowired
-	MemberService memberService;
-	
 	@Value("${kakao.client_id}")
 	private String client_id;
 
@@ -72,7 +69,7 @@ public class LoginController {
 		System.out.println("1단계");
 		if (signupService.validateId(member.getId()) && signupService.validatePassword(member.getPassword())) {
 			
-			LoginStatus status = loginService.validateMember(member);
+			LoginStatus status = loginService.validate(member);
 			System.out.println("2단계");
 			System.out.println("status : " + status);
 			
@@ -209,14 +206,12 @@ public class LoginController {
 	    String refreshToken = request.getHeader("Refresh_token");
 //
 //	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
-	    if (refreshToken == null || refreshToken.isEmpty()) {
-	    	// 400 : Refresh token 없음
-	        return new ResponseEntity<>("Refresh token is required", HttpStatus.BAD_REQUEST);
-	    }
-	    String id = memberService.getIdFromToken(request);
-	    if (memberService.isUserIdEquals(id)) {
+//	    if (refreshToken == null || refreshToken.isEmpty()) {
+//	    	// 400 : Refresh token 없음
+//	        return new ResponseEntity<>("Refresh token is required", HttpStatus.BAD_REQUEST);
+//	    }
 
-	    // Refresh Token 검증
+//	    // Refresh Token 검증
 //	    if (!JWTUtil.validateToken(refreshToken)) {
 //	    	// 401 : 유효하지 않은 Refresh token
 //	        return new ResponseEntity<>("Invalid refresh token", HttpStatus.UNAUTHORIZED);
@@ -243,10 +238,6 @@ public class LoginController {
 	    
 	    // 200 : Access_token 발급
 	    return new ResponseEntity<>(responseBody, HttpStatus.OK);
-	    } else {
-	    	// 401 토큰의 사용자와 요청한 사용자 불일치
-	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
-	    }
 	}
 	
 	@ResponseBody
@@ -330,13 +321,13 @@ public class LoginController {
 	        	String easylogin_token = JWTUtil.generateEasyloginToken(kakaoId, kakaoEmail);
 				System.out.println("이지로그인 토큰 : " + easylogin_token);
 				
-				Map<String, String> tokenMap = new HashMap<>();
-				tokenMap.put("Easylogin_token", "Bearer " + easylogin_token);
-				tokenMap.put("message", "No linked account found. Please link your account.");
-		        System.out.println("간편로그인 리스폰스 : " + tokenMap);
+				Map<String, String> response2 = new HashMap<>();
+		        response2.put("Easylogin_token", "Bearer " + easylogin_token);
+		        response2.put("message", "No linked account found. Please link your account.");
+		        System.out.println("간편로그인 리스폰스 : " + response2);
 		        
 		        // 303 : 연동된 계정이 존재하지 않음
-		        return new ResponseEntity<>(tokenMap, HttpStatus.SEE_OTHER);
+		        return new ResponseEntity<>(response, HttpStatus.SEE_OTHER);
 		        
 			} else {
 				
@@ -350,7 +341,7 @@ public class LoginController {
 				// 마지막 로그인 날짜 저장
 				loginService.setLastLogin(memberEntity);
 				
-				LoginStatus status = loginService.validateMember(memberEntity);
+				LoginStatus status = loginService.validate(memberEntity);
 				
 				// 로그인 정보 전달 객체 생성
 				LoginDTO loginDTO = new LoginDTO(status, "KakaoLogin successful");

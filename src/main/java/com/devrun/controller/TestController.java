@@ -2,8 +2,6 @@ package com.devrun.controller;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,19 +28,9 @@ public class TestController {
 //	122.41.29.73
 //	@CrossOrigin(origins = "localhost:3000" , allowedHeaders = {"GET"})
 	@GetMapping("/tmi")
-	public ResponseEntity<?> tmi(HttpServletRequest request) {
-		// refreshToken이 헤더에 있는지 확인
-	    String accessToken = request.getHeader("Access_token");
-
-//	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
-	    if (accessToken == null || accessToken.isEmpty()) {
-	    	// 400 : Access token 없음
-	        return new ResponseEntity<>("Access token is required", HttpStatus.BAD_REQUEST);
-	    }
-	    
-		String id = memberService.getIdFromToken(request);
+	public ResponseEntity<?> tmi(@RequestParam("id") String id) {
 	    if (memberService.isUserIdEquals(id)) {
-	        MemberEntity member = memberService.findById(id);
+	        MemberEntity member = signupService.findById(id);
 	        return ResponseEntity.ok(member);
 	    } else {
 	    	// 401 토큰의 사용자와 요청한 사용자 불일치

@@ -45,6 +45,7 @@ public class PaymentController {
 			LocalDateTime dateTime = LocalDateTime.now();
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd a hh:mm:ss", new Locale("ko"));
 			String paymentDate = dateTime.format(formatter);
+
 			System.err.println(paymentDTOList);
 			
 			  // 사용자의 포인트 정보를 조회
@@ -108,6 +109,7 @@ public class PaymentController {
 			} catch (Exception e) {
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("결제 정보 저장에 실패했습니다.");
 			}
+
 		}
 	
 	// 결제 정보

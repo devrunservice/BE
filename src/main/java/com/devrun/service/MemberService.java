@@ -12,10 +12,8 @@ import java.util.regex.Pattern;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.servlet.http.HttpServletRequest;
-import javax.transaction.TransactionalException;
-import javax.validation.ConstraintViolationException;
 
+import com.devrun.entity.PointEntity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,9 +23,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.devrun.entity.MemberEntity;
-import com.devrun.entity.PointEntity;
 import com.devrun.repository.MemberEntityRepository;
-import com.devrun.util.JWTUtil;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -44,7 +40,7 @@ public class MemberService {
 	
 	@Value("${sens.serviceId}")
 	private String serviceId;
-	
+
 	private final MemberEntityRepository memberEntityRepository;
 	
 	private final Map<String, String> phoneCodeMap = new ConcurrentHashMap<>();
@@ -52,13 +48,14 @@ public class MemberService {
 	public MemberEntity findById(String id) {
 		return memberEntityRepository.findById(id);
 	}
-	
-	public MemberEntity insert(MemberEntity memberEntity) throws ConstraintViolationException , TransactionalException , TransactionSystemException {
-		return memberEntityRepository.save(memberEntity);
-	}
-	
+
 	public PointEntity insert(PointEntity point) {
 		return memberEntityRepository.save(point);
+	}
+
+	public void insert(MemberEntity memberEntity) {
+		memberEntityRepository.save(memberEntity);
+
 	}
 	
 	public int checkID(String id) {
@@ -212,11 +209,4 @@ public class MemberService {
         String userId = authentication.getName();
         return userId.equals(id);
     }
-    
-    public String getIdFromToken(HttpServletRequest request) {
-    	String jwt = request.getHeader("Access_token");
-		String id = JWTUtil.getUserIdFromToken(jwt);
-        return id;
-    }
-
 }

@@ -38,5 +38,5 @@ public class PointEntity {
 	@Column(name = "mypoint", nullable = true, length = 10)
 	@Comment("보유한 총 포인트 ")
 	private int mypoint;
-	
+
 }

@@ -4,13 +4,13 @@ import java.util.Date;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-
 @Component
 public class JWTUtil {
 
@@ -56,6 +56,7 @@ public class JWTUtil {
     }
     
     // 주어진 token이 유효한지 확인합니다. 유효하면 true를, 그렇지 않으면 false를 반환
+
     public static boolean validateToken(String token) {
         try {
         	String subToken = token.substring(7);
@@ -70,9 +71,7 @@ public class JWTUtil {
 
     // 메서드는 주어진 token으로부터 사용자 ID를 추출
     public static String getUserIdFromToken(String token) {
-    	String subToken = token.substring(7);
-        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken).getBody();
-        System.out.println("사용자 아이디 : " + claims.getSubject());
+        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
         return claims.getSubject();
     }
     

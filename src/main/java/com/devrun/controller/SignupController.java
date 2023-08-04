@@ -1,8 +1,6 @@
 package com.devrun.controller;
 
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
@@ -12,7 +10,6 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -20,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.devrun.dto.member.SignupDTO;
 import com.devrun.entity.MemberEntity;
-import com.devrun.entity.PointEntity;
 import com.devrun.service.MemberService;
 
 import reactor.core.publisher.Mono;
@@ -29,7 +25,7 @@ import reactor.core.publisher.Mono;
 public class SignupController {
 	
 	@Autowired
-	MemberService memberService;
+	MemberService signupService;
 	
 	@ResponseBody
 	@PostMapping("/signup")
@@ -41,7 +37,7 @@ public class SignupController {
 	@ResponseBody
     public String checkID(@RequestBody SignupDTO signupDTO) {
 		String id = signupDTO.getId();
-        int result = memberService.checkID(id);
+        int result = signupService.checkID(id);
         return result + "";
     }
 	
@@ -49,7 +45,7 @@ public class SignupController {
 	@ResponseBody
     public String checkEmail(@RequestBody SignupDTO signupDTO) {
 		String email = signupDTO.getEmail();
-		int result = memberService.checkEmail(email);
+		int result = signupService.checkEmail(email);
         return result + "";
     }
 
@@ -57,7 +53,7 @@ public class SignupController {
 	@ResponseBody
 	public String checkPhone(@RequestBody SignupDTO signupDTO) {
 		String phonenumber = signupDTO.getPhonenumber();
-		int result = memberService.checkphone(phonenumber);
+		int result = signupService.checkphone(phonenumber);
 		return result + "";
 	}
 
@@ -66,7 +62,7 @@ public class SignupController {
 	public Mono<String> authPhonenumber(@RequestBody SignupDTO signupDTO) {
 		String phonenumber = signupDTO.getPhonenumber();
 		System.out.println("폰" + phonenumber);
-        return memberService.sendSmsCode(phonenumber);
+        return signupService.sendSmsCode(phonenumber);
     }
 	
 	@ResponseBody
@@ -74,7 +70,7 @@ public class SignupController {
 	 public ResponseEntity<?> verify(@RequestBody SignupDTO signupDTO) {
 		String phonenumber = signupDTO.getPhonenumber();
 		String code = signupDTO.getCode();
-        if (memberService.verifySmsCode(phonenumber, code)) {
+        if (signupService.verifySmsCode(phonenumber, code)) {
         	// 200 인증성공
         	return new ResponseEntity<>("Verification successful", HttpStatus.OK);
         } else {
@@ -84,25 +80,21 @@ public class SignupController {
     }
 	
 	@ResponseBody
-	@PostMapping("/signup/okay")
-	// @Transactional이 적용된 메소드나 클래스는 Spring에 의해 트랜잭션 경계가 설정되고, 
-	// 해당 트랜잭션 내에서 실행되는 모든 데이터베이스 작업은 단일 트랜잭션으로 묶입니다. 
-	// 이렇게 하면 데이터 무결성이 보장되며, 예외가 발생하면 트랜잭션이 롤백되어 데이터베이스 상태가 이전 상태로 복원됩니다.
-	@Transactional																// code는 파라미터로													
+	@PostMapping("/signup/okay")												// code는 파라미터로
 	public ResponseEntity<?> okay(@RequestBody @Valid MemberEntity memberEntity, String code) {
 		// @Valid 어노테이션이 있는 경우, Spring은 요청 본문을 MemberEntity 객체로 변환하기 전에 Bean Validation API를 사용하여 유효성 검사를 수행
 		System.out.println(memberEntity);
 		System.out.println(memberEntity.getEmail());
 
 		System.out.println("트루가 맞냐" + memberEntity.isAgeConsent());
-		System.out.println("아이디 유효성 검사 : " + memberService.validateId(memberEntity.getId()));
-		System.out.println("이메일 유효성 검사 : " + memberService.validateEmail(memberEntity.getEmail()));
-		System.out.println("비밀번호 유효성 검사" + memberService.validatePassword(memberEntity.getPassword()));
+		System.out.println("아이디 유효성 검사 : " + signupService.validateId(memberEntity.getId()));
+		System.out.println("이메일 유효성 검사 : " + signupService.validateEmail(memberEntity.getEmail()));
+		System.out.println("비밀번호 유효성 검사" + signupService.validatePassword(memberEntity.getPassword()));
 		// 회원정보 입력
-		if (memberService.checkID(memberEntity.getId()) == 0 
-				&& memberService.checkEmail(memberEntity.getEmail()) == 0
-				&& memberService.checkphone(memberEntity.getPhonenumber()) == 0
-				&& memberService.verifySmsCode(memberEntity.getPhonenumber(), code)
+		if (signupService.checkID(memberEntity.getId()) == 0 
+				&& signupService.checkEmail(memberEntity.getEmail()) == 0
+				&& signupService.checkphone(memberEntity.getPhonenumber()) == 0
+				&& signupService.verifySmsCode(memberEntity.getPhonenumber(), code)
 				) {
 //			// 403 약관 미동의    
 //			if (!memberEntity.isAgeConsent() 
@@ -112,9 +104,9 @@ public class SignupController {
 //			}
 			// 회원가입 성공
 //			else 
-				if (memberService.validateId(memberEntity.getId()) 
-					&& memberService.validateEmail(memberEntity.getEmail()) 
-					&& memberService.validatePassword(memberEntity.getPassword())
+				if (signupService.validateId(memberEntity.getId()) 
+					&& signupService.validateEmail(memberEntity.getEmail()) 
+					&& signupService.validatePassword(memberEntity.getPassword())
 					) {
 					
 					//LocalDate와 Date는 둘 다 Java에서 날짜를 표현하는 클래스입니다. 그러나 사용 방식과 기능에는 몇 가지 중요한 차이점이 있습니다.
@@ -150,73 +142,26 @@ public class SignupController {
 					// 현재 날짜가 사용자의 생년월일로부터 19년 후의 날짜 이후라면 19세 이상
 					// currentDate.isEqual(after19Years) : 생일 당일도 19세로 인정
 					if (localCurrentDate.isAfter(after19Years) || localCurrentDate.isEqual(after19Years)) {
+					    // 회원가입 처리
+						System.out.println("회원가입 성공");
 						
-					    try {
-					    	// 가입일자 설정
-					    	// 현재 날짜와 시간을 LocalDateTime 형식으로 가져오기
-					    	LocalDateTime localCurrentDateTime = LocalDateTime.now();
-
-					    	// LocalDateTime을 Instant로 변환하기
-					    	Instant currentInstant = localCurrentDateTime
-					    			// atZone() 메서드를 사용하여 시스템 기본 시간대를 사용
-					    			.atZone(ZoneId.systemDefault())
-					    			// toInstant() 메서드를 사용하여 Instant로 변환
-					    			.toInstant();
-
-					    	// Instant를 java.util.Date 객체로 변환
-					    	// 이를 위해 Date.from() 메서드를 사용
-					    	Date currentDate = Date.from(currentInstant);
-
-					    	// 가입일자를 현재 날짜와 시간으로 설정
-					    	memberEntity.setSignup(currentDate);
-							
-					    	// 사용자 등록 시도
-					    	MemberEntity m = memberService.insert(memberEntity);
-					    	
-					    	if (m != null) {
-					    		
-					    		// 회원가입 축하 포인트 지급
-					    		PointEntity point = new PointEntity();
-					    		point.setMypoint(3000);
-					    		
-					    		// PointEntity 객체에 MemberEntity 객체를 설정
-						    	point.setMemberEntity(m);
-						    	
-						    	System.out.println("멤버"+m);
-						    	System.out.println("포인트"+point);
-						    	
-						    	// PointEntity에 MemberEntity가 제대로 설정되었는지 검사
-						        if (point.getUserNo() != -1) {
-						        	
-						        	// 포인트 정보 등록 시도 실패 시
-						            if (memberService.insert(point) == null) {
-						                return new ResponseEntity<>("Failed to save point", HttpStatus.INTERNAL_SERVER_ERROR);
-						            }
-						            
-					            // MemberEntity 설정 실패 시
-						        } else {
-						            return new ResponseEntity<>("Failed to set point entity", HttpStatus.INTERNAL_SERVER_ERROR);
-						        }
-						        
-					        // 사용자 등록 실패 시
-						    } else {
-						        return new ResponseEntity<>("Failed to register the user", HttpStatus.INTERNAL_SERVER_ERROR);
-						    }
-					    	
-				    	// 기타 데이터베이스 오류 발생 시
-						} catch (Exception e) {
-							System.out.println("Error: " + e.getMessage());
-						    return new ResponseEntity<>("Failed to register for database", HttpStatus.INTERNAL_SERVER_ERROR);
-						}
-					    
-					    // 메모리에 저장된 전화번호와 인증코드 제거
-					    memberService.removeSmsCode(memberEntity.getPhonenumber());
-					    
-					    return new ResponseEntity<>("Signup successful", HttpStatus.OK);
-					    //ResponseEntity.ok("Signup successful");
-					    
-				    // 400 19세 미만
+						// 가입일자 저장
+						Date currentDate = Date.from(localCurrentDate
+								// .atStartOfDay(): LocalDate 객체에서 해당 날짜의 시작 시간(00:00:00)을 나타내는 LocalDateTime 객체를 생성
+								.atStartOfDay(ZoneId.systemDefault()).toInstant());
+						// 이러한 메서드들을 연결하여 사용함으로써, Date에서 LocalDate로 변환하거나, LocalDate에서 Date로 변환하는 등의 작업을 수행할 수 있습니다.
+						// 이는 Java 8에서 도입된 새로운 날짜/시간 API와 이전의 Date 클래스 사이의 호환성을 유지하기 위해 필요한 작업입니다.
+						
+					    memberEntity.setSignup(currentDate);
+						signupService.insert(memberEntity);
+						
+						// 메모리에 저장된 전화번호와 인증코드 제거
+						signupService.removeSmsCode(memberEntity.getPhonenumber());
+						
+						return new ResponseEntity<>("Signup successful", HttpStatus.OK);
+						//ResponseEntity.ok("Signup successful");
 					} else {
+						// 400 19세 미만
 					    return new ResponseEntity<>("User is under 19 years old", HttpStatus.BAD_REQUEST);
 					}
 					
@@ -228,22 +173,22 @@ public class SignupController {
 			}
 			
 		// 409 중복된 아이디
-		} else if(memberService.checkID(memberEntity.getId()) != 0) {
+		} else if(signupService.checkID(memberEntity.getId()) != 0) {
 		    return new ResponseEntity<>("UserId already taken", HttpStatus.CONFLICT);
 		    		//ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("UserId already taken");
 		
 		// 409 중복된 이메일
-		} else if(memberService.checkEmail(memberEntity.getEmail()) != 0) {
+		} else if(signupService.checkEmail(memberEntity.getEmail()) != 0) {
 		    return new ResponseEntity<>("Email already registered", HttpStatus.CONFLICT);
 		    		//ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email already registered");
 		
 		// 409 중복된 핸드폰번호
-		} else if(memberService.checkphone(memberEntity.getPhonenumber()) != 0) {
+		} else if(signupService.checkphone(memberEntity.getPhonenumber()) != 0) {
 		    return new ResponseEntity<>("Phone number already registered", HttpStatus.CONFLICT);
 		    		//ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Phone number already registered");
 		
 		// 403 인증되지 않은 전화번호
-		} else if(!memberService.verifySmsCode(memberEntity.getPhonenumber(), code)) {
+		} else if(!signupService.verifySmsCode(memberEntity.getPhonenumber(), code)) {
 			
 			return new ResponseEntity<>("Verification failed Phonenumber", HttpStatus.FORBIDDEN);
 		// 기타 오류 500
