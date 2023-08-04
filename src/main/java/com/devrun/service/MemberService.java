@@ -13,11 +13,14 @@ import java.util.regex.Pattern;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.TransactionalException;
+import javax.validation.ConstraintViolationException;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -50,7 +53,7 @@ public class MemberService {
 		return memberEntityRepository.findById(id);
 	}
 	
-	public MemberEntity insert(MemberEntity memberEntity) {
+	public MemberEntity insert(MemberEntity memberEntity) throws ConstraintViolationException , TransactionalException , TransactionSystemException {
 		return memberEntityRepository.save(memberEntity);
 	}
 	

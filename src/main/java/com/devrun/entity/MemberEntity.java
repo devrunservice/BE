@@ -10,10 +10,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 
+import lombok.Builder;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -21,6 +21,7 @@ import com.devrun.dto.member.MemberDTO.Role;
 import com.devrun.dto.member.MemberDTO.Status;
 
 import lombok.Data;
+import org.springframework.format.annotation.NumberFormat;
 
 @Data
 @Entity
@@ -44,6 +45,8 @@ public class MemberEntity {
 			, nullable = false
 			, length = 50)
 	@Comment("유저 이메일")
+	@Email
+	@NotNull(groups = editmyinfo.class)
 	@NotBlank(message = "information cannot be null or empty")
 	private String email;
 	
@@ -57,14 +60,17 @@ public class MemberEntity {
 	@Column(name = "password"
 			, nullable = false
 			, columnDefinition = "TEXT")
+	@NumberFormat
 	@Comment("유저 비밀번호")
-	@NotBlank(message = "information cannot be null or empty")
+	@NotBlank(groups = editmyinfo.class , message = "information cannot be null or empty")
 	private String password;
 	
 	@Column(name = "phonenumber"
 			, nullable = false
 			, length = 11)
 	@Comment("유저 연락처")
+	@Pattern(regexp = "^01(?:0|1|[6-9])[.-]?(\\d{3}|\\d{4})[.-]?(\\d{4})$", message = "10 ~ 11 자리의 숫자만 입력 가능합니다.") // 정규식 검증이 있었다??
+	@NotNull(groups = editmyinfo.class)
 	@NotBlank(message = "information cannot be null or empty")
 	private String phonenumber;
 	
@@ -130,6 +136,11 @@ public class MemberEntity {
 	@Column(name = "marketingConsent", nullable = false, columnDefinition = "TINYINT(1)")
 	@Comment("광고, 마케팅 동의")
 	private boolean marketConsent;
+
+	@Column(name = "profileimgsrc")
+	@NotBlank
+	@Comment("유저 프로필 이미지 주소")
+	private String profileimgsrc = "profile.png";
 
 
 	// OneToOne 어노테이션을 사용하여 1:1 관계 설정

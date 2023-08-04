@@ -52,6 +52,12 @@ dependencies {
 	implementation "io.springfox:springfox-boot-starter:3.0.0"
 	// https://mvnrepository.com/artifact/org.hibernate/hibernate-validator
 	implementation 'org.hibernate:hibernate-validator:8.0.0.Final'
+
+	// AWS_S3
+	implementation platform('software.amazon.awssdk:bom:2.20.88')
+	implementation 'software.amazon.awssdk:s3:'
+	implementation 'software.amazon.awssdk:sso'
+	implementation 'software.amazon.awssdk:ssooidc'
 	
 }
 
