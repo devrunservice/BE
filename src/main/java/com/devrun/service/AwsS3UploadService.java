@@ -63,6 +63,7 @@ public class AwsS3UploadService extends AWSS3Service{
             PutObjectRequest uploadRequest = getPutObjectRequest(uploadpath, contentType);
 
             s3Client.putObject(uploadRequest, uploadfile);
+
         }
         return uploadpath;
     }
