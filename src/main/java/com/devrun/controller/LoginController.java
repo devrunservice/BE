@@ -212,8 +212,10 @@ public class LoginController {
 	    	// 400 : Refresh token 없음
 	        return new ResponseEntity<>("Refresh token is required", HttpStatus.BAD_REQUEST);
 	    }
-	    String id = memberService.getIdFromToken(request);
-	    if (memberService.isUserIdEquals(id)) {
+//	    String id = memberService.getIdFromToken(request);
+	    // 사용자 식별
+	    String userId = JWTUtil.getUserIdFromToken(refreshToken);
+	    if (memberService.isUserIdEquals(userId)) {
 
 	    // Refresh Token 검증
 //	    if (!JWTUtil.validateToken(refreshToken)) {
@@ -221,8 +223,6 @@ public class LoginController {
 //	        return new ResponseEntity<>("Invalid refresh token", HttpStatus.UNAUTHORIZED);
 //	    }
 
-	    // 사용자 식별
-	    String userId = JWTUtil.getUserIdFromToken(refreshToken);
 
 	    // 사용자 존재 여부 확인
 	    MemberEntity memberEntity = loginRepository.findById(userId);
@@ -315,7 +315,7 @@ public class LoginController {
 			// 공사중 -------------------------------------------------------------------------------------
 			
 			// SNS Access_token 생성
-//			loginService.setEasycookie(response, oauthToken.getAccess_token(), kakaoProfile.getId());
+			loginService.setEasycookie(response, oauthToken.getAccess_token(), kakaoProfile.getId());
 			
 			MemberEntity memberEntity = new MemberEntity();
 			

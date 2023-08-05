@@ -34,7 +34,7 @@ public class MemberEntity {
 	private int userNo;
 	
 	@Column(name = "name"
-			, nullable = false
+			, nullable = false												// 모든 컨트롤러에서 @Valid로 검증하는 것이 아니기 때문에 사용할지 말지일단 Keep
 			, length = 20)
 	@Comment("유저 이름")
 	@NotBlank(message = "information cannot be null or empty")
@@ -81,7 +81,7 @@ public class MemberEntity {
 	, nullable = false
 	, length = 7)
 	@Comment("유저 역할 - STUDENT / MENTO / ADMIN")
-	private Role role = Role.STUDENT;							// 기본값 설정
+	private Role role = Role.STUDENT;										// 기본값 설정
 	
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status"
