@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.devrun.entity.MemberEntity;
 import com.devrun.service.MemberService;
 import com.devrun.service.TestService;
+import com.devrun.util.JWTUtil;
 
 @RestController
 public class TestController {
@@ -31,7 +32,16 @@ public class TestController {
 //	@CrossOrigin(origins = "localhost:3000" , allowedHeaders = {"GET"})
 	@GetMapping("/tmi")
 	public ResponseEntity<?> tmi(HttpServletRequest request) {
-		String id = memberService.getIdFromToken(request);
+		// refreshToken이 헤더에 있는지 확인
+	    String accessToken = request.getHeader("Access_token");
+
+//	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
+	    if (accessToken == null || accessToken.isEmpty()) {
+	    	// 400 : Access token 없음
+	        return new ResponseEntity<>("Access token is required", HttpStatus.BAD_REQUEST);
+	    }
+	    
+		String id = JWTUtil.getUserIdFromToken(accessToken);
 	    if (memberService.isUserIdEquals(id)) {
 	        MemberEntity member = memberService.findById(id);
 	        return ResponseEntity.ok(member);

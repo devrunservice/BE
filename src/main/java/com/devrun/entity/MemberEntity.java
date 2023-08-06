@@ -9,7 +9,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotBlank;
@@ -35,7 +34,7 @@ public class MemberEntity {
 	private int userNo;
 	
 	@Column(name = "name"
-			, nullable = false
+			, nullable = false												// 모든 컨트롤러에서 @Valid로 검증하는 것이 아니기 때문에 사용할지 말지일단 Keep
 			, length = 20)
 	@Comment("유저 이름")
 	@NotBlank(message = "information cannot be null or empty")
@@ -82,7 +81,7 @@ public class MemberEntity {
 	, nullable = false
 	, length = 7)
 	@Comment("유저 역할 - STUDENT / MENTO / ADMIN")
-	private Role role = Role.STUDENT;							// 기본값 설정
+	private Role role = Role.STUDENT;										// 기본값 설정
 	
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status"
@@ -131,12 +130,13 @@ public class MemberEntity {
 	@Column(name = "marketingConsent", nullable = false, columnDefinition = "TINYINT(1)")
 	@Comment("광고, 마케팅 동의")
 	private boolean marketConsent;
-	
-//	// OneToOne 어노테이션을 사용하여 1:1 관계 설정
+
+
+	// OneToOne 어노테이션을 사용하여 1:1 관계 설정
 //    @OneToOne(mappedBy = "memberEntity")
 //    private PointEntity pointEntity;
-    
-	
+
+
 	
 //	데이터베이스에 Enum 값을 저장할 때, 일반적으로 두 가지 전략을 사용할 수 있습니다:
 //

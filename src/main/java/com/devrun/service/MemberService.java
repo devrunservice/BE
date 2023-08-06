@@ -210,10 +210,20 @@ public class MemberService {
         return userId.equals(id);
     }
     
-    public String getIdFromToken(HttpServletRequest request) {
-    	String jwt = request.getHeader("Access_token");
-		String id = JWTUtil.getUserIdFromToken(jwt);
-        return id;
-    }
+//    public String getIdFromToken(HttpServletRequest request) {
+//    	String accessToken = request.getHeader("Access_token");
+//        String refreshToken = request.getHeader("Refresh_token");
+//        if (accessToken != null) {
+//        	String id = JWTUtil.getUserIdFromToken(accessToken);
+//        	return id;
+//		} else if (refreshToken != null) {
+//			String id = JWTUtil.getUserIdFromToken(refreshToken);
+//        	return id;
+//		} else {
+//			return null;
+//		}
+//        
+//    }
+
 
 }

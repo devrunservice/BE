@@ -51,12 +51,17 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 	        throws ServletException, IOException {
-		String requestPath = request.getRequestURI();
+		
+//		String requestPath = request.getRequestURI();
 		
 		//login 경로에 대한 요청인 경우 필터를 건너뛰도록 설정합니다.
-		if (!"/tmi".equals(requestPath) 
-				&& !"/savePaymentInfo".equals(requestPath)
-				&& !"/token/refresh".equals(requestPath)
+		if (
+//				!"/tmi".equals(requestPath) 
+//				&& !"/savePaymentInfo".equals(requestPath)
+//				&& !"/token/refresh".equals(requestPath)
+				request.getHeader("Access_token") == null
+				&& request.getHeader("Refresh_token") == null
+//				&& request.getHeader("Easylogin_token") == null
 				) {
 		    chain.doFilter(request, response);
 		    return;
@@ -66,16 +71,20 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			// HTTP 요청 헤더에서 헤더 값을 가져옴
 		    String accessTokenHeader = request.getHeader("Access_token");
 		    String refreshTokenHeader = request.getHeader("Refresh_token");
-		    String easyloginTokenHeader = request.getHeader("Easylogin_token");
+//		    String easyloginTokenHeader = request.getHeader("Easylogin_token");
 		    
 	        if (accessTokenHeader != null && accessTokenHeader.startsWith("Bearer ")) {
 	            processToken(accessTokenHeader, "Access_token", chain, request, response);
 	        } else if (refreshTokenHeader != null && refreshTokenHeader.startsWith("Bearer ")) {
 	        	System.out.println("여기냐1");
 	            processToken(refreshTokenHeader, "Refresh_token", chain, request, response);
-	        } else if (easyloginTokenHeader != null && easyloginTokenHeader.startsWith("Bearer ")) {
-	            processToken(easyloginTokenHeader, "Easylogin_token", chain, request, response);	
 	        }
+//	        else if (easyloginTokenHeader != null && easyloginTokenHeader.startsWith("Bearer ")) {
+//	        	System.out.println("이지토큰 : " + easyloginTokenHeader.substring(7));
+//	        	
+//	        	validateEasyLoginToken(easyloginTokenHeader.substring(7));
+//	        	
+//	        }
 //		        else {
 //		        	// 400 : 올바르지 않은 토큰
 //		            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No or invalid token provided");
@@ -132,41 +141,27 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     	
         // 토큰에서 추출한 아이디가 null이 아니고, 현재 Security Context에 인증 정보가 없는 경우
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails loadedUserDetails = this.userDetailsService.loadUserByUsername(username);
-            CustomUserDetails userDetails = (CustomUserDetails) loadedUserDetails;
-            System.out.println("여기냐3");
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+//            CustomUserDetails userDetails = (CustomUserDetails) loadedUserDetails;
+            System.out.println("여기냐3" + userDetails);
             
-            if (headerName.equals("Access_token") || headerName.equals("Easylogin_token")) {
+            if (headerName.equals("Access_token")) {
 	            // 토큰이 유효한 경우 Security Context에 인증 정보를 설정
-	            if (validateAccessToken(jwt, userDetails) || validateEasyLoginToken(jwt, userDetails)) {
+	            if (validateAccessToken(jwt, userDetails)) {
 	            	System.out.println("여기냐4" + validateAccessToken(jwt, userDetails));
-	            	// UsernamePasswordAuthenticationToken은 Spring Security에서 제공하는 Authentication의 구현체로
-	            	// 사용자의 인증 정보를 나타냄 이 객체는 주로 사용자의 ID, 비밀번호, 그리고 권한 정보를 포함
-	                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken 
-	                // new WebAuthenticationDetailsSource().buildDetails(request)는 요청에 대한 세부 정보를 생성하는 역할. 이 정보는 후속 보안 작업에서 사용
-	                = new UsernamePasswordAuthenticationToken(
-	                        userDetails, null, userDetails.getAuthorities());
-	                usernamePasswordAuthenticationToken
-	                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-	                System.out.println(usernamePasswordAuthenticationToken + "너냐5");
-	                // SecurityContext에 Authentication 객체를 설정하는 역할. Authentication 객체는 Spring Security의 다른 부분에서 현재 사용자의 인증 정보를 접근하는데 사용
-	                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+	            	setAuthenticationInSecurityContext(userDetails, request);
 	            }
 	            
             } else if(headerName.equals("Refresh_token")) {
-            	System.out.println("여기까진오나?");
             	
-            	if(!validateRefreshToken(jwt, userDetails)) {
-            		System.out.println("여기까진오나?2");
-            		
-            		throw new SignatureException("Invalid refresh token");
-            		
-            	} else if(validateRefreshToken(jwt, userDetails)) {
-            		System.out.println("여기까진오나?3");
-            	}
-            }
+        	    if(!validateRefreshToken(jwt, userDetails)) {
+        	        throw new SignatureException("Invalid refresh token");
+        	        
+        	    } else if(validateRefreshToken(jwt, userDetails)) {
+        	    	setAuthenticationInSecurityContext(userDetails, request);
+        	    }
+        	}
         }
-		        
 	}
 
     // Access 토큰에서 아이디를 추출하는 메서드
@@ -218,24 +213,32 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
     
     // EasyLogin_token에서 userId와 email을 추출하는 메소드
-    public static String getUserIdFromEasyloginToken(String token) {
-        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
-        return claims.getSubject();
-    }
-
-    public static String getEmailFromEasyloginToken(String token) {
-        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
-        return claims.get("email", String.class);
-    }
+//    public static String getUserIdFromEasyloginToken(String token) {
+//        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+//        return claims.getSubject();
+//    }
+//
+//    public static String getEmailFromEasyloginToken(String token) {
+//        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+//        return claims.get("email", String.class);
+//    }
 
     // EasyLogin_token을 검증하는 메소드
-    private Boolean validateEasyLoginToken(String token, CustomUserDetails userDetails) {
-        final String username = getUserIdFromEasyloginToken(token);
-        final String email = getEmailFromEasyloginToken(token);
-        // 여기서 userDetails는 우리가 DB 등에서 로드한 사용자의 정보를 가진 객체입니다.
-        return username.equals(userDetails.getUsername()) && email.equals(userDetails.getEmail()) && !isTokenExpired(token);
+//    private Boolean validateEasyLoginToken(String token) {
+//        return !isTokenExpired(token);
+//    }
+    
+    public void setAuthenticationInSecurityContext(UserDetails userDetails, HttpServletRequest request) {
+    	// UsernamePasswordAuthenticationToken은 Spring Security에서 제공하는 Authentication의 구현체로
+    	// 사용자의 인증 정보를 나타냄 이 객체는 주로 사용자의 ID, 비밀번호, 그리고 권한 정보를 포함
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken 
+                = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        usernamePasswordAuthenticationToken.setDetails(
+        		// new WebAuthenticationDetailsSource().buildDetails(request)는 요청에 대한 세부 정보를 생성하는 역할. 이 정보는 후속 보안 작업에서 사용
+        		new WebAuthenticationDetailsSource().buildDetails(request));
+        System.out.println(usernamePasswordAuthenticationToken + "너냐5");
+        // SecurityContext에 Authentication 객체를 설정하는 역할. Authentication 객체는 Spring Security의 다른 부분에서 현재 사용자의 인증 정보를 접근하는데 사용
+        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
     }
-
-
 
 }

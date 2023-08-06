@@ -26,6 +26,5 @@ public class TestService {
 	public String deleteId(String id) {
 		return memberEntityRepository.deleteById(id);
 	}
-	
-	
+
 }
