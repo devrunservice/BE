@@ -32,18 +32,19 @@ public class RefundService {
 
     public void refundPayment(Map<String, Object> refundData, String KEY, String SECRET) throws Exception {        
     	try {
-            // refundData에서 merchant_uid 확인
-            String merchantUid = refundData.get("merchant_uid").toString();
-            System.err.println(merchantUid);
-
-            // 결제 정보 조회
-            PaymentEntity paymentEntity = paymentRepository.findByMerchantUid(merchantUid);
-            System.err.println(paymentEntity);
-            System.err.println(paymentEntity.getMerchant_uid());
-
-            if (!paymentEntity.getMerchant_uid().equals(merchantUid)) {
-            	
-            }
+    		
+//            // refundData에서 merchant_uid 확인
+//            String merchantUid = refundData.get("merchant_uid").toString();
+//            System.err.println(merchantUid);
+//
+//            // 결제 정보 조회
+//            PaymentEntity paymentEntity = paymentRepository.findByMerchantUid(merchantUid);
+//            System.err.println(paymentEntity);
+//            System.err.println(paymentEntity.getMerchant_uid());
+//
+//            if (!paymentEntity.getMerchant_uid().equals(merchantUid)) {
+//            	
+//            }
 
             System.out.println("환불 진행");
 		
