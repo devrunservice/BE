@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.devrun.entity.MemberEntity;
 import com.devrun.service.MemberService;
 import com.devrun.service.TestService;
+import com.devrun.util.JWTUtil;
 
 @RestController
 public class TestController {
@@ -40,7 +41,7 @@ public class TestController {
 	        return new ResponseEntity<>("Access token is required", HttpStatus.BAD_REQUEST);
 	    }
 	    
-		String id = memberService.getIdFromToken(request);
+		String id = JWTUtil.getUserIdFromToken(accessToken);
 	    if (memberService.isUserIdEquals(id)) {
 	        MemberEntity member = memberService.findById(id);
 	        return ResponseEntity.ok(member);

@@ -26,6 +26,7 @@ import com.devrun.repository.PaymentRepository;
 import com.devrun.repository.PointRepository;
 import com.devrun.service.MemberService;
 import com.devrun.service.PaymentService;
+import com.devrun.util.JWTUtil;
 
 
 @RestController
@@ -133,7 +134,7 @@ public class PaymentController {
 		        return new ResponseEntity<>("Access token is required", HttpStatus.BAD_REQUEST);
 		    }
 
-		    String id = memberService.getIdFromToken(request);
+		    String id = JWTUtil.getUserIdFromToken(accessToken);
 		    if (memberService.isUserIdEquals(id)) {
 		        MemberEntity member = memberService.findById(id);	
 		        
