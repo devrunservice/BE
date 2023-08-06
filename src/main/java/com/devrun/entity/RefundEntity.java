@@ -24,9 +24,9 @@ public class RefundEntity {
 	@Comment("주문번호")
 	private String merchant_uid;
 
-	@Column(name = "cancelRequestAmount", nullable = true, length = 100)
+	@Column(name = "amount", nullable = true, length = 100)
 	@Comment("환불 금액")
-	private int cancel_request_amount;
+	private int amount;
 
 	@Column(name = "reason", nullable = true, length = 50)
 	@Comment("환불 이유")
@@ -37,9 +37,9 @@ public class RefundEntity {
 	private String refunddate;
 	
 	
-	 public RefundEntity(String merchant_uid, int cancel_request_amount, String reason, String refunddate) {
+	 public RefundEntity(String merchant_uid, int amount, String reason, String refunddate) {
 	        this.merchant_uid = merchant_uid;
-	        this.cancel_request_amount = cancel_request_amount;
+	        this.amount = amount;
 	        this.reason = reason;
 	        this.refunddate = refunddate;
 	    }
