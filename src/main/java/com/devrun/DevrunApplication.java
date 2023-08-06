@@ -1,12 +1,15 @@
 package com.devrun;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import javax.annotation.PostConstruct;
 import java.util.TimeZone;
 
+import javax.annotation.PostConstruct;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
 @SpringBootApplication
+@EnableTransactionManagement
 public class DevrunApplication {
 
 	@PostConstruct

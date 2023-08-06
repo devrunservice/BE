@@ -31,10 +31,9 @@ public class LectureService {
         lecture.setLectureTag(requestDto.getLectureTag());
 
         // 강의 카테고리 설정
-        Lecturecategory lectureCategory = new Lecturecategory();
+        LectureCategory lectureCategory = new LectureCategory();
         lectureCategory.setLectureBigCategory(requestDto.getLectureBigCategory());
         lectureCategory.setLectureMidCategory(requestDto.getLectureMidCategory());
-        lectureCategory = lectureRepository.save(lectureCategory);
 
         lecture.setLectureCategory(lectureCategory);
 
@@ -44,12 +43,19 @@ public class LectureService {
             LectureSection section = new LectureSection();
             section.setSectionNumber(sectionDto.getSectionNumber());
             section.setSectionTitle(sectionDto.getSectionTitle());
-            section.setLecture(lecture); // 섹션과 강의를 연결해줌
+            section.setLecture(lecture); // Lecture 객체와 연결
             sectionRepository.save(section); // LectureSection 저장
             sections.add(section);
         }
         lecture.setLectureSection(sections);
+        
+        // 강의를 먼저 저장해야 LectureSection에서 Lecture 객체가 영속성 컨텍스트에 존재합니다.
+        lecture = lectureRepository.save(lecture);
 
+        // 강의 섹션을 Lecture와 연결한 후에 LectureSection 저장
+        for (LectureSection section : sections) {
+            sectionRepository.save(section);
+        }
         // 비디오 설정
         List<Video> videos = new ArrayList<>();
         for (VideoDto videoDto : requestDto.getVideos()) {
@@ -60,10 +66,13 @@ public class LectureService {
             video.setTotalPlayTime(videoDto.getTotalPlayTime());
             video.setVideoLink(videoDto.getVideoLink());
             video.setVideoTitle(videoDto.getVideoTitle());
-            video.setLectureSection(videoDto.getLectureSection()); // 비디오와 섹션을 연결해줌
+         // 비디오에 해당하는 섹션을 찾아서 연결해줌
+            LectureSection section = sectionRepository.findById(videoDto.getLectureSection().getSectionid()).orElse(null);
+            video.setLectureSection(section);
             videos.add(video);
         }
         lecture.setVideos(videos);
+        lecture = lectureRepository.save(lecture);
 
         return lecture;
     }

@@ -10,11 +10,12 @@ import lombok.Data;
 
 @Data
 @Entity
-public class Lecturecategory {
-	
+public class LectureCategory {
+	 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "categoryNo") 
+    private Long categoryNo;
 
     @Column(nullable = true)
     private String lectureBigCategory;
@@ -22,6 +23,5 @@ public class Lecturecategory {
     @Column(nullable = true)
     private String lectureMidCategory;
 
-   
 
 }

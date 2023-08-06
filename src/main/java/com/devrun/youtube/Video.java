@@ -20,6 +20,7 @@ import lombok.Setter;
 	
 	    @Id
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
+	    @Column(name = "videoNo")
 	    private Long videoNo;
 	    
 	    @Column(nullable = true)
@@ -45,7 +46,7 @@ import lombok.Setter;
 	    private Lecture lecture;
 	    
 	    @ManyToOne
-	    @JoinColumn(name = "lecture_section_id")
+	    @JoinColumn(name = "sectionid")
 	    private LectureSection lectureSection;
 	    
 	    

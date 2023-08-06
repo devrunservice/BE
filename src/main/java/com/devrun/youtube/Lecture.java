@@ -20,7 +20,8 @@ import lombok.Data;
 public class Lecture {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "lectureid")
+    private Long lectureid;
 
     @Column(nullable = true)
     private String lectureName;
@@ -58,9 +59,9 @@ public class Lecture {
     @ElementCollection
     private List<String> lectureTag;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST) // 영속성 컨텍스트에 먼저 저장하도록 수정
     @JoinColumn(name = "categoryNo")
-    private Lecturecategory lectureCategory;
+    private LectureCategory lectureCategory;
     
     @OneToMany(mappedBy = "lecture", cascade = CascadeType.ALL)
     private List<Video> videos;
