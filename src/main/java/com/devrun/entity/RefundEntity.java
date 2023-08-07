@@ -27,20 +27,15 @@ public class RefundEntity {
 	@Column(name = "amount", nullable = true, length = 100)
 	@Comment("환불 금액")
 	private int amount;
-
-	@Column(name = "reason", nullable = true, length = 50)
-	@Comment("환불 이유")
-	private String reason;		
 	
 	@Column(name = "payment_Date", nullable = true, length = 100)
 	@Comment("환불 일자")
 	private String refunddate;
 	
 	
-	 public RefundEntity(String merchant_uid, int amount, String reason, String refunddate) {
+	 public RefundEntity(String merchant_uid, int amount, String refunddate) {
 	        this.merchant_uid = merchant_uid;
-	        this.amount = amount;
-	        this.reason = reason;
+	        this.amount = amount;	        
 	        this.refunddate = refunddate;
 	    }
 }

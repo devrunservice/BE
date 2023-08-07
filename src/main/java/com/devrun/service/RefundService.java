@@ -2,6 +2,8 @@ package com.devrun.service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.json.simple.JSONObject;
@@ -33,19 +35,23 @@ public class RefundService {
     public void refundPayment(Map<String, Object> refundData, String KEY, String SECRET) throws Exception {        
     	try {
     		
-//            // refundData에서 merchant_uid 확인
-//            String merchantUid = refundData.get("merchant_uid").toString();
-//            System.err.println(merchantUid);
-//
-//            // 결제 정보 조회
-//            PaymentEntity paymentEntity = paymentRepository.findByMerchantUid(merchantUid);
-//            System.err.println(paymentEntity);
-//            System.err.println(paymentEntity.getMerchant_uid());
-//
-//            if (!paymentEntity.getMerchant_uid().equals(merchantUid)) {
-//            	
-//            }
+            // refundData에서 merchant_uid 확인
+            String merchantUid = refundData.get("merchant_uid").toString();
+            System.err.println(merchantUid);
 
+           // 결제 정보 조회
+//            PaymentEntity paymentEntity = paymentRepository.findByMerchantUid(merchantUid);
+            List<PaymentEntity> paymentEntity = paymentRepository.findByListMerchantUid(merchantUid);
+
+            System.err.println(paymentEntity);
+
+            if (paymentEntity.isEmpty()) {
+                throw new Exception("해당 거래 번호가 없습니다.");
+            }
+                
+            System.err.println("해당 거래 번호에 대한 결제 정보가 존재합니다.");           
+            
+    		System.err.println(refundData);
             System.out.println("환불 진행");
 		
 		 //rest방식으로 api 호출 준비
@@ -104,6 +110,9 @@ public class RefundService {
 		        // refundData 에서 merchant_uid 받아오기 
 		        // 향후 수정될수있음. merchant_uid 나 imp_uid 둘중하나 넣어주면 됩니다.
 	            body.put("merchant_uid", refundData.get("merchant_uid"));
+	            body.put("amount", refundData.get("amount"));
+	            System.err.println(body);
+
 
 		        HttpEntity<JSONObject> TokenEntity = new HttpEntity<>(body, headers);
 		        // 아임포트 api 문서와 동일한 url로 결제 취소 요청.
@@ -114,7 +123,7 @@ public class RefundService {
 		        System.out.println("결제 취소가 완료되었습니다.");
 			
     	 } catch (Exception e) {
-    	        System.err.println("환불 처리 중 오류가 발생했습니다: " + e.getMessage());
+    	        System.err.println("환불 처리 중 오류가 발생했습니다1111: " + e.getMessage());
     	        //서비스단에서 예외처리 할 경우 앞단은 컨트롤단이랑 통신하니깐 한번 더 예외처리를 해준다
     	        throw e; 
     	        
@@ -123,24 +132,48 @@ public class RefundService {
     }
 		
 		//사용자 환불 정보 db 저장
-		public void saveRefund(Map<String, Object> refundData) {
-			
-			String merchantUid = refundData.get("merchant_uid").toString();
-		    int amount = Integer.parseInt(refundData.get("amount").toString());
-		    String reason = refundData.get("reason").toString();
-		    LocalDateTime dateTime = LocalDateTime.now();
-		    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 a hh:mm:ss", new Locale("ko"));
-		    String refunddate = dateTime.format(formatter);
-		    
-		    RefundEntity refundEntity = new RefundEntity(merchantUid, amount, reason, refunddate);
-			System.out.println(refundEntity);
-			System.err.println(refundData);
-			refundRepository.save(refundEntity);
-			
-			PaymentEntity paymentEntity = paymentRepository.findByMerchantUid(merchantUid);  
-		    paymentEntity.setStatus("1");	        
-		    paymentRepository.save(paymentEntity);
-			
-		}
+    public void saveRefund(Map<String, Object> refundData) {
+        try {
+        	
+            String merchantUid = refundData.get("merchant_uid").toString();
+            int amount = Integer.parseInt(refundData.get("amount").toString());
+            
+            System.out.println(merchantUid);
+            System.out.println("들어와?");
+            
+            // 부분 환불 상태 처리
+            // 2개 이상 결제 시 거래번호가 중복되므로 list로 불러옴
+            List<PaymentEntity> paymentEntities = paymentRepository.findByListMerchantUid(merchantUid);
+            System.err.println(paymentEntities);
+            
+            // for문을 돌려서 앞에서 날려준 amount 부분환불값을 찾아주어서 맞는 배열로 로직 진행.
+            for (PaymentEntity paymentEntity : paymentEntities) {
+                try {
+                    if (paymentEntity.getPaid_amount() == amount) {
+                        System.err.println(paymentEntity.getPaid_amount());
+                        System.err.println(amount);
+                        
+                        // 상태를 부분환불로 변경
+                        paymentEntity.setStatus("1");
+                        paymentRepository.save(paymentEntity);
+                        
+                        LocalDateTime dateTime = LocalDateTime.now();
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 a hh:mm:ss", new Locale("ko"));
+                        String refundDate = dateTime.format(formatter);
+                        
+                        RefundEntity refundEntity = new RefundEntity(merchantUid, amount, refundDate);
+                        System.out.println(refundEntity);
+                        System.err.println(refundData);
+                        refundRepository.save(refundEntity);
+                    }                    
+                } catch (Exception e) {
+                    System.err.println("환불 처리 중 오류 발생: " + e.getMessage());
+                }
+            }
+        } catch (Exception ex) {
+            System.err.println("환불 데이터 처리 중 오류 발생: " + ex.getMessage());
+        }
+    }	
+		
 
 }
