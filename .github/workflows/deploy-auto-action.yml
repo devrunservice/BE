@@ -44,8 +44,13 @@ jobs:
           echo "jwt.secretKey=${{ secrets.JWT_SECRETKEY }}" >> application.properties
           echo "spring.mvc.pathmatch.matching-strategy=${{ secrets.SWAGGER_PATHMATCH_OPTION }}" >> application.properties
           echo "server.error.include-message=always" >> application.properties
-
-
+          echo "cloud.aws.credentials.access-key=${{ secrets.AWS_ACCESS_KEY }}" >> application.properties
+          echo "cloud.aws.credentials.secret-key=${{ secrets.AWS_SECRET_KEY }}" >> application.properties
+          echo "cloud.aws.region.static=ap-northeast-2" >> application.properties
+          echo "cloud.aws.region.auto=false" >> application.properties
+          echo "cloud.aws.bucket=${{ secrets.AWS_BUCKET }}" >> application.properties
+          echo "cloud.aws.url=${{ secrets.AWS_SECRET_KEY }}" >> application.properties
+          
         working-directory : ./src/main/resources
         
       - name: Build and package with Gradle

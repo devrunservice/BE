@@ -23,7 +23,6 @@ public class LoginService {
 	@Autowired
 	private MemberEntityRepository memberEntityRepository;
 	
-	@SuppressWarnings("unused")
 	private LoginStatus loginStatus;
 
 	// 마지막 로그인 날짜 수정
@@ -33,7 +32,7 @@ public class LoginService {
 		memberEntity.setLastlogin(currentDate);
 		memberEntityRepository.save(memberEntity);
 	}
-	public LoginStatus validateMember(MemberEntity member) {
+	public LoginStatus validate(MemberEntity member) {
 		MemberEntity existingMember = loginRepository.findById(member.getId());
 		System.out.println(existingMember);
 		

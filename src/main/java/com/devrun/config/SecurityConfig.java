@@ -34,6 +34,7 @@ public class SecurityConfig {
                     .antMatchers("/token/refresh").authenticated()
                     .antMatchers("/logout").permitAll()
                 .anyRequest().permitAll())
+
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
             .logout().disable()
             .build();

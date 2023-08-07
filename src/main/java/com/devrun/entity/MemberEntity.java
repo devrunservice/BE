@@ -26,7 +26,7 @@ import lombok.Data;
 @Entity
 @Table(name = "user")
 public class MemberEntity {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "userNo", length = 5)
@@ -104,40 +104,42 @@ public class MemberEntity {
 	@Comment("마지막 로그인 날짜 ( 휴면 전환은 서버의 온오프로 발생 )")
 	private Date lastlogin;
 
-	@Column(name = "kakaoEmailId", length = 50, nullable = true)
-	@Comment("카카오 간편로그인 Email + ID")
-	private String kakaoEmailId;
-	
-	@Column(name = "logintry", nullable = false, length = 2)
-	@Comment("로그인 시도 횟수")
-	private int logintry = 0;
-	
-	@Column(name = "ageConsent", nullable = false, columnDefinition = "TINYINT(1)")
-	@Comment("나이 동의")
-	@AssertTrue(message = "User has not agreed to the terms")
-	private boolean ageConsent;
-	
-	@Column(name = "serviceConsent", nullable = false, columnDefinition = "TINYINT(1)")
-	@Comment("서비스 동의")
-	@AssertTrue(message = "User has not agreed to the terms")
-	private boolean termsOfService;
-	
-	@Column(name = "privacyConsent", nullable = false, columnDefinition = "TINYINT(1)")
-	@Comment("개인정보 동의")
-	@AssertTrue(message = "User has not agreed to the terms")
-	private boolean privacyConsent;
-	
-	@Column(name = "marketingConsent", nullable = false, columnDefinition = "TINYINT(1)")
-	@Comment("광고, 마케팅 동의")
-	private boolean marketConsent;
+    @Column(name = "kakaoEmailId", length = 50, nullable = true)
+    @Comment("카카오 간편로그인 Email + ID")
+    private String kakaoEmailId;
+
+    @Column(name = "logintry", nullable = false, length = 2)
+    @Comment("로그인 시도 횟수")
+    private int logintry = 0;
+
+    @Column(name = "ageConsent", nullable = false, columnDefinition = "TINYINT(1)")
+    @Comment("나이 동의")
+    @AssertTrue(message = "User has not agreed to the terms")
+    private boolean ageConsent;
+
+    @Column(name = "serviceConsent", nullable = false, columnDefinition = "TINYINT(1)")
+    @Comment("서비스 동의")
+    @AssertTrue(message = "User has not agreed to the terms")
+    private boolean termsOfService;
+
+    @Column(name = "privacyConsent", nullable = false, columnDefinition = "TINYINT(1)")
+    @Comment("개인정보 동의")
+    @AssertTrue(message = "User has not agreed to the terms")
+    private boolean privacyConsent;
+
+    @Column(name = "marketingConsent", nullable = false, columnDefinition = "TINYINT(1)")
+    @Comment("광고, 마케팅 동의")
+    private boolean marketConsent;
+
+    @Column(name = "profileimgsrc")
+    @NotBlank
+    @Comment("유저 프로필 이미지 주소")
+    private String profileimgsrc = "profile.png";
 
 
-	// OneToOne 어노테이션을 사용하여 1:1 관계 설정
+    // OneToOne 어노테이션을 사용하여 1:1 관계 설정
 //    @OneToOne(mappedBy = "memberEntity")
 //    private PointEntity pointEntity;
-
-
-	
 //	데이터베이스에 Enum 값을 저장할 때, 일반적으로 두 가지 전략을 사용할 수 있습니다:
 //
 //	ORDINAL: Enum 값의 순서(0부터 시작)를 데이터베이스에 저장합니다. 

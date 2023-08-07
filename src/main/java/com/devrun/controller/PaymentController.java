@@ -53,6 +53,7 @@ public class PaymentController {
 			LocalDateTime dateTime = LocalDateTime.now();
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd a hh:mm:ss", new Locale("ko"));
 			String paymentDate = dateTime.format(formatter);
+
 			System.err.println(paymentDTOList);
 			
 			  // 사용자의 포인트 정보를 조회

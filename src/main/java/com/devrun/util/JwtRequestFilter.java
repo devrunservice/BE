@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -51,7 +50,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 	        throws ServletException, IOException {
-		
 //		String requestPath = request.getRequestURI();
 		
 		//login 경로에 대한 요청인 경우 필터를 건너뛰도록 설정합니다.
@@ -79,6 +77,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	        	System.out.println("여기냐1");
 	            processToken(refreshTokenHeader, "Refresh_token", chain, request, response);
 	        }
+
 //	        else if (easyloginTokenHeader != null && easyloginTokenHeader.startsWith("Bearer ")) {
 //	        	System.out.println("이지토큰 : " + easyloginTokenHeader.substring(7));
 //	        	
@@ -90,10 +89,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 //		            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No or invalid token provided");
 //		            return;
 //		        }
-	        
+
 	        System.out.println("통과해?");
 	        chain.doFilter(request, response);
-	        
 	    } catch (ExpiredJwtException e) {
 			
 	        // 401 : JWT 토큰이 만료되었을 때
@@ -108,19 +106,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is expired");
 	        
 	    } catch (SignatureException e) {
-	    	
 	        // 403 : JWT 토큰이 조작되었을 때
 	        logger.error("Signature validation failed", e);
 	        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Signature validation failed");
-	    
-	    } catch (AccessDeniedException e) {
-	    	
-	    	// 403 : 엑세스 거절
-	    	logger.error("Access Denied failed", e);
-	    	response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied failed");
-	    	
+	        
 	    } catch (Exception e) {
-	    	
 	        // 500 : 그 외 예외 처리
 	        logger.error("Unexpected server error occurred", e);
 	        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected server error occurred");
@@ -153,7 +143,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	            }
 	            
             } else if(headerName.equals("Refresh_token")) {
-            	
+
         	    if(!validateRefreshToken(jwt, userDetails)) {
         	        throw new SignatureException("Invalid refresh token");
         	        
@@ -163,6 +153,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         	}
         }
 	}
+
 
     // Access 토큰에서 아이디를 추출하는 메서드
     private String extractUsername(String token) {

@@ -24,12 +24,13 @@ public class CouponSerivce {
     private CouponregicodeRepository couponregicodeRepository;
 
 
-    public void saveCouponDetail(CouponIssued couponBlueprint) {
-        couponIssuedRepository.save(couponBlueprint);
+    public CouponIssued saveCouponDetail(CouponIssued couponBlueprint) {
+        CouponIssued result = couponIssuedRepository.save(couponBlueprint);
         int quantity = couponBlueprint.getQuantity();
         Long issuedno = couponBlueprint.getIssuedno();
 
         saveCouponCode(quantity , issuedno);
+        return result;
     }
 
     public void saveCouponCode(int q , Long aLong){

@@ -71,7 +71,7 @@ public class SignupController {
 	
 	@ResponseBody
 	@PostMapping("/verify")
-	 public ResponseEntity<?> verify(@RequestBody SignupDTO signupDTO) {
+	public ResponseEntity<?> verify(@RequestBody SignupDTO signupDTO) {
 		String phonenumber = signupDTO.getPhonenumber();
 		String code = signupDTO.getCode();
         if (memberService.verifySmsCode(phonenumber, code)) {
