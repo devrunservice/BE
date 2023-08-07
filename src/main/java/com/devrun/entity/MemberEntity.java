@@ -1,5 +1,6 @@
 package com.devrun.entity;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -74,7 +75,7 @@ public class MemberEntity {
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	@Comment("유저 생일(생일 축하 쿠폰 발급)")
 	@NotNull(message = "information cannot be null or empty")
-	private Date birthday;
+	private LocalDate birthday;
 	
 	@Enumerated(EnumType.STRING)
 	@Column(name = "role"
