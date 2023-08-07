@@ -153,13 +153,17 @@ public class SignupController {
 						
 					    try {
 					    	// 가입일자 설정
+					    	
+					    	// 원하는 시간대로 변경 가능
+					    	ZoneId zoneId = ZoneId.systemDefault();
+					    	
 					    	// 현재 날짜와 시간을 LocalDateTime 형식으로 가져오기
-					    	LocalDateTime localCurrentDateTime = LocalDateTime.now();
+					    	LocalDateTime localCurrentDateTime = LocalDateTime.now(zoneId);
 
 					    	// LocalDateTime을 Instant로 변환하기
 					    	Instant currentInstant = localCurrentDateTime
 					    			// atZone() 메서드를 사용하여 시스템 기본 시간대를 사용
-					    			.atZone(ZoneId.systemDefault())
+					    			.atZone(zoneId)
 					    			// toInstant() 메서드를 사용하여 Instant로 변환
 					    			.toInstant();
 
