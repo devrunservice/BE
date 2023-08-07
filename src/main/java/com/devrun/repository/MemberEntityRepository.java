@@ -20,5 +20,4 @@ public interface MemberEntityRepository extends JpaRepository<MemberEntity, Long
 	PointEntity save(PointEntity point);
 
 	MemberEntity findByName(String name);
-
 }

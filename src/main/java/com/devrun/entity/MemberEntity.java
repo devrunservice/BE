@@ -30,89 +30,84 @@ import org.springframework.format.annotation.NumberFormat;
 @Table(name = "user")
 public class MemberEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "userNo", length = 5)
-    @Comment("유저 구분 번호")
-    private int userNo;
-
-    @Column(name = "name"
-            , nullable = false
-            , length = 20)
-    @Comment("유저 이름")
-    @NotBlank(message = "information cannot be null or empty")
-    private String name;
-
-    @Column(name = "email"
-            , nullable = false
-            , length = 50)
-    @Comment("유저 이메일")
-    @Email
-    @NotNull(groups = editmyinfo.class)
-    @NotBlank(message = "information cannot be null or empty")
-    private String email;
-
-    @Column(name = "id"
-            , nullable = false
-            , length = 15)
-    @Comment("유저 아이디")
-    @NotBlank(message = "information cannot be null or empty")
-    private String id;
-
-    @Column(name = "password"
-            , nullable = false
-            , columnDefinition = "TEXT")
-    @NumberFormat
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&]).{8,15}$", message = "숫자, 영문, 특수문자 조합 최소 8자 이상")
-    @Comment("유저 비밀번호")
-    @NotBlank(groups = editmyinfo.class, message = "information cannot be null or empty")
-    private String password;
-
-    @Column(name = "phonenumber"
-            , nullable = false
-            , length = 11)
-    @Comment("유저 연락처")
-    @Pattern(regexp = "^01(?:0|1|[6-9])[.-]?(\\d{3}|\\d{4})[.-]?(\\d{4})$", message = "10 ~ 11 자리의 숫자만 입력 가능합니다.")
-    // 정규식 검증이 있었다??
-    @NotNull(groups = editmyinfo.class)
-    @NotBlank(message = "information cannot be null or empty")
-    private String phonenumber;
-
-    @Column(name = "birthday"
-            , nullable = false
-    )
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Comment("유저 생일(생일 축하 쿠폰 발급)")
-    @NotNull(message = "information cannot be null or empty")
-    private Date birthday;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role"
-            , nullable = false
-            , length = 7)
-    @Comment("유저 역할 - STUDENT / MENTO / ADMIN")
-    private Role role = Role.STUDENT;                            // 기본값 설정
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status"
-            , nullable = false
-            , length = 9)
-    @Comment("활성 : ACTIVE / 휴면 : INACTIVE / 탈퇴 : WITHDRAWN")
-    private Status status = Status.ACTIVE;
-
-    @Column(name = "signup"
-            , nullable = false
-    )
-    @Comment("유저 가입일")
-    private Date signup;
-
-    @Column(name = "export", nullable = true)
-    @Comment("유저 탈퇴일(탈퇴 테이블로 분리할지 고민)")
-    private Date export;
-
-    @Column(name = "lastlogin", nullable = true)
-    @Comment("마지막 로그인 날짜 ( 휴면 전환은 서버의 온오프로 발생 )")
-    private Date lastlogin;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "userNo", length = 5)
+	@Comment("유저 구분 번호")
+	private int userNo;
+	
+	@Column(name = "name"
+			, nullable = false												// 모든 컨트롤러에서 @Valid로 검증하는 것이 아니기 때문에 사용할지 말지일단 Keep
+			, length = 20)
+	@Comment("유저 이름")
+	@NotBlank(message = "information cannot be null or empty")
+	private String name;
+	
+	@Column(name = "email"
+			, nullable = false
+			, length = 50)
+	@Comment("유저 이메일")
+	@NotBlank(message = "information cannot be null or empty")
+	private String email;
+	
+	@Column(name = "id"
+			, nullable = false
+			, length = 15)
+	@Comment("유저 아이디")
+	@NotBlank(message = "information cannot be null or empty")
+	private String id;
+	
+	@Column(name = "password"
+			, nullable = false
+			, columnDefinition = "TEXT")
+	@Comment("유저 비밀번호")
+    //@Pattern(regexp = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&]).{8,15}$", message = "숫자, 영문, 특수문자 조합 최소 8자 이상")
+	@NotBlank(message = "information cannot be null or empty")
+	private String password;
+	
+	@Column(name = "phonenumber"
+			, nullable = false
+			, length = 11)
+	@Comment("유저 연락처")
+    //@Pattern(regexp = "^01(?:0|1|[6-9])[.-]?(\\d{3}|\\d{4})[.-]?(\\d{4})$", message = "10 ~ 11 자리의 숫자만 입력 가능합니다.")
+	@NotBlank(message = "information cannot be null or empty")
+	private String phonenumber;
+	
+	@Column(name = "birthday"
+			, nullable = false
+			)
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	@Comment("유저 생일(생일 축하 쿠폰 발급)")
+	@NotNull(message = "information cannot be null or empty")
+	private Date birthday;
+	
+	@Enumerated(EnumType.STRING)
+	@Column(name = "role"
+	, nullable = false
+	, length = 7)
+	@Comment("유저 역할 - STUDENT / MENTO / ADMIN")
+	private Role role = Role.STUDENT;										// 기본값 설정
+	
+	@Enumerated(EnumType.STRING)
+	@Column(name = "status"
+	, nullable = false
+	, length = 9)
+	@Comment("활성 : ACTIVE / 휴면 : INACTIVE / 탈퇴 : WITHDRAWN")
+	private Status status = Status.ACTIVE;
+	
+	@Column(name = "signup"
+			, nullable = false
+			)
+	@Comment("유저 가입일")
+	private Date signup;
+	
+	@Column(name = "export", nullable = true)
+	@Comment("유저 탈퇴일(탈퇴 테이블로 분리할지 고민)")
+	private Date export;
+	
+	@Column(name = "lastlogin", nullable = true)
+	@Comment("마지막 로그인 날짜 ( 휴면 전환은 서버의 온오프로 발생 )")
+	private Date lastlogin;
 
     @Column(name = "kakaoEmailId", length = 50, nullable = true)
     @Comment("카카오 간편로그인 Email + ID")

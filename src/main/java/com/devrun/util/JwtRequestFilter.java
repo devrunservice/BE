@@ -133,39 +133,25 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 //            CustomUserDetails userDetails = (CustomUserDetails) loadedUserDetails;
-            System.out.println("여기냐3");
+            System.out.println("여기냐3" + userDetails);
             
             if (headerName.equals("Access_token")) {
 	            // 토큰이 유효한 경우 Security Context에 인증 정보를 설정
 	            if (validateAccessToken(jwt, userDetails)) {
 	            	System.out.println("여기냐4" + validateAccessToken(jwt, userDetails));
-	            	// UsernamePasswordAuthenticationToken은 Spring Security에서 제공하는 Authentication의 구현체로
-	            	// 사용자의 인증 정보를 나타냄 이 객체는 주로 사용자의 ID, 비밀번호, 그리고 권한 정보를 포함
-	                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken 
-	                // new WebAuthenticationDetailsSource().buildDetails(request)는 요청에 대한 세부 정보를 생성하는 역할. 이 정보는 후속 보안 작업에서 사용
-	                = new UsernamePasswordAuthenticationToken(
-	                        userDetails, null, userDetails.getAuthorities());
-	                usernamePasswordAuthenticationToken
-	                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-	                System.out.println(usernamePasswordAuthenticationToken + "너냐5");
-	                // SecurityContext에 Authentication 객체를 설정하는 역할. Authentication 객체는 Spring Security의 다른 부분에서 현재 사용자의 인증 정보를 접근하는데 사용
-	                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+	            	setAuthenticationInSecurityContext(userDetails, request);
 	            }
 	            
             } else if(headerName.equals("Refresh_token")) {
-            	System.out.println("여기까진오나?");
-            	
-            	if(!validateRefreshToken(jwt, userDetails)) {
-            		System.out.println("여기까진오나?2");
-            		
-            		throw new SignatureException("Invalid refresh token");
-            		
-            	}else if(validateRefreshToken(jwt, userDetails)) {
-            		System.out.println("여기까진오나?3");
-            	}
-            }
+
+        	    if(!validateRefreshToken(jwt, userDetails)) {
+        	        throw new SignatureException("Invalid refresh token");
+        	        
+        	    } else if(validateRefreshToken(jwt, userDetails)) {
+        	    	setAuthenticationInSecurityContext(userDetails, request);
+        	    }
+        	}
         }
-		        
 	}
 
 
@@ -232,5 +218,18 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 //    private Boolean validateEasyLoginToken(String token) {
 //        return !isTokenExpired(token);
 //    }
+    
+    public void setAuthenticationInSecurityContext(UserDetails userDetails, HttpServletRequest request) {
+    	// UsernamePasswordAuthenticationToken은 Spring Security에서 제공하는 Authentication의 구현체로
+    	// 사용자의 인증 정보를 나타냄 이 객체는 주로 사용자의 ID, 비밀번호, 그리고 권한 정보를 포함
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken 
+                = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        usernamePasswordAuthenticationToken.setDetails(
+        		// new WebAuthenticationDetailsSource().buildDetails(request)는 요청에 대한 세부 정보를 생성하는 역할. 이 정보는 후속 보안 작업에서 사용
+        		new WebAuthenticationDetailsSource().buildDetails(request));
+        System.out.println(usernamePasswordAuthenticationToken + "너냐5");
+        // SecurityContext에 Authentication 객체를 설정하는 역할. Authentication 객체는 Spring Security의 다른 부분에서 현재 사용자의 인증 정보를 접근하는데 사용
+        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+    }
 
 }
