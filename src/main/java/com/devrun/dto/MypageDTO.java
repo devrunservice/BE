@@ -8,6 +8,6 @@ import java.util.Date;
 @Data
 public class MypageDTO {
 
-    private String username , userid , useremail, phonenumber , profileimgsrc;
-    private Date birth;
+    private String name , id , email, phonenumber , profileimgsrc;
+    private Date birthday;
 }

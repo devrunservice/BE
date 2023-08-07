@@ -54,11 +54,11 @@ public class MyPageController {
         MemberEntity m = memberService.findById(userid);
 
         MypageDTO mypageDTO = new MypageDTO();
-        mypageDTO.setUserid(m.getId());
-        mypageDTO.setBirth(m.getBirthday());
-        mypageDTO.setUsername(m.getName());
+        mypageDTO.setId(m.getId());
+        mypageDTO.setBirthday(m.getBirthday());
+        mypageDTO.setName(m.getName());
         mypageDTO.setPhonenumber(m.getPhonenumber());
-        mypageDTO.setUseremail(m.getEmail());
+        mypageDTO.setEmail(m.getEmail());
         String profileimgurl = awsS3ReadService.findUploadKeyUrl(m.getProfileimgsrc());
         mypageDTO.setProfileimgsrc(profileimgurl);
 
@@ -67,9 +67,9 @@ public class MyPageController {
     }
 
     @PostMapping("/mypage/userconfirm")
-    public ResponseEntity<?> userConfirm(@RequestBody String password){
+    public ResponseEntity<?> userConfirm(@RequestBody Map<String , String> editdata){
         String v = SecurityContextHolder.getContext().getAuthentication().getName();
-        if(password.equals(memberService.findById(v).getPassword())){
+        if(editdata.get("password").equals(memberService.findById(v).getPassword())){
             return ResponseEntity.ok().body("수정 페이지로 이동");
         } else {
             System.out.println("--------------------------------------");
@@ -122,7 +122,7 @@ public class MyPageController {
 
         MemberEntity m = memberService.findById(v);
         String editpassword = editdata.get("password");
-        if (memberService.validatePassword(editpassword)) {
+        if ( !memberService.validatePassword(editpassword) ) {
             return ResponseEntity.badRequest().body("비밀번호 형식 미 충족");
 
         } else {
