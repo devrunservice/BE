@@ -75,7 +75,7 @@ public class MyPageController {
             System.out.println("--------------------------------------");
             System.out.println(v);
             System.out.println(memberService.findById(v).getPassword());
-            return ResponseEntity.badRequest().body("비밀번호 불일치");
+            return ResponseEntity.status(409).body("비밀번호 불일치");
         }
     }
 
@@ -85,15 +85,15 @@ public class MyPageController {
         String editphone = editdata.get("phonenumber");
         String verifycode = editdata.get("code");
         if(memberService.checkphone(editphone) >= 1){
-            return ResponseEntity.badRequest().body("중복된 번호");
+            return ResponseEntity.status(409).body("This number is duplicated");
         }
 
         if(memberService.verifySmsCode(editphone, verifycode)){
             MemberEntity m = memberService.findById(v);
             memberService.removeSmsCode(editphone);
-            return ResponseEntity.ok().body("휴대폰 번호 수정 완료");
+            return ResponseEntity.ok().body("Number edited successfully.");
         } else {
-            return ResponseEntity.badRequest().body("인증 실패");
+            return ResponseEntity.status(409).body("Failure to Authenticate");
         }
     }
 
@@ -104,33 +104,33 @@ public class MyPageController {
         MemberEntity m = memberService.findById(v);
         String editaemail = editdata.get("email");
         if ( !memberService.validateEmail(editaemail) ) {
-            return ResponseEntity.badRequest().body("이메일 형식 미 충족");
+            return ResponseEntity.status(409).body("Invalid email address.");
 
         } else if (memberService.checkEmail(editaemail) >= 1) {
-            return ResponseEntity.badRequest().body("중복된 이메일");
+            return ResponseEntity.status(409).body("This email is duplicated");
         } else {
             m.setEmail(editaemail);
             memberService.insert(m);
-            return ResponseEntity.ok().body("이메일 수정 완료");
+            return ResponseEntity.ok().body("Email edited successfully.");
         }
     }
 
-    @PostMapping("/edit/password")
-    public ResponseEntity<?> editPassword(@RequestBody Map<String , String> editdata) {
-
-        String v = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        MemberEntity m = memberService.findById(v);
-        String editpassword = editdata.get("password");
-        if ( !memberService.validatePassword(editpassword) ) {
-            return ResponseEntity.badRequest().body("비밀번호 형식 미 충족");
-
-        } else {
-            m.setPassword(editpassword);
-            memberService.insert(m);
-            return ResponseEntity.ok().body("비밀번호 수정 완료");
-        }
-    }
+//    @PostMapping("/edit/password")
+//    public ResponseEntity<?> editPassword(@RequestBody Map<String , String> editdata) {
+//
+//        String v = SecurityContextHolder.getContext().getAuthentication().getName();
+//
+//        MemberEntity m = memberService.findById(v);
+//        String editpassword = editdata.get("password");
+//        if ( !memberService.validatePassword(editpassword) ) {
+//            return ResponseEntity.badRequest().body("Invalid password.");
+//
+//        } else {
+//            m.setPassword(editpassword);
+//            memberService.insert(m);
+//            return ResponseEntity.ok().body("password edited successfully.");
+//        }
+//    }
 
     @PostMapping("/edit/profileimg")
     public ResponseEntity<?> editProfileImg(@RequestPart(required = true) List<MultipartFile> editimg) throws IOException {
@@ -140,17 +140,17 @@ public class MyPageController {
 
         if (editimg != null) {
             if (editimg.size() >= 2) {
-                return ResponseEntity.badRequest().body("Only one image is available.");
+                return ResponseEntity.status(409).body("Only one image is available.");
             } else {
                 String uploadpath = awsS3UploadService.putS3(editimg, "profile");
                 String newprofileimgsrc = awsS3ReadService.findUploadKeyUrl(uploadpath);
                 m.setProfileimgsrc(newprofileimgsrc);
                 memberService.insert(m);
-                return ResponseEntity.ok("프로필 이미지를 포함한 수정 성공");
+                return ResponseEntity.ok("profile image edited successfully.");
             }
         } else {
 
-            return ResponseEntity.ok("이미지가 첨부되지 않았습니다.");
+            return ResponseEntity.status(409).body("The profile image is not attached.");
 
 
 
