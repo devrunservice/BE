@@ -3,7 +3,7 @@ package com.devrun.service;
 
 import com.devrun.dto.CartDTO;
 import com.devrun.entity.Cart;
-import com.devrun.entity.Lecture;
+import com.devrun.youtube.Lecture;
 import com.devrun.entity.MemberEntity;
 import com.devrun.exception.RestApiException;
 import com.devrun.exception.UserErrorCode;
@@ -35,13 +35,13 @@ public class CartService {
 
         for (Cart e: Carts) {
 
-            int lecturePrice = e.getLecture().getPrice();
-            String mentoName = e.getLecture().getMemberEntity().getName();
-            String lectureIntro = e.getLecture().getIntro();
-            String lectureTitle = e.getLecture().getTitle();
-            int lectureNo = e.getLecture().getLno();
+            int lecturePrice = e.getLecture().getLecturePrice();
+            String mentoName = "gotka153";
+            String lectureIntro = e.getLecture().getLectureIntro();
+            String lectureTitle = e.getLecture().getLectureName();
+            Long lectureNo = e.getLecture().getLectureid();
             Map<String , String> singglelectureinfo = new HashMap<String , String>();
-            singglelectureinfo.put("lectureNo" , Integer.toString(lectureNo));
+           // singglelectureinfo.put("lectureNo" , Integer.toString(lectureNo));
             singglelectureinfo.put("lectureTitle" , lectureTitle);
             singglelectureinfo.put("lectrueIntro" , lectureIntro);
             singglelectureinfo.put("mentoName" , mentoName);
@@ -80,7 +80,7 @@ public class CartService {
         if(memberEntity != null){
             Cart cart = new Cart();
             Lecture lecture = new Lecture();
-            lecture.setLno(1);
+            lecture.setLectureid((long) 1);
             cart.setLecture(lecture);
             cart.setMemberEntity(memberEntity);
             //cartRepo.save(cart);

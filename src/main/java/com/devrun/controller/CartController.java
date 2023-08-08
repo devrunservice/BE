@@ -2,7 +2,7 @@ package com.devrun.controller;
 
 import com.devrun.dto.CartDTO;
 import com.devrun.entity.Cart;
-import com.devrun.entity.Lecture;
+import com.devrun.youtube.Lecture;
 import com.devrun.entity.MemberEntity;
 import com.devrun.exception.CommonErrorCode;
 import com.devrun.exception.RestApiException;
@@ -24,53 +24,53 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Type;
 import java.util.*;
-
-@RestController
-@Api(tags = "Devrun.Cart")
-public class CartController {
-    @Autowired
-    private CartService cartService;
-
-
-    @PostMapping("/api/cartinsert")
-    @ApiOperation("장바구니에 강의를 추가합니다. 현재 미완성")
-    @ApiImplicitParam(name = "lno"
-            , value = "강의 일련번호"
-    )
-    public String putCart(@RequestParam(name = "lno") int lno) {
-
-    String msg = cartService.putInCart("title");
-    //강의 기능이 마무리 되고 관련 JPA 코드가 생기면 그때 수정하기
-        return  msg;
-    }
-
-    @PostMapping("/api/cartdelete")
-    @ApiOperation("장바구니에서 강의를 삭제합니다. 현재 미완성")
-    @ApiImplicitParam(name = "lecturetitle"
-            , value = "강의명"
-    )
-    public String deleteInCart(@RequestParam(name = "lecturetitle") String lecturetitle){
-
-        lecturetitle = "1";
-        String msg = cartService.deleteInCart(lecturetitle);
-    //강의 기능이 마무리 되고 관련 JPA 코드가 생기면 그때 수정하기
-        return msg;
-    }
-
-    @GetMapping("/cart")
-    @ApiOperation("장바구니 화면에 출력할 데이터를 전달합니다.")
-    public ResponseEntity<?> cartopen(){
-
-        String userid = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        CartDTO result = cartService.showCartInfo(userid);
-        return ResponseEntity.ok().body(result);
-
-    }
-
-//    @GetMapping("/users/test")
-//    public String getUser() {
-//        throw new RestApiException(UserErrorCode.INACTIVE_USER);
+//
+//@RestController
+//@Api(tags = "Devrun.Cart")
+//public class CartController {
+//    @Autowired
+//    private CartService cartService;
+//
+//
+//    @PostMapping("/api/cartinsert")
+//    @ApiOperation("장바구니에 강의를 추가합니다. 현재 미완성")
+//    @ApiImplicitParam(name = "lno"
+//            , value = "강의 일련번호"
+//    )
+//    public String putCart(@RequestParam(name = "lno") int lno) {
+//
+//    String msg = cartService.putInCart("title");
+//    //강의 기능이 마무리 되고 관련 JPA 코드가 생기면 그때 수정하기
+//        return  msg;
 //    }
-
-}
+//
+//    @PostMapping("/api/cartdelete")
+//    @ApiOperation("장바구니에서 강의를 삭제합니다. 현재 미완성")
+//    @ApiImplicitParam(name = "lecturetitle"
+//            , value = "강의명"
+//    )
+//    public String deleteInCart(@RequestParam(name = "lecturetitle") String lecturetitle){
+//
+//        lecturetitle = "1";
+//        String msg = cartService.deleteInCart(lecturetitle);
+//    //강의 기능이 마무리 되고 관련 JPA 코드가 생기면 그때 수정하기
+//        return msg;
+//    }
+//
+//    @GetMapping("/cart")
+//    @ApiOperation("장바구니 화면에 출력할 데이터를 전달합니다.")
+//    public ResponseEntity<?> cartopen(){
+//
+//        String userid = SecurityContextHolder.getContext().getAuthentication().getName();
+//
+//        CartDTO result = cartService.showCartInfo(userid);
+//        return ResponseEntity.ok().body(result);
+//
+//    }
+//
+////    @GetMapping("/users/test")
+////    public String getUser() {
+////        throw new RestApiException(UserErrorCode.INACTIVE_USER);
+////    }
+//
+//}
