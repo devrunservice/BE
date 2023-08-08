@@ -26,7 +26,7 @@ public class LectureSection {
     @Column(nullable = true)
     private String SectionTitle;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "lectureid")
     private Lecture lecture;
   

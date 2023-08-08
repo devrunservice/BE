@@ -59,7 +59,7 @@ public class Lecture {
     @ElementCollection
     private List<String> lectureTag;
 
-    @ManyToOne(cascade = CascadeType.PERSIST) // 영속성 컨텍스트에 먼저 저장하도록 수정
+    @ManyToOne(cascade = CascadeType.PERSIST) 
     @JoinColumn(name = "categoryNo")
     private LectureCategory lectureCategory;
     

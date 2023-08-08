@@ -2,6 +2,7 @@ package com.devrun.youtube;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -41,11 +42,11 @@ import lombok.Setter;
 	    @Column(nullable = true)
 	    private String videoTitle;
 	    
-	    @ManyToOne
+	    @ManyToOne(cascade = CascadeType.PERSIST)
 	    @JoinColumn(name = "lecture_id")
 	    private Lecture lecture;
 	    
-	    @ManyToOne
+	    @ManyToOne(cascade = CascadeType.PERSIST)
 	    @JoinColumn(name = "sectionid")
 	    private LectureSection lectureSection;
 	    
