@@ -62,7 +62,7 @@ public class YouTubeUploader {
   /* 업로드되는 비디오의 형식(MIME 유형)을 나타내는 전역 인스턴스. */
   private static String VIDEO_FILE_FORMAT = "video/*";
 
-  public YouTubeUploader() {
+  /*public YouTubeUploader() {
       // YouTube 객체 초기화
       try {
           Credential credential = authorize(Collections.singletonList("https://www.googleapis.com/auth/youtube.upload"));
@@ -71,7 +71,7 @@ public class YouTubeUploader {
       } catch (Exception e) {
           e.printStackTrace();
       }
-  }
+  }*/
 
  
   
