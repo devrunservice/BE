@@ -62,6 +62,12 @@ dependencies {
 	// caffeine
 	implementation 'com.github.ben-manes.caffeine:caffeine:3.1.2'
 	
+	// redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	
+	// jedis
+	implementation 'redis.clients:jedis:3.7.0'
+	
 }
 
 tasks.named('test') {

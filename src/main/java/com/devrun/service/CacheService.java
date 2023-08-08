@@ -14,7 +14,7 @@ public class CacheService {
 
     public CacheService() {
         smsCodeCache = Caffeine.newBuilder()
-                .expireAfterWrite(5, TimeUnit.MINUTES) // 5분 후에 만료
+                .expireAfterWrite(5, TimeUnit.MINUTES) // 5분 후에 만료 지금은 핸드폰 인증에만 사용 중
                 .maximumSize(100) // 최대 100개의 항목 저장
                 .build(key -> null); // 만약 키가 존재하지 않으면 null 반환
     }
