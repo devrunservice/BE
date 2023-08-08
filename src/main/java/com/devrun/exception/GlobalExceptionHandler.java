@@ -1,8 +1,11 @@
 package com.devrun.exception;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -10,11 +13,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.devrun.exception.ErrorResponse;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -52,14 +58,26 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<Object> nullex(final NullPointerException e) {
-
-        return ResponseEntity.badRequest().body("Can't Find Data, Check Your Request -By DevRun");
+        Map<String, String> responeMap = new HashMap<>();
+        responeMap.put("message", "Can't Find Data, Check Your Request. -By DevRun");
+        return ResponseEntity.badRequest().body(responeMap);
     }
 
     @ExceptionHandler(value = ConstraintViolationException.class) // 유효성 검사 실패 시 발생하는 예외를 처리
     protected ResponseEntity handleException(ConstraintViolationException exception) {
         System.out.println();
-        return ResponseEntity.badRequest().body("유효성 검사 실패\n" + getResultMessage(exception.getConstraintViolations().iterator()));
+        return ResponseEntity.badRequest().body("Failed validation\n" + getResultMessage(exception.getConstraintViolations().iterator()));
+    }
+
+//    @ExceptionHandler(value = HttpMessageNotReadableException.class)
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+            Map<String ,String> responemap = new HashMap<>();
+            responemap.put("message" , "Can't Read HTTP Request, Check Your Request data type. ex json, xml, text, Number, Array, Object etc. -By DevRun");
+
+
+        return handleExceptionInternal(ex, responemap, headers, status, request);
     }
 
     protected String getResultMessage(final Iterator<ConstraintViolation<?>> violationIterator) {
@@ -88,12 +106,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(value = StringIndexOutOfBoundsException.class)
-    protected ResponseEntity stringIndexOutOfBoundsException(final StringIndexOutOfBoundsException e){
-        return ResponseEntity.badRequest().body("인자 수가 부족합니다.\n" + e.getMessage());
+    protected ResponseEntity stringIndexOutOfBoundsException(final StringIndexOutOfBoundsException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
 
     @ExceptionHandler(InvalidDataAccessResourceUsageException.class)
-    protected ResponseEntity InvalidDataAccessResourceUsageException(final InvalidDataAccessResourceUsageException e){
-        return ResponseEntity.badRequest().body("인자 값이 너무 많습니다.");
+    protected ResponseEntity InvalidDataAccessResourceUsageException(final InvalidDataAccessResourceUsageException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
+
+
 }
