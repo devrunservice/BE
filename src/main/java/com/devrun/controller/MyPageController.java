@@ -106,7 +106,7 @@ public class MyPageController {
         } else {
 
             result.put("message", "Failure to Authenticate");
-            return ResponseEntity.status(409).body("Failure to Authenticate");
+            return ResponseEntity.status(409).body(result);
         }
     }
 
