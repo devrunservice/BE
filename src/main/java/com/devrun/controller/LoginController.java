@@ -28,6 +28,7 @@ import com.devrun.repository.LoginRepository;
 import com.devrun.service.KakaoLoginService;
 import com.devrun.service.LoginService;
 import com.devrun.service.MemberService;
+import com.devrun.service.TokenBlacklistService;
 import com.devrun.util.JWTUtil;
 import com.devrun.util.TokenBlacklist;
 
@@ -44,7 +45,10 @@ public class LoginController {
 
     @Autowired
     private KakaoLoginService kakaoLoginService;
-
+    
+    @Autowired
+    private TokenBlacklistService tokenBlacklistService;
+    
     @Autowired
     private LoginRepository loginRepository;
 
@@ -247,28 +251,43 @@ public class LoginController {
 	@ResponseBody
 	@PostMapping("/logout")
 	public ResponseEntity<?> logout(HttpServletRequest request){
-        System.out.println("dd");
-        // refreshToken이 헤더에 있는지 확인
-        String refreshToken=request.getHeader("Refresh_token");
-        System.out.println("리프레시 있냐 없냐 : "+refreshToken==null||refreshToken.isEmpty());
+		// refreshToken이 헤더에 있는지 확인
+        String refreshToken = request.getHeader("Refresh_token");
+        
 //	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
-//	    if (refreshToken == null || refreshToken.isEmpty()) {
-//	    	
-//	    	// 400 : Refresh token 없음
-//	        return new ResponseEntity<>("Refresh token is required", HttpStatus.BAD_REQUEST);
-//	    }
-//	    
-//	    // Refresh Token 검증
-//	    if (!JWTUtil.validateToken(refreshToken)) {
-//	        // 401 : 유효하지 않은 Refresh token
-//	        return new ResponseEntity<>("Invalid refresh token", HttpStatus.UNAUTHORIZED);
-//	    }
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            // 400 : Refresh token 없음
+            return new ResponseEntity<>("Refresh token is required", HttpStatus.BAD_REQUEST);
+        }
+        
+        // 사용자 식별
+        String userId = JWTUtil.getUserIdFromToken(refreshToken);
+        
+        if (signupService.isUserIdEquals(userId)) {
+	    
+//		    // Refresh Token 검증
+//		    if (!JWTUtil.validateToken(refreshToken)) {
+//		        // 401 : 유효하지 않은 Refresh token
+//		        return new ResponseEntity<>("Invalid refresh token", HttpStatus.UNAUTHORIZED);
+//		    }
 
-        // 토큰을 블랙리스트에 추가합니다
-        TokenBlacklist.blacklistToken(refreshToken);
-
-        // 200 : 로그아웃 성공
-        return new ResponseEntity<>("Logout successful",HttpStatus.OK);
+	        // 토큰을 블랙리스트에 추가합니다
+//	        TokenBlacklist.blacklistToken(refreshToken);
+        	tokenBlacklistService.blacklistToken(refreshToken);										// 테스트 끝나면 tokenBlacklistService를 TokenBlacklist로 변경
+	        
+	        // 토큰이 블랙리스트에 올바르게 추가 됐는지 확인
+//	        boolean isTokenBlacklisted = TokenBlacklist.isTokenBlacklisted(refreshToken);
+//	        System.out.println("블랙리스트 등록 확인 : " + isTokenBlacklisted);
+        	boolean isTokenBlacklisted = tokenBlacklistService.isTokenBlacklisted(refreshToken);
+            System.out.println("블랙리스트 등록 확인 : " + isTokenBlacklisted);
+	
+	        // 200 : 로그아웃 성공
+	        return new ResponseEntity<>("Logout successful",HttpStatus.OK);
+        
+        } else {
+            // 401 토큰의 사용자와 요청한 사용자 불일치
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
+        }
         
     }
 	
