@@ -1,13 +1,13 @@
 package com.devrun.dto;
 
 
-import lombok.Data;
+import java.time.LocalDate;
 
-import java.util.Date;
+import lombok.Data;
 
 @Data
 public class MypageDTO {
 
     private String name , id , email, phonenumber , profileimgsrc;
-    private Date birthday;
+    private LocalDate birthday;
 }

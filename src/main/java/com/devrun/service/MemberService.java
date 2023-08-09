@@ -13,16 +13,15 @@ import java.util.regex.Pattern;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import com.devrun.entity.PointEntity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.devrun.entity.MemberEntity;
+import com.devrun.entity.PointEntity;
 import com.devrun.repository.MemberEntityRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -42,8 +41,10 @@ public class MemberService {
     private String serviceId;
 
     private final MemberEntityRepository memberEntityRepository;
+    
+    private final CacheService cacheService; // 캐시 서비스 주입
 
-    private final Map<String, String> phoneCodeMap = new ConcurrentHashMap<>();
+//    private final Map<String, String> phoneCodeMap = new ConcurrentHashMap<>();
 
     public MemberEntity findById(String id) {
         return memberEntityRepository.findById(id);
@@ -90,8 +91,12 @@ public class MemberService {
         Random r = new Random();
         String smsCode = Integer.toString(r.nextInt(900000) + 100000);
 
+//        // Save the code for verification later
+//        phoneCodeMap.put(recipientPhoneNumber, smsCode);
+        
         // Save the code for verification later
-        phoneCodeMap.put(recipientPhoneNumber, smsCode);
+        cacheService.saveSmsCode(recipientPhoneNumber, smsCode); // Caffeine 캐시에 코드 저장
+
 
         String jsonBody = "{"
                 + "\"type\": \"SMS\","
@@ -173,13 +178,15 @@ public class MemberService {
     }
 
     public boolean verifySmsCode(String phoneNumber, String code) {
-        String savedCode = phoneCodeMap.get(phoneNumber);
+//        String savedCode = phoneCodeMap.get(phoneNumber);
+    	String savedCode = cacheService.getSmsCode(phoneNumber); // Caffeine 캐시에서 코드 검색
         System.out.println(savedCode + ":" + code);
         return savedCode != null && savedCode.equals(code);
     }
 
     public void removeSmsCode(String phoneNumber) {
-        phoneCodeMap.remove(phoneNumber);
+//        phoneCodeMap.remove(phoneNumber);
+    	cacheService.removeSmsCode(phoneNumber); // Caffeine 캐시에서 코드 제거
     }
 
     public boolean validateId(String id) {

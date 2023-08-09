@@ -93,7 +93,8 @@ public class SignupController {
 		// @Valid 어노테이션이 있는 경우, Spring은 요청 본문을 MemberEntity 객체로 변환하기 전에 Bean Validation API를 사용하여 유효성 검사를 수행
 		System.out.println(memberEntity);
 		System.out.println(memberEntity.getEmail());
-
+		System.out.println("생일 : " + memberEntity.getBirthday());
+		
 		System.out.println("트루가 맞냐" + memberEntity.isAgeConsent());
 		System.out.println("아이디 유효성 검사 : " + memberService.validateId(memberEntity.getId()));
 		System.out.println("이메일 유효성 검사 : " + memberService.validateEmail(memberEntity.getEmail()));
@@ -136,13 +137,7 @@ public class SignupController {
 					// 현재 날짜 구하기
 					LocalDate localCurrentDate = LocalDate.now();
 
-					// 사용자의 생년월일을 LocalDate 형식으로 변환
-					// .toInstant(): java.util.Date 객체를 java.time.Instant 객체로 변환합니다. Instant는 1970년 1월 1일 00:00:00 UTC를 기점으로 한 특정 시점을 나노초 단위로 표현합니다.
-					LocalDate userBirthday = memberEntity.getBirthday().toInstant()
-						  // ZoneId.systemDefault()를 사용하여 시스템 기본 시간대를 사용
-					      .atZone(ZoneId.systemDefault())
-					      // ZonedDateTime이나 Instant를 LocalDate로 변환
-					      .toLocalDate();
+					LocalDate userBirthday = memberEntity.getBirthday();
 
 					// 사용자의 생년월일로부터 19년 후의 날짜 계산
 					LocalDate after19Years = userBirthday.plusYears(19);

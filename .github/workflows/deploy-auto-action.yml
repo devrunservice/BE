@@ -50,6 +50,8 @@ jobs:
           echo "cloud.aws.region.auto=false" >> application.properties
           echo "cloud.aws.bucket=${{ secrets.AWS_BUCKET }}" >> application.properties
           echo "cloud.aws.url=${{ secrets.AWS_SECRET_KEY }}" >> application.properties
+          echo "spring.redis.host=${{ secrets.SPRING_REDIS_HOST }}" >> application.properties
+          echo "spring.redis.port=${{ secrets.SPRING_REDIS_PORT }}" >> application.properties
           
         working-directory : ./src/main/resources
         

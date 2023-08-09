@@ -20,7 +20,6 @@ repositories {
 	maven { url 'https://repo.spring.io/snapshot' }
 	// 아임포트 
     maven { url 'https://jitpack.io' }
-	
 }
 
 dependencies {
@@ -58,6 +57,15 @@ dependencies {
 	implementation 'software.amazon.awssdk:s3:'
 	implementation 'software.amazon.awssdk:sso'
 	implementation 'software.amazon.awssdk:ssooidc'
+	
+	// caffeine
+	implementation 'com.github.ben-manes.caffeine:caffeine:3.1.2'
+	
+	// redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	
+	// jedis
+	implementation 'redis.clients:jedis:3.7.0'
 	
 	//구글
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2'
