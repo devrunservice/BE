@@ -42,10 +42,12 @@ public class CouponController {
     @ApiOperation("유저가 쿠폰 코드를 입력하면 쿠폰을 검증하고, 쿠폰을 등록합니다.")
     @ApiImplicitParam(name = "couponecode"
             , value = "쿠폰 코드")
-    public String userGetCoupon(@RequestBody String couponecode){
-        if(couponSerivce.validate(couponecode)){
+    public String userGetCoupon(@RequestBody Map<String,String> map){
+    	String couponCode = map.get("couponcode");
+    	
+        if(couponSerivce.validate(couponCode)){
             String userid = SecurityContextHolder.getContext().getAuthentication().getName();
-            String res = couponSerivce.checkcoupon(couponecode, userid);
+            String res = couponSerivce.checkcoupon(couponCode, userid);
             return res;
         } else {
             return "쿠폰 코드를 정확히 입력해주세요";
