@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,7 +31,6 @@ import com.devrun.service.LoginService;
 import com.devrun.service.MemberService;
 import com.devrun.service.TokenBlacklistService;
 import com.devrun.util.JWTUtil;
-import com.devrun.util.TokenBlacklist;
 
 import reactor.core.publisher.Mono;
 
@@ -70,8 +70,11 @@ public class LoginController {
 
         member.setId(memberEntity.getId());
         member.setPassword(memberEntity.getPassword());
+        
         System.out.println("1단계");
-        if (signupService.validateId(member.getId()) && signupService.validatePassword(member.getPassword())) {
+        if (signupService.validateId(member.getId()) 
+//        		&& signupService.validatePassword(member.getPassword())										// 비밀번호 암호화 이후 검증 불가
+        				) {
 
             LoginStatus status = loginService.validate(member);
             System.out.println("2단계");
