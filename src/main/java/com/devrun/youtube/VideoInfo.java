@@ -2,12 +2,11 @@ package com.devrun.youtube;
 
 public class VideoInfo {
     private String videoId;
-    private String title;
     private String url;
 
-    public VideoInfo(String videoId, String title, String url) {
+    public VideoInfo(String videoId, String url) {
         this.videoId = videoId;
-        this.title = title;
+   
         this.url = url;
     }
 
@@ -15,9 +14,7 @@ public class VideoInfo {
         return videoId;
     }
 
-    public String getTitle() {
-        return title;
-    }
+  
 
     public String getUrl() {
         return url;
