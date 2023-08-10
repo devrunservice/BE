@@ -18,8 +18,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.devrun.dto.CustomUserDetails;
 import com.devrun.service.CustomUserDetailsService;
+import com.devrun.service.TokenBlacklistService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -31,6 +31,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
 	@Autowired
     private CustomUserDetailsService userDetailsService;
+	
+	@Autowired
+    private TokenBlacklistService tokenBlacklistService;
     
 //    Spring Boot에서는 초기화 과정에서 컴포넌트를 주입할 때, 어플리케이션에 대한 Key/Value 형태의 설정을 클래스 내 변수에 값을 넣어주는 @Value Annotation이 존재한다.
 //    이러한 설정은 application.properties 또는 application.yml 과 같은 파일에서 다음과 같은 형식으로 관리할 수 있다.
@@ -67,15 +70,21 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	    
 	    try {
 			// HTTP 요청 헤더에서 헤더 값을 가져옴
-		    String accessTokenHeader = request.getHeader("Access_token");
-		    String refreshTokenHeader = request.getHeader("Refresh_token");
+		    String accessToken = request.getHeader("Access_token");
+		    String refreshToken = request.getHeader("Refresh_token");
 //		    String easyloginTokenHeader = request.getHeader("Easylogin_token");
 		    
-	        if (accessTokenHeader != null && accessTokenHeader.startsWith("Bearer ")) {
-	            processToken(accessTokenHeader, "Access_token", chain, request, response);
-	        } else if (refreshTokenHeader != null && refreshTokenHeader.startsWith("Bearer ")) {
+	        if (accessToken != null && accessToken.startsWith("Bearer ")) {
+	            processToken(accessToken, "Access_token", chain, request, response);
+	        } else if (refreshToken != null && refreshToken.startsWith("Bearer ")) {
 	        	System.out.println("여기냐1");
-	            processToken(refreshTokenHeader, "Refresh_token", chain, request, response);
+//	        	if (TokenBlacklist.isTokenBlacklisted(refreshToken)) {
+        		if (tokenBlacklistService.isTokenBlacklisted(refreshToken)) {
+	        		
+	        		// 블랙리스트에 등록된 토큰 사용
+	        		response.sendError(HttpServletResponse.SC_FORBIDDEN, "Logout user");
+				}
+	            processToken(refreshToken, "Refresh_token", chain, request, response);
 	        }
 
 //	        else if (easyloginTokenHeader != null && easyloginTokenHeader.startsWith("Bearer ")) {
