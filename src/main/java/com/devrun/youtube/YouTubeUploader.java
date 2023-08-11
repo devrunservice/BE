@@ -235,12 +235,11 @@ public class YouTubeUploader {
 	          
 	        // 업로드된 비디오의 정보를 VideoInfo 객체로 생성하여 반환
 	        String videoId = returnedVideo.getId();
-	        String videoTitle = returnedVideo.getSnippet().getTitle();
 	        String videoUrl = "https://www.youtube.com/watch?v="+videoId;
 	        
 	        
 	        
-	        return new VideoInfo(videoId, videoTitle, videoUrl);
+	        return new VideoInfo(videoId, videoUrl);
 	        
 	    } catch (IOException e) {
 	        throw new IOException("비디오 업로드 중 오류가 발생했습니다.", e);
