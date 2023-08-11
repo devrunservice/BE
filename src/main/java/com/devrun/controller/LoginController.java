@@ -41,7 +41,7 @@ public class LoginController {
     private LoginService loginService;
 
     @Autowired
-    private MemberService signupService;
+    private MemberService memberService;
 
     @Autowired
     private KakaoLoginService kakaoLoginService;
@@ -72,8 +72,8 @@ public class LoginController {
         member.setPassword(memberEntity.getPassword());
         
         System.out.println("1단계");
-        if (signupService.validateId(member.getId()) 
-//        		&& signupService.validatePassword(member.getPassword())										// 비밀번호 암호화 이후 검증 불가
+        if (memberService.validateId(member.getId()) 
+//        		&& memberService.validatePassword(member.getPassword())										// 비밀번호 암호화 이후 검증 불가
         				) {
 
             LoginStatus status = loginService.validate(member);
@@ -218,14 +218,13 @@ public class LoginController {
 //	    String id = memberService.getIdFromToken(request);
         // 사용자 식별
         String userId = JWTUtil.getUserIdFromToken(refreshToken);
-        if (signupService.isUserIdEquals(userId)) {
+        if (memberService.isUserIdEquals(userId)) {
 
             // Refresh Token 검증
 //	    if (!JWTUtil.validateToken(refreshToken)) {
 //	    	// 401 : 유효하지 않은 Refresh token
 //	        return new ResponseEntity<>("Invalid refresh token", HttpStatus.UNAUTHORIZED);
 //	    }
-
 
             // 사용자 존재 여부 확인
             MemberEntity memberEntity = loginRepository.findById(userId);
@@ -246,6 +245,7 @@ public class LoginController {
             // 200 : Access_token 발급
             return new ResponseEntity<>(responseBody, HttpStatus.OK);
         } else {
+        	
             // 401 토큰의 사용자와 요청한 사용자 불일치
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
         }
@@ -266,7 +266,7 @@ public class LoginController {
         // 사용자 식별
         String userId = JWTUtil.getUserIdFromToken(refreshToken);
         
-        if (signupService.isUserIdEquals(userId)) {
+        if (memberService.isUserIdEquals(userId)) {
 	    
 //		    // Refresh Token 검증
 //		    if (!JWTUtil.validateToken(refreshToken)) {
@@ -276,7 +276,7 @@ public class LoginController {
 
 	        // 토큰을 블랙리스트에 추가합니다
 //	        TokenBlacklist.blacklistToken(refreshToken);
-        	tokenBlacklistService.blacklistToken(refreshToken);										// 테스트 끝나면 tokenBlacklistService를 TokenBlacklist로 변경
+        	tokenBlacklistService.blacklistToken(refreshToken);										// 테스트 끝나면 TokenBlacklist 삭제
 	        
 	        // 토큰이 블랙리스트에 올바르게 추가 됐는지 확인
 //	        boolean isTokenBlacklisted = TokenBlacklist.isTokenBlacklisted(refreshToken);
@@ -448,15 +448,15 @@ public class LoginController {
 		
         String id=loginRepository.findByPhonenumber(signupDTO.getPhonenumber());
         System.out.println("찾은 아이디 : "+id+signupDTO.getCode());
-//		signupService.sendSmsCode(signupDTO.getPhonenumber());
+//		memberService.sendSmsCode(signupDTO.getPhonenumber());
         
-        if(signupService.verifySmsCode(signupDTO.getPhonenumber(),signupDTO.getCode())){
+        if(memberService.verifySmsCode(signupDTO.getPhonenumber(),signupDTO.getCode())){
         	
 	        // id를 핸드폰번호로 발송
-	        Mono<String> sendSmsResult=signupService.sendSmsFindid(signupDTO.getPhonenumber(),id);
+	        Mono<String> sendSmsResult=memberService.sendSmsFindid(signupDTO.getPhonenumber(),id);
 	
 	        // 메모리에 저장된 전화번호와 인증코드 제거
-	        signupService.removeSmsCode(signupDTO.getPhonenumber());
+	        memberService.removeSmsCode(signupDTO.getPhonenumber());
         
         // .then은 실행되지면 return에는 무시되고 .just만 return에 포함된다 실행여부와 상관없이 (단지)just만 return 된다는 뜻이다
         return sendSmsResult.then(Mono.just(new ResponseEntity<>("Find ID successful",HttpStatus.OK)));
@@ -475,17 +475,17 @@ public class LoginController {
 		
         MemberEntity memberEntity=loginRepository.findById(signupDTO.getId());
         
-        if(signupService.verifySmsCode(signupDTO.getPhonenumber(),signupDTO.getCode())
-			&& signupService.validatePassword(signupDTO.getPassword())
+        if(memberService.verifySmsCode(signupDTO.getPhonenumber(),signupDTO.getCode())
+			&& memberService.validatePassword(signupDTO.getPassword())
 			&& !memberEntity.getPassword().equals(signupDTO.getPassword())
 			){
 			memberEntity.setPassword(signupDTO.getPassword());
 			loginRepository.save(memberEntity);
-			signupService.removeSmsCode(signupDTO.getPhonenumber());
+			memberService.removeSmsCode(signupDTO.getPhonenumber());
 			
 			return new ResponseEntity<>("Password change successful",HttpStatus.OK);
 			
-        } else if (!signupService.verifySmsCode(signupDTO.getPhonenumber(),signupDTO.getCode())){
+        } else if (!memberService.verifySmsCode(signupDTO.getPhonenumber(),signupDTO.getCode())){
         	
         // 403 인증되지 않은 전화번호
         return new ResponseEntity<>("Verification failed Phonenumber",HttpStatus.FORBIDDEN);

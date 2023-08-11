@@ -69,8 +69,29 @@ public class JWTUtil {
         }
     }
 
-    // 메서드는 주어진 token으로부터 사용자 ID를 추출
+    // 주어진 token으로부터 사용자 ID를 추출
     public static String getUserIdFromToken(String token) {
+    	String subToken = token.substring(7);
+        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken).getBody();
+        System.out.println("사용자 아이디 : " + claims.getSubject());
+        return claims.getSubject();
+    }
+    
+    // 토큰을 두 가지 동시에 사용할 경우 주어진 token으로부터 사용자 ID를 추출
+    // 아직 사용하지 않음
+    public static String getUserIdFromToken(String accessToken, String refreshToken) {
+    	
+    	String token;
+    	
+    	if (accessToken != null && refreshToken == null) {
+			token = accessToken;
+		} else if (refreshToken != null && accessToken == null) {
+			token = refreshToken;
+		} else {
+			// 두 토큰이 모두 null인 경우에 대한 처리
+			throw new IllegalArgumentException("Token missing or at least one");
+		}
+    	
     	String subToken = token.substring(7);
         Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken).getBody();
         System.out.println("사용자 아이디 : " + claims.getSubject());

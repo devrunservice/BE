@@ -36,8 +36,8 @@ public class SecurityConfig {
                 .csrf().disable()
             .authorizeRequests(authorize -> authorize
                     .antMatchers(HttpMethod.OPTIONS, "/**/*").permitAll()
-                    .antMatchers("/tmi").hasAuthority("ADMIN")// 인증이 필요한 /tmi 엔드포인트
-//                    .antMatchers("/savePaymentInfo").authenticated()// 인증이 필요한 /tmi 엔드포인트
+                    .antMatchers("/tmi").hasAnyAuthority("STUDENT","ADMIN")// 인증이 필요한 /tmi 엔드포인트
+//                    .antMatchers("/savePaymentInfo").authenticated()
                     .antMatchers("/token/refresh").authenticated()
                     .antMatchers("/logout").permitAll()
                 .anyRequest().permitAll())
