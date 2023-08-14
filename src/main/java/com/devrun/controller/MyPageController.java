@@ -136,7 +136,7 @@ public class MyPageController {
             memberService.insert(m);
 
             result.put("message", "Email edited successfully.");
-            result.put("phonenumber" , editaemail);
+            result.put("email" , editaemail);
             return ResponseEntity.ok().body(result);
         }
     }
