@@ -28,6 +28,8 @@ import com.devrun.service.MemberService;
 import com.devrun.service.PaymentService;
 import com.devrun.util.JWTUtil;
 
+import io.swagger.annotations.ApiOperation;
+
 
 @RestController
 public class PaymentController {
@@ -48,6 +50,7 @@ public class PaymentController {
 
 	// 결제 정보 db에 저장
 		@PostMapping("/savePaymentInfo")
+		@ApiOperation("결제 완료 시 db에 필요한 정보들을 저장합니다.")
 		public ResponseEntity<String> savePaymentInfo(@RequestBody List<PaymentDTO> paymentDTOList) {
 			
 			LocalDateTime dateTime = LocalDateTime.now();
@@ -56,7 +59,7 @@ public class PaymentController {
 
 			System.err.println(paymentDTOList);
 			
-			  // 사용자의 포인트 정보를 조회
+			// 사용자의 포인트 정보를 조회
 			//2개이상 구매시 구매자는 이름이 같으니깐, 첫번째 배열에 있는 이름으로 point찾음.
 		    String name = paymentDTOList.get(0).getBuyer_name();
 		    System.err.println(name);
@@ -64,8 +67,7 @@ public class PaymentController {
 		    System.err.println(pointEntity);
 
 		    if (pointEntity == null) {
-		        // 사용자의 포인트 정보가 없을 경우 에러 응답 반환
-		        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Point information not found for the user");
+		        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("사용자의 포인트 정보가 없습니다.");
 		    }
 
 		    // 사용자의 포인트에서 지불할 금액 계산
@@ -78,7 +80,7 @@ public class PaymentController {
 
 		    if (nowPoint < userPoint) {
 		        // 사용자의 포인트가 부족하여 처리할 수 없는 경우 에러 응답 반환
-		        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient points");
+		        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("보유한 포인트 보다 사용 할 포인트가 더 많습니다.");
 		    }
 
 		    // 사용자의 포인트에서 지불할 금액만큼 차감
@@ -124,6 +126,8 @@ public class PaymentController {
 		//구매 정보 페이지
 		
 		@GetMapping("/PaymentInfo")
+		@ApiOperation("구매 정보 페이지, 로그인시 토큰에 들어있는 ID값을 가져와서 사용자 정보를 가져옵니다.")
+
 		public ResponseEntity<?> tmi(HttpServletRequest request) {
 			
 		    // refreshToken이 헤더에 있는지 확인
@@ -148,7 +152,7 @@ public class PaymentController {
 
 		        if (payments.isEmpty()) {
 		            // 결제 정보가 없을 경우에 대한 처리
-		            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No payment information found for the user");
+		            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("결제 정보가 없습니다.");
 		        }
 
 		        return ResponseEntity.ok(payments);

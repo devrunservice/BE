@@ -18,6 +18,8 @@ import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
 
+import io.swagger.annotations.ApiOperation;
+
 @RestController
 public class PayController {
 	
@@ -32,6 +34,8 @@ public class PayController {
 	@ResponseBody
 	// 아임포트 api 문서를 예시로 값 넣어주기
 	@PostMapping("/verifyIamport/{imp_uid}")
+    @ApiOperation("결제 검증, 결제 번호를 통하여 아임포트 서버에서 값을 받아와서 우리 서버의 요청값과 비교 후 같으면 진행합니다.(결제금액의 위변조 검증)")
+
 	public ResponseEntity<?> paymentByImpUid( Model model, Locale locale, HttpSession session,
 			@PathVariable(value = "imp_uid") String imp_uid) {
 		
