@@ -97,9 +97,6 @@ public class LoginController {
 
                 case SUCCESS:
 
-                    // 공사중 --------------------------------------------------------------------------------------------------
-
-
                     // 임시 토큰이 헤더에 있는지 확인
                     String easyloginToken = request.getHeader("Easylogin_token");
 
@@ -134,8 +131,6 @@ public class LoginController {
                         }
                         
                     }
-
-                    // -------------------------------------------------------------------------------------------------- 공사중
 
                     // 로그인 성공 처리
                     memberEntity = loginRepository.findById(member.getId());
@@ -341,9 +336,6 @@ public class LoginController {
 			String kakaoEmail=kakaoProfile.getKakao_account().getEmail();
 			String KakaoEmailId=kakaoId+kakaoEmail;
 			
-			
-			// 공사중 -------------------------------------------------------------------------------------
-			
 			// SNS Access_token 생성
 			loginService.setEasycookie(response, oauthToken.getAccess_token(), kakaoProfile.getId());
 			
@@ -392,10 +384,6 @@ public class LoginController {
 			
 			// 로그인 성공 200
 			return new ResponseEntity<>(loginDTO,HttpStatus.OK);
-			
-			
-			// --------------------------------------------------------------------------------- 공사중
-			
 			
 			}
 		

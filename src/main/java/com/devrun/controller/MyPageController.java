@@ -6,6 +6,10 @@ import com.devrun.entity.editmyinfo;
 import com.devrun.service.AwsS3ReadService;
 import com.devrun.service.AwsS3UploadService;
 import com.devrun.service.MemberService;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,6 +44,12 @@ public class MyPageController {
     private AwsS3UploadService awsS3UploadService;
 
     @GetMapping("/mypage/{userid}")
+    @ApiOperation(value = "프로필 불러오기", notes = "헤더에 삽입된 액세스 토큰으로부터 id를 조회하여, 해당 유저의 프로필을 불러옵니다.")
+    @ApiImplicitParam(name = "userid" , value = "주소창에 표시할 유저 id" , required = true)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "성공적으로 처리되었습니다"),
+            @ApiResponse(code = 400, message = "액세스 토큰이 입력되지 않았거나, 존재하지 않는 유저입니다.")
+    })
     public ResponseEntity<?> mypageopen(@PathVariable String userid) {
 
         String v = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -82,6 +92,14 @@ public class MyPageController {
     }
 
     @PostMapping("/edit/phone")
+    @ApiOperation(value = "연락처 수정", notes = "헤더에 삽입된 액세스 토큰으로부터 id를 조회하여, 해당 유저의 연락처를 수정합니다.")
+    @ApiImplicitParam(name = "editdata" , value = "연락처와 인증번호" , required = true)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "성공적으로 처리되었습니다"),
+            @ApiResponse(code = 400, message = "액세스 토큰과 키 값을 확인해주세요(phonenumber , code)"),
+            @ApiResponse(code = 409, message = "이미 등록된 번호"),
+            @ApiResponse(code = 409, message = "인증번호 불일치"),
+    })
     public ResponseEntity<?> editphone(@RequestBody Map<String, String> editdata) {
         String v = SecurityContextHolder.getContext().getAuthentication().getName();
         String editphone = editdata.get("phonenumber");
@@ -106,11 +124,19 @@ public class MyPageController {
         } else {
 
             result.put("message", "Failure to Authenticate");
-            return ResponseEntity.status(409).body("Failure to Authenticate");
+            return ResponseEntity.status(409).body(result);
         }
     }
 
     @PostMapping(value = "/edit/email")
+    @ApiOperation(value = "이메일 수정", notes = "헤더에 삽입된 액세스 토큰으로부터 id를 조회하여, 해당 유저의 이메일주소를 수정합니다.")
+    @ApiImplicitParam(name = "editdata" , value = "이메일주소" , required = true)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "성공적으로 처리되었습니다"),
+            @ApiResponse(code = 400, message = "액세스 토큰과 키 값을 확인해주세요(email)"),
+            @ApiResponse(code = 409, message = "이미 등록된 이메일 주소"),
+            @ApiResponse(code = 409, message = "형식이 유효하지 않은 이메일 주소"),
+    })
     public ResponseEntity<?> editEmail(@RequestBody Map<String, String> editdata, HttpServletResponse response) throws IOException {
 
         String v = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -136,7 +162,7 @@ public class MyPageController {
             memberService.insert(m);
 
             result.put("message", "Email edited successfully.");
-            result.put("phonenumber" , editaemail);
+            result.put("email" , editaemail);
             return ResponseEntity.ok().body(result);
         }
     }
@@ -160,6 +186,13 @@ public class MyPageController {
 //    }
 
     @PostMapping("/edit/profileimg")
+    @ApiOperation(value = "프로필 이미지 수정", notes = "헤더에 삽입된 액세스 토큰으로부터 id를 조회하여, 해당 유저의 프로필 이미지를 수정합니다.")
+    //@ApiImplicitParam(value = "프로필 이미지 파일") 왠지 모르겠는 데 nullpointer error 뜸
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "성공적으로 처리되었습니다"),
+            @ApiResponse(code = 400, message = "액세스 토큰과 키 값을 확인해주세요(phonenumber , code"),
+            @ApiResponse(code = 409, message = "이미지가 첨부되지 않았거나, 2장 이상 첨부되었습니다."),
+    })
     public ResponseEntity<?> editProfileImg(@RequestPart(required = true) List<MultipartFile> editimg) throws IOException {
         String v = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -175,11 +208,11 @@ public class MyPageController {
 
                 String uploadpath = awsS3UploadService.putS3(editimg, "profile");
                 String newprofileimgsrc = awsS3ReadService.findUploadKeyUrl(uploadpath);
-                m.setProfileimgsrc(newprofileimgsrc);
+                m.setProfileimgsrc(uploadpath);
                 memberService.insert(m);
 
                 result.put("message", "profile image edited successfully.");
-
+                result.put("profileimg" , newprofileimgsrc);
                 return ResponseEntity.ok(result);
             }
         } else {

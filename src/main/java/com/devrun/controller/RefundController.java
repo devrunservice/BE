@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.devrun.service.RefundService;
 
+import io.swagger.annotations.ApiOperation;
+
 
 @RestController
 public class RefundController {
@@ -26,6 +28,8 @@ public class RefundController {
 	
 	 // 사용자 환불 로직
 	 @PostMapping("/payment")
+	 @ApiOperation("아임포트 api를 이용하여 환불정보와 Key,Secret값들을 이용하여 환불합니다.")
+
 	 public ResponseEntity<String> refundPay(@RequestBody Map<String, Object> refundData) {
 		 
 	     try {	    	 

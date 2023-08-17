@@ -52,7 +52,7 @@ public class S3Controller {
     @GetMapping("/read")
     public String fileRead(@RequestParam(name = "no") Long no){
 
-        String key = "profile/da834627-a0d5-4348-9934-4dfeac3264e0.png";
+        String key = "profile.png";
         String result = awsS3ReadService.findUploadKeyUrl(key);
         return result;
     }

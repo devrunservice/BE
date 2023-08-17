@@ -9,6 +9,8 @@ import com.devrun.dto.CouponDTO;
 import com.devrun.entity.CouponViewEntity;
 import com.devrun.repository.CouponViewRepository;
 
+import io.swagger.annotations.ApiOperation;
+
 
 @RestController
 public class DiscountController {
@@ -16,6 +18,7 @@ public class DiscountController {
 	private CouponViewRepository couponViewRepository;
 
 	@PostMapping("/applyCoupon")
+    @ApiOperation("보유하고 있는 쿠폰을 적용합니다.")
 	public ResponseEntity<?> applyCoupon(@RequestBody CouponDTO couponDTO) {
 		System.err.println(couponDTO);
 		
