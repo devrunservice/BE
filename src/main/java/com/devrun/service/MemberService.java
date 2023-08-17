@@ -210,9 +210,9 @@ public class MemberService {
         return matcher.find();
     }
 
-    public boolean isUserIdEquals(String id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userId = authentication.getName();
-        return userId.equals(id);
-    }
+//    public boolean isUserIdEquals(String id) {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String userId = authentication.getName();
+//        return userId.equals(id);
+//    }
 }

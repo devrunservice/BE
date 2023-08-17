@@ -72,6 +72,17 @@ public class LoginService {
 	    return member.getPhonenumber().equals(phonenumber);
 	}
 	
+	// Refresh_token HttpOnly 쿠키 생성
+	public void setRefeshcookie(HttpServletResponse response, String token) {
+		
+		Cookie Refesh_token = new Cookie("Refesh_token", token);
+		Refesh_token.setHttpOnly(true);
+		Refesh_token.setMaxAge(24 * 60 * 60 * 1000);
+		Refesh_token.setPath("/authz");
+	    response.addCookie(Refesh_token);
+	    
+	}
+	
 	// 로그아웃에 필요한 SNS Access_token 생성
 	public void setEasycookie(HttpServletResponse response, String token, Long id) {
 		
