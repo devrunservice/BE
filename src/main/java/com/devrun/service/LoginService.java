@@ -1,5 +1,6 @@
 package com.devrun.service;
 
+import java.util.Base64;
 import java.util.Date;
 
 import javax.servlet.http.Cookie;
@@ -75,11 +76,13 @@ public class LoginService {
 	// Refresh_token HttpOnly 쿠키 생성
 	public void setRefeshcookie(HttpServletResponse response, String token) {
 		
-		Cookie Refesh_token = new Cookie("Refresh_token", "Bearer " + token);
-		Refesh_token.setHttpOnly(true);
-		Refesh_token.setMaxAge(24 * 60 * 60 * 1000);
-		Refesh_token.setPath("/authz");
-	    response.addCookie(Refesh_token);
+		String value = "Bearer " + token;
+	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
+	    Cookie Refresh_token = new Cookie("Refresh_token", encodedValue);
+	    Refresh_token.setHttpOnly(true);
+	    Refresh_token.setMaxAge(24 * 60 * 60 * 1000);
+	    Refresh_token.setPath("/authz");
+	    response.addCookie(Refresh_token);
 	    
 	}
 	

@@ -1,6 +1,7 @@
 package com.devrun.util;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Date;
 import java.util.function.Function;
 
@@ -136,8 +137,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	private void processToken(String tokenHeader, String headerName, FilterChain chain, HttpServletRequest request, HttpServletResponse response)
 		    throws ServletException, IOException {
 		
+		String decodedValue = new String(Base64.getDecoder().decode(tokenHeader));
     	// 각각의 헤더 값이 "Bearer "로 시작하는 경우, 실제 토큰을 추출
-    	String jwt = tokenHeader.substring(7);
+    	String jwt = decodedValue.substring(7);
     	System.out.println(jwt + "잘리냐");
     	String username = extractUsername(jwt);
     	
