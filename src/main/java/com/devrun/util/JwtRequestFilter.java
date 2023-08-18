@@ -57,16 +57,21 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 //		String requestPath = request.getRequestURI();
 		// HTTP 요청 헤더에서 헤더 값을 가져옴
 	    String accessToken = request.getHeader("Access_token");
-	    String refreshToken = request.getHeader("Refresh_token");
+	    String encodedRefreshToken = request.getHeader("Refresh_token");
+	    String refreshToken = null;
+	    if (encodedRefreshToken != null) {
+	    	refreshToken = new String(Base64.getDecoder().decode(encodedRefreshToken));
+			
+		}
+	    System.out.println("리프레시 토큰 : " + refreshToken);
 //	    String easyloginTokenHeader = request.getHeader("Easylogin_token");
-	    
 		//login 경로에 대한 요청인 경우 필터를 건너뛰도록 설정합니다.
 		if (
 //				!"/tmi".equals(requestPath) 
 //				&& !"/savePaymentInfo".equals(requestPath)
 //				&& !"/token/refresh".equals(requestPath)
 				accessToken == null
-				&& refreshToken == null
+				&& encodedRefreshToken == null
 //				&& easyloginTokenHeader == null
 				) {
 		    chain.doFilter(request, response);
@@ -137,9 +142,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	private void processToken(String tokenHeader, String headerName, FilterChain chain, HttpServletRequest request, HttpServletResponse response)
 		    throws ServletException, IOException {
 		
-		String decodedValue = new String(Base64.getDecoder().decode(tokenHeader));
     	// 각각의 헤더 값이 "Bearer "로 시작하는 경우, 실제 토큰을 추출
-    	String jwt = decodedValue.substring(7);
+    	String jwt = tokenHeader.substring(7);
     	System.out.println(jwt + "잘리냐");
     	String username = extractUsername(jwt);
     	
