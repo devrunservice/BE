@@ -75,7 +75,7 @@ public class LoginService {
 	// Refresh_token HttpOnly 쿠키 생성
 	public void setRefeshcookie(HttpServletResponse response, String token) {
 		
-		Cookie Refesh_token = new Cookie("Refesh_token", "Bear " + token);
+		Cookie Refesh_token = new Cookie("Refesh_token", "Bearer " + token);
 		Refesh_token.setHttpOnly(true);
 		Refesh_token.setMaxAge(24 * 60 * 60 * 1000);
 		Refesh_token.setPath("/authz");
