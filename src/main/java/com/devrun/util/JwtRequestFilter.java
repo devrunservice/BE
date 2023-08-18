@@ -61,7 +61,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	    String refreshToken = null;
 	    if (encodedRefreshToken != null) {
 	    	refreshToken = new String(Base64.getDecoder().decode(encodedRefreshToken));
-			
 		}
 	    System.out.println("리프레시 토큰 : " + refreshToken);
 //	    String easyloginTokenHeader = request.getHeader("Easylogin_token");
@@ -79,25 +78,32 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		}
 	    
 	    try {
-			
-	        if (accessToken != null && accessToken.startsWith("Bearer ")) {
-	        	
-	            processToken(accessToken, "Access_token", chain, request, response);
-	            
-	        } else if (refreshToken != null && refreshToken.startsWith("Bearer ")) {
-	        	
-	        	System.out.println("여기냐1");
-//	        	if (TokenBlacklist.isTokenBlacklisted(refreshToken)) {
-	        	
-        		if (tokenBlacklistService.isTokenBlacklisted(refreshToken)) {
+			if (JWTUtil.isAlgorithmValid(refreshToken)) {
+				
+		        if (accessToken != null && accessToken.startsWith("Bearer ")) {
+		        	
+		            processToken(accessToken, "Access_token", chain, request, response);
+		            
+		        } else if (refreshToken != null && refreshToken.startsWith("Bearer ")) {
+		        	
+		        	System.out.println("여기냐1");
+	//	        	if (TokenBlacklist.isTokenBlacklisted(refreshToken)) {
+		        	
+	        		if (tokenBlacklistService.isTokenBlacklisted(refreshToken)) {
+		        		
+		        		// 블랙리스트에 등록된 토큰 사용
+		        		response.sendError(HttpServletResponse.SC_FORBIDDEN, "Logout user");
+					}
 	        		
-	        		// 블랙리스트에 등록된 토큰 사용
-	        		response.sendError(HttpServletResponse.SC_FORBIDDEN, "Logout user");
-				}
-        		
-	            processToken(refreshToken, "Refresh_token", chain, request, response);
-	            
-	        }
+		            processToken(refreshToken, "Refresh_token", chain, request, response);
+		            
+		        }
+		        
+			} else {
+				
+				response.sendError(403, "Invalid token signature algorithm");
+				
+			}
 
 //	        else if (easyloginTokenHeader != null && easyloginTokenHeader.startsWith("Bearer ")) {
 //	        	System.out.println("이지토큰 : " + easyloginTokenHeader.substring(7));

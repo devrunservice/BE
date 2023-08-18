@@ -21,6 +21,9 @@ public class JWTUtil {
     	JWTUtil.SECRET_KEY = secretKey;
     }
     
+    // 시그니쳐 알고리즘 설정
+    private static final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
+    
 	// 토큰 만료시간 설정
     private static final long EASYLOGIN_TOKEN_EXPIRATION_TIME = 15 * 60 * 1000;		// 5분
     private static final long ACCESS_TOKEN_EXPIRATION_TIME = 
@@ -41,7 +44,7 @@ public class JWTUtil {
                 // JWT의 exp (expiration time) 필드를 설정
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TIME))
                 // WT를 서명하는 데 사용될 알고리즘과 시크릿 키를 설정
-                .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
+                .signWith(SIGNATURE_ALGORITHM, SECRET_KEY)
                 // 최종적으로 생성된 JWT를 직렬화하여 문자열 형태로 반환
                 .compact();
     }
@@ -53,7 +56,7 @@ public class JWTUtil {
 //            .claim("name", name)
             .setIssuedAt(new Date(System.currentTimeMillis()))
             .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION_TIME))
-            .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
+            .signWith(SIGNATURE_ALGORITHM, SECRET_KEY)
             .compact();
     }
     
@@ -61,6 +64,10 @@ public class JWTUtil {
     public static boolean validateToken(String token) {
         try {
         	String subToken = token.substring(7);
+        	
+        	// Jws는 JWT (JSON Web Token)의 서명된 부분을 나타냄
+        	// Jws<Claims>는 서명을 포함한 토큰의 전체 구조를 나타냄
+        	// Jws 객체는 헤더 (알고리즘, 타입 등), 본문 (클레임), 서명 세 부분을 포함
             Jws<Claims> claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken);
             return claims.getBody().getExpiration().after(new Date());
         } catch (Exception e) {
@@ -73,31 +80,42 @@ public class JWTUtil {
     // 주어진 token으로부터 사용자 ID를 추출
     public static String getUserIdFromToken(String token) {
     	String subToken = token.substring(7);
+    	
+    	// Claims는 JWT의 페이로드 (Payload)를 나타내는 본문 부분
         Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken).getBody();
         System.out.println("사용자 아이디 : " + claims.getSubject());
         return claims.getSubject();
     }
     
+    // 주어진 token으로부터 alg를 추출하여 검증
+    public static boolean isAlgorithmValid(String token) {
+        String subToken = token.substring(7); // Bearer 제거
+        Jws<Claims> jwsClaims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken);
+        String algorithmUsed = jwsClaims.getHeader().getAlgorithm();
+        return SIGNATURE_ALGORITHM.getValue().equals(algorithmUsed);
+    }
+
+    
     // 토큰을 두 가지 동시에 사용할 경우 주어진 token으로부터 사용자 ID를 추출
     // 아직 사용하지 않음
-    public static String getUserIdFromToken(String accessToken, String refreshToken) {
-    	
-    	String token;
-    	
-    	if (accessToken != null && refreshToken == null) {
-			token = accessToken;
-		} else if (refreshToken != null && accessToken == null) {
-			token = refreshToken;
-		} else {
-			// 두 토큰이 모두 null인 경우에 대한 처리
-			throw new IllegalArgumentException("Token missing or at least one");
-		}
-    	
-    	String subToken = token.substring(7);
-        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken).getBody();
-        System.out.println("사용자 아이디 : " + claims.getSubject());
-        return claims.getSubject();
-    }
+//    public static String getUserIdFromToken(String accessToken, String refreshToken) {
+//    	
+//    	String token;
+//    	
+//    	if (accessToken != null && refreshToken == null) {
+//			token = accessToken;
+//		} else if (refreshToken != null && accessToken == null) {
+//			token = refreshToken;
+//		} else {
+//			// 두 토큰이 모두 null인 경우에 대한 처리
+//			throw new IllegalArgumentException("Token missing or at least one");
+//		}
+//    	
+//    	String subToken = token.substring(7);
+//        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken).getBody();
+//        System.out.println("사용자 아이디 : " + claims.getSubject());
+//        return claims.getSubject();
+//    }
     
     // EASYLOGIN_TOKEN 생성
     public static String generateEasyloginToken(String userId, String email) {
