@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,6 +42,9 @@ public class LoginController {
 
     @Autowired
     private MemberService memberService;
+    
+    @Autowired
+	private PasswordEncoder passwordEncoder;
 
     @Autowired
     private KakaoLoginService kakaoLoginService;
@@ -69,7 +73,10 @@ public class LoginController {
         MemberEntity member = new MemberEntity();
 
         member.setId(memberEntity.getId());
-        member.setPassword(memberEntity.getPassword());
+        
+        // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(memberEntity.getPassword());
+        member.setPassword(encodedPassword);
         
         System.out.println("1단계");
         if (memberService.validateId(member.getId()) 
@@ -286,7 +293,7 @@ public class LoginController {
             System.out.println("블랙리스트 등록 확인 : " + isTokenBlacklisted);
 	
 	        // 200 : 로그아웃 성공
-	        return new ResponseEntity<>("Logout successful",HttpStatus.OK);
+	        return new ResponseEntity<>("Logout successful", HttpStatus.OK);
         
 //        } else {
             // 401 토큰의 사용자와 요청한 사용자 불일치
@@ -298,8 +305,8 @@ public class LoginController {
 	@ResponseBody
 	@GetMapping("/auth/kakao/callback")
 	public ResponseEntity<?> kakaoCallback(@RequestParam(required = false) String code
-									        ,@RequestParam(required = false) String error
-									        ,HttpServletResponse response){
+									        , @RequestParam(required = false) String error
+									        , HttpServletResponse response){
 		
 		System.out.println("코드"+code);
 		
@@ -313,7 +320,7 @@ public class LoginController {
 			if( oauthToken == null || oauthToken.getAccess_token() == null ) {
 				
 			// 500 : 엑세스 토큰을 가져오지 못 함
-			return new ResponseEntity<>("Failed to retrieve access token",HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>("Failed to retrieve access token", HttpStatus.INTERNAL_SERVER_ERROR);
 			
 			}
 			
@@ -326,48 +333,48 @@ public class LoginController {
 			if( kakaoProfile == null || kakaoProfile.getId() == null ) {
 				
 			// 500 : 카카오 프로필을 가져오지 못 함
-			return new ResponseEntity<>("Failed to retrieve profile information",HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>("Failed to retrieve profile information", HttpStatus.INTERNAL_SERVER_ERROR);
 			
 			}
 			
-			System.out.println("카카오 ID : "+kakaoProfile.getId());
-			System.out.println("카카오 Email : "+kakaoProfile.getKakao_account().getEmail());
+			System.out.println("카카오 ID : " + kakaoProfile.getId());
+			System.out.println("카카오 Email : " + kakaoProfile.getKakao_account().getEmail());
 			
-			String kakaoId=kakaoProfile.getId().toString();
-			String kakaoEmail=kakaoProfile.getKakao_account().getEmail();
-			String KakaoEmailId=kakaoId+kakaoEmail;
+			String kakaoId = kakaoProfile.getId().toString();
+			String kakaoEmail = kakaoProfile.getKakao_account().getEmail();
+			String KakaoEmailId = kakaoId + kakaoEmail;
 			
 			// SNS Access_token 생성
 			loginService.setEasycookie(response, oauthToken.getAccess_token(), kakaoProfile.getId());
 			
-			MemberEntity memberEntity=new MemberEntity();
+			MemberEntity memberEntity = new MemberEntity();
 			
-			memberEntity=loginRepository.findByKakaoEmailId(KakaoEmailId);
-			System.out.println("3단계"+memberEntity);
+			memberEntity = loginRepository.findByKakaoEmailId(KakaoEmailId);
+			System.out.println("3단계" + memberEntity);
 			
 			if ( memberEntity == null ) {
 			
 			// 카카오 계정에 연동된 아이디가 없는 경우
 			// 카카오 아이디와 이메일을 포함한 토큰 생성
-			String easylogin_token = JWTUtil.generateEasyloginToken(kakaoId,kakaoEmail);
+			String easylogin_token = JWTUtil.generateEasyloginToken(kakaoId, kakaoEmail);
 			System.out.println("이지로그인 토큰 : " + easylogin_token);
 			
-			Map<String, String> response2=new HashMap<>();
+			Map<String, String> response2 = new HashMap<>();
 			response2.put("Easylogin_token","Bearer " + easylogin_token);
 			response2.put("message","No linked account found. Please link your account.");
 			System.out.println("간편로그인 리스폰스 : " + response2);
 			
 			// 303 : 연동된 계정이 존재하지 않음
-			return new ResponseEntity<>(response,HttpStatus.SEE_OTHER);
+			return new ResponseEntity<>(response, HttpStatus.SEE_OTHER);
 			
 			} else {
 			
 			
 			// JWT토큰
-			String access_token = JWTUtil.generateAccessToken(memberEntity.getId(),memberEntity.getName());
+			String access_token = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName());
 			
 			// JWT refresh 토큰
-			String refresh_token = JWTUtil.generateRefreshToken(memberEntity.getId(),memberEntity.getName());
+			String refresh_token = JWTUtil.generateRefreshToken(memberEntity.getId(), memberEntity.getName());
 			
 			// 마지막 로그인 날짜 저장
 			loginService.setLastLogin(memberEntity);
@@ -375,7 +382,7 @@ public class LoginController {
 			LoginStatus status = loginService.validate(memberEntity);
 			
 			// 로그인 정보 전달 객체 생성
-			LoginDTO loginDTO = new LoginDTO(status,"KakaoLogin successful");
+			LoginDTO loginDTO = new LoginDTO(status, "KakaoLogin successful");
 			
 			// 토큰을 응답 본문에 추가
 			loginDTO.setAccess_token("Bearer " + access_token);
@@ -384,19 +391,19 @@ public class LoginController {
 			loginService.setRefeshcookie(response, refresh_token);
 			
 			// 로그인 성공 200
-			return new ResponseEntity<>(loginDTO,HttpStatus.OK);
+			return new ResponseEntity<>(loginDTO, HttpStatus.OK);
 			
 			}
 		
 		} else if ( error != null ) {
 		
 		// 400 로그인 에러
-		return new ResponseEntity<>("KakaoLogin failed",HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>("KakaoLogin failed", HttpStatus.BAD_REQUEST);
 		
 		} else {
 			
 		// 400 code, error 둘다 null 값인 경우
-		return new ResponseEntity<>("Invalid request",HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST);
 		
 		}
 
@@ -406,29 +413,29 @@ public class LoginController {
 	@PostMapping("/sns/logout/kakao")
 	public ResponseEntity<?> kakaoLogout(HttpServletRequest request){
 	
-		String token=request.getHeader("Access_token_easy");
-		String userIdString=request.getHeader("User_Id");
+		String token = request.getHeader("Access_token_easy");
+		String userIdString = request.getHeader("User_Id");
 		
 		if ( token == null ) {
 			
 		// 400 토큰 null
-		return new ResponseEntity<>("Access_token_easy is null",HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>("Access_token_easy is null", HttpStatus.BAD_REQUEST);
 		
 		}
 		
 		if ( userIdString == null ) {
 			
 		// 400 id null
-		return new ResponseEntity<>("ID is null",HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>("ID is null", HttpStatus.BAD_REQUEST);
 		
 		}
 		
 		Long id = Long.parseLong(userIdString);
 		LogoutResponse kakaoLogout = kakaoLoginService.kakaoLogout(token,id);
 		
-		System.out.println("로그아웃 성공 ID : "+kakaoLogout.getId());
+		System.out.println("로그아웃 성공 ID : " + kakaoLogout.getId());
 		
-		return new ResponseEntity<>("KakaoLogout successful",HttpStatus.OK);
+		return new ResponseEntity<>("KakaoLogout successful", HttpStatus.OK);
 	}
 	
 	//	@ResponseBody
@@ -442,59 +449,63 @@ public class LoginController {
 	@PostMapping("/find/id")
 	public Mono<ResponseEntity<?>>findId(@RequestBody SignupDTO signupDTO){
 		
-        String id=loginRepository.findByPhonenumber(signupDTO.getPhonenumber());
-        System.out.println("찾은 아이디 : "+id+signupDTO.getCode());
-//		memberService.sendSmsCode(signupDTO.getPhonenumber());
+        String id = loginRepository.findByPhonenumber(signupDTO.getPhonenumber());
+        System.out.println("찾은 아이디 : " + id + signupDTO.getCode());
         
-        if(memberService.verifySmsCode(signupDTO.getPhonenumber(),signupDTO.getCode())){
+        if(memberService.verifySmsCode(signupDTO.getPhonenumber(), signupDTO.getCode())){
         	
 	        // id를 핸드폰번호로 발송
-	        Mono<String> sendSmsResult=memberService.sendSmsFindid(signupDTO.getPhonenumber(),id);
+	        Mono<String> sendSmsResult = memberService.sendSmsFindid(signupDTO.getPhonenumber(), id);
 	
 	        // 메모리에 저장된 전화번호와 인증코드 제거
 	        memberService.removeSmsCode(signupDTO.getPhonenumber());
         
         // .then은 실행되지면 return에는 무시되고 .just만 return에 포함된다 실행여부와 상관없이 (단지)just만 return 된다는 뜻이다
-        return sendSmsResult.then(Mono.just(new ResponseEntity<>("Find ID successful",HttpStatus.OK)));
+        return sendSmsResult.then(Mono.just(new ResponseEntity<>("Find ID successful", HttpStatus.OK)));
 
         } else {
         	
         // 403 인증되지 않은 전화번호
-        return Mono.just(new ResponseEntity<>("Verification failed Phonenumber",HttpStatus.FORBIDDEN));
+        return Mono.just(new ResponseEntity<>("Verification failed Phonenumber", HttpStatus.FORBIDDEN));
         
         }
     }
 	
 	@ResponseBody
 	@PostMapping("/find/password")
-	public ResponseEntity<?> findpw(@RequestBody SignupDTO signupDTO){
+	public ResponseEntity<?> findpw(@RequestBody SignupDTO signupDTO) {
 		
         MemberEntity memberEntity = loginRepository.findById(signupDTO.getId());
+        // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(signupDTO.getPassword());
         
-        if(memberService.verifySmsCode(signupDTO.getPhonenumber(),signupDTO.getCode())
+        if (memberService.verifySmsCode(signupDTO.getPhonenumber(),signupDTO.getCode())
 			&& memberService.validatePassword(signupDTO.getPassword())
-			&& !memberEntity.getPassword().equals(signupDTO.getPassword())
-			){
-			memberEntity.setPassword(signupDTO.getPassword());
+			&& !memberEntity.getPassword().equals(encodedPassword)
+			) {
+        	
+			memberEntity.setPassword(encodedPassword);
+			
 			loginRepository.save(memberEntity);
+			
 			memberService.removeSmsCode(signupDTO.getPhonenumber());
 			
-			return new ResponseEntity<>("Password change successful",HttpStatus.OK);
+			return new ResponseEntity<>("Password change successful", HttpStatus.OK);
 			
-        } else if (!memberService.verifySmsCode(signupDTO.getPhonenumber(),signupDTO.getCode())){
+        } else if ( !memberService.verifySmsCode(signupDTO.getPhonenumber(), signupDTO.getCode()) ) {
         
         // 403 인증되지 않은 전화번호
-        return new ResponseEntity<>("Verification failed Phonenumber",HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>("Verification failed Phonenumber", HttpStatus.FORBIDDEN);
         
-        } else if (memberEntity.getPassword().equals(signupDTO.getPassword())){
+        } else if ( memberEntity.getPassword().equals(encodedPassword) ) {
         	
         // 400 현재 비밀번호와 같음
-        return new ResponseEntity<>("Same as current password",HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("Same as current password", HttpStatus.BAD_REQUEST);
         
         } else {
         
         // 400 비밀번호 유효성검사 실패
-        return new ResponseEntity<>("Invalid input data",HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("Invalid input data", HttpStatus.BAD_REQUEST);
         
         }
     }
@@ -503,13 +514,11 @@ public class LoginController {
 	@PostMapping("/verifyPhone")
 	public boolean verifyPhone(@RequestBody LoginDTO loginDTO){
 		
-		String id=loginDTO.getId();
-		String phone=loginDTO.getPhonenumber();
+		String id = loginDTO.getId();
+		String phone = loginDTO.getPhonenumber();
 		
-		boolean isPhoneVerified=loginService.verifyPhone(id,phone);
+		boolean isPhoneVerified = loginService.verifyPhone(id, phone);
 		
 		return isPhoneVerified;
-		
 	}
-	
 }
