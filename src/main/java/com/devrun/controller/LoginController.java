@@ -305,7 +305,7 @@ public class LoginController {
 									        , @RequestParam(required = false) String error
 									        , HttpServletResponse response){
 		
-		System.out.println("코드"+code);
+		System.out.println("코드" + code);
 		
 		// 성공했을 경우 code라는 파라미터값이 생성되고 실패했을 경우 error라는 파라미터값이 생성된다
 		if ( code != null ) {
@@ -357,12 +357,12 @@ public class LoginController {
 			System.out.println("이지로그인 토큰 : " + easylogin_token);
 			
 			Map<String, String> response2 = new HashMap<>();
-			response2.put("Easylogin_token","Bearer " + easylogin_token);
-			response2.put("message","No linked account found. Please link your account.");
+			response2.put("Easylogin_token", "Bearer " + easylogin_token);
+			response2.put("message", "No linked account found. Please link your account.");
 			System.out.println("간편로그인 리스폰스 : " + response2);
 			
 			// 303 : 연동된 계정이 존재하지 않음
-			return new ResponseEntity<>(response, HttpStatus.SEE_OTHER);
+			return new ResponseEntity<>(response2, HttpStatus.SEE_OTHER);
 			
 			} else {
 			
@@ -383,7 +383,7 @@ public class LoginController {
 			
 			// 토큰을 응답 본문에 추가
 			loginDTO.setAccess_token("Bearer " + access_token);
-//			loginDTO.setRefresh_token("Bearer "+refresh_token);
+//			loginDTO.setRefresh_token("Bearer " + refresh_token);
 			
 			loginService.setRefeshcookie(response, refresh_token);
 			

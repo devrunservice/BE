@@ -79,32 +79,32 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	    
 	    try {
 				
-		        if (accessToken != null && accessToken.startsWith("Bearer ")) {
-		        	
-		        	if (JWTUtil.isAlgorithmValid(accessToken)) {
-		        		processToken(accessToken, "Access_token", chain, request, response);
-		        	} else {
-		        		
-		        		response.sendError(403, "Invalid token signature algorithm");
-		        		
-		        	}
-		            
-		        } else if (refreshToken != null && refreshToken.startsWith("Bearer ")) {
-		        	
-		        	System.out.println("여기냐1");
-	//	        	if (TokenBlacklist.isTokenBlacklisted(refreshToken)) {
-		        	
-	        		if (tokenBlacklistService.isTokenBlacklisted(refreshToken)) {
-		        		
-		        		// 블랙리스트에 등록된 토큰 사용
-		        		response.sendError(HttpServletResponse.SC_FORBIDDEN, "Logout user");
-					}
-	        		if (JWTUtil.isAlgorithmValid(refreshToken)) {
-	        			processToken(refreshToken, "Refresh_token", chain, request, response);
-	        		} else {
-		        		response.sendError(403, "Invalid token signature algorithm");
-		        	}
-		        }
+	        if (accessToken != null && accessToken.startsWith("Bearer ")) {
+	        	
+	        	if (JWTUtil.isAlgorithmValid(accessToken)) {
+	        		processToken(accessToken, "Access_token", chain, request, response);
+	        	} else {
+	        		
+	        		response.sendError(403, "Invalid token signature algorithm");
+	        		
+	        	}
+	            
+	        } else if (refreshToken != null && refreshToken.startsWith("Bearer ")) {
+	        	
+	        	System.out.println("여기냐1");
+//	        	if (TokenBlacklist.isTokenBlacklisted(refreshToken)) {
+	        	
+        		if (tokenBlacklistService.isTokenBlacklisted(refreshToken)) {
+	        		
+	        		// 블랙리스트에 등록된 토큰 사용
+	        		response.sendError(HttpServletResponse.SC_FORBIDDEN, "Logout user");
+				}
+        		if (JWTUtil.isAlgorithmValid(refreshToken)) {
+        			processToken(refreshToken, "Refresh_token", chain, request, response);
+        		} else {
+	        		response.sendError(403, "Invalid token signature algorithm");
+	        	}
+	        }
 		        
 
 //	        else if (easyloginTokenHeader != null && easyloginTokenHeader.startsWith("Bearer ")) {
