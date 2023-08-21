@@ -52,6 +52,8 @@ jobs:
           echo "cloud.aws.url=${{ secrets.AWS_SECRET_KEY }}" >> application.properties
           echo "spring.redis.host=${{ secrets.SPRING_REDIS_HOST }}" >> application.properties
           echo "spring.redis.port=${{ secrets.SPRING_REDIS_PORT }}" >> application.properties
+          echo "spring.servlet.multipart.max-file-size=1000MB" >> application.properties
+          echo "spring.servlet.multipart.max-request-size=1000MB" >> application.properties
           
         working-directory : ./src/main/resources
         
