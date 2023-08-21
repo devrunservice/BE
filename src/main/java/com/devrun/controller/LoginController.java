@@ -60,6 +60,9 @@ public class LoginController {
 
     @Value("${kakao.redirect_url}")
     private String redirect_uri;
+    
+    @Value("${ReCAPTCHA.secretKey}")
+    private String secretKey;
 
     @ResponseBody
     @PostMapping("/login")
@@ -73,10 +76,7 @@ public class LoginController {
         MemberEntity member = new MemberEntity();
 
         member.setId(memberEntity.getId());
-        
-        // 비밀번호 암호화
-        String encodedPassword = passwordEncoder.encode(memberEntity.getPassword());
-        member.setPassword(encodedPassword);
+        member.setPassword(memberEntity.getPassword());
         
         System.out.println("1단계");
         if (memberService.validateId(member.getId()) 
@@ -314,7 +314,7 @@ public class LoginController {
 		if ( code != null ) {
 			
 			// oauthToken 가져오기
-			OAuthToken oauthToken=kakaoLoginService.getOauthToken(code);
+			OAuthToken oauthToken = kakaoLoginService.getOauthToken(code);
 			System.out.println("여기");
 			
 			if( oauthToken == null || oauthToken.getAccess_token() == null ) {
@@ -324,10 +324,10 @@ public class LoginController {
 			
 			}
 			
-			System.out.println("카카오 엑세스 토큰 : "+oauthToken.getAccess_token());
+			System.out.println("카카오 엑세스 토큰 : " + oauthToken.getAccess_token());
 			
 			// kakaoProfile 가져오기
-			KakaoProfileDTO kakaoProfile=kakaoLoginService.getKakaoProfile(oauthToken);
+			KakaoProfileDTO kakaoProfile = kakaoLoginService.getKakaoProfile(oauthToken);
 			System.out.println(kakaoProfile);
 			
 			if( kakaoProfile == null || kakaoProfile.getId() == null ) {
@@ -498,7 +498,7 @@ public class LoginController {
         return new ResponseEntity<>("Verification failed Phonenumber", HttpStatus.FORBIDDEN);
         
         } else if ( memberEntity.getPassword().equals(encodedPassword) ) {
-        	
+        
         // 400 현재 비밀번호와 같음
         return new ResponseEntity<>("Same as current password", HttpStatus.BAD_REQUEST);
         
@@ -521,4 +521,14 @@ public class LoginController {
 		
 		return isPhoneVerified;
 	}
+	
+//	@ResponseBody
+//	@PostMapping("/reCaptcha")
+//	public String reCaptcha(@RequestBody String token) {
+//		
+//		String response = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + token;
+//		return "";
+//	}
+	
+	
 }

@@ -80,10 +80,10 @@ public class LoginService {
 	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
 	    Cookie Refresh_token = new Cookie("Refresh_token", encodedValue);
 	    Refresh_token.setHttpOnly(true);
-	    Refresh_token.setMaxAge(24 * 60 * 60 * 1000);
-	    Refresh_token.setPath("/authz");
+	    Refresh_token.setMaxAge(24 * 60 * 60);
+	    Refresh_token.setPath("/");
+	    Refresh_token.setDomain("localhost");
 	    response.addCookie(Refresh_token);
-	    
 	}
 	
 	// 로그아웃에 필요한 SNS Access_token 생성
