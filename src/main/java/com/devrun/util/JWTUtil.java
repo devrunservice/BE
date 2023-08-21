@@ -24,7 +24,8 @@ public class JWTUtil {
 	// 토큰 만료시간 설정
     private static final long EASYLOGIN_TOKEN_EXPIRATION_TIME = 15 * 60 * 1000;		// 5분
     private static final long ACCESS_TOKEN_EXPIRATION_TIME = 
-   		15 * 60 * 1000;		// 15분				테스트는 1초로 할 것
+//    		1
+    		5 * 60 * 1000;		// 15분				테스트는 1초로 할 것
     private static final long REFRESH_TOKEN_EXPIRATION_TIME = 24 * 60 * 60 * 1000;	// 24시간, 24시간/일 * 60분/시간 * 60초/분 * 1000밀리초/초
     
     // ACCESS_TOKEN 생성
@@ -69,8 +70,29 @@ public class JWTUtil {
         }
     }
 
-    // 메서드는 주어진 token으로부터 사용자 ID를 추출
+    // 주어진 token으로부터 사용자 ID를 추출
     public static String getUserIdFromToken(String token) {
+    	String subToken = token.substring(7);
+        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken).getBody();
+        System.out.println("사용자 아이디 : " + claims.getSubject());
+        return claims.getSubject();
+    }
+    
+    // 토큰을 두 가지 동시에 사용할 경우 주어진 token으로부터 사용자 ID를 추출
+    // 아직 사용하지 않음
+    public static String getUserIdFromToken(String accessToken, String refreshToken) {
+    	
+    	String token;
+    	
+    	if (accessToken != null && refreshToken == null) {
+			token = accessToken;
+		} else if (refreshToken != null && accessToken == null) {
+			token = refreshToken;
+		} else {
+			// 두 토큰이 모두 null인 경우에 대한 처리
+			throw new IllegalArgumentException("Token missing or at least one");
+		}
+    	
     	String subToken = token.substring(7);
         Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken).getBody();
         System.out.println("사용자 아이디 : " + claims.getSubject());

@@ -1,6 +1,7 @@
 package com.devrun.util;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Date;
 import java.util.function.Function;
 
@@ -54,37 +55,48 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 	        throws ServletException, IOException {
 //		String requestPath = request.getRequestURI();
-		
+		// HTTP 요청 헤더에서 헤더 값을 가져옴
+	    String accessToken = request.getHeader("Access_token");
+	    String encodedRefreshToken = request.getHeader("Refresh_token");
+	    String refreshToken = null;
+	    if (encodedRefreshToken != null) {
+	    	refreshToken = new String(Base64.getDecoder().decode(encodedRefreshToken));
+			
+		}
+	    System.out.println("리프레시 토큰 : " + refreshToken);
+//	    String easyloginTokenHeader = request.getHeader("Easylogin_token");
 		//login 경로에 대한 요청인 경우 필터를 건너뛰도록 설정합니다.
 		if (
 //				!"/tmi".equals(requestPath) 
 //				&& !"/savePaymentInfo".equals(requestPath)
 //				&& !"/token/refresh".equals(requestPath)
-				request.getHeader("Access_token") == null
-				&& request.getHeader("Refresh_token") == null
-//				&& request.getHeader("Easylogin_token") == null
+				accessToken == null
+				&& encodedRefreshToken == null
+//				&& easyloginTokenHeader == null
 				) {
 		    chain.doFilter(request, response);
 		    return;
 		}
 	    
 	    try {
-			// HTTP 요청 헤더에서 헤더 값을 가져옴
-		    String accessToken = request.getHeader("Access_token");
-		    String refreshToken = request.getHeader("Refresh_token");
-//		    String easyloginTokenHeader = request.getHeader("Easylogin_token");
-		    
+			
 	        if (accessToken != null && accessToken.startsWith("Bearer ")) {
+	        	
 	            processToken(accessToken, "Access_token", chain, request, response);
+	            
 	        } else if (refreshToken != null && refreshToken.startsWith("Bearer ")) {
+	        	
 	        	System.out.println("여기냐1");
 //	        	if (TokenBlacklist.isTokenBlacklisted(refreshToken)) {
+	        	
         		if (tokenBlacklistService.isTokenBlacklisted(refreshToken)) {
 	        		
 	        		// 블랙리스트에 등록된 토큰 사용
 	        		response.sendError(HttpServletResponse.SC_FORBIDDEN, "Logout user");
 				}
+        		
 	            processToken(refreshToken, "Refresh_token", chain, request, response);
+	            
 	        }
 
 //	        else if (easyloginTokenHeader != null && easyloginTokenHeader.startsWith("Bearer ")) {
@@ -101,6 +113,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
 	        System.out.println("통과해?");
 	        chain.doFilter(request, response);
+	        
 	    } catch (ExpiredJwtException e) {
 			
 	        // 401 : JWT 토큰이 만료되었을 때

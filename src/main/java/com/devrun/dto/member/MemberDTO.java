@@ -1,5 +1,6 @@
 package com.devrun.dto.member;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import lombok.AllArgsConstructor;
@@ -13,7 +14,8 @@ public class MemberDTO {
 	
 	private String name, email, id, password, phonenumber;
 	private int userNo;
-	private Date birthday, signup;
+	private Date signup;
+	private LocalDate birthday;
 	private Status status;
 	private Role role;
 	

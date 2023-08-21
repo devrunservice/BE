@@ -140,7 +140,7 @@ public class PaymentController {
 		    }
 
 		    String id = JWTUtil.getUserIdFromToken(accessToken);
-		    if (memberService.isUserIdEquals(id)) {
+		    
 		        MemberEntity member = memberService.findById(id);	
 		        
 		        String name = member.getName();
@@ -156,10 +156,6 @@ public class PaymentController {
 		        }
 
 		        return ResponseEntity.ok(payments);
-		    } else {
-		        // 401 토큰의 사용자와 요청한 사용자 불일치
-		        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
-		    }
 		}
 
 		

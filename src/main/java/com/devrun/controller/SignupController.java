@@ -12,6 +12,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,7 +30,10 @@ import reactor.core.publisher.Mono;
 public class SignupController {
 	
 	@Autowired
-	MemberService memberService;
+	private MemberService memberService;
+	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 	
 	@ResponseBody
 	@PostMapping("/signup")
@@ -91,8 +95,9 @@ public class SignupController {
 	@Transactional																// code는 파라미터로													
 	public ResponseEntity<?> okay(@RequestBody @Valid MemberEntity memberEntity, String code) {
 		// @Valid 어노테이션이 있는 경우, Spring은 요청 본문을 MemberEntity 객체로 변환하기 전에 Bean Validation API를 사용하여 유효성 검사를 수행
+		
 		System.out.println(memberEntity);
-		System.out.println(memberEntity.getEmail());
+		System.out.println(memberEntity.getPassword());
 		System.out.println("생일 : " + memberEntity.getBirthday());
 		
 		System.out.println("트루가 맞냐" + memberEntity.isAgeConsent());
@@ -169,6 +174,10 @@ public class SignupController {
 					    	// 가입일자를 현재 날짜와 시간으로 설정
 					    	memberEntity.setSignup(currentDate);
 							
+					    	// 비밀번호 암호화
+					        String encodedPassword = passwordEncoder.encode(memberEntity.getPassword());
+					        memberEntity.setPassword(encodedPassword); // 암호화된 비밀번호 설정
+					    	
 					    	// 사용자 등록 시도
 					    	MemberEntity m = memberService.insert(memberEntity);
 					    	

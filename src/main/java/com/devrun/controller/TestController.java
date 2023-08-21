@@ -42,13 +42,13 @@ public class TestController {
 		}
 
 		String id = JWTUtil.getUserIdFromToken(accessToken);
-			if (memberService.isUserIdEquals(id)) {
+//			if (memberService.isUserIdEquals(id)) {
 				MemberEntity member = signupService.findById(id);
 				return ResponseEntity.ok(member);
-			} else {
+//			} else {
 				// 401 토큰의 사용자와 요청한 사용자 불일치
-				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
-			}
+//				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
+//			}
 
 		}
 

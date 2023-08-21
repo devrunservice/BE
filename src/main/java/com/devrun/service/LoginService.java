@@ -1,11 +1,13 @@
 package com.devrun.service;
 
+import java.util.Base64;
 import java.util.Date;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.devrun.dto.member.LoginDTO.LoginStatus;
@@ -23,6 +25,9 @@ public class LoginService {
 	@Autowired
 	private MemberEntityRepository memberEntityRepository;
 	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	
 	private LoginStatus loginStatus;
 
 	// 마지막 로그인 날짜 수정
@@ -33,14 +38,16 @@ public class LoginService {
 		memberEntityRepository.save(memberEntity);
 	}
 	public LoginStatus validate(MemberEntity member) {
+		
 		MemberEntity existingMember = loginRepository.findById(member.getId());
-		System.out.println(existingMember);
+        
+		System.out.println("회원정보 : " + existingMember + "\n입력한 회원정보 : " + member);
 		
 		if (existingMember == null) {
 		    return LoginStatus.USER_NOT_FOUND;
 		} else if (existingMember.getLogintry() >= 5) {
 		    return LoginStatus.LOGIN_TRIES_EXCEEDED;
-		} else if (!existingMember.getPassword().equals(member.getPassword())) {
+		} else if (!passwordEncoder.matches(member.getPassword(), existingMember.getPassword())) {
 		    existingMember.setLogintry(existingMember.getLogintry() + 1);
 		    memberEntityRepository.save(existingMember);
 		    return LoginStatus.PASSWORD_MISMATCH;
@@ -66,10 +73,23 @@ public class LoginService {
 	    return member.getPhonenumber().equals(phonenumber);
 	}
 	
+	// Refresh_token HttpOnly 쿠키 생성
+	public void setRefeshcookie(HttpServletResponse response, String token) {
+		
+		String value = "Bearer " + token;
+	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
+	    Cookie Refresh_token = new Cookie("Refresh_token", encodedValue);
+	    Refresh_token.setHttpOnly(true);
+	    Refresh_token.setMaxAge(24 * 60 * 60 * 1000);
+	    Refresh_token.setPath("/authz");
+	    response.addCookie(Refresh_token);
+	    
+	}
+	
 	// 로그아웃에 필요한 SNS Access_token 생성
 	public void setEasycookie(HttpServletResponse response, String token, Long id) {
 		
-		Cookie SNSaccessToken = new Cookie("Access_token_easy", token);
+		Cookie SNSaccessToken = new Cookie("Access_token_easy", "Bearer " + token);
 		SNSaccessToken.setHttpOnly(true);
 		SNSaccessToken.setPath("/sns/logout");
 	    response.addCookie(SNSaccessToken);
