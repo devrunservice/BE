@@ -61,7 +61,7 @@ jobs:
           echo "spring.servlet.multipart.max-file-size=1000MB" >> application.properties
           echo "spring.servlet.multipart.max-request-size=1000MB" >> application.properties
           echo "" >> application.properties
-          echo "RECAPTCHA_SECRETKEY=${{ ReCAPTCHA.secretKey }}" >> application.properties
+          echo "ReCAPTCHA.secretKey=${{ secretKey.RECAPTCHA_SECRETKEY }}" >> application.properties
           
         working-directory : ./src/main/resources
         
