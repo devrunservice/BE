@@ -39,21 +39,29 @@ jobs:
           echo "" >> application.properties
           echo "kakao.client_id=${{ secrets.KAKAO_CLIENT_ID }}" >> application.properties
           echo "kakao.redirect_url=${{ secrets.KAKAO_REDIRECT_URL }}" >> application.properties
+          echo "" >> application.properties
           echo "IAMPORT_KEY=${{ secrets.IAMPORT_KEY }}" >> application.properties
           echo "IAMPORT_SECRET=${{ secrets.IAMPORT_SECRET }}" >> application.properties
+          echo "" >> application.properties
           echo "jwt.secretKey=${{ secrets.JWT_SECRETKEY }}" >> application.properties
+          echo "" >> application.properties
           echo "spring.mvc.pathmatch.matching-strategy=${{ secrets.SWAGGER_PATHMATCH_OPTION }}" >> application.properties
           echo "server.error.include-message=always" >> application.properties
+          echo "" >> application.properties
           echo "cloud.aws.credentials.access-key=${{ secrets.AWS_ACCESS_KEY }}" >> application.properties
           echo "cloud.aws.credentials.secret-key=${{ secrets.AWS_SECRET_KEY }}" >> application.properties
           echo "cloud.aws.region.static=ap-northeast-2" >> application.properties
           echo "cloud.aws.region.auto=false" >> application.properties
           echo "cloud.aws.bucket=${{ secrets.AWS_BUCKET }}" >> application.properties
           echo "cloud.aws.url=${{ secrets.AWS_SECRET_KEY }}" >> application.properties
+          echo "" >> application.properties
           echo "spring.redis.host=${{ secrets.SPRING_REDIS_HOST }}" >> application.properties
           echo "spring.redis.port=${{ secrets.SPRING_REDIS_PORT }}" >> application.properties
+          echo "" >> application.properties
           echo "spring.servlet.multipart.max-file-size=1000MB" >> application.properties
           echo "spring.servlet.multipart.max-request-size=1000MB" >> application.properties
+          echo "" >> application.properties
+          echo "RECAPTCHA_SECRETKEY=${{ ReCAPTCHA.secretKey }}" >> application.properties
           
         working-directory : ./src/main/resources
         
