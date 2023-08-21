@@ -61,9 +61,6 @@ public class LoginController {
     @Value("${kakao.redirect_url}")
     private String redirect_uri;
     
-    @Value("${ReCAPTCHA.secretKey}")
-    private String secretKey;
-
     @ResponseBody
     @PostMapping("/login")
     public ResponseEntity<?> login(HttpServletRequest request
@@ -521,14 +518,5 @@ public class LoginController {
 		
 		return isPhoneVerified;
 	}
-	
-//	@ResponseBody
-//	@PostMapping("/reCaptcha")
-//	public String reCaptcha(@RequestBody String token) {
-//		
-//		String response = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + token;
-//		return "";
-//	}
-	
 	
 }

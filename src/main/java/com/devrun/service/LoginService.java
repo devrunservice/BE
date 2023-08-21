@@ -84,12 +84,15 @@ public class LoginService {
 	    Refresh_token.setPath("/");
 	    Refresh_token.setDomain("localhost");
 	    response.addCookie(Refresh_token);
+	    
 	}
 	
 	// 로그아웃에 필요한 SNS Access_token 생성
 	public void setEasycookie(HttpServletResponse response, String token, Long id) {
 		
-		Cookie SNSaccessToken = new Cookie("Access_token_easy", "Bearer " + token);
+		String value = "Bearer " + token;
+	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
+		Cookie SNSaccessToken = new Cookie("Access_token_easy", encodedValue);
 		SNSaccessToken.setHttpOnly(true);
 		SNSaccessToken.setPath("/sns/logout");
 	    response.addCookie(SNSaccessToken);
