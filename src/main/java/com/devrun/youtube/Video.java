@@ -50,5 +50,7 @@ import lombok.Setter;
 	    @JoinColumn(name = "sectionid")
 	    private LectureSection lectureSection;
 	    
-	    
+	    // 생성자
+	    public Video() {
+	    }
 	}

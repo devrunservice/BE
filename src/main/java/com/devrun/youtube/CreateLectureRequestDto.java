@@ -18,9 +18,10 @@ public class CreateLectureRequestDto {
     private String lectureDiscountstart;
     private String lectureDiscountend;
     private String lectureStatus;
-    private String lectureThumbnail;
+    private List<MultipartFile> lectureThumbnailFile;
     private List<String> lectureTag;
-    
+    private List<MultipartFile> videoFiles; // 동영상 파일 리스트
+
     private List<LectureSectionDto> lectureSectionList; // 섹션 정보 리스트
     private LecturecategoryDto lectureCategory; // 카테고리 정보
     private List<VideoDto> videoList; // 비디오 정보 리스트
@@ -50,5 +51,21 @@ public class CreateLectureRequestDto {
     // 비디오 파일을 반환하는 메서드 (예시로 null을 반환하도록 구현)
     public MultipartFile getVideoFile() {
         return null;
+    }
+    
+    public List<MultipartFile> getLectureThumbnailFile() {
+        return lectureThumbnailFile;
+    }
+
+    public void setLectureThumbnailFile(List<MultipartFile> lectureThumbnailFile) {
+        this.lectureThumbnailFile = lectureThumbnailFile;
+    }
+
+    public List<MultipartFile> getVideoFiles() {
+        return videoFiles;
+    }
+
+    public void setVideoFiles(List<MultipartFile> videoFiles) {
+        this.videoFiles = videoFiles;
     }
 }

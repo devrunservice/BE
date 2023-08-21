@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.servlet.http.HttpServletResponse;
 
 import lombok.Data;
 
@@ -67,6 +68,10 @@ public class Lecture {
     private List<Video> videos;
 
 	public void setLectureSection(List<LectureSection> sections) {
+	}
+
+	public HttpServletResponse getId() {
+		return null;
 	}
 
 	

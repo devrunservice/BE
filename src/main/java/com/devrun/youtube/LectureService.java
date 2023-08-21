@@ -30,7 +30,7 @@ public class LectureService {
         return lectureCategory;
     }
     
-    public void saveLecture(CreateLectureRequestDto requestDto) {
+    public Lecture saveLecture(CreateLectureRequestDto requestDto, String thumbnailUrl) {
         // 강의 카테고리 저장
         LectureCategory lectureCategory = convertToLectureCategoryEntity(requestDto.getLectureCategory());
         lectureCategory = categoryRepository.save(lectureCategory); // LectureCategory 저장
@@ -38,6 +38,9 @@ public class LectureService {
         // 강의 저장
         Lecture lecture = convertToLectureEntity(requestDto, lectureCategory);
         lecture = lectureRepository.save(lecture); // Lecture 저장
+
+        // 강의 썸네일 이미지 URL 저장
+        lecture.setLectureThumbnail(thumbnailUrl);
 
         // LectureSection 저장
         for (LectureSectionDto sectionDto : requestDto.getLectureSectionList()) {
@@ -67,17 +70,18 @@ public class LectureService {
             video.setLecture(lecture); // Lecture와 연결
             videoRepository.save(video); // Video 저장
         }
+
+        return lecture;
     }
 
     
-    private Lecture convertToLectureEntity(CreateLectureRequestDto requestDto, LectureCategory lectureCategory) {
+    private Lecture convertToLectureEntity(CreateLectureRequestDto requestDto, LectureCategory lectureCategory ) {
         Lecture lecture = new Lecture();
 
         // CreateLectureRequestDto에서 필요한 데이터를 가져와서 Lecture 엔티티에 설정합니다.
         lecture.setLectureName(requestDto.getLectureName());
         lecture.setLectureIntro(requestDto.getLectureIntro());
         lecture.setLecturePrice(requestDto.getLecturePrice());
-        lecture.setLectureThumbnail(requestDto.getLectureThumbnail());
         lecture.setLectureTag(requestDto.getLectureTag());
 
         // LectureCategory 객체를 Lecture 엔티티의 속성으로 설정합니다.
@@ -125,6 +129,22 @@ public class LectureService {
 
         // 저장된 Lecture 엔티티를 반환합니다.
         return lecture;
+    }
+    
+    public void saveVideoInfo(List<VideoInfo> videoInfoList, Lecture lecture) {
+        for (VideoInfo videoInfo : videoInfoList) {
+            Video video = new Video();
+            video.setUploadDate(videoInfo.getUploadDate());
+            video.setFileName(videoInfo.getFileName());
+            video.setVideoId(videoInfo.getVideoId());
+            video.setTotalPlayTime(videoInfo.getTotalPlayTime());
+            video.setVideoLink(videoInfo.getVideoLink());
+            video.setVideoTitle(videoInfo.getVideoTitle());
+            video.setLecture(lecture);
+
+            // Video 정보를 데이터베이스에 저장
+            videoRepository.save(video);
+        }
     }
 }
 
