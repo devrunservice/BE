@@ -58,25 +58,25 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 //		String requestPath = request.getRequestURI();
 		// HTTP 요청 헤더에서 헤더 값을 가져옴
 	    String accessToken = request.getHeader("Access_token");
-	    String encodedRefreshToken = request.getHeader("refresh_token");
-	    String refreshToken = null;
-	    if (encodedRefreshToken != null) {
-	    	refreshToken = new String(Base64.getDecoder().decode(encodedRefreshToken));
-		}
-//	    Cookie[] cookies = request.getCookies();
-//	    System.out.println("리프레시 쿠키 : " + cookies);
+//	    String encodedRefreshToken = request.getHeader("refresh_token");
 //	    String refreshToken = null;
-//	    if (cookies != null) {
-//	        for (Cookie cookie : cookies) {
-//	            if ("Refresh_token".equals(cookie.getName())) {
-//	                String encodedRefreshToken = cookie.getValue();
-//	                refreshToken = new String(Base64.getDecoder().decode(encodedRefreshToken));
-//	                break;
-//	            } else {
-//	            	break;
-//	            }
-//	        }
-//	    }
+//	    if (encodedRefreshToken != null) {
+//	    	refreshToken = new String(Base64.getDecoder().decode(encodedRefreshToken));
+//		}
+	    Cookie[] cookies = request.getCookies();
+	    System.out.println("리프레시 쿠키 : " + cookies);
+	    String refreshToken = null;
+	    if (cookies != null) {
+	        for (Cookie cookie : cookies) {
+	            if ("Refresh_token".equals(cookie.getName())) {
+	                String encodedRefreshToken = cookie.getValue();
+	                refreshToken = new String(Base64.getDecoder().decode(encodedRefreshToken));
+	                break;
+	            } else {
+	            	break;
+	            }
+	        }
+	    }
 	    System.out.println("리프레시 토큰 : " + refreshToken);
 //	    String easyloginTokenHeader = request.getHeader("Easylogin_token");
 		//login 경로에 대한 요청인 경우 필터를 건너뛰도록 설정합니다.
@@ -85,7 +85,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 //				&& !"/savePaymentInfo".equals(requestPath)
 //				&& !"/token/refresh".equals(requestPath)
 				accessToken == null
-				&& encodedRefreshToken == null
+				&& cookies == null
 //				&& easyloginTokenHeader == null
 				) {
 		    chain.doFilter(request, response);
