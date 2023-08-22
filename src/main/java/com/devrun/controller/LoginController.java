@@ -168,7 +168,7 @@ public class LoginController {
             	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
                     ResponseCookie HTTP_refresh_token = ResponseCookie
 			    .from("Refresh_token", encodedValue)
-			    .path("/")
+			    .path("/authz")
 			    .sameSite("none")
 			    .secure(true)
 			    .httpOnly(true)
