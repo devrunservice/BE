@@ -165,7 +165,7 @@ public class LoginController {
 //                    loginService.setRefeshcookie(response, refresh_token);
                     String value = "Bearer " + refresh_token;
             	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
-                    ResponseCookie HTTP_refresh_token = ResponseCookie.from("Refresh_token", encodedValue).path("/").sameSite("none").secure(true).httpOnly(true).domain("devrun.net").build();
+                    ResponseCookie HTTP_refresh_token = ResponseCookie.from("Refresh_token", encodedValue).path("/").sameSite("Lax").secure(true).httpOnly(true).domain("devrun.net").build();
                  // HttpHeaders 객체 생성 및 쿠키 설정
                     HttpHeaders headers = new HttpHeaders();
                     headers.add("Set-Cookie", HTTP_refresh_token.toString());
