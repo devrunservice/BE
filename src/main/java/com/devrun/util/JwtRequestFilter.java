@@ -57,7 +57,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 //		String requestPath = request.getRequestURI();
 		// HTTP 요청 헤더에서 헤더 값을 가져옴
 	    String accessToken = request.getHeader("Access_token");
-	    String encodedRefreshToken = request.getHeader("Refresh_token");
+	    String encodedRefreshToken = request.getHeader("refresh_token");
 	    String refreshToken = null;
 	    if (encodedRefreshToken != null) {
 	    	refreshToken = new String(Base64.getDecoder().decode(encodedRefreshToken));
