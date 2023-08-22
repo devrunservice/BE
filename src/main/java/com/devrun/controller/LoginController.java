@@ -169,8 +169,8 @@ public class LoginController {
                     ResponseCookie HTTP_refresh_token = ResponseCookie
 			    .from("Refresh_token", encodedValue)
 			    .path("/")
-			    .sameSite("Lax")
-			    .secure(false)
+			    .sameSite("none")
+			    .secure(true)
 			    .httpOnly(true)
 			    .build();
                     // HttpHeaders 객체 생성 및 쿠키 설정
