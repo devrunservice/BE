@@ -38,7 +38,7 @@ public class SecurityConfig {
                     .antMatchers(HttpMethod.OPTIONS, "/**/*").permitAll()
                     .antMatchers("/tmi").hasAnyAuthority("STUDENT","ADMIN")// 인증이 필요한 /tmi 엔드포인트
 //                    .antMatchers("/savePaymentInfo").authenticated()
-                    .antMatchers("/token/refresh").authenticated()
+                    .antMatchers("/authz/token/refresh").authenticated()
                     .antMatchers("/logout").permitAll()
                 .anyRequest().permitAll())
 

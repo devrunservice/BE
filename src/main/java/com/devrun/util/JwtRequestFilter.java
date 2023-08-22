@@ -71,9 +71,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	            if ("Refresh_token".equals(cookie.getName())) {
 	                String encodedRefreshToken = cookie.getValue();
 	                refreshToken = new String(Base64.getDecoder().decode(encodedRefreshToken));
-	                break;
-	            } else {
-	            	break;
 	            }
 	        }
 	    }
