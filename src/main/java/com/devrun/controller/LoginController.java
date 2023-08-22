@@ -4,6 +4,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -166,7 +167,17 @@ public class LoginController {
 //                    loginService.setRefeshcookie(response, refresh_token);
                     String value = "Bearer " + refresh_token;
             	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
-                    ResponseCookie HTTP_refresh_token = ResponseCookie.from("Refresh_token", encodedValue).path("/authz").sameSite(SameSite.NONE.attributeValue()).secure(true).httpOnly(true).domain("devrun.net").build();
+                    ResponseCookie HTTP_refresh_token = ResponseCookie
+                    		.from("Refresh_token", encodedValue)
+                    		.path("/authz")
+                    		.sameSite(
+//                    		SameSite.NONE.attributeValue()
+                    		"none"
+                    		)
+                    		.secure(true)
+                    		.httpOnly(true)
+                    		.domain("devrun.net")
+                    		.build();
                     // HttpHeaders 객체 생성 및 쿠키 설정
                     HttpHeaders headers = new HttpHeaders();
                     headers.add("Set-Cookie", HTTP_refresh_token.toString());
@@ -223,7 +234,18 @@ public class LoginController {
     public ResponseEntity<?> refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
 
         // refreshToken이 헤더에 있는지 확인
-        String refreshToken = request.getHeader("Refresh_token");
+//        String refreshToken = request.getHeader("Refresh_token");
+    	Cookie[] cookies = request.getCookies();
+	    System.out.println("리프레시 쿠키 : " + cookies);
+	    String refreshToken = null;
+	    if (cookies != null) {
+	        for (Cookie cookie : cookies) {
+	            if ("Refresh_token".equals(cookie.getName())) {
+	                String encodedRefreshToken = cookie.getValue();
+	                refreshToken = new String(Base64.getDecoder().decode(encodedRefreshToken));
+	            }
+	        }
+	    }
 //
 //	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
         if (refreshToken == null || refreshToken.isEmpty()) {
