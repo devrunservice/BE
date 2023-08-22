@@ -169,7 +169,7 @@ public class LoginController {
                     ResponseCookie HTTP_refresh_token = ResponseCookie
 			    .from("Refresh_token", encodedValue)
 			    .path("/")
-			    .sameSite("None")
+			    .sameSite("Lax")
 			    .secure(false)
 			    .httpOnly(true)
 			    .build();
