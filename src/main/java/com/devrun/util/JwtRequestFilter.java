@@ -7,6 +7,7 @@ import java.util.function.Function;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -62,6 +63,20 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	    if (encodedRefreshToken != null) {
 	    	refreshToken = new String(Base64.getDecoder().decode(encodedRefreshToken));
 		}
+//	    Cookie[] cookies = request.getCookies();
+//	    System.out.println("리프레시 쿠키 : " + cookies);
+//	    String refreshToken = null;
+//	    if (cookies != null) {
+//	        for (Cookie cookie : cookies) {
+//	            if ("Refresh_token".equals(cookie.getName())) {
+//	                String encodedRefreshToken = cookie.getValue();
+//	                refreshToken = new String(Base64.getDecoder().decode(encodedRefreshToken));
+//	                break;
+//	            } else {
+//	            	break;
+//	            }
+//	        }
+//	    }
 	    System.out.println("리프레시 토큰 : " + refreshToken);
 //	    String easyloginTokenHeader = request.getHeader("Easylogin_token");
 		//login 경로에 대한 요청인 경우 필터를 건너뛰도록 설정합니다.

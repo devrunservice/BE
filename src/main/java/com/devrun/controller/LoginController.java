@@ -1,5 +1,6 @@
 package com.devrun.controller;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -158,7 +160,12 @@ public class LoginController {
                     loginDTO.setAccess_token("Bearer " + access_token);
 //                    loginDTO.setRefresh_token("Bearer " + refresh_token);
 
-                    loginService.setRefeshcookie(response, refresh_token);
+                    // HTTPONLY 쿠키 생성
+//                    loginService.setRefeshcookie(response, refresh_token);
+                    String value = "Bearer " + refresh_token;
+            	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
+                    ResponseCookie HTTP_refresh_token = ResponseCookie.from("Refresh_token", encodedValue).path("/").sameSite("Lax").httpOnly(true).domain("localhost").build();
+                    response.addHeader("Set-Cooke", HTTP_refresh_token.toString());
                     
                     // 로그인 성공 200
                     return new ResponseEntity<>(loginDTO, HttpStatus.OK);
