@@ -170,13 +170,9 @@ public class LoginController {
                     ResponseCookie HTTP_refresh_token = ResponseCookie
                     		.from("Refresh_token", encodedValue)
                     		.path("/authz")
-                    		.sameSite(
-//                    		SameSite.NONE.attributeValue()
-                    		"none"
-                    		)
+                    		.sameSite("none")
                     		.secure(true)
                     		.httpOnly(true)
-//                    		.domain("devrun.net")
                     		.build();
                     // HttpHeaders 객체 생성 및 쿠키 설정
                     HttpHeaders headers = new HttpHeaders();
@@ -274,14 +270,29 @@ public class LoginController {
             String newAccessToken = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName());
             String newRefreshToken = JWTUtil.generateRefreshToken(memberEntity.getId(), memberEntity.getName());
 
-            loginService.setRefeshcookie(response, newRefreshToken);
+            // HttpOnly 쿠키 생성
+//            loginService.setRefeshcookie(response, newRefreshToken);
+            String value = "Bearer " + newRefreshToken;
+    	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
+            ResponseCookie HTTP_refresh_token = ResponseCookie
+            		.from("Refresh_token", encodedValue)
+            		.path("/authz")
+            		.sameSite("none")
+            		.secure(true)
+            		.httpOnly(true)
+            		.build();
+            
+            // HttpHeaders 객체 생성 및 쿠키 설정
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Set-Cookie", HTTP_refresh_token.toString());
+            
             // 새로운 Access Token 응답으로 전송
             Map<String, String> responseBody = new HashMap<>();
             responseBody.put("Access_token", "Bearer " + newAccessToken);
 //            responseBody.put("Refresh_token", "Bearer " + newRefreshToken);
 
             // 200 : Access_token 발급
-            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+            return ResponseEntity.status(200).headers(headers).body(responseBody);
 //        } else {
         	
             // 401 토큰의 사용자와 요청한 사용자 불일치
@@ -418,10 +429,24 @@ public class LoginController {
 			loginDTO.setAccess_token("Bearer " + access_token);
 //			loginDTO.setRefresh_token("Bearer " + refresh_token);
 			
-			loginService.setRefeshcookie(response, refresh_token);
+			// HttpOnly 쿠키 생성
+//          loginService.setRefeshcookie(response, newRefreshToken);
+			String value = "Bearer " + refresh_token;
+			String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
+			ResponseCookie HTTP_refresh_token = ResponseCookie
+				.from("Refresh_token", encodedValue)
+				.path("/authz")
+				.sameSite("none")
+				.secure(true)
+				.httpOnly(true)
+				.build();
+			  
+			// HttpHeaders 객체 생성 및 쿠키 설정
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("Set-Cookie", HTTP_refresh_token.toString());
 			
 			// 로그인 성공 200
-			return new ResponseEntity<>(loginDTO, HttpStatus.OK);
+			return ResponseEntity.status(200).headers(headers).body(loginDTO);
 			
 			}
 		

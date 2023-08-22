@@ -74,19 +74,19 @@ public class LoginService {
 	}
 	
 	// Refresh_token HttpOnly 쿠키 생성
-	public void setRefeshcookie(HttpServletResponse response, String token) {
-		
-		String value = "Bearer " + token;
-	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
-	    Cookie Refresh_token = new Cookie("Refresh_token", encodedValue);
-	    Refresh_token.setHttpOnly(true);
-	    Refresh_token.setMaxAge(24 * 60 * 60);
-	    Refresh_token.setPath("/");
-	    Refresh_token.setDomain("devrun.net");
-	    Refresh_token.setSecure(true);
-	    response.addCookie(Refresh_token);
-	    
-	}
+//	public void setRefeshcookie(HttpServletResponse response, String token) {
+//		
+//		String value = "Bearer " + token;
+//	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
+//	    Cookie Refresh_token = new Cookie("Refresh_token", encodedValue);
+//	    Refresh_token.setHttpOnly(true);
+//	    Refresh_token.setMaxAge(24 * 60 * 60);
+//	    Refresh_token.setPath("/");
+//	    Refresh_token.setDomain("devrun.net");
+//	    Refresh_token.setSecure(true);
+//	    response.addCookie(Refresh_token);
+//	    
+//	}
 	
 	// 로그아웃에 필요한 SNS Access_token 생성
 	public void setEasycookie(HttpServletResponse response, String token, Long id) {
