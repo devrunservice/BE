@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -165,10 +166,12 @@ public class LoginController {
                     String value = "Bearer " + refresh_token;
             	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
                     ResponseCookie HTTP_refresh_token = ResponseCookie.from("Refresh_token", encodedValue).path("/").sameSite("none").secure(true).httpOnly(true).domain("devrun.net").build();
-                    response.addHeader("Set-Cooke", HTTP_refresh_token.toString());
-                    
+                 // HttpHeaders 객체 생성 및 쿠키 설정
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add("Set-Cookie", HTTP_refresh_token.toString());
+
                     // 로그인 성공 200
-                    return new ResponseEntity<>(loginDTO, HttpStatus.OK);
+                    return ResponseEntity.status(200).headers(headers).body(loginDTO);
 
                 case USER_NOT_FOUND:
                 case PASSWORD_MISMATCH:
