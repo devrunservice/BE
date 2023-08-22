@@ -82,7 +82,8 @@ public class LoginService {
 	    Refresh_token.setHttpOnly(true);
 	    Refresh_token.setMaxAge(24 * 60 * 60);
 	    Refresh_token.setPath("/");
-	    Refresh_token.setDomain("localhost");
+	    Refresh_token.setDomain("devrun.net");
+	    Refresh_token.setSecure(true);
 	    response.addCookie(Refresh_token);
 	    
 	}
