@@ -176,7 +176,7 @@ public class LoginController {
                     		)
                     		.secure(true)
                     		.httpOnly(true)
-                    		.domain("devrun.net")
+//                    		.domain("devrun.net")
                     		.build();
                     // HttpHeaders 객체 생성 및 쿠키 설정
                     HttpHeaders headers = new HttpHeaders();
@@ -246,7 +246,7 @@ public class LoginController {
 	            }
 	        }
 	    }
-//
+	    
 //	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
         if (refreshToken == null || refreshToken.isEmpty()) {
             // 400 : Refresh token 없음
