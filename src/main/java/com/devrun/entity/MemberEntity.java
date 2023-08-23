@@ -89,13 +89,13 @@ public class MemberEntity {
 	, nullable = false
 	, length = 9)
 	@Comment("활성 : ACTIVE / 휴면 : INACTIVE / 탈퇴 : WITHDRAWN")
-	private Status status = Status.ACTIVE;
+	private Status status = Status.INACTIVE;
 	
 	@Column(name = "signup"
 			, nullable = false
 			)
 	@Comment("유저 가입일")
-	private Date signup;
+	private Date signupDate;
 	
 	@Column(name = "export", nullable = true)
 	@Comment("유저 탈퇴일(탈퇴 테이블로 분리할지 고민)")

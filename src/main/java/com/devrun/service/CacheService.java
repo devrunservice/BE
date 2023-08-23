@@ -30,4 +30,16 @@ public class CacheService {
     public void removeSmsCode(String phoneNumber) {
         smsCodeCache.invalidate(phoneNumber);
     }
+    
+    public void saveEmailVerifyTempKey(String id, String key) {
+    	smsCodeCache.put(id, key);
+    }
+    
+    public String getEmailVerifyTempKey(String id) {
+        return smsCodeCache.get(id);
+    }
+    
+    public void removeEmailVerifyTempKey(String id) {
+        smsCodeCache.invalidate(id);
+    }
 }

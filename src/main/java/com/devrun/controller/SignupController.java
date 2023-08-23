@@ -172,7 +172,7 @@ public class SignupController {
 					    	Date currentDate = Date.from(currentInstant);
 
 					    	// 가입일자를 현재 날짜와 시간으로 설정
-					    	memberEntity.setSignup(currentDate);
+					    	memberEntity.setSignupDate(currentDate);
 							
 					    	// 비밀번호 암호화
 					        String encodedPassword = passwordEncoder.encode(memberEntity.getPassword());

@@ -1,6 +1,9 @@
 package com.devrun.controller;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,6 +19,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,9 +31,11 @@ import com.devrun.dto.member.KakaoProfileDTO;
 import com.devrun.dto.member.LoginDTO;
 import com.devrun.dto.member.LoginDTO.LoginStatus;
 import com.devrun.dto.member.LogoutResponse;
+import com.devrun.dto.member.MemberDTO.Status;
 import com.devrun.dto.member.SignupDTO;
 import com.devrun.entity.MemberEntity;
 import com.devrun.repository.LoginRepository;
+import com.devrun.service.CacheService;
 import com.devrun.service.EmailSenderService;
 import com.devrun.service.KakaoLoginService;
 import com.devrun.service.LoginService;
@@ -59,6 +65,9 @@ public class LoginController {
     
     @Autowired
     private LoginRepository loginRepository;
+    
+    @Autowired
+    private CacheService cacheService;
 
     @Value("${kakao.client_id}")
     private String client_id;
@@ -600,19 +609,67 @@ public class LoginController {
 	private EmailSenderService emailSenderService;
 	
 	@ResponseBody
-	@PostMapping("/email")
-	public ResponseEntity<?> email(@RequestParam("email") String toEmail
-			, @RequestParam("id") String id
-			, @RequestParam("nickname") String nickname) {
+	@PostMapping("/signup/email")
+	public ResponseEntity<?> signupEmail(@RequestParam("email") String toEmail
+			, @RequestParam("id") String id) {
 		
-		String subject = "회원가입 이메일 인증 안내";
         try {
-        	emailSenderService.sendEmail(toEmail, subject);
-        	return ResponseEntity.status(200).body("테스트 성공");
+        	emailSenderService.sendEmail(toEmail, id);
+        	
+        	// 200 성공
+        	return ResponseEntity.status(200).body("Email sent successfully");
         } catch (Exception e) {
         	System.out.println("이메일 에러 : " + e);
-        	return ResponseEntity.status(403).body("테스트 실패");
+        	// 403 이메일 전송 실패
+        	return ResponseEntity.status(403).body("Failed to send email");
         }
+	}
+	
+	@ResponseBody
+	@Transactional
+	@PostMapping("/signup/ok")
+	public ResponseEntity<?> signupOk(@RequestParam("id") String id
+										, @RequestParam("key") String key){
+		
+		MemberEntity member = memberService.findById(id);
+		
+		if (member != null) {
+			// 현재 시간
+			Instant currentDate = Instant.now();
+			// 회원가입 시간
+			Instant signupDate = member.getSignupDate().toInstant();
+			long diffInMinutes = Duration.between(currentDate, signupDate).toMinutes();
+			
+			System.out.println("현재시간 : " + currentDate);
+			System.out.println("가입시간 : " + signupDate);
+			System.out.println("시간 차이 : " + diffInMinutes);
+			
+			if (diffInMinutes < 60) {
+				
+				String cachedKey = cacheService.getEmailVerifyTempKey(id);
+				if (cachedKey != null && cachedKey.equals(key)) {
+					
+					member.setStatus(Status.ACTIVE);
+					
+					memberService.insert(member);
+					cacheService.removeEmailVerifyTempKey(id);
+					
+					// 이메일 인증 성공 회원 활성화
+					return ResponseEntity.status(200).body("Email verification successful, account activated");
+				} else {
+					// 유효하지 않은 키
+					return ResponseEntity.status(400).body("Invalid key");
+				}
+				
+			} else {
+				// 회원가입 1시간 경과
+				return ResponseEntity.status(400).body("Verification expired");
+			}
+			
+		} else {
+			// 회원을 찾을 수 없음
+			return ResponseEntity.status(404).body("Member not found");
+		}
 	}
 	
 }
