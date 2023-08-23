@@ -303,8 +303,20 @@ public class LoginController {
 	@ResponseBody
 	@PostMapping("/authz/logout")
 	public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response){
+		
 		// refreshToken이 헤더에 있는지 확인
-        String refreshToken = request.getHeader("Refresh_token");
+//        String refreshToken = request.getHeader("Refresh_token");
+		Cookie[] cookies = request.getCookies();
+	    System.out.println("리프레시 쿠키 : " + cookies);
+	    String refreshToken = null;
+	    if (cookies != null) {
+	        for (Cookie cookie : cookies) {
+	            if ("Refresh_token".equals(cookie.getName())) {
+	                String encodedRefreshToken = cookie.getValue();
+	                refreshToken = new String(Base64.getDecoder().decode(encodedRefreshToken));
+	            }
+	        }
+	    }
         
 //	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
         if (refreshToken == null || refreshToken.isEmpty()) {
