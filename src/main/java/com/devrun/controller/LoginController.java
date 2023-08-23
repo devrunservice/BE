@@ -613,6 +613,7 @@ public class LoginController {
 		
 		return ResponseEntity.status(200).body("테스트 성공");
         } catch (Exception e) {
+        	System.out.println("이메일 에러 : " + e);
         	return ResponseEntity.status(403).body("테스트 실패");
         }
 	}
