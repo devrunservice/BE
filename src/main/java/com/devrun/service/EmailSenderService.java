@@ -31,7 +31,6 @@ public class EmailSenderService {
         String url = "https://devrun.net/signup/ok";
         RandomString rs = new RandomString(35);
         String key = rs.nextString();
-        cacheService.saveEmailVerifyTempKey(id, key);
         String body = "<!DOCTYPE html>" +
                 "<html lang=\"ko\">" +
                 "<head>" +
@@ -106,6 +105,7 @@ public class EmailSenderService {
             helper.setText(body, true); // Set the second parameter to 'true' to send HTML content
 
             mailSender.send(message);
+            cacheService.saveEmailVerifyTempKey(id, key);
         } catch (MessagingException e) {
             e.printStackTrace();
         }
