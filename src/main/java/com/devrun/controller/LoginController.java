@@ -606,12 +606,9 @@ public class LoginController {
 			, @RequestParam("nickname") String nickname) {
 		
 		String subject = "회원가입 이메일 인증 안내";
-        String body = "Hi";
         try {
-			
-        emailSenderService.sendEmail(toEmail, subject, body);
-		
-		return ResponseEntity.status(200).body("테스트 성공");
+        	emailSenderService.sendEmail(toEmail, subject);
+        	return ResponseEntity.status(200).body("테스트 성공");
         } catch (Exception e) {
         	System.out.println("이메일 에러 : " + e);
         	return ResponseEntity.status(403).body("테스트 실패");
