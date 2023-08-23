@@ -31,6 +31,7 @@ public class EmailSenderService {
         String url = "https://devrun.net/signup/ok";
         RandomString rs = new RandomString(35);
         String key = rs.nextString();
+        
         String body = "<!DOCTYPE html>" +
                 "<html lang=\"ko\">" +
                 "<head>" +
