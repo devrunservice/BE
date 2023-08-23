@@ -7,6 +7,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -87,6 +88,19 @@ public class LoginService {
 //	    response.addCookie(Refresh_token);
 //	    
 //	}
+	public ResponseCookie setRefeshcookie(String token) {
+		
+		String value = "Bearer " + token;
+		String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
+		ResponseCookie refresh_token = ResponseCookie
+			.from("Refresh_token", encodedValue)
+			.path("/authz")
+			.sameSite("none")
+			.secure(true)
+			.httpOnly(true)
+			.build();
+		return refresh_token;
+	}
 	
 	// 로그아웃에 필요한 SNS Access_token 생성
 	public void setEasycookie(HttpServletResponse response, String token, Long id) {

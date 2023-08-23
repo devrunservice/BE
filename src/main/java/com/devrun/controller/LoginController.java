@@ -165,15 +165,18 @@ public class LoginController {
 
                     // HTTPONLY 쿠키 생성
 //                    loginService.setRefeshcookie(response, refresh_token);
-                    String value = "Bearer " + refresh_token;
-            	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
-                    ResponseCookie HTTP_refresh_token = ResponseCookie
-                    		.from("Refresh_token", encodedValue)
-                    		.path("/authz")
-                    		.sameSite("none")
-                    		.secure(true)
-                    		.httpOnly(true)
-                    		.build();
+                    ResponseCookie HTTP_refresh_token = loginService.setRefeshcookie(refresh_token);
+                    
+//                    String value = "Bearer " + refresh_token;
+//            	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
+//                    ResponseCookie HTTP_refresh_token = ResponseCookie
+//                    		.from("Refresh_token", encodedValue)
+//                    		.path("/authz")
+//                    		.sameSite("none")
+//                    		.secure(true)
+//                    		.httpOnly(true)
+//                    		.build();
+                    
                     // HttpHeaders 객체 생성 및 쿠키 설정
                     HttpHeaders headers = new HttpHeaders();
                     headers.add("Set-Cookie", HTTP_refresh_token.toString());
@@ -272,15 +275,17 @@ public class LoginController {
 
             // HttpOnly 쿠키 생성
 //            loginService.setRefeshcookie(response, newRefreshToken);
-            String value = "Bearer " + newRefreshToken;
-    	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
-            ResponseCookie HTTP_refresh_token = ResponseCookie
-            		.from("Refresh_token", encodedValue)
-            		.path("/authz")
-            		.sameSite("none")
-            		.secure(true)
-            		.httpOnly(true)
-            		.build();
+            ResponseCookie HTTP_refresh_token = loginService.setRefeshcookie(newRefreshToken);
+            
+//            String value = "Bearer " + newRefreshToken;
+//    	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
+//            ResponseCookie HTTP_refresh_token = ResponseCookie
+//            		.from("Refresh_token", encodedValue)
+//            		.path("/authz")
+//            		.sameSite("none")
+//            		.secure(true)
+//            		.httpOnly(true)
+//            		.build();
             
             // HttpHeaders 객체 생성 및 쿠키 설정
             HttpHeaders headers = new HttpHeaders();
@@ -442,16 +447,18 @@ public class LoginController {
 //			loginDTO.setRefresh_token("Bearer " + refresh_token);
 			
 			// HttpOnly 쿠키 생성
-//          loginService.setRefeshcookie(response, newRefreshToken);
-			String value = "Bearer " + refresh_token;
-			String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
-			ResponseCookie HTTP_refresh_token = ResponseCookie
-				.from("Refresh_token", encodedValue)
-				.path("/authz")
-				.sameSite("none")
-				.secure(true)
-				.httpOnly(true)
-				.build();
+//          loginService.setRefeshcookie(response, refresh_token);
+			ResponseCookie HTTP_refresh_token = loginService.setRefeshcookie(refresh_token);
+			
+//			String value = "Bearer " + refresh_token;
+//			String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
+//			ResponseCookie HTTP_refresh_token = ResponseCookie
+//				.from("Refresh_token", encodedValue)
+//				.path("/authz")
+//				.sameSite("none")
+//				.secure(true)
+//				.httpOnly(true)
+//				.build();
 			  
 			// HttpHeaders 객체 생성 및 쿠키 설정
 			HttpHeaders headers = new HttpHeaders();
