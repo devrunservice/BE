@@ -88,7 +88,7 @@ public class LoginService {
 //	    response.addCookie(Refresh_token);
 //	    
 //	}
-	public ResponseCookie setRefeshcookie(String token) {
+	public ResponseCookie setRefeshCookie(String token) {
 		
 		String value = "Bearer " + token;
 		String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());

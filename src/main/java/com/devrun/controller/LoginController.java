@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.server.Cookie.SameSite;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -31,6 +30,7 @@ import com.devrun.dto.member.LogoutResponse;
 import com.devrun.dto.member.SignupDTO;
 import com.devrun.entity.MemberEntity;
 import com.devrun.repository.LoginRepository;
+import com.devrun.service.EmailSenderService;
 import com.devrun.service.KakaoLoginService;
 import com.devrun.service.LoginService;
 import com.devrun.service.MemberService;
@@ -164,8 +164,8 @@ public class LoginController {
 //                    loginDTO.setRefresh_token("Bearer " + refresh_token);
 
                     // HTTPONLY 쿠키 생성
-//                    loginService.setRefeshcookie(response, refresh_token);
-                    ResponseCookie HTTP_refresh_token = loginService.setRefeshcookie(refresh_token);
+//                    loginService.setRefeshCookie(response, refresh_token);
+                    ResponseCookie HTTP_refresh_token = loginService.setRefeshCookie(refresh_token);
                     
 //                    String value = "Bearer " + refresh_token;
 //            	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
@@ -274,8 +274,8 @@ public class LoginController {
             String newRefreshToken = JWTUtil.generateRefreshToken(memberEntity.getId(), memberEntity.getName());
 
             // HttpOnly 쿠키 생성
-//            loginService.setRefeshcookie(response, newRefreshToken);
-            ResponseCookie HTTP_refresh_token = loginService.setRefeshcookie(newRefreshToken);
+//            loginService.setRefeshCookie(response, newRefreshToken);
+            ResponseCookie HTTP_refresh_token = loginService.setRefeshCookie(newRefreshToken);
             
 //            String value = "Bearer " + newRefreshToken;
 //    	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
@@ -447,8 +447,8 @@ public class LoginController {
 //			loginDTO.setRefresh_token("Bearer " + refresh_token);
 			
 			// HttpOnly 쿠키 생성
-//          loginService.setRefeshcookie(response, refresh_token);
-			ResponseCookie HTTP_refresh_token = loginService.setRefeshcookie(refresh_token);
+//          loginService.setRefeshCookie(response, refresh_token);
+			ResponseCookie HTTP_refresh_token = loginService.setRefeshCookie(refresh_token);
 			
 //			String value = "Bearer " + refresh_token;
 //			String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
@@ -594,6 +594,27 @@ public class LoginController {
 		boolean isPhoneVerified = loginService.verifyPhone(id, phone);
 		
 		return isPhoneVerified;
+	}
+	
+	@Autowired
+	private EmailSenderService emailSenderService;
+	
+	@ResponseBody
+	@PostMapping("/email")
+	public ResponseEntity<?> email(@RequestParam("email") String toEmail
+			, @RequestParam("id") String id
+			, @RequestParam("nickname") String nickname) {
+		
+		String subject = "회원가입 이메일 인증 안내";
+        String body = "Hi";
+        try {
+			
+        emailSenderService.sendEmail(toEmail, subject, body);
+		
+		return ResponseEntity.status(200).body("테스트 성공");
+        } catch (Exception e) {
+        	return ResponseEntity.status(403).body("테스트 실패");
+        }
 	}
 	
 }
