@@ -168,7 +168,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     	String username = extractUsername(jwt);
     	
     	// 이전에 SecurityContextHolder에 저장된 토큰값과 유저정보를 초기화
-    	SecurityContextHolder.clearContext();
+//    	SecurityContextHolder.clearContext();
     	System.out.println("여기냐2" + username);
     	
         // 토큰에서 추출한 아이디가 null이 아니고, 현재 Security Context에 인증 정보가 없는 경우

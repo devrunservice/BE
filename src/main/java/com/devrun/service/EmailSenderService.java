@@ -1,5 +1,10 @@
 package com.devrun.service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Base64;
+
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
@@ -14,6 +19,7 @@ import net.bytebuddy.utility.RandomString;
 @Service
 public class EmailSenderService {
 	
+	// dataURL사용 확정되면 프로퍼티까지 같이 지워주기
 	@Value("${devrun.logo.image}")
 	private String logo_image;
 	
@@ -26,8 +32,21 @@ public class EmailSenderService {
     public void sendEmail(String toEmail, String id) {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper;
+        String imgTag = "";
         
-        String subject = "회원가입 이메일 인증 안내";
+        try {
+        	// dataURL을 사용하여 이미지 첨부
+        	// 경로에 파일이 없거나 파일을 읽을 권한이 없을 경우 예외처리를 하기 위해 try/catch를 사용
+        	byte[] imageBytes = Files.readAllBytes(Paths.get("img/logo.png"));
+            String encodedString = Base64.getEncoder().encodeToString(imageBytes);
+            imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\"/>";
+		} catch (IOException e) {
+			System.out.println("이미지 인코딩 실패");
+			e.printStackTrace();
+		}
+
+        
+        String subject = "[Devrun] 회원가입을 축하합니다. 이메일 인증을 완료해주세요.";
         String url = "https://devrun.net/signup/ok";
         RandomString rs = new RandomString(35);
         String key = rs.nextString();
@@ -65,7 +84,7 @@ public class EmailSenderService {
                 "<body>" +
                 "<div id=\"root\" style=\"background:#f7f7f7;width:100%;padding:50px 0;\">" +
                 "<div style=\"background:#fff;margin:0 auto;width:640px;\">" +
-                "<div style=\"background: #5F4B8B; font-size: 0; padding: 0 30px;  height: 100px; display: flex; align-items: center;\"><img src=\"" + logo_image + "\" alt=\"devrun로고\"/></div>" +
+                "<div style=\"background: #5F4B8B; font-size: 0; padding: 0 30px;  height: 100px; display: flex; align-items: center;\">" + imgTag + "</div>" +
                 "<div style=\"padding:40px 40px 60px\">" +
                 "<h3 style=\"font-size:1.56rem;color:#171717;line-height: 1;margin:0;margin-bottom:25px; font-family: \"Pretendard\";font-weight:700;\">DevRun 회원가입을 축하드립니다.</h3>" +
                 "<p style=\"font-size:1rem;color:#676767;line-height: 1;margin:0; font-family: \"Pretendard\";font-weight:400;\">아래 링크를 클릭하여 회원가입을 완료해 주세요.</p>" +
@@ -105,8 +124,8 @@ public class EmailSenderService {
             helper.setSubject(subject);
             helper.setText(body, true); // Set the second parameter to 'true' to send HTML content
 
-            mailSender.send(message);
             cacheService.saveEmailVerifyTempKey(id, key);
+            mailSender.send(message);
         } catch (MessagingException e) {
             e.printStackTrace();
         }
