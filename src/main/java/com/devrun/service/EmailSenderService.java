@@ -25,7 +25,7 @@ public class EmailSenderService {
     @Autowired
     private CaffeineCache cacheService;
 
-    public void sendEmail(String toEmail, String id) {
+    public void sendSignupEmail(String toEmail, String id) {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper;
         String imgTag = "";

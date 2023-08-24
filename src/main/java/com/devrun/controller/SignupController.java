@@ -1,5 +1,6 @@
 package com.devrun.controller;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,13 +16,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.devrun.dto.member.SignupDTO;
+import com.devrun.dto.member.MemberDTO.Status;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.PointEntity;
+import com.devrun.service.EmailSenderService;
 import com.devrun.service.MemberService;
+import com.devrun.util.CaffeineCache;
 
 import reactor.core.publisher.Mono;
 
@@ -33,6 +38,12 @@ public class SignupController {
 	
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	
+	@Autowired
+	private EmailSenderService emailSenderService;
+	
+	@Autowired
+    private CaffeineCache caffeineCache;
 	
 	@PostMapping("/checkID")
 	@ResponseBody
@@ -212,7 +223,6 @@ public class SignupController {
 					    
 					    // 메모리에 저장된 전화번호와 인증코드 제거
 					    memberService.removeSmsCode(memberEntity.getPhonenumber());
-					    
 					    return new ResponseEntity<>("Signup successful", HttpStatus.OK);
 					    //ResponseEntity.ok("Signup successful");
 					    
@@ -253,6 +263,70 @@ public class SignupController {
 		    		//ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
 		}
 
+	}
+	
+	@ResponseBody
+	@PostMapping("/signup/confirm/email")
+	public ResponseEntity<?> signupEmail(@RequestParam("email") String toEmail
+			, @RequestParam("id") String id) {
+		
+        try {
+        	emailSenderService.sendSignupEmail(toEmail, id);
+        	
+        	// 200 성공
+        	return ResponseEntity.status(200).body("Email sent successfully");
+        } catch (Exception e) {
+        	System.out.println("이메일 에러 : " + e);
+        	// 403 이메일 전송 실패
+        	return ResponseEntity.status(403).body("Failed to send email");
+        }
+	}
+	
+	@ResponseBody
+	@Transactional
+	@PostMapping("/verifyEmail")
+	public ResponseEntity<?> signupOk(@RequestParam("id") String id
+										, @RequestParam("key") String key){
+		
+		MemberEntity member = memberService.findById(id);
+		
+		if (member != null) {
+			// 현재 시간
+			Instant currentDate = Instant.now();
+			// 회원가입 시간
+			Instant signupDate = member.getSignupDate().toInstant();
+			long diffInMinutes = Duration.between(signupDate, currentDate).toMinutes();
+			
+			System.out.println("현재시간 : " + currentDate);
+			System.out.println("가입시간 : " + signupDate);
+			System.out.println("시간 차이 : " + diffInMinutes);
+			
+			if (diffInMinutes < 60) {
+				
+				String cachedKey = caffeineCache.getEmailVerifyTempKey(id);
+				if (cachedKey != null && cachedKey.equals(key)) {
+					
+					member.setStatus(Status.ACTIVE);
+					
+					memberService.insert(member);
+					caffeineCache.removeEmailVerifyTempKey(id);
+					
+					// 이메일 인증 성공 회원 활성화
+					return ResponseEntity.status(200).body("Email verification successful, account activated");
+				} else {
+					// 유효하지 않은 키
+					return ResponseEntity.status(400).body("Invalid key");
+				}
+				
+			} else {
+				// 회원가입 1시간 경과
+				return ResponseEntity.status(400).body("Verification expired");
+			}
+			
+		} else {
+			// 회원을 찾을 수 없음
+			return ResponseEntity.status(404).body("Member not found");
+		}
 	}
 	
 }
