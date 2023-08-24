@@ -217,31 +217,41 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		try {
             handleToken(request, response, chain, accessToken, refreshToken);
         } catch (ExpiredJwtException e) {
+        	// 401 : JWT 토큰이 만료되었을 때
             sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Token is expired");
         } catch (SignatureException e) {
+        	// 403 : JWT 토큰이 조작되었을 때
             sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "Signature validation failed");
         } catch (Exception e) {
+        	// 500 : 그 외 예외 처리
             sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected server error occurred");
         }
 		
 	}
 
+	// Access_token과 Refresh_token 나눠서 처리
 	private void handleToken(HttpServletRequest request, HttpServletResponse response, FilterChain chain, String accessToken, String refreshToken)
 	        throws ServletException, IOException {
 	    if (validateAndHandleToken(accessToken, "Access_token", request, response, chain)) return;
 	    if (validateAndHandleToken(refreshToken, "Refresh_token", request, response, chain)) return;
+	    // 올바르지 않은 토큰
 	    sendErrorResponse(response, 403, "Invalid token");
 	}
 	
+	// 토큰 유효성 검사 및 처리
 	private boolean validateAndHandleToken(String token, String tokenType, HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 	        throws ServletException, IOException {
+		
 	    if (token != null && token.startsWith("Bearer ")) {
 	        String jwt = token.substring(7);
 	        String userId = JWTUtil.getUserIdFromToken(jwt);
 	        String requestJti = JWTUtil.getJtiFromToken(jwt);
 	        String storedJti = redisCache.getJti(userId);
 
-	        if (requestJti.equals(storedJti) && validateAndProcessToken(token, tokenType, request)) {
+	        if (!isValidAlgorithm(jwt, response) || isBlacklistedRefreshToken(tokenType, token, response)) return true;
+	        
+	        if (requestJti.equals(storedJti) && validateAndProcessToken(token, request)) {
+	        	// 토큰 검증 및 처리 성공
 	            chain.doFilter(request, response);
 	            return true;
 	        } else {
@@ -253,35 +263,44 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	    return false;
 	}
 	
-    private boolean validateAndProcessToken(String token, String tokenType, HttpServletRequest request) {
-        if (token != null && token.startsWith("Bearer ")) {
-            String jwt = token.substring(7);
-            String username = extractUsername(jwt);
+	private boolean isValidAlgorithm(String token, HttpServletResponse response) throws IOException {
+	    if (!JWTUtil.isAlgorithmValid(token)) {
+	    	// 잘못된 서명 알고리즘
+	        sendErrorResponse(response, 403, "Invalid token signature algorithm");
+	        return false;
+	    }
+	    return true;
+	}
+	
+	private boolean isBlacklistedRefreshToken(String tokenType, String token, HttpServletResponse response) throws IOException {
+	    if (tokenType.equals("Refresh_token") && redisCache.isTokenBlacklisted(token)) {
+	    	// 블랙리스트에 등록된 토큰 사용
+	        sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "Logout user");
+	        return true;
+	    }
+	    return false;
+	}
+	
+	private boolean validateAndProcessToken(String token, HttpServletRequest request) {
+	    if (token != null && token.startsWith("Bearer ")) {
+	        String jwt = token.substring(7);
+	        String username = extractUsername(jwt);
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+	        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+	            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
-                if (validateToken(jwt, userDetails, tokenType)) {
-                    setAuthenticationInSecurityContext(userDetails, request);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+	            if (validateToken(jwt, userDetails)) { // tokenType 인자가 제거되었습니다.
+	                setAuthenticationInSecurityContext(userDetails, request);
+	                return true;
+	            }
+	        }
+	    }
+	    return false;
+	}
     
+    // 오류 응답 전송
     private void sendErrorResponse(HttpServletResponse response, int status, String message) throws IOException {
         response.sendError(status, message);
-    }
-    
-    private boolean validateToken(String token, UserDetails userDetails, String tokenType) {
-        if (tokenType.equals("Access_token")) {
-            return validateAccessToken(token, userDetails);
-        } else if (tokenType.equals("Refresh_token")) {
-            return validateRefreshToken(token, userDetails);
-        }
-
-        return false;
     }
     
     public void setAuthenticationInSecurityContext(UserDetails userDetails, HttpServletRequest request) {
@@ -312,52 +331,36 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         return refreshToken; // 쿠키에서 "Refresh_token"을 찾지 못한 경우 null 반환
     }
     
-    // Access 토큰에서 아이디를 추출하는 메서드
+ // 토큰에서 아이디를 추출하는 메서드
     private String extractUsername(String token) {
         return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().getSubject();
     }
 
-    // Access 토큰이 유효한지 검증하는 메서드
-    private Boolean validateAccessToken(String token, UserDetails userDetails) {
+    // 토큰의 유효성을 검사하는 메소드
+    private Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-    // Access 토큰의 만료 여부를 확인하는 메서드
+    // 토큰의 만료 여부를 확인하는 메소드
     private Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
-    
-    // Access 토큰에서 만료 시간을 추출하는 메서드
+
+    // 토큰에서 만료 시간을 추출하는 메소드
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    // Access 토큰에서 클레임을 추출하는 메서드
+    // 토큰에서 클레임을 추출하는 메서드
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
-    // Access 토큰에서 모든 클레임을 추출하는 메서드
+    // 토큰에서 모든 클레임을 추출하는 메서드
     private Claims extractAllClaims(String token) {
         return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
-    }
-    
-    // Refresh 토큰의 유효성을 검사하는 메소드
-    private Boolean validateRefreshToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isRefreshTokenExpired(token));
-    }
-
-    // Refresh 토큰의 만료 여부를 확인하는 메소드
-    private Boolean isRefreshTokenExpired(String token) {
-        return extractRefreshTokenExpiration(token).before(new Date());
-    }
-
-    // Refresh 토큰에서 만료 시간을 추출하는 메소드
-    private Date extractRefreshTokenExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
     }
     
     // EasyLogin_token에서 userId와 email을 추출하는 메소드
