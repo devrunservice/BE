@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,12 +34,6 @@ public class SignupController {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 	
-	@ResponseBody
-	@PostMapping("/signup")
-	public String signup(HttpServletResponse response) {
-		return "signup";
-	}
-
 	@PostMapping("/checkID")
 	@ResponseBody
     public String checkID(@RequestBody SignupDTO signupDTO) {

@@ -57,6 +57,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 //		String requestPath = request.getRequestURI();
 		// HTTP 요청 헤더에서 헤더 값을 가져옴
 	    String accessToken = request.getHeader("Access_token");
+	    System.out.println("엑세스 토큰 : " + accessToken);
 //	    String encodedRefreshToken = request.getHeader("Refresh_token");
 //	    String refreshToken = null;
 //	    if (encodedRefreshToken != null) {
@@ -76,9 +77,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 //				&& !"/savePaymentInfo".equals(requestPath)
 //				&& !"/token/refresh".equals(requestPath)
 				accessToken == null
-				&& cookies == null
+				&& refreshToken == null
 //				&& easyloginTokenHeader == null
 				) {
+			System.out.println("그냥 통과");
 		    chain.doFilter(request, response);
 		    return;
 		}
@@ -215,6 +217,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 //        }
 		
 		try {
+			System.out.println("여기냐1");
             handleToken(request, response, chain, accessToken, refreshToken);
         } catch (ExpiredJwtException e) {
         	// 401 : JWT 토큰이 만료되었을 때

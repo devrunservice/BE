@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -666,7 +665,7 @@ public class LoginController {
 			Instant currentDate = Instant.now();
 			// 회원가입 시간
 			Instant signupDate = member.getSignupDate().toInstant();
-			long diffInMinutes = Duration.between(currentDate, signupDate).toMinutes();
+			long diffInMinutes = Duration.between(signupDate, currentDate).toMinutes();
 			
 			System.out.println("현재시간 : " + currentDate);
 			System.out.println("가입시간 : " + signupDate);

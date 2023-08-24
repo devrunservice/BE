@@ -91,7 +91,7 @@ public class MemberEntity {
 	@Comment("활성 : ACTIVE / 휴면 : INACTIVE / 탈퇴 : WITHDRAWN")
 	private Status status = Status.INACTIVE;
 	
-	@Column(name = "signup"
+	@Column(name = "signupDate"
 			, nullable = false
 			)
 	@Comment("유저 가입일")

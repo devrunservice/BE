@@ -1,8 +1,7 @@
 package com.devrun.service;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
 import java.util.Base64;
 
 import javax.mail.MessagingException;
@@ -34,16 +33,17 @@ public class EmailSenderService {
         try {
         	// dataURL을 사용하여 이미지 첨부
         	// 경로에 파일이 없거나 파일을 읽을 권한이 없을 경우 예외처리를 하기 위해 try/catch를 사용
-        	byte[] imageBytes = Files.readAllBytes(Paths.get("img/logo.png"));
+        	InputStream in = getClass().getResourceAsStream("/img/logo.png");
+        	byte[] imageBytes = in.readAllBytes();
             String encodedString = Base64.getEncoder().encodeToString(imageBytes);
-            imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\"/>";
+            imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width: 250px; height: 60px;\"/>";
 		} catch (IOException e) {
 			System.out.println("이미지 인코딩 실패");
 			e.printStackTrace();
 		}
 
         
-        String subject = "[Devrun] 회원가입을 축하합니다. 이메일 인증을 완료해주세요.";
+        String subject = "[Devrun] " + id + "님 회원가입을 축하합니다. 이메일 인증을 완료해주세요.";
         String url = "https://devrun.net/signup/ok";
         RandomString rs = new RandomString(35);
         String key = rs.nextString();
@@ -86,13 +86,10 @@ public class EmailSenderService {
                 "<h3 style=\"font-size:1.56rem;color:#171717;line-height: 1;margin:0;margin-bottom:25px; font-family: \"Pretendard\";font-weight:700;\">DevRun 회원가입을 축하드립니다.</h3>" +
                 "<p style=\"font-size:1rem;color:#676767;line-height: 1;margin:0; font-family: \"Pretendard\";font-weight:400;\">아래 링크를 클릭하여 회원가입을 완료해 주세요.</p>" +
                 "<div style=\"border-top:1px solid #ddd; border-bottom:1px solid #ddd; padding: 25px 0;margin-top: 35px;\">" +
-                "<p style=\"font-size: 0; padding:0px 30px;margin-bottom:15px; display: flex;align-items: center;\">" +
-                "<span style=\"font-size: 1rem; width:130px; font-family: \"Pretendard\";font-weight:400; color:#171717;  display: block;\">DevRun계정</span>" +
-                "<span style=\"font-size: 1rem;font-family: \"Pretendard\";font-weight:500; color:#5F4B8B;display: block;text-decoration: underline;\">"+ id +"</span></p>" +
                 
 				"<form id=\"confirmationForm\" method=\"post\" action=\"" + url + "\">" +
-				"<input type='hidden' id='id' name='id' value='" + id + "'/><br>" +
-				"<input type='hidden' id='key' name='key' value='" + key + "'/><br>" +
+				"<input type='hidden' id='id' name='id' value='" + id + "'/>" +
+				"<input type='hidden' id='key' name='key' value='" + key + "'/>" +
 				"<p style=\"font-size: 0; padding:0px 30px;display: flex;align-items: center;justify-content: center;\">" +
 				"<button type=\"submit\" style=\"background-color: #5F4B8B; color: #FFFFFF; width: 140px; height: 45px; text-align: center; border: none; font-family: 'Pretendard'; font-weight: 400; display: flex; align-items: center; justify-content: center;\"><b>이메일 인증하기</b></button>" +
 				"</p>" +

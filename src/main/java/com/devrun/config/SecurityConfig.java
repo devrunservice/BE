@@ -33,7 +33,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
+    	return http
             .csrf().disable()
             .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS, "/**/*").permitAll()
@@ -46,9 +46,8 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
-            .logout().disable();
-
-        return http.build();
+            .logout().disable()
+            .build();
     }
 //    기본적으로 스프링 시큐리티는 인증 후 사용자 세션을 생성하고 그 세션에 사용자 정보를 저장합니다. 
 //    그러나 SessionCreationPolicy.STATELESS를 설정하면 스프링 시큐리티는 세션을 사용하지 않으며, 따라서 사용자 정보도 세션에 저장되지 않습니다.
