@@ -64,10 +64,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 //		}
 	    Cookie[] cookies = request.getCookies();
 	    System.out.println("리프레시 쿠키 : " + cookies);
+	    
 	    String refreshToken = getRefreshTokenFromCookies(cookies);
 	    System.out.println("리프레시 토큰 : " + refreshToken);
+	    
 //	    String easyloginTokenHeader = request.getHeader("Easylogin_token");
 		//login 경로에 대한 요청인 경우 필터를 건너뛰도록 설정합니다.
+	    
 		if (
 //				!"/tmi".equals(requestPath) 
 //				&& !"/savePaymentInfo".equals(requestPath)
@@ -210,6 +213,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 //        	    }
 //        	}
 //        }
+		
 		try {
             handleToken(request, response, chain, accessToken, refreshToken);
         } catch (ExpiredJwtException e) {
@@ -222,17 +226,33 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		
 	}
 
-    private void handleToken(HttpServletRequest request, HttpServletResponse response, FilterChain chain, String accessToken, String refreshToken)
-            throws ServletException, IOException {
-        if (validateAndProcessToken(accessToken, "Access_token", request)) {
-            chain.doFilter(request, response);
-        } else if (validateAndProcessToken(refreshToken, "Refresh_token", request)) {
-            chain.doFilter(request, response);
-        } else {
-            sendErrorResponse(response, 403, "Invalid token");
-        }
-    }
-    
+	private void handleToken(HttpServletRequest request, HttpServletResponse response, FilterChain chain, String accessToken, String refreshToken)
+	        throws ServletException, IOException {
+	    if (validateAndHandleToken(accessToken, "Access_token", request, response, chain)) return;
+	    if (validateAndHandleToken(refreshToken, "Refresh_token", request, response, chain)) return;
+	    sendErrorResponse(response, 403, "Invalid token");
+	}
+	
+	private boolean validateAndHandleToken(String token, String tokenType, HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+	        throws ServletException, IOException {
+	    if (token != null && token.startsWith("Bearer ")) {
+	        String jwt = token.substring(7);
+	        String userId = JWTUtil.getUserIdFromToken(jwt);
+	        String requestJti = JWTUtil.getJtiFromToken(jwt);
+	        String storedJti = redisCache.getJti(userId);
+
+	        if (requestJti.equals(storedJti) && validateAndProcessToken(token, tokenType, request)) {
+	            chain.doFilter(request, response);
+	            return true;
+	        } else {
+	            // 중복 로그인 처리
+	            sendErrorResponse(response, 403, "Duplicate login detected");
+	            return true;
+	        }
+	    }
+	    return false;
+	}
+	
     private boolean validateAndProcessToken(String token, String tokenType, HttpServletRequest request) {
         if (token != null && token.startsWith("Bearer ")) {
             String jwt = token.substring(7);
