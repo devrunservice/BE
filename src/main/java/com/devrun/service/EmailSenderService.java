@@ -30,9 +30,9 @@ public class EmailSenderService {
         MimeMessageHelper helper;
         String imgTag = "";
         
+        // 경로에 파일이 없거나 파일을 읽을 권한이 없을 경우 예외처리를 하기 위해 try/catch를 사용
         try {
         	// dataURL을 사용하여 이미지 첨부
-        	// 경로에 파일이 없거나 파일을 읽을 권한이 없을 경우 예외처리를 하기 위해 try/catch를 사용
         	InputStream in = getClass().getResourceAsStream("/img/logo.png");
         	byte[] imageBytes = in.readAllBytes();
             String encodedString = Base64.getEncoder().encodeToString(imageBytes);
