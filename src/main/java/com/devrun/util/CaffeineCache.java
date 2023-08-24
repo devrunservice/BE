@@ -1,4 +1,4 @@
-package com.devrun.service;
+package com.devrun.util;
 
 import java.util.concurrent.TimeUnit;
 
@@ -8,11 +8,11 @@ import org.springframework.stereotype.Service;
 
 
 @Service
-public class CacheService {
+public class CaffeineCache {
 
     private final LoadingCache<String, String> smsCodeCache;
 
-    public CacheService() {
+    public CaffeineCache() {
         smsCodeCache = Caffeine.newBuilder()
                 .expireAfterWrite(5, TimeUnit.MINUTES) // 5분 후에 만료 지금은 핸드폰 인증에만 사용 중
                 .maximumSize(100) // 최대 100개의 항목 저장

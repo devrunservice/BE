@@ -14,6 +14,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import com.devrun.util.CaffeineCache;
+
 import net.bytebuddy.utility.RandomString;
 
 @Service
@@ -27,7 +29,7 @@ public class EmailSenderService {
     private JavaMailSender mailSender;
     
     @Autowired
-    private CacheService cacheService;
+    private CaffeineCache cacheService;
 
     public void sendEmail(String toEmail, String id) {
         MimeMessage message = mailSender.createMimeMessage();

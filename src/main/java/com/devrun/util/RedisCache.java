@@ -1,4 +1,4 @@
-package com.devrun.service;
+package com.devrun.util;
 
 import java.util.concurrent.TimeUnit;
 
@@ -6,11 +6,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TokenBlacklistService {
+public class RedisCache {
 	
     private final StringRedisTemplate redisTemplate;
 
-    public TokenBlacklistService(StringRedisTemplate redisTemplate) {
+    public RedisCache(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
@@ -30,4 +30,21 @@ public class TokenBlacklistService {
     	// Redis의 hasKey() 메소드를 사용하여 토큰이 Redis에 저장되어 있는지 확인
         return redisTemplate.hasKey(token);
     }
+    
+    // jti를 이용해 로그인 처리
+    public void setJti(String id, String jti) {
+    	redisTemplate.opsForValue().set(id, jti);
+    	redisTemplate.expire(id, 24, TimeUnit.HOURS);
+    }
+    
+    // jti를 이용해 로그아웃 처리
+    public void removeJti(String id) {
+        redisTemplate.delete(id);
+    }
+
+    // 해당 id에 연결된 jti 값을 가져옴
+    public String getJti(String id) {
+        return redisTemplate.opsForValue().get(id);
+    }
+
 }

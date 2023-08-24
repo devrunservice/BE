@@ -19,6 +19,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.PointEntity;
 import com.devrun.repository.MemberEntityRepository;
+import com.devrun.util.CaffeineCache;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -38,7 +39,7 @@ public class MemberService {
 
     private final MemberEntityRepository memberEntityRepository;
     
-    private final CacheService cacheService; // 캐시 서비스 주입
+    private final CaffeineCache cacheService; // 캐시 서비스 주입
 
 //    private final Map<String, String> phoneCodeMap = new ConcurrentHashMap<>();
 

@@ -3,9 +3,9 @@ package com.devrun.controller;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -35,13 +35,13 @@ import com.devrun.dto.member.MemberDTO.Status;
 import com.devrun.dto.member.SignupDTO;
 import com.devrun.entity.MemberEntity;
 import com.devrun.repository.LoginRepository;
-import com.devrun.service.CacheService;
 import com.devrun.service.EmailSenderService;
 import com.devrun.service.KakaoLoginService;
 import com.devrun.service.LoginService;
 import com.devrun.service.MemberService;
-import com.devrun.service.TokenBlacklistService;
+import com.devrun.util.CaffeineCache;
 import com.devrun.util.JWTUtil;
+import com.devrun.util.RedisCache;
 
 import reactor.core.publisher.Mono;
 
@@ -61,13 +61,13 @@ public class LoginController {
     private KakaoLoginService kakaoLoginService;
     
     @Autowired
-    private TokenBlacklistService tokenBlacklistService;
+    private RedisCache redisCache;
     
     @Autowired
     private LoginRepository loginRepository;
     
     @Autowired
-    private CacheService cacheService;
+    private CaffeineCache cacheService;
 
     @Value("${kakao.client_id}")
     private String client_id;
@@ -155,11 +155,17 @@ public class LoginController {
                     memberEntity = loginRepository.findById(member.getId());
                     System.out.println("3단계" + memberEntity);
 
-                    // JWT토큰
-                    String access_token = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName());
+                    // jti 생성
+                    String jti = JWTUtil.generateJti();
+                    
+                    // redis에 jti 등록
+                    redisCache.setJti(memberEntity.getId(), jti);
+                    
+                    // Access_token 생성
+                    String access_token = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName(), jti);
 
-                    // JWT refresh 토큰
-                    String refresh_token = JWTUtil.generateRefreshToken(memberEntity.getId(), memberEntity.getName());
+                    // Refresh_token 생성
+                    String refresh_token = JWTUtil.generateRefreshToken(memberEntity.getId(), memberEntity.getName(), jti);
 
 
                     // 마지막 로그인 날짜 저장
@@ -263,6 +269,8 @@ public class LoginController {
 //	    String id = memberService.getIdFromToken(request);
         // 사용자 식별
         String userId = JWTUtil.getUserIdFromToken(refreshToken);
+        
+        
 //        if (memberService.isUserIdEquals(userId)) {
 
             // Refresh Token 검증
@@ -278,9 +286,21 @@ public class LoginController {
                 return new ResponseEntity<>("User not found", HttpStatus.UNAUTHORIZED);
             }
 
-            // 새로운 Access Token 생성
-            String newAccessToken = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName());
-            String newRefreshToken = JWTUtil.generateRefreshToken(memberEntity.getId(), memberEntity.getName());
+            // 기존 jti 추출
+            String jti = JWTUtil.getJtiFromToken(refreshToken);
+            
+            // redis에서 jti 제거
+            redisCache.removeJti(userId);
+            
+            // 새로운 jti 생성
+            jti = JWTUtil.generateJti();
+            
+            // redis에 jti 등록
+            redisCache.setJti(memberEntity.getId(), jti);
+            
+            // 새로운 Token 생성
+            String newAccessToken = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName(), jti);
+            String newRefreshToken = JWTUtil.generateRefreshToken(memberEntity.getId(), memberEntity.getName(), jti);
 
             // HttpOnly 쿠키 생성
 //            loginService.setRefeshCookie(response, newRefreshToken);
@@ -339,7 +359,7 @@ public class LoginController {
         }
         
         // 사용자 식별
-//        String userId = JWTUtil.getUserIdFromToken(refreshToken);
+        String userId = JWTUtil.getUserIdFromToken(refreshToken);
         
 //        if (memberService.isUserIdEquals(userId)) {
 	    
@@ -348,15 +368,18 @@ public class LoginController {
 //		        // 401 : 유효하지 않은 Refresh token
 //		        return new ResponseEntity<>("Invalid refresh token", HttpStatus.UNAUTHORIZED);
 //		    }
-
+	        
+	        // redis에서 jti 제거
+	        redisCache.removeJti(userId);
+        
 	        // 토큰을 블랙리스트에 추가합니다
 //	        TokenBlacklist.blacklistToken(refreshToken);
-        	tokenBlacklistService.blacklistToken(refreshToken);										// 테스트 끝나면 TokenBlacklist 삭제
+        	redisCache.blacklistToken(refreshToken);										// 테스트 끝나면 TokenBlacklist 삭제
 	        
 	        // 토큰이 블랙리스트에 올바르게 추가 됐는지 확인
 //	        boolean isTokenBlacklisted = TokenBlacklist.isTokenBlacklisted(refreshToken);
 //	        System.out.println("블랙리스트 등록 확인 : " + isTokenBlacklisted);
-        	boolean isTokenBlacklisted = tokenBlacklistService.isTokenBlacklisted(refreshToken);
+        	boolean isTokenBlacklisted = redisCache.isTokenBlacklisted(refreshToken);
             System.out.println("블랙리스트 등록 확인 : " + isTokenBlacklisted);
 	
 	        // 200 : 로그아웃 성공
@@ -436,12 +459,17 @@ public class LoginController {
 			
 			} else {
 			
+			// jti 생성
+            String jti = JWTUtil.generateJti();
+            
+            // redis에 jti 등록
+            redisCache.setJti(memberEntity.getId(), jti);
+            
+			// Aeccess_token 생성
+			String access_token = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName(), jti);
 			
-			// JWT토큰
-			String access_token = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName());
-			
-			// JWT refresh 토큰
-			String refresh_token = JWTUtil.generateRefreshToken(memberEntity.getId(), memberEntity.getName());
+			// Refresh_token 생성
+			String refresh_token = JWTUtil.generateRefreshToken(memberEntity.getId(), memberEntity.getName(), jti);
 			
 			// 마지막 로그인 날짜 저장
 			loginService.setLastLogin(memberEntity);

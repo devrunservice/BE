@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.devrun.service.CustomUserDetailsService;
-import com.devrun.service.TokenBlacklistService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -35,8 +34,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private CustomUserDetailsService userDetailsService;
 	
 	@Autowired
-    private TokenBlacklistService tokenBlacklistService;
-    
+    private RedisCache redisCache;
+	
 //    Spring Boot에서는 초기화 과정에서 컴포넌트를 주입할 때, 어플리케이션에 대한 Key/Value 형태의 설정을 클래스 내 변수에 값을 넣어주는 @Value Annotation이 존재한다.
 //    이러한 설정은 application.properties 또는 application.yml 과 같은 파일에서 다음과 같은 형식으로 관리할 수 있다.
 //    이러한 방식을 사용하여 아마존 서비스와 같이 다른 3rd party 서비스를 사용할 때 Access Key 또는 Secret Key 같은 설정을 유용하게 할 수 있다.
@@ -65,15 +64,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 //		}
 	    Cookie[] cookies = request.getCookies();
 	    System.out.println("리프레시 쿠키 : " + cookies);
-	    String refreshToken = null;
-	    if (cookies != null) {
-	        for (Cookie cookie : cookies) {
-	            if ("Refresh_token".equals(cookie.getName())) {
-	                String encodedRefreshToken = cookie.getValue();
-	                refreshToken = new String(Base64.getDecoder().decode(encodedRefreshToken));
-	            }
-	        }
-	    }
+	    String refreshToken = getRefreshTokenFromCookies(cookies);
 	    System.out.println("리프레시 토큰 : " + refreshToken);
 //	    String easyloginTokenHeader = request.getHeader("Easylogin_token");
 		//login 경로에 대한 요청인 경우 필터를 건너뛰도록 설정합니다.
@@ -89,114 +80,218 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		    return;
 		}
 	    
-	    try {
-				
-	        if (accessToken != null && accessToken.startsWith("Bearer ")) {
-	        	
-	        	if (JWTUtil.isAlgorithmValid(accessToken)) {
-	        		processToken(accessToken, "Access_token", chain, request, response);
-	        	} else {
-	        		
-	        		response.sendError(403, "Invalid token signature algorithm");
-	        		
-	        	}
-	            
-	        } else if (refreshToken != null && refreshToken.startsWith("Bearer ")) {
-	        	
-	        	System.out.println("여기냐1");
-//	        	if (TokenBlacklist.isTokenBlacklisted(refreshToken)) {
-	        	
-        		if (tokenBlacklistService.isTokenBlacklisted(refreshToken)) {
-	        		
-	        		// 블랙리스트에 등록된 토큰 사용
-	        		response.sendError(HttpServletResponse.SC_FORBIDDEN, "Logout user");
-				}
-        		if (JWTUtil.isAlgorithmValid(refreshToken)) {
-        			processToken(refreshToken, "Refresh_token", chain, request, response);
-        		} else {
-	        		response.sendError(403, "Invalid token signature algorithm");
-	        	}
-	        }
-		        
-
-//	        else if (easyloginTokenHeader != null && easyloginTokenHeader.startsWith("Bearer ")) {
-//	        	System.out.println("이지토큰 : " + easyloginTokenHeader.substring(7));
+//	    try {
+//	    	
+//	        if (accessToken != null && accessToken.startsWith("Bearer ")) {
+//	        	// 사용자 식별
+//	        	String id = JWTUtil.getUserIdFromToken(accessToken);
+//	        	// 요청에서 jti 추출
+//	        	String requestJti = JWTUtil.getJtiFromToken(accessToken);
+//	        	// 저장소에서 해당 사용자 ID의 jti 읽기
+//	        	String storedJti = redisCache.getJti(id);
 //	        	
-//	        	validateEasyLoginToken(easyloginTokenHeader.substring(7));
+//	        	if (requestJti.equals(storedJti)) {
+//	        		
+//	        		if (JWTUtil.isAlgorithmValid(accessToken)) {
+//	        			processToken(accessToken, "Access_token", chain, request, response);
+//	        		} else {
+//	        			
+//	        			response.sendError(403, "Invalid token signature algorithm");
+//	        			
+//	        		}
+//	        	} else {
+//	        		// 중복 로그인 처리
+//	        		response.sendError(403, "Duplicate login detected");
+//	        	}
 //	        	
+//	            
+//	        } else if (refreshToken != null && refreshToken.startsWith("Bearer ")) {
+//	        	// 사용자 식별
+//	        	String id = JWTUtil.getUserIdFromToken(accessToken);
+//	        	// 요청에서 jti 추출
+//	        	String requestJti = JWTUtil.getJtiFromToken(accessToken);
+//	        	// 저장소에서 해당 사용자 ID의 jti 읽기
+//	        	String storedJti = redisCache.getJti(id);
+//	        	
+//	        	if (requestJti.equals(storedJti)) {
+//		        	System.out.println("여기냐1");
+//	//	        	if (TokenBlacklist.isTokenBlacklisted(refreshToken)) {
+//	        		if (redisCache.isTokenBlacklisted(refreshToken)) {
+//		        		
+//		        		// 블랙리스트에 등록된 토큰 사용
+//		        		response.sendError(HttpServletResponse.SC_FORBIDDEN, "Logout user");
+//					} else {
+//						
+//						if (JWTUtil.isAlgorithmValid(refreshToken)) {
+//							processToken(refreshToken, "Refresh_token", chain, request, response);
+//						} else {
+//							response.sendError(403, "Invalid token signature algorithm");
+//						}
+//					}
+//	        	} else {
+//	        		// 중복 로그인 처리
+//	        		response.sendError(403, "Duplicate login detected");
+//	        	}
 //	        }
-//		        else {
-//		        	// 400 : 올바르지 않은 토큰
-//		            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No or invalid token provided");
-//		            return;
-//		        }
-
-	        System.out.println("통과해?");
-	        chain.doFilter(request, response);
-	        
-	    } catch (ExpiredJwtException e) {
-			
-	        // 401 : JWT 토큰이 만료되었을 때
-	        logger.error("Token is expired", e);
-	        // 2.3 릴리스 이후 SpringBoot에서 오류메시지를 포함하지 않는다는 말이 있다
-	        // 로컬에서 테스트할 때는 message가 정상적으로 포함되지만 AWS EC2를 사용하면 message가 사라진다
-	        // 이때는 application.properties에 server.error.include-message=always를 추가해주면 message가 정상적으로 포함된다
-	        // Starting from the 2.3 version, Spring Boot doesn't include an error message on the default error page. 
-	        // The reason is to reduce the risk of leaking information to a client
-	        // spring boot 2.3 버전 부터는 클라이언트에 정보가 누수될까봐, 기본 에러페이지에 에러메세지를 담지 않는다고 한다.
-	        // https://stackoverflow.com/questions/65019051/not-getting-message-in-spring-internal-exception
-	        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is expired");
-	        
-	    } catch (SignatureException e) {
-	        // 403 : JWT 토큰이 조작되었을 때
-	        logger.error("Signature validation failed", e);
-	        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Signature validation failed");
-	        
-	    } catch (Exception e) {
-	        // 500 : 그 외 예외 처리
-	        logger.error("Unexpected server error occurred", e);
-	        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected server error occurred");
-	    }   
-	}
-
-	private void processToken(String tokenHeader, String headerName, FilterChain chain, HttpServletRequest request, HttpServletResponse response)
-		    throws ServletException, IOException {
-		
-    	// 각각의 헤더 값이 "Bearer "로 시작하는 경우, 실제 토큰을 추출
-    	String jwt = tokenHeader.substring(7);
-    	System.out.println(jwt + "잘리냐");
-    	String username = extractUsername(jwt);
-    	
-    	// 이전에 SecurityContextHolder에 저장된 토큰값과 유저정보를 초기화
-//    	SecurityContextHolder.clearContext();
-    	System.out.println("여기냐2" + username);
-    	
-        // 토큰에서 추출한 아이디가 null이 아니고, 현재 Security Context에 인증 정보가 없는 경우
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-//            CustomUserDetails userDetails = (CustomUserDetails) loadedUserDetails;
-            System.out.println("여기냐3" + userDetails);
-            
-            if (headerName.equals("Access_token")) {
-	            // 토큰이 유효한 경우 Security Context에 인증 정보를 설정
-	            if (validateAccessToken(jwt, userDetails)) {
-	            	System.out.println("여기냐4" + validateAccessToken(jwt, userDetails));
-	            	setAuthenticationInSecurityContext(userDetails, request);
-	            }
-	            
-            } else if(headerName.equals("Refresh_token")) {
-
-        	    if(!validateRefreshToken(jwt, userDetails)) {
-        	        throw new SignatureException("Invalid refresh token");
-        	        
-        	    } else if(validateRefreshToken(jwt, userDetails)) {
-        	    	setAuthenticationInSecurityContext(userDetails, request);
-        	    }
-        	}
+//		        
+//
+////	        else if (easyloginTokenHeader != null && easyloginTokenHeader.startsWith("Bearer ")) {
+////	        	System.out.println("이지토큰 : " + easyloginTokenHeader.substring(7));
+////	        	
+////	        	validateEasyLoginToken(easyloginTokenHeader.substring(7));
+////	        	
+////	        }
+////		        else {
+////		        	// 400 : 올바르지 않은 토큰
+////		            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No or invalid token provided");
+////		            return;
+////		        }
+//
+//	        System.out.println("통과해?");
+//	        chain.doFilter(request, response);
+//	        
+//	    } catch (ExpiredJwtException e) {
+//			
+//	        // 401 : JWT 토큰이 만료되었을 때
+//	        logger.error("Token is expired", e);
+//	        // 2.3 릴리스 이후 SpringBoot에서 오류메시지를 포함하지 않는다는 말이 있다
+//	        // 로컬에서 테스트할 때는 message가 정상적으로 포함되지만 AWS EC2를 사용하면 message가 사라진다
+//	        // 이때는 application.properties에 server.error.include-message=always를 추가해주면 message가 정상적으로 포함된다
+//	        // Starting from the 2.3 version, Spring Boot doesn't include an error message on the default error page. 
+//	        // The reason is to reduce the risk of leaking information to a client
+//	        // spring boot 2.3 버전 부터는 클라이언트에 정보가 누수될까봐, 기본 에러페이지에 에러메세지를 담지 않는다고 한다.
+//	        // https://stackoverflow.com/questions/65019051/not-getting-message-in-spring-internal-exception
+//	        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is expired");
+//	        
+//	    } catch (SignatureException e) {
+//	        // 403 : JWT 토큰이 조작되었을 때
+//	        logger.error("Signature validation failed", e);
+//	        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Signature validation failed");
+//	        
+//	    } catch (Exception e) {
+//	        // 500 : 그 외 예외 처리
+//	        logger.error("Unexpected server error occurred", e);
+//	        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected server error occurred");
+//	    }   
+//	}
+//
+//	private void processToken(String tokenHeader, String headerName, FilterChain chain, HttpServletRequest request, HttpServletResponse response)
+//		    throws ServletException, IOException {
+//		
+//    	// 각각의 헤더 값이 "Bearer "로 시작하는 경우, 실제 토큰을 추출
+//    	String jwt = tokenHeader.substring(7);
+//    	System.out.println(jwt + "잘리냐");
+//    	String username = extractUsername(jwt);
+//    	
+//    	// 이전에 SecurityContextHolder에 저장된 토큰값과 유저정보를 초기화
+////    	SecurityContextHolder.clearContext();
+//    	System.out.println("여기냐2" + username);
+//    	
+//        // 토큰에서 추출한 아이디가 null이 아니고, 현재 Security Context에 인증 정보가 없는 경우
+//        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+//            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+////            CustomUserDetails userDetails = (CustomUserDetails) loadedUserDetails;
+//            System.out.println("여기냐3" + userDetails);
+//            
+//            if (headerName.equals("Access_token")) {
+//	            // 토큰이 유효한 경우 Security Context에 인증 정보를 설정
+//	            if (validateAccessToken(jwt, userDetails)) {
+//	            	System.out.println("여기냐4" + validateAccessToken(jwt, userDetails));
+//	            	setAuthenticationInSecurityContext(userDetails, request);
+//	            }
+//	            
+//            } else if(headerName.equals("Refresh_token")) {
+//
+//        	    if(!validateRefreshToken(jwt, userDetails)) {
+//        	        throw new SignatureException("Invalid refresh token");
+//        	        
+//        	    } else if(validateRefreshToken(jwt, userDetails)) {
+//        	    	setAuthenticationInSecurityContext(userDetails, request);
+//        	    }
+//        	}
+//        }
+		try {
+            handleToken(request, response, chain, accessToken, refreshToken);
+        } catch (ExpiredJwtException e) {
+            sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Token is expired");
+        } catch (SignatureException e) {
+            sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "Signature validation failed");
+        } catch (Exception e) {
+            sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected server error occurred");
         }
+		
 	}
 
+    private void handleToken(HttpServletRequest request, HttpServletResponse response, FilterChain chain, String accessToken, String refreshToken)
+            throws ServletException, IOException {
+        if (validateAndProcessToken(accessToken, "Access_token", request)) {
+            chain.doFilter(request, response);
+        } else if (validateAndProcessToken(refreshToken, "Refresh_token", request)) {
+            chain.doFilter(request, response);
+        } else {
+            sendErrorResponse(response, 403, "Invalid token");
+        }
+    }
+    
+    private boolean validateAndProcessToken(String token, String tokenType, HttpServletRequest request) {
+        if (token != null && token.startsWith("Bearer ")) {
+            String jwt = token.substring(7);
+            String username = extractUsername(jwt);
 
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+
+                if (validateToken(jwt, userDetails, tokenType)) {
+                    setAuthenticationInSecurityContext(userDetails, request);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    private void sendErrorResponse(HttpServletResponse response, int status, String message) throws IOException {
+        response.sendError(status, message);
+    }
+    
+    private boolean validateToken(String token, UserDetails userDetails, String tokenType) {
+        if (tokenType.equals("Access_token")) {
+            return validateAccessToken(token, userDetails);
+        } else if (tokenType.equals("Refresh_token")) {
+            return validateRefreshToken(token, userDetails);
+        }
+
+        return false;
+    }
+    
+    public void setAuthenticationInSecurityContext(UserDetails userDetails, HttpServletRequest request) {
+    	// UsernamePasswordAuthenticationToken은 Spring Security에서 제공하는 Authentication의 구현체로
+    	// 사용자의 인증 정보를 나타냄 이 객체는 주로 사용자의 ID, 비밀번호, 그리고 권한 정보를 포함
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken 
+                = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        usernamePasswordAuthenticationToken.setDetails(
+        		// new WebAuthenticationDetailsSource().buildDetails(request)는 요청에 대한 세부 정보를 생성하는 역할. 이 정보는 후속 보안 작업에서 사용
+        		new WebAuthenticationDetailsSource().buildDetails(request));
+        System.out.println(usernamePasswordAuthenticationToken + "너냐5");
+        // SecurityContext에 Authentication 객체를 설정하는 역할. Authentication 객체는 Spring Security의 다른 부분에서 현재 사용자의 인증 정보를 접근하는데 사용
+        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+    }
+    
+    // 쿠키에서 refreshToken 반환
+    private String getRefreshTokenFromCookies(Cookie[] cookies) {
+        String refreshToken = null;
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("Refresh_token".equals(cookie.getName())) {
+                    String encodedRefreshToken = cookie.getValue();
+                    refreshToken = new String(Base64.getDecoder().decode(encodedRefreshToken));
+                    break;
+                }
+            }
+        }
+        return refreshToken; // 쿠키에서 "Refresh_token"을 찾지 못한 경우 null 반환
+    }
+    
     // Access 토큰에서 아이디를 추출하는 메서드
     private String extractUsername(String token) {
         return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().getSubject();
@@ -260,18 +355,5 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 //    private Boolean validateEasyLoginToken(String token) {
 //        return !isTokenExpired(token);
 //    }
-    
-    public void setAuthenticationInSecurityContext(UserDetails userDetails, HttpServletRequest request) {
-    	// UsernamePasswordAuthenticationToken은 Spring Security에서 제공하는 Authentication의 구현체로
-    	// 사용자의 인증 정보를 나타냄 이 객체는 주로 사용자의 ID, 비밀번호, 그리고 권한 정보를 포함
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken 
-                = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-        usernamePasswordAuthenticationToken.setDetails(
-        		// new WebAuthenticationDetailsSource().buildDetails(request)는 요청에 대한 세부 정보를 생성하는 역할. 이 정보는 후속 보안 작업에서 사용
-        		new WebAuthenticationDetailsSource().buildDetails(request));
-        System.out.println(usernamePasswordAuthenticationToken + "너냐5");
-        // SecurityContext에 Authentication 객체를 설정하는 역할. Authentication 객체는 Spring Security의 다른 부분에서 현재 사용자의 인증 정보를 접근하는데 사용
-        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-    }
 
 }
