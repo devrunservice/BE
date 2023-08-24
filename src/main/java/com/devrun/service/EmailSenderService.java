@@ -21,10 +21,6 @@ import net.bytebuddy.utility.RandomString;
 @Service
 public class EmailSenderService {
 	
-	// dataURL사용 확정되면 프로퍼티까지 같이 지워주기
-	@Value("${devrun.logo.image}")
-	private String logo_image;
-	
     @Autowired
     private JavaMailSender mailSender;
     

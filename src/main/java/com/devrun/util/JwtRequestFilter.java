@@ -263,6 +263,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	    return false;
 	}
 	
+	// 주어진 token으로부터 alg를 추출하여 검증
 	private boolean isValidAlgorithm(String token, HttpServletResponse response) throws IOException {
 	    if (!JWTUtil.isAlgorithmValid(token)) {
 	    	// 잘못된 서명 알고리즘
@@ -272,6 +273,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	    return true;
 	}
 	
+	// 블랙리스트에 등록된 토큰인지 검증
 	private boolean isBlacklistedRefreshToken(String tokenType, String token, HttpServletResponse response) throws IOException {
 	    if (tokenType.equals("Refresh_token") && redisCache.isTokenBlacklisted(token)) {
 	    	// 블랙리스트에 등록된 토큰 사용
@@ -281,15 +283,20 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	    return false;
 	}
 	
+	// 토큰을 검증하고 인증 프로세스를 처리
 	private boolean validateAndProcessToken(String token, HttpServletRequest request) {
 	    if (token != null && token.startsWith("Bearer ")) {
 	        String jwt = token.substring(7);
 	        String username = extractUsername(jwt);
 
+	        // 사용자 이름이 null이 아니고, 현재 Security Context에 인증 정보가 없는 경우
 	        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+	        	// 사용자 정보 로드
 	            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
-	            if (validateToken(jwt, userDetails)) { // tokenType 인자가 제거되었습니다.
+	            // 토큰이 유효한 경우 Security Context에 인증 정보 설정
+	            if (validateToken(jwt, userDetails)) {
+	            	// 인증 정보를 Security Context에 설정
 	                setAuthenticationInSecurityContext(userDetails, request);
 	                return true;
 	            }
@@ -298,22 +305,24 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	    return false;
 	}
     
-    // 오류 응답 전송
-    private void sendErrorResponse(HttpServletResponse response, int status, String message) throws IOException {
-        response.sendError(status, message);
-    }
-    
+    // Security Context에 사용자 인증 정보를 설정
     public void setAuthenticationInSecurityContext(UserDetails userDetails, HttpServletRequest request) {
     	// UsernamePasswordAuthenticationToken은 Spring Security에서 제공하는 Authentication의 구현체로
     	// 사용자의 인증 정보를 나타냄 이 객체는 주로 사용자의 ID, 비밀번호, 그리고 권한 정보를 포함
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken 
                 = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        // 요청에 대한 세부 정보 설정 (예: IP 주소, 세션 ID 등)
         usernamePasswordAuthenticationToken.setDetails(
         		// new WebAuthenticationDetailsSource().buildDetails(request)는 요청에 대한 세부 정보를 생성하는 역할. 이 정보는 후속 보안 작업에서 사용
         		new WebAuthenticationDetailsSource().buildDetails(request));
         System.out.println(usernamePasswordAuthenticationToken + "너냐5");
         // SecurityContext에 Authentication 객체를 설정하는 역할. Authentication 객체는 Spring Security의 다른 부분에서 현재 사용자의 인증 정보를 접근하는데 사용
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+    }
+    
+    // 오류 응답 전송
+    private void sendErrorResponse(HttpServletResponse response, int status, String message) throws IOException {
+        response.sendError(status, message);
     }
     
     // 쿠키에서 refreshToken 반환
@@ -331,7 +340,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         return refreshToken; // 쿠키에서 "Refresh_token"을 찾지 못한 경우 null 반환
     }
     
- // 토큰에서 아이디를 추출하는 메서드
+    // 토큰에서 아이디를 추출하는 메서드
     private String extractUsername(String token) {
         return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().getSubject();
     }
