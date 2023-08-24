@@ -13,10 +13,7 @@ import net.bytebuddy.utility.RandomString;
 
 @Service
 public class EmailSenderService {
-	
-	@Value("${devrun.logo.image}")
-	private String logo_image;
-	
+
     @Autowired
     private JavaMailSender mailSender;
     
