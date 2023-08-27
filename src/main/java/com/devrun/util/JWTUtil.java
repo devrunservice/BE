@@ -199,7 +199,9 @@ public class JWTUtil {
  	        String requestJti = JWTUtil.getJtiFromToken(jwt);
  	        String storedJti = redisCache.getJti(userId);
 
- 	        if (!isValidAlgorithm(jwt, response) || isBlacklistedRefreshToken(tokenType, token, response)) return true;
+ 	        if (
+//			!isValidAlgorithm(jwt, response) || 
+			isBlacklistedRefreshToken(tokenType, token, response)) return true;
  	        
  	        if (requestJti.equals(storedJti) && validateAndProcessToken(token, request)) {
  	        	// 토큰 검증 및 처리 성공
