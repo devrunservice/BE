@@ -42,7 +42,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 //	    String easyloginTokenHeader = request.getHeader("Easylogin_token");
 		//login 경로에 대한 요청인 경우 필터를 건너뛰도록 설정합니다.
 	    
-		if (!isTokenValid(accessToken, refreshToken)
+		if (isTokenValid(accessToken, refreshToken)
 //				!"/tmi".equals(requestPath) 
 //				&& !"/savePaymentInfo".equals(requestPath)
 //				&& !"/token/refresh".equals(requestPath)
