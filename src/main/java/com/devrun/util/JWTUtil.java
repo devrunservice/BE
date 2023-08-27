@@ -48,8 +48,8 @@ public class JWTUtil {
     @Autowired
     private CustomUserDetailsService userDetailsService;
     
-//    @Autowired
-//    private RedisCache redisCache;
+    @Autowired
+    private RedisCache redisCache;
     
     // 시그니쳐 알고리즘 설정
     private static final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
@@ -232,7 +232,7 @@ public class JWTUtil {
 	// 블랙리스트에 등록된 토큰인지 검증
 	private boolean isBlacklistedRefreshToken(String tokenType, String token, HttpServletResponse response) throws IOException {
 	    if (tokenType.equals("Refresh_token") 
-//	    		&& redisCache.isTokenBlacklisted(token)
+	    		&& redisCache.isTokenBlacklisted(token)
 	    		) {
 	    	// 블랙리스트에 등록된 토큰 사용
 	        sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "Logout user");
