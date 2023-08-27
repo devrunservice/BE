@@ -114,7 +114,6 @@ public class JWTUtil {
     // 주어진 token으로부터 사용자 ID를 추출
     public static String getUserIdFromToken(String token) {
     	String subToken = token.substring(7);
-    	
     	// Claims는 JWT의 페이로드 (Payload)를 나타내는 본문 부분
         Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken).getBody();
         System.out.println("사용자 아이디 : " + claims.getSubject());
@@ -123,16 +122,14 @@ public class JWTUtil {
     
     // 주어진 token으로부터 alg를 추출하여 검증
     public static boolean isAlgorithmValid(String token) {
-        String subToken = token.substring(7); // Bearer 제거
-        Jws<Claims> jwsClaims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken);
+        Jws<Claims> jwsClaims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
         String algorithmUsed = jwsClaims.getHeader().getAlgorithm();
         return SIGNATURE_ALGORITHM.getValue().equals(algorithmUsed);
     }
 
     // 주어진 token으로부터 jti 추철
     public static String getJtiFromToken(String token) {
-        String subToken = token.substring(7); // "Bearer " 제거
-        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken).getBody();
+        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
         return claims.getId(); // jti (JWT ID) 반환
     }
     
@@ -199,11 +196,13 @@ public class JWTUtil {
  	        String requestJti = JWTUtil.getJtiFromToken(jwt);
  	        String storedJti = redisCache.getJti(userId);
 
+ 	        System.out.println("11");
+ 	        if (!isValidAlgorithm(jwt, response) || isBlacklistedRefreshToken(tokenType, token, response)) return true;
+ 	        System.out.println("111");
  	        if (
-//			!isValidAlgorithm(jwt, response) || 
-			isBlacklistedRefreshToken(tokenType, token, response)) return true;
- 	        
- 	        if (requestJti.equals(storedJti) && validateAndProcessToken(token, request)) {
+ 	        		requestJti.equals(storedJti) && 
+ 	        		validateAndProcessToken(token, request)) {
+ 	        	System.out.println("1111");
  	        	// 토큰 검증 및 처리 성공
  	            chain.doFilter(request, response);
  	            return true;
@@ -238,17 +237,17 @@ public class JWTUtil {
 	
 	// 토큰을 검증하고 인증 프로세스를 처리
 	private boolean validateAndProcessToken(String token, HttpServletRequest request) {
+		String subToken = token.substring(7);
 	    if (token != null && token.startsWith("Bearer ")) {
-	        String jwt = token.substring(7);
-	        String username = extractUsername(jwt);
-
+	    	System.out.println("22222"+token);
+	        String username = extractUsername(subToken);
 	        // 사용자 이름이 null이 아니고, 현재 Security Context에 인증 정보가 없는 경우
 	        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 	        	// 사용자 정보 로드
 	            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
 	            // 토큰이 유효한 경우 Security Context에 인증 정보 설정
-	            if (validateToken(jwt, userDetails)) {
+	            if (validateToken(subToken, userDetails)) {
 	            	// 인증 정보를 Security Context에 설정
 	                setAuthenticationInSecurityContext(userDetails, request);
 	                return true;
@@ -278,7 +277,7 @@ public class JWTUtil {
         return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().getSubject();
     }
     
- // 토큰의 유효성을 검사하는 메소드
+    // 토큰의 유효성을 검사하는 메소드
     private Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));

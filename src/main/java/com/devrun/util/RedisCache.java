@@ -34,7 +34,7 @@ public class RedisCache {
     // jti를 이용해 로그인 처리
     public void setJti(String id, String jti) {
     	redisTemplate.opsForValue().set(id, jti);
-    	redisTemplate.expire(id, 24, TimeUnit.HOURS);
+    	redisTemplate.expire(id, 15, TimeUnit.MINUTES);
     }
     
     // jti를 이용해 로그아웃 처리
