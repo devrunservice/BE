@@ -38,7 +38,7 @@ public class TestController {
 			// 400 : Access token 없음
 			return new ResponseEntity<>("Access token is required", HttpStatus.BAD_REQUEST);
 		}
-
+System.out.println("11111111");
 		String id = JWTUtil.getUserIdFromToken(accessToken);
 		System.out.println("아이디 : " + id);
 //			if (memberService.isUserIdEquals(id)) {

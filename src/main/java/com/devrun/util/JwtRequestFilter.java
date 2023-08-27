@@ -199,6 +199,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         	jwtUtil.sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "Signature validation failed");
         } catch (Exception e) {
         	// 500 : 그 외 예외 처리
+        	System.out.println("500");
         	jwtUtil.sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unexpected server error occurred");
         }
 		

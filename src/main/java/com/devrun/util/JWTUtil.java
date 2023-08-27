@@ -48,8 +48,8 @@ public class JWTUtil {
     @Autowired
     private CustomUserDetailsService userDetailsService;
     
-    @Autowired
-    private RedisCache redisCache;
+//    @Autowired
+//    private RedisCache redisCache;
     
     // 시그니쳐 알고리즘 설정
     private static final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
@@ -129,7 +129,8 @@ public class JWTUtil {
 
     // 주어진 token으로부터 jti 추철
     public static String getJtiFromToken(String token) {
-        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+    	String subToken = token.substring(7);
+        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken).getBody();
         return claims.getId(); // jti (JWT ID) 반환
     }
     
@@ -192,15 +193,18 @@ public class JWTUtil {
  		
  	    if (token != null && token.startsWith("Bearer ")) {
  	        String jwt = token.substring(7);
- 	        String userId = JWTUtil.getUserIdFromToken(jwt);
- 	        String requestJti = JWTUtil.getJtiFromToken(jwt);
- 	        String storedJti = redisCache.getJti(userId);
+ 	        String userId = getUserIdFromToken(token);
+ 	        System.out.println(userId);
+ 	        String requestJti = getJtiFromToken(token);
+ 	        System.out.println(requestJti);
+ 	        System.out.println("3213");
+// 	        String storedJti = redisCache.getJti(userId);
 
  	        System.out.println("11");
  	        if (!isValidAlgorithm(jwt, response) || isBlacklistedRefreshToken(tokenType, token, response)) return true;
  	        System.out.println("111");
  	        if (
- 	        		requestJti.equals(storedJti) && 
+// 	        		requestJti.equals(storedJti) && 
  	        		validateAndProcessToken(token, request)) {
  	        	System.out.println("1111");
  	        	// 토큰 검증 및 처리 성공
@@ -227,7 +231,9 @@ public class JWTUtil {
  	
 	// 블랙리스트에 등록된 토큰인지 검증
 	private boolean isBlacklistedRefreshToken(String tokenType, String token, HttpServletResponse response) throws IOException {
-	    if (tokenType.equals("Refresh_token") && redisCache.isTokenBlacklisted(token)) {
+	    if (tokenType.equals("Refresh_token") 
+//	    		&& redisCache.isTokenBlacklisted(token)
+	    		) {
 	    	// 블랙리스트에 등록된 토큰 사용
 	        sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "Logout user");
 	        return true;
