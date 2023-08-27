@@ -33,8 +33,8 @@ import com.devrun.repository.LoginRepository;
 import com.devrun.service.KakaoLoginService;
 import com.devrun.service.LoginService;
 import com.devrun.service.MemberService;
+import com.devrun.util.CaffeineCache;
 import com.devrun.util.JWTUtil;
-import com.devrun.util.RedisCache;
 
 import reactor.core.publisher.Mono;
 
@@ -54,7 +54,8 @@ public class LoginController {
     private KakaoLoginService kakaoLoginService;
     
     @Autowired
-    private RedisCache redisCache;
+    private CaffeineCache redisCache;
+//    private RedisCache redisCache;
     
     @Autowired
     private LoginRepository loginRepository;
@@ -241,15 +242,7 @@ public class LoginController {
 //        String refreshToken = request.getHeader("Refresh_token");
     	Cookie[] cookies = request.getCookies();
 	    System.out.println("리프레시 쿠키 : " + cookies);
-	    String refreshToken = null;
-	    if (cookies != null) {
-	        for (Cookie cookie : cookies) {
-	            if ("Refresh_token".equals(cookie.getName())) {
-	                String encodedRefreshToken = cookie.getValue();
-	                refreshToken = new String(Base64.getDecoder().decode(encodedRefreshToken));
-	            }
-	        }
-	    }
+	    String refreshToken = JWTUtil.getRefreshTokenFromCookies(cookies);
 	    
 //	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
         if (refreshToken == null || refreshToken.isEmpty()) {

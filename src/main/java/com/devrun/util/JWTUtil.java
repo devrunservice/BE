@@ -49,7 +49,8 @@ public class JWTUtil {
     private CustomUserDetailsService userDetailsService;
     
     @Autowired
-    private RedisCache redisCache;
+    private CaffeineCache redisCache;
+//    private RedisCache redisCache;
     
     // 시그니쳐 알고리즘 설정
     private static final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
@@ -198,13 +199,15 @@ public class JWTUtil {
  	        String requestJti = getJtiFromToken(token);
  	        System.out.println(requestJti);
  	        System.out.println("3213");
-// 	        String storedJti = redisCache.getJti(userId);
+ 	        String storedJti = redisCache.getJti(userId);
 
  	        System.out.println("11");
- 	        if (!isValidAlgorithm(jwt, response) || isBlacklistedRefreshToken(tokenType, token, response)) return true;
+ 	        if (!isValidAlgorithm(jwt, response) 
+ 	        		|| isBlacklistedRefreshToken(tokenType, token, response)
+ 	        		) return true;
  	        System.out.println("111");
  	        if (
-// 	        		requestJti.equals(storedJti) && 
+ 	        		requestJti.equals(storedJti) && 
  	        		validateAndProcessToken(token, request)) {
  	        	System.out.println("1111");
  	        	// 토큰 검증 및 처리 성공
@@ -235,6 +238,7 @@ public class JWTUtil {
 	    		&& redisCache.isTokenBlacklisted(token)
 	    		) {
 	    	// 블랙리스트에 등록된 토큰 사용
+	    	System.out.println("33");
 	        sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "Logout user");
 	        return true;
 	    }
@@ -311,8 +315,9 @@ public class JWTUtil {
     }
  	
  	// 쿠키에서 refreshToken 반환
-    public String getRefreshTokenFromCookies(Cookie[] cookies) {
+    public static String getRefreshTokenFromCookies(Cookie[] cookies) {
         String refreshToken = null;
+        System.out.println("쿠키 있냐 : " + cookies);
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("Refresh_token".equals(cookie.getName())) {

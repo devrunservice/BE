@@ -36,7 +36,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	    Cookie[] cookies = request.getCookies();
 	    System.out.println("리프레시 쿠키 : " + cookies);
 	    
-	    String refreshToken = jwtUtil.getRefreshTokenFromCookies(cookies);
+	    String refreshToken = JWTUtil.getRefreshTokenFromCookies(cookies);
 	    System.out.println("리프레시 토큰 : " + refreshToken);
 	    
 //	    String easyloginTokenHeader = request.getHeader("Easylogin_token");

@@ -33,6 +33,8 @@ public class RedisCache {
     
     // jti를 이용해 로그인 처리
     public void setJti(String id, String jti) {
+    	System.out.println("redis id : " + id);
+    	System.out.println("redis jti : " + jti);
     	redisTemplate.opsForValue().set(id, jti);
     	redisTemplate.expire(id, 15, TimeUnit.MINUTES);
     }
@@ -44,7 +46,8 @@ public class RedisCache {
 
     // 해당 id에 연결된 jti 값을 가져옴
     public String getJti(String id) {
-        return redisTemplate.opsForValue().get(id);
+    	String getjti = redisTemplate.opsForValue().get(id);
+    	System.out.println("redis getjti : " + getjti);
+        return getjti;
     }
-
 }

@@ -42,4 +42,54 @@ public class CaffeineCache {
     public void removeEmailVerifyTempKey(String id) {
         smsCodeCache.invalidate(id);
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    // 토큰을 blacklist에 추가
+ 	public void blacklistToken(String token) {
+ 		// Redis의 opsForValue() 메소드를 사용하여 토큰을 키로, "blacklisted"를 값으로 저장
+ 		smsCodeCache.put(token, token);
+ 	}
+ 	
+ 	// 토큰이 블랙리스트에 있는지 확인
+ 	public boolean isTokenBlacklisted(String token) {
+ 		// Redis의 hasKey() 메소드를 사용하여 토큰이 Redis에 저장되어 있는지 확인
+ 		if (smsCodeCache.get(token) != null) {
+ 			return true;
+			
+		} else {
+			return false;
+		}
+ 	}
+ 	  
+ 	// jti를 이용해 로그인 처리
+ 	public void setJti(String id, String jti) {
+ 		System.out.println("redis id : " + id);
+ 		smsCodeCache.put(id, jti.toString());
+ 		System.out.println("redis jti : " + jti);
+ 	}
+ 	  
+ 	// jti를 이용해 로그아웃 처리
+ 	public void removeJti(String id) {
+ 		smsCodeCache.invalidate(id);
+ 	}
+ 	
+ 	// 해당 id에 연결된 jti 값을 가져옴
+ 	public String getJti(String id) {
+ 		String getjti = smsCodeCache.get(id);
+ 		System.out.println("redis getjti : " + getjti);
+ 		return getjti;
+ 	}
 }
