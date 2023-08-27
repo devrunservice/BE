@@ -234,8 +234,7 @@ public class JWTUtil {
  	
 	// 블랙리스트에 등록된 토큰인지 검증
 	private boolean isBlacklistedRefreshToken(String tokenType, String token, HttpServletResponse response) throws IOException {
-	    if (tokenType.equals("Refresh_token") 
-	    		&& redisCache.isTokenBlacklisted(token)
+	    if (tokenType.equals("Refresh_token") && redisCache.isTokenBlacklisted(token)
 	    		) {
 	    	// 블랙리스트에 등록된 토큰 사용
 	    	System.out.println("33");
