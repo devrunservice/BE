@@ -19,28 +19,16 @@ public class CaffeineCache {
                 .build(key -> null); // 만약 키가 존재하지 않으면 null 반환
     }
 
-    public void saveSmsCode(String phoneNumber, String code) {
-        smsCodeCache.put(phoneNumber, code);
+    public void saveCaffeine(String key, String value) {
+        smsCodeCache.put(key, value);
     }
 
-    public String getSmsCode(String phoneNumber) {
-        return smsCodeCache.get(phoneNumber);
+    public String getCaffeine(String key) {
+        return smsCodeCache.get(key);
     }
 
-    public void removeSmsCode(String phoneNumber) {
-        smsCodeCache.invalidate(phoneNumber);
-    }
-    
-    public void saveEmailVerifyTempKey(String id, String key) {
-    	smsCodeCache.put(id, key);
-    }
-    
-    public String getEmailVerifyTempKey(String id) {
-        return smsCodeCache.get(id);
-    }
-    
-    public void removeEmailVerifyTempKey(String id) {
-        smsCodeCache.invalidate(id);
+    public void removeCaffeine(String key) {
+        smsCodeCache.invalidate(key);
     }
     
     
@@ -51,11 +39,12 @@ public class CaffeineCache {
     
     
     
-    
-    
-    
-    
-    
+    // 로컬 테스트 버전
+    // 로컬 테스트 버전
+    // 로컬 테스트 버전
+    // 로컬 테스트 버전
+    // 로컬 테스트 버전
+    // 로컬 테스트 버전
     
     // 토큰을 blacklist에 추가
  	public void blacklistToken(String token) {

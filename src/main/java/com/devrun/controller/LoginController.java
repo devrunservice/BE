@@ -1,5 +1,7 @@
 package com.devrun.controller;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,10 +29,13 @@ import com.devrun.dto.OAuthToken;
 import com.devrun.dto.member.KakaoProfileDTO;
 import com.devrun.dto.member.LoginDTO;
 import com.devrun.dto.member.LoginDTO.LoginStatus;
+import com.devrun.dto.member.MemberDTO.Status;
 import com.devrun.dto.member.LogoutResponse;
+import com.devrun.dto.member.MemberDTO;
 import com.devrun.dto.member.SignupDTO;
 import com.devrun.entity.MemberEntity;
 import com.devrun.repository.LoginRepository;
+import com.devrun.service.EmailSenderService;
 import com.devrun.service.KakaoLoginService;
 import com.devrun.service.LoginService;
 import com.devrun.service.MemberService;
@@ -52,6 +58,9 @@ public class LoginController {
 
     @Autowired
     private KakaoLoginService kakaoLoginService;
+    
+    @Autowired
+	private EmailSenderService emailSenderService;
     
     @Autowired
     private CaffeineCache redisCache;
@@ -540,13 +549,13 @@ public class LoginController {
 	//	}
 	
 	@ResponseBody
-	@PostMapping("/find/id")
-	public Mono<ResponseEntity<?>>findId(@RequestBody SignupDTO signupDTO){
+	@PostMapping("/find/id/phone")
+	public Mono<ResponseEntity<?>>findIdPhone(@RequestBody SignupDTO signupDTO){
 		
         String id = loginRepository.findByPhonenumber(signupDTO.getPhonenumber());
         System.out.println("찾은 아이디 : " + id + signupDTO.getCode());
         
-        if(memberService.verifySmsCode(signupDTO.getPhonenumber(), signupDTO.getCode())){
+        if(memberService.verifyCode(signupDTO.getPhonenumber(), signupDTO.getCode())){
         	
 	        // id를 핸드폰번호로 발송
 	        Mono<String> sendSmsResult = memberService.sendSmsFindid(signupDTO.getPhonenumber(), id);
@@ -566,14 +575,14 @@ public class LoginController {
     }
 	
 	@ResponseBody
-	@PostMapping("/find/password")
-	public ResponseEntity<?> findpw(@RequestBody SignupDTO signupDTO) {
+	@PostMapping("/find/password/phone")
+	public ResponseEntity<?> findpwPhone(@RequestBody SignupDTO signupDTO) {
 		
         MemberEntity memberEntity = loginRepository.findById(signupDTO.getId());
         // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(signupDTO.getPassword());
         
-        if (memberService.verifySmsCode(signupDTO.getPhonenumber(),signupDTO.getCode())
+        if (memberService.verifyCode(signupDTO.getPhonenumber(),signupDTO.getCode())
 			&& memberService.validatePassword(signupDTO.getPassword())
 			&& !memberEntity.getPassword().equals(encodedPassword)
 			) {
@@ -586,7 +595,7 @@ public class LoginController {
 			
 			return new ResponseEntity<>("Password change successful", HttpStatus.OK);
 			
-        } else if ( !memberService.verifySmsCode(signupDTO.getPhonenumber(), signupDTO.getCode()) ) {
+        } else if ( !memberService.verifyCode(signupDTO.getPhonenumber(), signupDTO.getCode()) ) {
         
         // 403 인증되지 않은 전화번호
         return new ResponseEntity<>("Verification failed Phonenumber", HttpStatus.FORBIDDEN);
@@ -614,6 +623,92 @@ public class LoginController {
 		boolean isPhoneVerified = loginService.verifyPhone(id, phone);
 		
 		return isPhoneVerified;
+	}
+	
+
+	@ResponseBody
+	@PostMapping("/auth/email")
+	public ResponseEntity<?> signupEmail(@RequestBody MemberDTO memberDTO) {
+		
+        try {
+        	emailSenderService.sendFindByEmail(memberDTO.getEmail(), memberDTO.getId());
+        	// 200 성공
+        	return ResponseEntity.status(200).body("Email sent successfully");
+        } catch (Exception e) {
+        	System.out.println("이메일 에러 : " + e);
+        	// 403 이메일 전송 실패
+        	return ResponseEntity.status(403).body("Failed to send email");
+        }
+	}
+	
+	@ResponseBody
+	@PostMapping("/verify/email")
+	public ResponseEntity<?> verify(@RequestBody SignupDTO signupDTO) {
+		String email = signupDTO.getEmail();
+		String code = signupDTO.getCode();
+        if (memberService.verifyCode(email, code)) {
+        	// 200 인증성공
+        	return new ResponseEntity<>("Verification successful", HttpStatus.OK);
+        } else {
+        	// 403 인증실패
+        	return new ResponseEntity<>("Verification failed", HttpStatus.FORBIDDEN);
+        }
+    }
+	
+	@ResponseBody
+	@PostMapping("/find/id/email")
+	public ResponseEntity<?> findIdEmail(@RequestBody SignupDTO signupDTO){
+		
+        String id = loginRepository.findByEmail(signupDTO.getEmail());
+        System.out.println("찾은 아이디 : " + id + signupDTO.getCode());
+        
+        if(memberService.verifyCode(signupDTO.getEmail(), signupDTO.getCode())){
+        	
+	        // id를 이메일로 발송
+	        emailSenderService.sendIdByEmail(signupDTO.getEmail(), id);
+	
+	        // 메모리에 저장된 이메일과 인증코드 제거
+	        memberService.removeSmsCode(signupDTO.getEmail());
+        
+        // .then은 실행되지면 return에는 무시되고 .just만 return에 포함된다 실행여부와 상관없이 (단지)just만 return 된다는 뜻이다
+        return new ResponseEntity<>("Find ID successful", HttpStatus.OK);
+
+        } else {
+        	
+        // 403 인증되지 않은 전화번호
+        return new ResponseEntity<>("Verification failed Phonenumber", HttpStatus.FORBIDDEN);
+        
+        }
+    }
+	
+	@Autowired
+    private CaffeineCache caffeineCache;
+	
+	@ResponseBody
+	@PostMapping("/find/id/email")
+	public ResponseEntity<?> signupOk(@RequestBody MemberDTO memberDTO
+										, @RequestParam("key") String key){
+		
+		MemberEntity member = memberService.findById(memberDTO.getId());
+		String encodedPassword = passwordEncoder.encode(memberDTO.getPassword());
+		if (member != null) {
+			
+			String cachedKey = caffeineCache.getCaffeine(memberDTO.getId());
+			if (cachedKey != null && cachedKey.equals(key)) {
+				member.setPassword(encodedPassword);
+				memberService.insert(member);
+				caffeineCache.removeCaffeine(memberDTO.getId());
+				
+				return ResponseEntity.status(200).body("Find ID successful");
+			} else {
+				return ResponseEntity.status(400).body("Verification failed Email");
+			}
+				
+			
+		} else {
+			// 회원을 찾을 수 없음
+			return ResponseEntity.status(404).body("Member not found");
+		}
 	}
 	
 }

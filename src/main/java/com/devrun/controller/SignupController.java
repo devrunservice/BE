@@ -78,11 +78,11 @@ public class SignupController {
     }
 	
 	@ResponseBody
-	@PostMapping("/verify")
+	@PostMapping("/verify/phone")
 	public ResponseEntity<?> verify(@RequestBody SignupDTO signupDTO) {
 		String phonenumber = signupDTO.getPhonenumber();
 		String code = signupDTO.getCode();
-        if (memberService.verifySmsCode(phonenumber, code)) {
+        if (memberService.verifyCode(phonenumber, code)) {
         	// 200 인증성공
         	return new ResponseEntity<>("Verification successful", HttpStatus.OK);
         } else {
@@ -112,7 +112,7 @@ public class SignupController {
 		if (memberService.checkID(memberEntity.getId()) == 0 
 				&& memberService.checkEmail(memberEntity.getEmail()) == 0
 				&& memberService.checkphone(memberEntity.getPhonenumber()) == 0
-				&& memberService.verifySmsCode(memberEntity.getPhonenumber(), code)
+				&& memberService.verifyCode(memberEntity.getPhonenumber(), code)
 				) {
 //			// 403 약관 미동의    
 //			if (!memberEntity.isAgeConsent() 
@@ -254,7 +254,7 @@ public class SignupController {
 		    		//ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Phone number already registered");
 		
 		// 403 인증되지 않은 전화번호
-		} else if(!memberService.verifySmsCode(memberEntity.getPhonenumber(), code)) {
+		} else if(!memberService.verifyCode(memberEntity.getPhonenumber(), code)) {
 			
 			return new ResponseEntity<>("Verification failed Phonenumber", HttpStatus.FORBIDDEN);
 		// 기타 오류 500
@@ -268,11 +268,10 @@ public class SignupController {
 	@ResponseBody
 	@PostMapping("/signup/confirm/email")
 	public ResponseEntity<?> signupEmail(@RequestParam("email") String toEmail
-			, @RequestParam("id") String id) {
+										, @RequestParam("id") String id) {
 		
         try {
-        	emailSenderService.sendSignupEmail(toEmail, id);
-        	
+        	emailSenderService.sendSignupByEmail(toEmail, id);
         	// 200 성공
         	return ResponseEntity.status(200).body("Email sent successfully");
         } catch (Exception e) {
@@ -284,7 +283,7 @@ public class SignupController {
 	
 	@ResponseBody
 	@Transactional
-	@PostMapping("/verifyEmail")
+	@PostMapping("/verify/signupEmail")
 	public ResponseEntity<?> signupOk(@RequestParam("id") String id
 										, @RequestParam("key") String key){
 		
@@ -303,13 +302,13 @@ public class SignupController {
 			
 			if (diffInMinutes < 60) {
 				
-				String cachedKey = caffeineCache.getEmailVerifyTempKey(id);
+				String cachedKey = caffeineCache.getCaffeine(id);
 				if (cachedKey != null && cachedKey.equals(key)) {
 					
 					member.setStatus(Status.ACTIVE);
 					
 					memberService.insert(member);
-					caffeineCache.removeEmailVerifyTempKey(id);
+					caffeineCache.removeCaffeine(id);
 					
 					// 이메일 인증 성공 회원 활성화
 					return ResponseEntity.status(200).body("Email verification successful, account activated");

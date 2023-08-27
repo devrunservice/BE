@@ -92,7 +92,7 @@ public class MemberService {
 //        phoneCodeMap.put(recipientPhoneNumber, smsCode);
         
         // Save the code for verification later
-        cacheService.saveSmsCode(recipientPhoneNumber, smsCode); // Caffeine 캐시에 코드 저장
+        cacheService.saveCaffeine(recipientPhoneNumber, smsCode); // Caffeine 캐시에 코드 저장
 
 
         String jsonBody = "{"
@@ -175,16 +175,16 @@ public class MemberService {
         return Base64.getEncoder().encodeToString(mac.doFinal(message.getBytes(StandardCharsets.UTF_8)));
     }
 
-    public boolean verifySmsCode(String phoneNumber, String code) {
+    public boolean verifyCode(String phoneNumber, String code) {
 //        String savedCode = phoneCodeMap.get(phoneNumber);
-    	String savedCode = cacheService.getSmsCode(phoneNumber); // Caffeine 캐시에서 코드 검색
+    	String savedCode = cacheService.getCaffeine(phoneNumber); // Caffeine 캐시에서 코드 검색
         System.out.println(savedCode + ":" + code);
         return savedCode != null && savedCode.equals(code);
     }
 
     public void removeSmsCode(String phoneNumber) {
 //        phoneCodeMap.remove(phoneNumber);
-    	cacheService.removeSmsCode(phoneNumber); // Caffeine 캐시에서 코드 제거
+    	cacheService.removeCaffeine(phoneNumber); // Caffeine 캐시에서 코드 제거
     }
 
     public boolean validateId(String id) {

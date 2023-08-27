@@ -16,5 +16,8 @@ public interface LoginRepository extends JpaRepository<MemberEntity, Long> {
 	
 	@Query("SELECT m.id FROM MemberEntity m WHERE m.phonenumber = :phonenumber")
 	String findByPhonenumber(@Param("phonenumber") String phonenumber);
+	
+	@Query("SELECT m.id FROM MemberEntity m WHERE m.email = :email")
+	String findByEmail(@Param("email") String email);
 
 }
