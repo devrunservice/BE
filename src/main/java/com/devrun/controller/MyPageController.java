@@ -112,7 +112,7 @@ public class MyPageController {
             return ResponseEntity.status(409).body(result);
         }
 
-        if (memberService.verifySmsCode(editphone, verifycode)) {
+        if (memberService.verifyCode(editphone, verifycode)) {
             MemberEntity m = memberService.findById(v);
             m.setPhonenumber(editphone);
             memberService.insert(m);
