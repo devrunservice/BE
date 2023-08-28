@@ -685,7 +685,7 @@ public class LoginController {
     private CaffeineCache caffeineCache;
 	
 	@ResponseBody
-	@PostMapping("/find/id/email")
+	@PostMapping("/signup/ok")
 	public ResponseEntity<?> signupOk(@RequestBody MemberDTO memberDTO
 										, @RequestParam("key") String key){
 		

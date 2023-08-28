@@ -26,8 +26,7 @@ public class EmailSenderService {
     @Autowired
     private CaffeineCache cacheService;
 
-    MimeMessage message = mailSender.createMimeMessage();
-    MimeMessageHelper helper;
+    
     String imgTag = "";
     String bodyTop = "<!DOCTYPE html>" +
     		"<html lang=\"ko\">" +
@@ -79,7 +78,9 @@ public class EmailSenderService {
     		"</html>";
     
     public void sendSignupByEmail(String toEmail, String id) {
-        
+    	MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper;
+    	
         // 경로에 파일이 없거나 파일을 읽을 권한이 없을 경우 예외처리를 하기 위해 try/catch를 사용
         try {
         	// dataURL을 사용하여 이미지 첨부
@@ -133,7 +134,6 @@ public class EmailSenderService {
     public void sendFindByEmail(String toEmail, String id) {
     	MimeMessage message = mailSender.createMimeMessage();
     	MimeMessageHelper helper;
-    	String imgTag = "";
     	
     	// 경로에 파일이 없거나 파일을 읽을 권한이 없을 경우 예외처리를 하기 위해 try/catch를 사용
     	try {
