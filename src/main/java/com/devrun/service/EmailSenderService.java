@@ -85,7 +85,7 @@ public class EmailSenderService {
         	InputStream in = getClass().getResourceAsStream("/img/logo.png");
         	byte[] imageBytes = in.readAllBytes();
             String encodedString = Base64.getEncoder().encodeToString(imageBytes);
-            imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width: 250px; height: 60px;\"/>";
+            imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\\\"width:144px,height:144px;\"/>";
 		} catch (IOException e) {
 			System.out.println("이미지 인코딩 실패");
 			e.printStackTrace();
@@ -141,7 +141,7 @@ public class EmailSenderService {
     		InputStream in = getClass().getResourceAsStream("/img/logo.png");
     		byte[] imageBytes = in.readAllBytes();
     		String encodedString = Base64.getEncoder().encodeToString(imageBytes);
-    		imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width: 250px; height: 60px;\"/>";
+    		imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\\\"width:144px,height:144px;\"/>";
     	} catch (IOException e) {
     		System.out.println("이미지 인코딩 실패");
     		e.printStackTrace();
@@ -205,7 +205,7 @@ public class EmailSenderService {
     	
     	String subject = "[Devrun] 아이디를 확인해주세요.";
     	Random rs = new Random();
-    	String key = String.valueOf(rs.nextInt(6) + 1) ;
+    	String key = String.valueOf(rs.nextInt(6) + 1);
     	
     	String body = bodyTop +
     			
