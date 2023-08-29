@@ -85,7 +85,7 @@ public class EmailSenderService {
         	InputStream in = getClass().getResourceAsStream("/img/logo.png");
         	byte[] imageBytes = in.readAllBytes();
             String encodedString = Base64.getEncoder().encodeToString(imageBytes);
-            imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\\\"width:144px,height:144px;\"/>";
+            imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width:144px,height:144px;\"/>";
 		} catch (IOException e) {
 			System.out.println("이미지 인코딩 실패");
 			e.printStackTrace();
@@ -141,16 +141,18 @@ public class EmailSenderService {
     		InputStream in = getClass().getResourceAsStream("/img/logo.png");
     		byte[] imageBytes = in.readAllBytes();
     		String encodedString = Base64.getEncoder().encodeToString(imageBytes);
-    		imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\\\"width:144px,height:144px;\"/>";
+    		imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width:144px,height:144px;\"/>";
     	} catch (IOException e) {
     		System.out.println("이미지 인코딩 실패");
     		e.printStackTrace();
     	}
     	
-    	
     	String subject = "[Devrun] " + id + "님 이메일 인증을 완료해주세요.";
-    	Random rs = new Random();
-    	String key = String.valueOf(rs.nextInt(6) + 1) ;
+    	
+    	// 6자리 인증코드 생성
+    	Random random = new Random();
+    	int randomInt = random.nextInt(1000000); // 0부터 999999까지 랜덤한 숫자를 생성
+    	String key = String.format("%06d", randomInt); // 6자리로 패딩을 채움
     	
     	String body = bodyTop +
     			
@@ -202,11 +204,8 @@ public class EmailSenderService {
     		e.printStackTrace();
     	}
     	
-    	
     	String subject = "[Devrun] 아이디를 확인해주세요.";
-    	Random rs = new Random();
-    	String key = String.valueOf(rs.nextInt(6) + 1);
-    	
+
     	String body = bodyTop +
     			
 	    		"<div style=\"background: #5F4B8B; font-size: 0; padding: 0 30px; height: 100px; line-height:100px; \">" + imgTag + "</div>" +
@@ -231,7 +230,6 @@ public class EmailSenderService {
     		helper.setSubject(subject);
     		helper.setText(body, true); // Set the second parameter to 'true' to send HTML content
     		
-    		cacheService.saveCaffeine(id, key);
     		mailSender.send(message);
     	} catch (MessagingException e) {
     		e.printStackTrace();
