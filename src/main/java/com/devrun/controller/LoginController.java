@@ -614,7 +614,7 @@ public class LoginController {
     }
 	
 	@ResponseBody
-	@PostMapping("/verifyPhone")
+	@PostMapping("/verify/phone")
 	public boolean verifyPhone(@RequestBody LoginDTO loginDTO){
 		
 		String id = loginDTO.getId();
@@ -669,14 +669,14 @@ public class LoginController {
 	
 	        // 메모리에 저장된 이메일과 인증코드 제거
 	        memberService.removeSmsCode(signupDTO.getEmail());
-        
-        // .then은 실행되지면 return에는 무시되고 .just만 return에 포함된다 실행여부와 상관없이 (단지)just만 return 된다는 뜻이다
-        return new ResponseEntity<>("Find ID successful", HttpStatus.OK);
+	        
+	        // .then은 실행되지면 return에는 무시되고 .just만 return에 포함된다 실행여부와 상관없이 (단지)just만 return 된다는 뜻이다
+	        return new ResponseEntity<>("Find ID successful", HttpStatus.OK);
 
         } else {
         	
-        // 403 인증되지 않은 전화번호
-        return new ResponseEntity<>("Verification failed Phonenumber", HttpStatus.FORBIDDEN);
+	        // 403 인증되지 않은 전화번호
+	        return new ResponseEntity<>("Verification failed Phonenumber", HttpStatus.FORBIDDEN);
         
         }
     }
@@ -704,11 +704,9 @@ public class LoginController {
 				return ResponseEntity.status(400).body("Verification failed Email");
 			}
 				
-			
 		} else {
 			// 회원을 찾을 수 없음
 			return ResponseEntity.status(404).body("Member not found");
 		}
 	}
-	
 }
