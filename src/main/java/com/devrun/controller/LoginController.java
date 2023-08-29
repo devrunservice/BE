@@ -614,7 +614,7 @@ public class LoginController {
     }
 	
 	@ResponseBody
-	@PostMapping("/verify/phone")
+	@PostMapping("/users/verifyPhone")
 	public boolean verifyPhone(@RequestBody LoginDTO loginDTO){
 		
 		String id = loginDTO.getId();
