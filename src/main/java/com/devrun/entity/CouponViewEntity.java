@@ -22,7 +22,7 @@ public class CouponViewEntity {
 
     private String couponcode;
 
-    private Long userno;
+    private int userno;
 
     private int discountrate;
 

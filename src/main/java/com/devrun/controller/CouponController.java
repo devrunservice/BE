@@ -2,24 +2,22 @@ package com.devrun.controller;
 
 
 import com.devrun.entity.CouponIssued;
-import com.devrun.entity.UserCoupon;
+import com.devrun.entity.CouponViewEntity;
+import com.devrun.entity.MemberEntity;
 import com.devrun.service.CouponSerivce;
+import com.devrun.service.MemberService;
+
 import io.swagger.annotations.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.Date;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -27,6 +25,23 @@ public class CouponController {
 
     @Autowired
     private CouponSerivce couponSerivce;
+    
+    @Autowired
+    private MemberService memberService;
+    
+    
+    @GetMapping("/coupon/readmycoupon")
+    @ApiOperation(value = "쿠폰 조회하기" , notes = "로그인 한 회원이 가진 쿠폰을 조회합니다.")
+    public ResponseEntity<?> readmycoupon(){
+    	System.out.println("---------------------------------CouponController readmycoupon method start---------------------------------");
+    	String userid = //SecurityContextHolder.getContext().getAuthentication().getName();
+    	"sunho12341";
+    	MemberEntity userEntity = memberService.findById(userid);
+    	List<CouponViewEntity> couponlist = couponSerivce.readmycoupon(userEntity);
+		return ResponseEntity.ok(couponlist);
+    	
+    	
+    }
 
     @PostMapping("/coupon/publish")
     @ApiOperation(value = "쿠폰 생성기", notes = "쿠폰을 생성하여 DB에 저장합니다.")
