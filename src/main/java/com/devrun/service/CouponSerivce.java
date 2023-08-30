@@ -1,23 +1,21 @@
 package com.devrun.service;
 
-import com.devrun.entity.CouponIssued;
-import com.devrun.entity.CouponViewEntity;
-import com.devrun.entity.Couponregicode;
-import com.devrun.entity.MemberEntity;
-import com.devrun.entity.UserCoupon;
-import com.devrun.repository.CouponIssuedRepository;
-import com.devrun.repository.CouponViewRepository;
-import com.devrun.repository.CouponregicodeRepository;
-import com.devrun.repository.UserCouponRepository;
-import com.devrun.repository.couponviewRepositroy;
-import com.devrun.util.CouponCodeGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.devrun.entity.CouponIssued;
+import com.devrun.entity.CouponViewEntity;
+import com.devrun.entity.Couponregicode;
+import com.devrun.entity.MemberEntity;
+import com.devrun.repository.CouponIssuedRepository;
+import com.devrun.repository.CouponViewRepository;
+import com.devrun.repository.CouponregicodeRepository;
+import com.devrun.util.CouponCodeGenerator;
 
 @Service
 public class CouponSerivce {
