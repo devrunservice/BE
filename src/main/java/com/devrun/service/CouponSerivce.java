@@ -1,9 +1,15 @@
 package com.devrun.service;
 
 import com.devrun.entity.CouponIssued;
+import com.devrun.entity.CouponViewEntity;
 import com.devrun.entity.Couponregicode;
+import com.devrun.entity.MemberEntity;
+import com.devrun.entity.UserCoupon;
 import com.devrun.repository.CouponIssuedRepository;
+import com.devrun.repository.CouponViewRepository;
 import com.devrun.repository.CouponregicodeRepository;
+import com.devrun.repository.UserCouponRepository;
+import com.devrun.repository.couponviewRepositroy;
 import com.devrun.util.CouponCodeGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,8 +28,11 @@ public class CouponSerivce {
 
     @Autowired
     private CouponregicodeRepository couponregicodeRepository;
+    
+    @Autowired
+    private CouponViewRepository couponviewRepositroy;
 
-
+   
     public CouponIssued saveCouponDetail(CouponIssued couponBlueprint) {
         CouponIssued result = couponIssuedRepository.save(couponBlueprint);
         int quantity = couponBlueprint.getQuantity();
@@ -70,4 +79,10 @@ public class CouponSerivce {
         String res = couponregicodeRepository.removecode(removecoupon, able);
         return res;
     }
+
+	public  List<CouponViewEntity> readmycoupon(MemberEntity userEntity) {
+		List<CouponViewEntity> couponlist = couponviewRepositroy.findAllByUserno(userEntity.getUserNo());
+		//List<CouponViewEntity> couponlist = couponviewRepositroy.activatequery(userEntity.getUserNo());
+		return couponlist;
+	}
 }
