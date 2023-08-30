@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.devrun.entity.MemberEntity;
 import com.devrun.service.MemberService;
 import com.devrun.service.TestService;
+import com.devrun.util.CaffeineCache;
 import com.devrun.util.JWTUtil;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,6 +25,10 @@ public class TestController {
 	
 	@Autowired
 	MemberService memberService;
+	
+	@Autowired
+    private CaffeineCache redisCache;
+//    private RedisCache redisCache;
 	
 //	122.41.29.73
 //	@CrossOrigin(origins = "localhost:3000" , allowedHeaders = {"GET"})
@@ -38,7 +43,7 @@ public class TestController {
 			// 400 : Access token 없음
 			return new ResponseEntity<>("Access token is required", HttpStatus.BAD_REQUEST);
 		}
-System.out.println("11111111");
+		System.out.println("11111111");
 		String id = JWTUtil.getUserIdFromToken(accessToken);
 		System.out.println("아이디 : " + id);
 //			if (memberService.isUserIdEquals(id)) {
@@ -61,6 +66,13 @@ System.out.println("11111111");
 		@GetMapping("/deleteId")
 		public String deleteId(@RequestParam("id") String id) {
 			return testService.deleteId(id);
+		}
+		
+		@GetMapping("/removeCache")
+		public String cache(@RequestParam("id") String id) {
+			redisCache.removeCaffeine(id);
+			redisCache.removeJti(id);
+			return "Removed cache for " + id;
 		}
 
 	

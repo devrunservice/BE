@@ -85,7 +85,7 @@ public class EmailSenderService {
         	InputStream in = getClass().getResourceAsStream("/img/logo.png");
         	byte[] imageBytes = in.readAllBytes();
             String encodedString = Base64.getEncoder().encodeToString(imageBytes);
-            imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width:144px,height:144px;\"/>";
+            imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width:144px; height:144px;\"/>";
 		} catch (IOException e) {
 			System.out.println("이미지 인코딩 실패");
 			e.printStackTrace();
@@ -99,7 +99,7 @@ public class EmailSenderService {
         
         String body = bodyTop +
         		
-         		"<div style=\"background: #5F4B8B; font-size: 0; padding: 0 30px; height: 100px; line-height:100px; \">" + imgTag + "</div>" +
+         		"<div style=\"background: #5F4B8B; font-size: 0; padding: 0 30px; height: 144px; line-height:144px; \">" + imgTag + "</div>" +
          		"<div style=\"padding:40px 40px 60px\">" +
                 "<h3 style=\"font-size:1.56rem;color:#171717;line-height: 1;margin:0;margin-bottom:25px; font-family: \"Pretendard\";font-weight:700;\">DevRun 회원가입을 축하드립니다.</h3>" +
                 "<p style=\"font-size:1rem;color:#676767;line-height: 1;margin:0; font-family: \"Pretendard\";font-weight:400;\">아래 링크를 클릭하여 회원가입을 완료해 주세요.</p>" +
@@ -141,7 +141,7 @@ public class EmailSenderService {
     		InputStream in = getClass().getResourceAsStream("/img/logo.png");
     		byte[] imageBytes = in.readAllBytes();
     		String encodedString = Base64.getEncoder().encodeToString(imageBytes);
-    		imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width:144px,height:144px;\"/>";
+    		imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width:144px; height:144px;\"/>";
     	} catch (IOException e) {
     		System.out.println("이미지 인코딩 실패");
     		e.printStackTrace();
@@ -156,7 +156,7 @@ public class EmailSenderService {
     	
     	String body = bodyTop +
     			
-	    		"<div style=\"background: #5F4B8B; font-size: 0; padding: 0 30px; height: 100px; line-height:100px; \">" + imgTag + "</div>" +
+	    		"<div style=\"background: #5F4B8B; font-size: 0; padding: 0 30px; height: 144px; line-height:144px; \">" + imgTag + "</div>" +
 	    		"<div style=\"padding:40px 40px 60px\">" +
     			"<h3 style=\"font-size:1.56rem;color:#171717;line-height: 1;margin:0;margin-bottom:25px; font-family: \"Pretendard\";font-weight:700;\">DevRun 인증번호 안내입니다.</h3>" +
     			"<p style=\"font-size:1rem;color:#676767;line-height: 1;margin:0; font-family: \"Pretendard\";font-weight:400;\">아래 인증번호를 입력해 주세요.</p>" +
@@ -198,7 +198,7 @@ public class EmailSenderService {
     		InputStream in = getClass().getResourceAsStream("/img/logo.png");
     		byte[] imageBytes = in.readAllBytes();
     		String encodedString = Base64.getEncoder().encodeToString(imageBytes);
-    		imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width:144px,height:144px;\"/>";
+    		imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width:144px; height:144px;\"/>";
     	} catch (IOException e) {
     		System.out.println("이미지 인코딩 실패");
     		e.printStackTrace();
@@ -208,7 +208,7 @@ public class EmailSenderService {
 
     	String body = bodyTop +
     			
-	    		"<div style=\"background: #5F4B8B; font-size: 0; padding: 0 30px; height: 100px; line-height:100px; \">" + imgTag + "</div>" +
+	    		"<div style=\"background: #5F4B8B; font-size: 0; padding: 0 30px; height: 144px; line-height:144px; \">" + imgTag + "</div>" +
 	    		"<div style=\"padding:40px 40px 60px\">" +
     			"<h3 style=\"font-size:1.56rem;color:#171717;line-height: 1;margin:0;margin-bottom:25px; font-family: \"Pretendard\";font-weight:700;\">DevRun 아이디찾기 안내입니다.</h3>" +
     			"<p style=\"font-size:1rem;color:#676767;line-height: 1;margin:0; font-family: \"Pretendard\";font-weight:400;\">아래 아이디를 확인해 주세요.</p>" +
