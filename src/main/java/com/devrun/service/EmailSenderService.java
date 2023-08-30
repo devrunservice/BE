@@ -25,7 +25,6 @@ public class EmailSenderService {
     
     @Autowired
     private CaffeineCache cacheService;
-
     
     String imgTag = "";
     String bodyTop = "<!DOCTYPE html>" +
@@ -60,9 +59,8 @@ public class EmailSenderService {
     		"</head>" +
     		"<body>" +
     		"<div id=\"root\" style=\"background:#f7f7f7;width:100%;padding:50px 0;\">" +
-    		"<div style=\"background:#fff;margin:0 auto;width:640px;\">" +
-    		"<div style=\"background: #5F4B8B; font-size: 0; padding: 0 30px;  height: 100px; display: flex; align-items: center;\">" + imgTag + "</div>" +
-    		"<div style=\"padding:40px 40px 60px\">";
+    		"<div style=\"background:#fff;margin:0 auto;width:640px;\">";
+    
     String bodyBottom = "</div>" +
     		"</div>" +
     		"<div style=\"border-top:1px solid #ddd;\">" +
@@ -87,7 +85,7 @@ public class EmailSenderService {
         	InputStream in = getClass().getResourceAsStream("/img/logo.png");
         	byte[] imageBytes = in.readAllBytes();
             String encodedString = Base64.getEncoder().encodeToString(imageBytes);
-            imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width: 250px; height: 60px;\"/>";
+            imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width:144px,height:144px;\"/>";
 		} catch (IOException e) {
 			System.out.println("이미지 인코딩 실패");
 			e.printStackTrace();
@@ -101,6 +99,8 @@ public class EmailSenderService {
         
         String body = bodyTop +
         		
+         		"<div style=\"background: #5F4B8B; font-size: 0; padding: 0 30px; height: 100px; line-height:100px; \">" + imgTag + "</div>" +
+         		"<div style=\"padding:40px 40px 60px\">" +
                 "<h3 style=\"font-size:1.56rem;color:#171717;line-height: 1;margin:0;margin-bottom:25px; font-family: \"Pretendard\";font-weight:700;\">DevRun 회원가입을 축하드립니다.</h3>" +
                 "<p style=\"font-size:1rem;color:#676767;line-height: 1;margin:0; font-family: \"Pretendard\";font-weight:400;\">아래 링크를 클릭하여 회원가입을 완료해 주세요.</p>" +
                 "<div style=\"border-top:1px solid #ddd; border-bottom:1px solid #ddd; padding: 25px 0;margin-top: 35px;\">" +
@@ -141,19 +141,23 @@ public class EmailSenderService {
     		InputStream in = getClass().getResourceAsStream("/img/logo.png");
     		byte[] imageBytes = in.readAllBytes();
     		String encodedString = Base64.getEncoder().encodeToString(imageBytes);
-    		imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width: 250px; height: 60px;\"/>";
+    		imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width:144px,height:144px;\"/>";
     	} catch (IOException e) {
     		System.out.println("이미지 인코딩 실패");
     		e.printStackTrace();
     	}
     	
-    	
     	String subject = "[Devrun] " + id + "님 이메일 인증을 완료해주세요.";
-    	Random rs = new Random();
-    	String key = String.valueOf(rs.nextInt(6) + 1) ;
+    	
+    	// 6자리 인증코드 생성
+    	Random random = new Random();
+    	int randomInt = random.nextInt(1000000); // 0부터 999999까지 랜덤한 숫자를 생성
+    	String key = String.format("%06d", randomInt); // 6자리로 패딩을 채움
     	
     	String body = bodyTop +
     			
+	    		"<div style=\"background: #5F4B8B; font-size: 0; padding: 0 30px; height: 100px; line-height:100px; \">" + imgTag + "</div>" +
+	    		"<div style=\"padding:40px 40px 60px\">" +
     			"<h3 style=\"font-size:1.56rem;color:#171717;line-height: 1;margin:0;margin-bottom:25px; font-family: \"Pretendard\";font-weight:700;\">DevRun 인증번호 안내입니다.</h3>" +
     			"<p style=\"font-size:1rem;color:#676767;line-height: 1;margin:0; font-family: \"Pretendard\";font-weight:400;\">아래 인증번호를 입력해 주세요.</p>" +
     			"<div style=\"border-top:1px solid #ddd; border-bottom:1px solid #ddd; padding: 25px 0;margin-top: 35px;\">" +
@@ -194,19 +198,18 @@ public class EmailSenderService {
     		InputStream in = getClass().getResourceAsStream("/img/logo.png");
     		byte[] imageBytes = in.readAllBytes();
     		String encodedString = Base64.getEncoder().encodeToString(imageBytes);
-    		imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width: 250px; height: 60px;\"/>";
+    		imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width:144px,height:144px;\"/>";
     	} catch (IOException e) {
     		System.out.println("이미지 인코딩 실패");
     		e.printStackTrace();
     	}
     	
-    	
     	String subject = "[Devrun] 아이디를 확인해주세요.";
-    	Random rs = new Random();
-    	String key = String.valueOf(rs.nextInt(6) + 1) ;
-    	
+
     	String body = bodyTop +
     			
+	    		"<div style=\"background: #5F4B8B; font-size: 0; padding: 0 30px; height: 100px; line-height:100px; \">" + imgTag + "</div>" +
+	    		"<div style=\"padding:40px 40px 60px\">" +
     			"<h3 style=\"font-size:1.56rem;color:#171717;line-height: 1;margin:0;margin-bottom:25px; font-family: \"Pretendard\";font-weight:700;\">DevRun 아이디찾기 안내입니다.</h3>" +
     			"<p style=\"font-size:1rem;color:#676767;line-height: 1;margin:0; font-family: \"Pretendard\";font-weight:400;\">아래 아이디를 확인해 주세요.</p>" +
     			"<div style=\"border-top:1px solid #ddd; border-bottom:1px solid #ddd; padding: 25px 0;margin-top: 35px;\">" +
@@ -227,7 +230,6 @@ public class EmailSenderService {
     		helper.setSubject(subject);
     		helper.setText(body, true); // Set the second parameter to 'true' to send HTML content
     		
-    		cacheService.saveCaffeine(id, key);
     		mailSender.send(message);
     	} catch (MessagingException e) {
     		e.printStackTrace();

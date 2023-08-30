@@ -153,7 +153,6 @@ public class MemberService {
                 + "]"
                 + "}";
 
-
         Mono<String> result = webClient.post()
                 .uri(uri)
                 .header("Content-Type", "application/json; charset=utf-8")
