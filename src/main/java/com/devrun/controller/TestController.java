@@ -43,9 +43,11 @@ public class TestController {
 			// 400 : Access token 없음
 			return new ResponseEntity<>("Access token is required", HttpStatus.BAD_REQUEST);
 		}
+		
 		System.out.println("11111111");
 		String id = JWTUtil.getUserIdFromToken(accessToken);
 		System.out.println("아이디 : " + id);
+		
 //			if (memberService.isUserIdEquals(id)) {
 				MemberEntity member = memberService.findById(id);
 				return ResponseEntity.ok(member);
@@ -54,26 +56,26 @@ public class TestController {
 //				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
 //			}
 
-		}
+	}
 
-		@GetMapping("/findAll")
-		public List<MemberEntity> findAll() {
-			List<MemberEntity> list = testService.findAll();
-			System.out.println("리스트 : " + list);
-			return list;
-		}
+	@GetMapping("/findAll")
+	public List<MemberEntity> findAll() {
+		List<MemberEntity> list = testService.findAll();
+		System.out.println("리스트 : " + list);
+		return list;
+	}
 
-		@GetMapping("/deleteId")
-		public String deleteId(@RequestParam("id") String id) {
-			return testService.deleteId(id);
-		}
-		
-		@GetMapping("/removeCache")
-		public String cache(@RequestParam("id") String id) {
-			redisCache.removeCaffeine(id);
-			redisCache.removeJti(id);
-			return "Removed cache for " + id;
-		}
+	@GetMapping("/deleteId")
+	public String deleteId(@RequestParam("id") String id) {
+		return testService.deleteId(id);
+	}
+	
+	@GetMapping("/removeCache")
+	public String cache(@RequestParam("id") String id) {
+		redisCache.removeCaffeine(id);
+		redisCache.removeJti(id);
+		return "Removed cache for " + id;
+	}
 
 	
 }

@@ -174,9 +174,9 @@ public class MemberService {
         return Base64.getEncoder().encodeToString(mac.doFinal(message.getBytes(StandardCharsets.UTF_8)));
     }
 
-    public boolean verifyCode(String phoneNumber, String code) {
+    public boolean verifyCode(String key, String code) {
 //        String savedCode = phoneCodeMap.get(phoneNumber);
-    	String savedCode = cacheService.getCaffeine(phoneNumber); // Caffeine 캐시에서 코드 검색
+    	String savedCode = cacheService.getCaffeine(key); // Caffeine 캐시에서 코드 검색
         System.out.println(savedCode + ":" + code);
         return savedCode != null && savedCode.equals(code);
     }

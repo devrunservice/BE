@@ -1,7 +1,5 @@
 package com.devrun.controller;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +16,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,7 +26,6 @@ import com.devrun.dto.OAuthToken;
 import com.devrun.dto.member.KakaoProfileDTO;
 import com.devrun.dto.member.LoginDTO;
 import com.devrun.dto.member.LoginDTO.LoginStatus;
-import com.devrun.dto.member.MemberDTO.Status;
 import com.devrun.dto.member.LogoutResponse;
 import com.devrun.dto.member.MemberDTO;
 import com.devrun.dto.member.SignupDTO;
@@ -644,9 +640,9 @@ public class LoginController {
 	@ResponseBody
 	@PostMapping("/verify/email")
 	public ResponseEntity<?> verify(@RequestBody SignupDTO signupDTO) {
-		String email = signupDTO.getEmail();
+		String id = signupDTO.getId();
 		String code = signupDTO.getCode();
-        if (memberService.verifyCode(email, code)) {
+        if (memberService.verifyCode(id, code)) {
         	// 200 인증성공
         	return new ResponseEntity<>("Verification successful", HttpStatus.OK);
         } else {

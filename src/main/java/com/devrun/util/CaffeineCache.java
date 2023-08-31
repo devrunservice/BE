@@ -20,14 +20,17 @@ public class CaffeineCache {
     }
 
     public void saveCaffeine(String key, String value) {
+    	System.out.println("카페인 저장 : " + key + ", " + value);
         smsCodeCache.put(key, value);
     }
 
     public String getCaffeine(String key) {
+    	System.out.println("카페인 가져오기 : " + key);
         return smsCodeCache.get(key);
     }
 
     public void removeCaffeine(String key) {
+    	System.out.println("카페인 제거 : " + key);
         smsCodeCache.invalidate(key);
     }
     
