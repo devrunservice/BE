@@ -27,6 +27,25 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 //		String requestPath = request.getRequestURI();
 		// HTTP 요청 헤더에서 헤더 값을 가져옴
 	    String accessToken = request.getHeader("Access_token");
+	    System.out.println("접속 아이피 : " + request.getRemoteAddr());
+	    String ip = request.getHeader("X-Forwarded-For");
+	    
+	    if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+	        ip = request.getHeader("Proxy-Client-IP");
+	    }
+	    if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+	        ip = request.getHeader("WL-Proxy-Client-IP");
+	    }
+	    if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+	        ip = request.getHeader("HTTP_CLIENT_IP");
+	    }
+	    if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+	        ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+	    }
+	    if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+	        ip = request.getRemoteAddr();
+	    }
+	    System.out.println("접속 아이피(정확) : " + ip);
 	    System.out.println("엑세스 토큰 : " + accessToken);
 //	    String encodedRefreshToken = request.getHeader("Refresh_token");
 //	    String refreshToken = null;
