@@ -1,11 +1,15 @@
 package com.devrun.service;
 
+import java.sql.Date;
+import java.sql.Time;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.quartz.LocalDataSourceJobStore;
 import org.springframework.stereotype.Service;
 
 import com.devrun.entity.CouponIssued;
@@ -80,6 +84,12 @@ public class CouponSerivce {
 
 	public  List<CouponViewEntity> readmycoupon(MemberEntity userEntity) {
 		List<CouponViewEntity> couponlist = couponviewRepositroy.findAllByUserno(userEntity.getUserNo());
+		for (CouponViewEntity couponViewEntity : couponlist) {
+			if(couponViewEntity.getExpirydate().after(Date.valueOf(LocalDate.now()))){
+				System.out.println("유효기간이 만료된 쿠폰입니다. 쿠폰 코드 : " + couponViewEntity.getCouponcode() );
+				couponViewEntity.setState(2);
+			};
+		}
 		//List<CouponViewEntity> couponlist = couponviewRepositroy.activatequery(userEntity.getUserNo());
 		return couponlist;
 	}

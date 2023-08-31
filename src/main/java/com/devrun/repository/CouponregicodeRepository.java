@@ -12,7 +12,7 @@ public interface CouponregicodeRepository extends JpaRepository<Couponregicode ,
 
     int countByCouponcode(String code);
 
-    @Procedure("coupon_process")
+    @Procedure("coupon_register_process")
     @Transactional
     String getCouponStatus(String code, String user);
 

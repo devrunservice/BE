@@ -10,6 +10,7 @@ import com.devrun.service.MemberService;
 import io.swagger.annotations.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,10 +35,12 @@ public class CouponController {
     @ApiOperation(value = "쿠폰 조회하기" , notes = "로그인 한 회원이 가진 쿠폰을 조회합니다.")
     public ResponseEntity<?> readmycoupon(){
     	System.out.println("---------------------------------CouponController readmycoupon method start---------------------------------");
-    	String userid = //SecurityContextHolder.getContext().getAuthentication().getName();
-    	"sunho12341";
+    	String userid = SecurityContextHolder.getContext().getAuthentication().getName();
     	MemberEntity userEntity = memberService.findById(userid);
     	List<CouponViewEntity> couponlist = couponSerivce.readmycoupon(userEntity);
+    	if(couponlist.isEmpty()) {
+    		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("보유한 쿠폰이 없습니다.");
+    	}
 		return ResponseEntity.ok(couponlist);
     	
     	
@@ -59,15 +62,15 @@ public class CouponController {
             @ApiResponse(code = 200, message = "성공적으로 처리되었습니다"),
             @ApiResponse(code = 400, message = "옳지 않은 키 값입니다. 키 값 : couponcode")
             })
-    public String userGetCoupon(@RequestBody Map<String,String> map){
+    public ResponseEntity<?> userGetCoupon(@RequestBody Map<String,String> map){
     	String couponCode = map.get("couponcode");
     	
         if(couponSerivce.validate(couponCode)){
             String userid = SecurityContextHolder.getContext().getAuthentication().getName();
             String res = couponSerivce.checkcoupon(couponCode, userid);
-            return res;
+            return ResponseEntity.status(HttpStatus.OK).body(res);
         } else {
-            return "쿠폰 코드를 정확히 입력해주세요";
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("쿠폰 코드를 정확히 입력해주세요");
         }
     }
 
