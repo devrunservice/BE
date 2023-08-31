@@ -5,12 +5,15 @@ import com.devrun.entity.CouponIssued;
 import com.devrun.entity.CouponViewEntity;
 import com.devrun.entity.MemberEntity;
 import com.devrun.repository.CouponViewRepository;
+import com.devrun.repository.PaymentInfo;
 import com.devrun.service.CouponSerivce;
 import com.devrun.service.MemberService;
+import com.devrun.util.JWTUtil;
 
 import io.swagger.annotations.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 
 @RestController
@@ -100,8 +105,14 @@ public class CouponController {
     
     // 강의파트 구현시 변경 예정
     @GetMapping("/couponlist")
-    public List<CouponViewEntity> getCouponList() {    	
-        return couponViewRepository.findAll();
-    }
+    public ResponseEntity<?> getcouponlist() {
+    	
+    	List<CouponViewEntity> couponlist = couponViewRepository.findAll();
+    	System.err.println(couponlist);
+    	
+        return ResponseEntity.ok(couponlist);
+        
+    }    
+	
 	
 }
