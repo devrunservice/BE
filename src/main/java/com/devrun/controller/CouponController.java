@@ -4,8 +4,11 @@ package com.devrun.controller;
 import com.devrun.entity.CouponIssued;
 import com.devrun.entity.CouponViewEntity;
 import com.devrun.entity.MemberEntity;
+import com.devrun.repository.CouponViewRepository;
+import com.devrun.repository.PaymentInfo;
 import com.devrun.service.CouponSerivce;
 import com.devrun.service.MemberService;
+import com.devrun.util.JWTUtil;
 
 import io.swagger.annotations.*;
 
@@ -21,6 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
+
 @RestController
 public class CouponController {
 
@@ -29,6 +35,9 @@ public class CouponController {
     
     @Autowired
     private MemberService memberService;
+    
+    @Autowired
+    private CouponViewRepository couponViewRepository;
     
     
     @GetMapping("/coupon/readmycoupon")
@@ -95,4 +104,17 @@ public class CouponController {
             return ResponseEntity.badRequest().body("only number allowed");
         }
     }
+    
+    // 강의파트 구현시 변경 예정
+    @GetMapping("/couponlist")
+    public ResponseEntity<?> getcouponlist() {
+    	
+    	List<CouponViewEntity> couponlist = couponViewRepository.findAll();
+    	System.err.println(couponlist);
+    	
+        return ResponseEntity.ok(couponlist);
+        
+    }    
+	
+	
 }

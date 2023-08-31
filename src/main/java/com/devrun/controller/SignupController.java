@@ -112,7 +112,7 @@ public class SignupController {
 		if (memberService.checkID(memberEntity.getId()) == 0 
 				&& memberService.checkEmail(memberEntity.getEmail()) == 0
 				&& memberService.checkphone(memberEntity.getPhonenumber()) == 0
-				&& memberService.verifyCode(memberEntity.getPhonenumber(), code)
+//				&& memberService.verifyCode(memberEntity.getPhonenumber(), code)
 				) {
 //			// 403 약관 미동의    
 //			if (!memberEntity.isAgeConsent() 
