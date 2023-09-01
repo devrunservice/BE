@@ -1,9 +1,12 @@
 package com.devrun.repository;
 
+import com.devrun.entity.CouponIssued;
 import com.devrun.entity.Couponregicode;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 import javax.transaction.Transactional;
 
@@ -17,6 +20,8 @@ public interface CouponregicodeRepository extends JpaRepository<Couponregicode ,
     String getCouponStatus(String code, String user);
 
     @Procedure("coupon_remove_recover")
-    String removecode(String removecoupon , int able);
+    String removecode(String removecoupon , String able);
+
+	List<Couponregicode> findAllByIssuedno(CouponIssued couponIssued);
 
 }

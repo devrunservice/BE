@@ -38,13 +38,13 @@ public class CouponSerivce {
     public CouponIssued saveCouponDetail(CouponIssued couponBlueprint) {
         CouponIssued result = couponIssuedRepository.save(couponBlueprint);
         int quantity = couponBlueprint.getQuantity();
-        Long issuedno = couponBlueprint.getIssuedno();
 
-        saveCouponCode(quantity , issuedno);
+        saveCouponCode(quantity , couponBlueprint);
+        
         return result;
     }
 
-    public void saveCouponCode(int q , Long aLong){
+    public void saveCouponCode(int q , CouponIssued couponBlueprint){
 
         List<Couponregicode> codelist = new ArrayList<Couponregicode>();
 
@@ -53,7 +53,7 @@ public class CouponSerivce {
             Couponregicode couponregicode = new Couponregicode();
             String code = new CouponCodeGenerator().toString();
             couponregicode.setCouponcode(code);
-            couponregicode.setIssuedno(aLong);
+            couponregicode.setIssuedno(couponBlueprint);
             codelist.add(couponregicode);
             i++;
             }
@@ -77,9 +77,20 @@ public class CouponSerivce {
         return res;
     }
 
-    public String removecode(String removecoupon , int able) {
-        String res = couponregicodeRepository.removecode(removecoupon, able);
-        return res;
+    public String removecode(MemberEntity userEntity, List<String> TargetCouponCodeList) {
+    	List<Couponregicode> list = readCouponMadeByMento(userEntity);
+    	String rsl = "해당 멘토가 발행한 쿠폰이 아닙니다.";
+    	for (Couponregicode couponregicode : list) {
+			for (String TargetCouponCode : TargetCouponCodeList) {
+				if(couponregicode.getCouponcode().equals(TargetCouponCode)) {
+					System.out.println("해당 멘토가 발행한 쿠폰으로 확인 되었으므로, 삭제");
+					rsl = couponregicodeRepository.removecode(TargetCouponCode, "REMOVED");
+					
+				}
+			}
+		}
+
+        return rsl;
     }
 
 	public  List<CouponViewEntity> readmycoupon(MemberEntity userEntity) {
@@ -92,5 +103,19 @@ public class CouponSerivce {
 		}
 		//List<CouponViewEntity> couponlist = couponviewRepositroy.activatequery(userEntity.getUserNo());
 		return couponlist;
+	}
+	
+	public List<Couponregicode> readCouponMadeByMento(MemberEntity userEntity){
+		List<CouponIssued> couponIssuedlist = couponIssuedRepository.findAllByIssueduser(userEntity);
+		List<Couponregicode> couponcodes = new ArrayList<Couponregicode>(); 
+		for (CouponIssued couponIssued : couponIssuedlist) {
+			List<Couponregicode> couponcodelist = couponregicodeRepository.findAllByIssuedno(couponIssued);
+			for (Couponregicode coupone : couponcodelist) {
+				couponcodes.add(coupone);
+			}			
+		}
+	
+		return couponcodes;
+				
 	}
 }
