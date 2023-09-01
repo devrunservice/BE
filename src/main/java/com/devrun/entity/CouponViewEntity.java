@@ -34,6 +34,6 @@ public class CouponViewEntity {
 
     private String target;
 
-    private int state;
+    private String state;
 
 }
