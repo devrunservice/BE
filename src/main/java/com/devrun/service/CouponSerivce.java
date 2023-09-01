@@ -98,7 +98,7 @@ public class CouponSerivce {
 		for (CouponViewEntity couponViewEntity : couponlist) {
 			if(couponViewEntity.getExpirydate().after(Date.valueOf(LocalDate.now()))){
 				System.out.println("유효기간이 만료된 쿠폰입니다. 쿠폰 코드 : " + couponViewEntity.getCouponcode() );
-				couponViewEntity.setState(2);
+				couponViewEntity.setState("EXPIRY");
 			};
 		}
 		//List<CouponViewEntity> couponlist = couponviewRepositroy.activatequery(userEntity.getUserNo());
