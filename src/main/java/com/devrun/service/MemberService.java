@@ -181,7 +181,7 @@ public class MemberService {
         return savedCode != null && savedCode.equals(code);
     }
 
-    public void removeSmsCode(String phoneNumber) {
+    public void removeVerifyCode(String phoneNumber) {
 //        phoneCodeMap.remove(phoneNumber);
     	cacheService.removeCaffeine(phoneNumber); // Caffeine 캐시에서 코드 제거
     }

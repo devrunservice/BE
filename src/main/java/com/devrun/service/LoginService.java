@@ -74,6 +74,14 @@ public class LoginService {
 	    return member.getPhonenumber().equals(phonenumber);
 	}
 	
+	public boolean verifyEmail(String id, String email) {
+		MemberEntity member = memberEntityRepository.findById(id);
+	    if (member == null) {
+	        return false;
+	    }
+		return member.getEmail().equals(email);
+	}
+	
 	// Refresh_token HttpOnly 쿠키 생성
 //	public void setRefeshcookie(HttpServletResponse response, String token) {
 //		

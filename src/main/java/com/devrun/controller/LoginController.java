@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -544,9 +545,23 @@ public class LoginController {
 	//		return new RedirectView(test);
 	//	}
 	
+
+	// 회원의 핸드폰 번호가 맞는지 확인
 	@ResponseBody
-	@PostMapping("/find/id/phone")
-	public Mono<ResponseEntity<?>>findIdPhone(@RequestBody SignupDTO signupDTO){
+	@PostMapping("/user/{userId}/verify/phone")
+	public boolean verifyPhone(@PathVariable String userId, @RequestBody LoginDTO loginDTO){
+		
+		String phone = loginDTO.getPhonenumber();
+		
+		boolean isPhoneVerified = loginService.verifyPhone(userId, phone);
+		
+		return isPhoneVerified;
+	}
+	
+	// 찾은 아이디를 핸드폰 번호로 전송
+	@ResponseBody
+	@PostMapping("/find-id/send-phone")
+	public Mono<ResponseEntity<?>>sendIdBySms(@RequestBody SignupDTO signupDTO){
 		
         String id = loginRepository.findByPhonenumber(signupDTO.getPhonenumber());
         System.out.println("찾은 아이디 : " + id + signupDTO.getCode());
@@ -557,7 +572,7 @@ public class LoginController {
 	        Mono<String> sendSmsResult = memberService.sendSmsFindid(signupDTO.getPhonenumber(), id);
 	
 	        // 메모리에 저장된 전화번호와 인증코드 제거
-	        memberService.removeSmsCode(signupDTO.getPhonenumber());
+	        memberService.removeVerifyCode(signupDTO.getPhonenumber());
         
         // .then은 실행되지면 return에는 무시되고 .just만 return에 포함된다 실행여부와 상관없이 (단지)just만 return 된다는 뜻이다
         return sendSmsResult.then(Mono.just(new ResponseEntity<>("Find ID successful", HttpStatus.OK)));
@@ -570,11 +585,12 @@ public class LoginController {
         }
     }
 	
+	// 인증 완료 후 비밀번호 변경
 	@ResponseBody
-	@PostMapping("/find/password/phone")
-	public ResponseEntity<?> findpwPhone(@RequestBody SignupDTO signupDTO) {
+	@PostMapping("/users/{userId}/edit-password")
+	public ResponseEntity<?> findpwPhone(@PathVariable String userId, @RequestBody SignupDTO signupDTO) {
 		
-        MemberEntity memberEntity = loginRepository.findById(signupDTO.getId());
+        MemberEntity memberEntity = loginRepository.findById(userId);
         // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(signupDTO.getPassword());
         
@@ -587,7 +603,7 @@ public class LoginController {
 			
 			loginRepository.save(memberEntity);
 			
-			memberService.removeSmsCode(signupDTO.getPhonenumber());
+			memberService.removeVerifyCode(signupDTO.getPhonenumber());
 			
 			return new ResponseEntity<>("Password change successful", HttpStatus.OK);
 			
@@ -609,19 +625,19 @@ public class LoginController {
         }
     }
 	
+	// 회원의 이메일이 맞는지 확인
 	@ResponseBody
-	@PostMapping("/users/verifyPhone")
-	public boolean verifyPhone(@RequestBody LoginDTO loginDTO){
+	@PostMapping("/user/{userId}/verify/email")
+	public boolean verifyEmail(@PathVariable String userId, @RequestBody LoginDTO loginDTO){
 		
-		String id = loginDTO.getId();
-		String phone = loginDTO.getPhonenumber();
+		String email = loginDTO.getEmail();
 		
-		boolean isPhoneVerified = loginService.verifyPhone(id, phone);
+		boolean isPhoneVerified = loginService.verifyEmail(userId, email);
 		
 		return isPhoneVerified;
 	}
 	
-
+	// 비밀번호 찾기 인증번호 이메일로 전송
 	@ResponseBody
 	@PostMapping("/auth/email")
 	public ResponseEntity<?> signupEmail(@RequestBody MemberDTO memberDTO) {
@@ -637,6 +653,7 @@ public class LoginController {
         }
 	}
 	
+	// 이메일로 전송된 인증코드 맞는지 검증
 	@ResponseBody
 	@PostMapping("/verify/email")
 	public ResponseEntity<?> verify(@RequestBody SignupDTO signupDTO) {
@@ -651,6 +668,7 @@ public class LoginController {
         }
     }
 	
+	// 이메일로 아이디 전송
 	@ResponseBody
 	@PostMapping("/find/id/email")
 	public ResponseEntity<?> findIdEmail(@RequestBody SignupDTO signupDTO){
@@ -664,7 +682,7 @@ public class LoginController {
 	        emailSenderService.sendIdByEmail(signupDTO.getEmail(), id);
 	
 	        // 메모리에 저장된 이메일과 인증코드 제거
-	        memberService.removeSmsCode(signupDTO.getEmail());
+	        memberService.removeVerifyCode(signupDTO.getEmail());
 	        
 	        // .then은 실행되지면 return에는 무시되고 .just만 return에 포함된다 실행여부와 상관없이 (단지)just만 return 된다는 뜻이다
 	        return new ResponseEntity<>("Find ID successful", HttpStatus.OK);
@@ -672,7 +690,7 @@ public class LoginController {
         } else {
         	
 	        // 403 인증되지 않은 전화번호
-	        return new ResponseEntity<>("Verification failed Phonenumber", HttpStatus.FORBIDDEN);
+	        return new ResponseEntity<>("Verification failed Email", HttpStatus.FORBIDDEN);
         
         }
     }
@@ -680,6 +698,10 @@ public class LoginController {
 	@Autowired
     private CaffeineCache caffeineCache;
 	
+	// 이거 왜 만들었지 뭔가 임시로 만든 거 같은데 뭐지
+	// 이것저것 섞인 것 같은데 비밀번호 변경이겠지 하고 일단 수정하고 냅둠
+	// 아닌데 뭐지 그냥 테스트 였나
+	// 얘 진짜 뭐야 진짜 테스트인가
 	@ResponseBody
 	@PostMapping("/signup/ok")
 	public ResponseEntity<?> signupOk(@RequestBody MemberDTO memberDTO
@@ -695,9 +717,9 @@ public class LoginController {
 				memberService.insert(member);
 				caffeineCache.removeCaffeine(memberDTO.getId());
 				
-				return ResponseEntity.status(200).body("Find ID successful");
+				return ResponseEntity.status(200).body("Edit password successful");
 			} else {
-				return ResponseEntity.status(400).body("Verification failed Email");
+				return ResponseEntity.status(400).body("Authentication key mismatch");
 			}
 				
 		} else {
@@ -705,4 +727,5 @@ public class LoginController {
 			return ResponseEntity.status(404).body("Member not found");
 		}
 	}
+
 }

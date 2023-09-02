@@ -1,7 +1,7 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '2.7.13-SNAPSHOT'
-	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+   id 'java'
+   id 'org.springframework.boot' version '2.7.13-SNAPSHOT'
+   id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 }
 
 group = 'com'
@@ -9,73 +9,73 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+   compileOnly {
+      extendsFrom annotationProcessor
+   }
 }
 
 repositories {
-	mavenCentral()
-	maven { url 'https://repo.spring.io/milestone' }
-	maven { url 'https://repo.spring.io/snapshot' }
-	// 아임포트 
+   mavenCentral()
+   maven { url 'https://repo.spring.io/milestone' }
+   maven { url 'https://repo.spring.io/snapshot' }
+   // 아임포트 
     maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-	//아임포트        
-	implementation 'com.github.iamport:iamport-rest-client-java:0.2.23'
-	
-	implementation 'com.googlecode.json-simple:json-simple:1.1.1' // https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple	
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+   //아임포트        
+   implementation 'com.github.iamport:iamport-rest-client-java:0.2.23'
+   
+   implementation 'com.googlecode.json-simple:json-simple:1.1.1' // https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple   
+   implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+   implementation 'org.springframework.boot:spring-boot-starter-web'
+   compileOnly 'org.projectlombok:lombok'
+   developmentOnly 'org.springframework.boot:spring-boot-devtools'
+   runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+   annotationProcessor 'org.projectlombok:lombok'
+   testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-	// OAuth 2.0
-	//implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-	implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
-	// https://mvnrepository.com/artifact/com.google.code.gson/gson
-	// Webclient
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'
-	// https://mvnrepository.com/artifact/io.projectreactor/reactor-core
-	implementation 'io.projectreactor:reactor-core:3.5.6'
-	// JWT
-	implementation 'io.jsonwebtoken:jjwt:0.9.1'
-	// 스프링 시큐리티
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	// SWAGGER
-	implementation "io.springfox:springfox-boot-starter:3.0.0"
-	// https://mvnrepository.com/artifact/org.hibernate/hibernate-validator
-	implementation 'org.hibernate:hibernate-validator:8.0.0.Final'
+   // OAuth 2.0
+   //implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+   implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
+   // https://mvnrepository.com/artifact/com.google.code.gson/gson
+   // Webclient
+   implementation 'org.springframework.boot:spring-boot-starter-webflux'
+   // https://mvnrepository.com/artifact/io.projectreactor/reactor-core
+   implementation 'io.projectreactor:reactor-core:3.5.6'
+   // JWT
+   implementation 'io.jsonwebtoken:jjwt:0.9.1'
+   // 스프링 시큐리티
+   implementation 'org.springframework.boot:spring-boot-starter-security'
+   // SWAGGER
+   implementation "io.springfox:springfox-boot-starter:3.0.0"
+   // https://mvnrepository.com/artifact/org.hibernate/hibernate-validator
+   implementation 'org.hibernate:hibernate-validator:8.0.0.Final'
 
-	// AWS_S3
-	implementation platform('software.amazon.awssdk:bom:2.20.88')
-	implementation 'software.amazon.awssdk:s3:'
-	implementation 'software.amazon.awssdk:sso'
-	implementation 'software.amazon.awssdk:ssooidc'
-	
-	// caffeine
-	implementation 'com.github.ben-manes.caffeine:caffeine:3.1.2'
-	
-	// redis
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-	
-	// jedis
-	implementation 'redis.clients:jedis:3.7.0'
-	
-	//구글
-	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2'
+   // AWS_S3
+   implementation platform('software.amazon.awssdk:bom:2.20.88')
+   implementation 'software.amazon.awssdk:s3:'
+   implementation 'software.amazon.awssdk:sso'
+   implementation 'software.amazon.awssdk:ssooidc'
+   
+   // caffeine
+   implementation 'com.github.ben-manes.caffeine:caffeine:3.1.2'
+   
+   // redis
+   implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+   
+   // jedis
+   implementation 'redis.clients:jedis:3.7.0'
+   
+   //구글
+   runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.2'
     implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
-	implementation 'org.bouncycastle:bcpkix-jdk15on:1.70'
-	implementation 'com.google.apis:google-api-services-youtube:v3-rev222-1.25.0'
+   implementation 'org.bouncycastle:bcpkix-jdk15on:1.70'
+   implementation 'com.google.apis:google-api-services-youtube:v3-rev222-1.25.0'
     implementation 'com.google.api-client:google-api-client:1.25.0'
     implementation 'com.google.api-client:google-api-client-gson:1.25.0'
-	 implementation 'com.google.oauth-client:google-oauth-client-jetty:1.31.1'
+    implementation 'com.google.oauth-client:google-oauth-client-jetty:1.31.1'
     implementation 'com.google.apis:google-api-services-gmail:v1-rev110-1.25.0'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
@@ -83,9 +83,9 @@ dependencies {
     }
     implementation 'javax.servlet:jstl:1.2'
     compileOnly 'org.apache.tomcat.embed:tomcat-embed-jasper'
-	
+    
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+   useJUnitPlatform()
 }

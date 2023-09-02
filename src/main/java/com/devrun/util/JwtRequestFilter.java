@@ -24,6 +24,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 	        throws ServletException, IOException {
+		System.out.println("Request URL: " + request.getRequestURL().toString());
+        System.out.println("Remote Address: " + request.getRemoteAddr());
+        
 //		String requestPath = request.getRequestURI();
 		// HTTP 요청 헤더에서 헤더 값을 가져옴
 	    String accessToken = request.getHeader("Access_token");

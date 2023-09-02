@@ -45,6 +45,7 @@ public class SignupController {
 	@Autowired
     private CaffeineCache caffeineCache;
 	
+	// ID 중복확인
 	@PostMapping("/checkID")
 	@ResponseBody
     public String checkID(@RequestBody SignupDTO signupDTO) {
@@ -53,6 +54,7 @@ public class SignupController {
         return result + "";
     }
 	
+	// Email 중복확인
 	@PostMapping("/checkEmail")
 	@ResponseBody
     public String checkEmail(@RequestBody SignupDTO signupDTO) {
@@ -61,6 +63,7 @@ public class SignupController {
         return result + "";
     }
 
+	// Phone 중복확인
 	@PostMapping("/checkPhone")
 	@ResponseBody
 	public String checkPhone(@RequestBody SignupDTO signupDTO) {
@@ -69,6 +72,7 @@ public class SignupController {
 		return result + "";
 	}
 
+	// 핸드폰 인증번호 전송
 	@PostMapping("/auth/phone")
 	@ResponseBody
 	public Mono<String> authPhonenumber(@RequestBody SignupDTO signupDTO) {
@@ -77,6 +81,7 @@ public class SignupController {
         return memberService.sendSmsCode(phonenumber);
     }
 	
+	// 핸드폰 인증번호 확인
 	@ResponseBody
 	@PostMapping("/verify/phone")
 	public ResponseEntity<?> verify(@RequestBody SignupDTO signupDTO) {
@@ -91,6 +96,7 @@ public class SignupController {
         }
     }
 	
+	// 회원가입
 	@ResponseBody
 	@PostMapping("/signup/okay")
 	// @Transactional이 적용된 메소드나 클래스는 Spring에 의해 트랜잭션 경계가 설정되고, 
@@ -222,7 +228,7 @@ public class SignupController {
 						}
 					    
 					    // 메모리에 저장된 전화번호와 인증코드 제거
-					    memberService.removeSmsCode(memberEntity.getPhonenumber());
+					    memberService.removeVerifyCode(memberEntity.getPhonenumber());
 					    return new ResponseEntity<>("Signup successful", HttpStatus.OK);
 					    //ResponseEntity.ok("Signup successful");
 					    
@@ -265,6 +271,7 @@ public class SignupController {
 
 	}
 	
+	// 회원가입 인증 이메일 발송
 	@ResponseBody
 	@PostMapping("/signup/confirm/email")
 	public ResponseEntity<?> signupEmail(@RequestParam("email") String toEmail
@@ -281,6 +288,7 @@ public class SignupController {
         }
 	}
 	
+	// 회원가입 인증 확인
 	@ResponseBody
 	@Transactional
 	@PostMapping("/verify/signupEmail")
