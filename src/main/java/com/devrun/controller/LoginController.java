@@ -657,9 +657,9 @@ public class LoginController {
 	@ResponseBody
 	@PostMapping("/verify/email")
 	public ResponseEntity<?> verify(@RequestBody SignupDTO signupDTO) {
-		String id = signupDTO.getId();
+		String email = signupDTO.getEmail();
 		String code = signupDTO.getCode();
-        if (memberService.verifyCode(id, code)) {
+        if (memberService.verifyCode(email, code)) {
         	// 200 인증성공
         	return new ResponseEntity<>("Verification successful", HttpStatus.OK);
         } else {

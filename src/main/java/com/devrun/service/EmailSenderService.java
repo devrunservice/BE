@@ -162,7 +162,7 @@ public class EmailSenderService {
     			"<p style=\"font-size:1rem;color:#676767;line-height: 1;margin:0; font-family: \"Pretendard\";font-weight:400;\">아래 인증번호를 입력해 주세요.</p>" +
     			"<div style=\"border-top:1px solid #ddd; border-bottom:1px solid #ddd; padding: 25px 0;margin-top: 35px;\">" +
     			
-				"<input type='hidden' id='id' name='id' value='" + id + "'/>" +
+				"<input type='hidden' id='id' name='id' value='" + toEmail + "'/>" +
 				"<input type='hidden' id='key' name='key' value='" + key + "'/>" +
                 "<p style=\"font-size: 0; padding:0px 30px;display: flex;align-items: center;\">" +
                 "<span style=\"font-size: 1rem; width:130px; font-family: 'Pretendard';font-weight:400; color:#171717; display: block;\">인증번호</span>" +
@@ -180,7 +180,7 @@ public class EmailSenderService {
     		helper.setSubject(subject);
     		helper.setText(body, true); // Set the second parameter to 'true' to send HTML content
     		
-    		cacheService.saveCaffeine(id, key);
+    		cacheService.saveCaffeine(toEmail, key);
     		mailSender.send(message);
     	} catch (MessagingException e) {
     		e.printStackTrace();
