@@ -281,6 +281,9 @@ public class LoginController {
             // 새로운 jti 생성
             jti = JWTUtil.generateJti();
             
+            // redis에 jti 등록
+ 			redisCache.setJti(userId, jti);
+            
             // 새로운 Token 생성
             String newAccessToken = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName(), jti);
             String newRefreshToken = JWTUtil.generateRefreshToken(memberEntity.getId(), memberEntity.getName(), jti);

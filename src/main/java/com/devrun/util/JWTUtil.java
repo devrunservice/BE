@@ -200,21 +200,19 @@ public class JWTUtil {
  	        System.out.println(requestJti);
  	        System.out.println("3213");
  	        String storedJti = redisCache.getJti(userId);
-
+ 	        
  	        System.out.println("11");
- 	        if (!isValidAlgorithm(jwt, response) 
+ 	        if ( !isValidAlgorithm(jwt, response) 
  	        		|| isBlacklistedRefreshToken(tokenType, token, response)
  	        		) return true;
  	        System.out.println("111");
- 	        if (	storedJti == null &&
- 	        		requestJti.equals(storedJti) && 
- 	        		validateAndProcessToken(token, request)) {
+ 	        if (isValidateJti(requestJti, storedJti, tokenType, userId)) {
  	        	System.out.println("1111");
- 	        	// redis에 jti 등록
-				redisCache.setJti(userId, requestJti);
- 	        	// 토큰 검증 및 처리 성공
- 	            chain.doFilter(request, response);
- 	            return true;
+				if (validateAndProcessToken(token, request)) {
+					// 토큰 검증 및 처리 성공
+					chain.doFilter(request, response);
+					return true;
+				}
  	        } else {
  	            // 중복 로그인 처리
  	            sendErrorResponse(response, 403, "Duplicate login detected");
@@ -222,6 +220,16 @@ public class JWTUtil {
  	        }
  	    }
  	    return false;
+ 	}
+ 	
+ 	// 중복 로그인 방지를 위해 jti 검증
+ 	private boolean isValidateJti(String requestJti, String storedJti, String tokenType, String userId) throws IOException {
+ 		if (storedJti == null || requestJti.equals(storedJti)) {
+ 			// redis에 jti 등록
+			redisCache.setJti(userId, requestJti);
+			return true;
+		}
+ 		return false;
  	}
  	
  	// 주어진 token으로부터 alg를 추출하여 검증
