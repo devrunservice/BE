@@ -58,8 +58,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		    return;
 		}
 		
-		
-	    
 //	    try {
 //	    	
 //	        if (accessToken != null && accessToken.startsWith("Bearer ")) {

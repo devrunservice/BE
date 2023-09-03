@@ -107,6 +107,9 @@ public class LoginService {
 			.secure(true)
 			.httpOnly(true)
 			.build();
+		
+		System.out.println("리프레시 토큰 생성 : " + refresh_token);
+		
 		return refresh_token;
 	}
 	

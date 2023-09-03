@@ -206,10 +206,12 @@ public class JWTUtil {
  	        		|| isBlacklistedRefreshToken(tokenType, token, response)
  	        		) return true;
  	        System.out.println("111");
- 	        if (
+ 	        if (	storedJti == null &&
  	        		requestJti.equals(storedJti) && 
  	        		validateAndProcessToken(token, request)) {
  	        	System.out.println("1111");
+ 	        	// redis에 jti 등록
+				redisCache.setJti(userId, requestJti);
  	        	// 토큰 검증 및 처리 성공
  	            chain.doFilter(request, response);
  	            return true;

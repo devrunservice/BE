@@ -155,9 +155,6 @@ public class LoginController {
                     // jti 생성
                     String jti = JWTUtil.generateJti();
                     
-                    // redis에 jti 등록
-                    redisCache.setJti(memberEntity.getId(), jti);
-                    
                     // Access_token 생성
                     String access_token = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName(), jti);
 
@@ -283,9 +280,6 @@ public class LoginController {
             
             // 새로운 jti 생성
             jti = JWTUtil.generateJti();
-            
-            // redis에 jti 등록
-            redisCache.setJti(memberEntity.getId(), jti);
             
             // 새로운 Token 생성
             String newAccessToken = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName(), jti);
@@ -451,9 +445,6 @@ public class LoginController {
 			// jti 생성
             String jti = JWTUtil.generateJti();
             
-            // redis에 jti 등록
-            redisCache.setJti(memberEntity.getId(), jti);
-            
 			// Aeccess_token 생성
 			String access_token = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName(), jti);
 			
@@ -548,7 +539,7 @@ public class LoginController {
 
 	// 회원의 핸드폰 번호가 맞는지 확인
 	@ResponseBody
-	@PostMapping("/user/{userId}/verify/phone")
+	@PostMapping("/users/{userId}/verify/phone")
 	public boolean verifyPhone(@PathVariable String userId, @RequestBody LoginDTO loginDTO){
 		
 		String phone = loginDTO.getPhonenumber();
@@ -627,14 +618,14 @@ public class LoginController {
 	
 	// 회원의 이메일이 맞는지 확인
 	@ResponseBody
-	@PostMapping("/user/{userId}/verify/email")
+	@PostMapping("/users/{userId}/verify/email")
 	public boolean verifyEmail(@PathVariable String userId, @RequestBody LoginDTO loginDTO){
 		
 		String email = loginDTO.getEmail();
 		
-		boolean isPhoneVerified = loginService.verifyEmail(userId, email);
+		boolean isEmailVerified = loginService.verifyEmail(userId, email);
 		
-		return isPhoneVerified;
+		return isEmailVerified;
 	}
 	
 	// 비밀번호 찾기 인증번호 이메일로 전송
