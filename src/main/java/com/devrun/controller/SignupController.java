@@ -227,6 +227,8 @@ public class SignupController {
 						    return new ResponseEntity<>("Failed to register for database", HttpStatus.INTERNAL_SERVER_ERROR);
 						}
 					    
+					    // 회원가입 인증 메일 발송
+					    emailSenderService.sendSignupByEmail(memberEntity.getEmail(), memberEntity.getId());
 					    // 메모리에 저장된 전화번호와 인증코드 제거
 					    memberService.removeVerifyCode(memberEntity.getPhonenumber());
 					    return new ResponseEntity<>("Signup successful", HttpStatus.OK);
@@ -271,9 +273,9 @@ public class SignupController {
 
 	}
 	
-	// 회원가입 인증 이메일 발송
+	// 회원가입 인증 이메일 재발송
 	@ResponseBody
-	@PostMapping("/signup/confirm/email")
+	@PostMapping("/signup/resend/confirm-email")
 	public ResponseEntity<?> signupEmail(@RequestParam("email") String toEmail
 										, @RequestParam("id") String id) {
 		
