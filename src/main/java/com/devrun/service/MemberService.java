@@ -10,14 +10,21 @@ import java.util.regex.Pattern;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.devrun.entity.Consent;
+import com.devrun.entity.Contact;
+import com.devrun.entity.LoginInfo;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.PointEntity;
+import com.devrun.repository.ConsentRepository;
+import com.devrun.repository.ContactRepository;
+import com.devrun.repository.LoginInfoRepository;
 import com.devrun.repository.MemberEntityRepository;
 import com.devrun.util.CaffeineCache;
 
@@ -38,6 +45,9 @@ public class MemberService {
     private String serviceId;
 
     private final MemberEntityRepository memberEntityRepository;
+    private final ContactRepository contactRepository;
+    private final ConsentRepository consentRepository;
+    private final LoginInfoRepository loginInfoRepository;
     
     private final CaffeineCache cacheService; // 캐시 서비스 주입
 
@@ -53,6 +63,18 @@ public class MemberService {
 
     public MemberEntity insert(MemberEntity memberEntity) {
 		return memberEntityRepository.save(memberEntity);
+	}
+    
+    public Contact insert(Contact contact) {
+		return contactRepository.save(contact);
+	}
+    
+    public Consent insert(Consent consent) {
+		return consentRepository.save(consent);
+	}
+
+	public LoginInfo insert(LoginInfo loginInfo) {
+		return loginInfoRepository.save(loginInfo);
 	}
 
     public int checkID(String id) {

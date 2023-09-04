@@ -3,11 +3,14 @@ package com.devrun.service;
 
 import com.devrun.dto.CartDTO;
 import com.devrun.entity.Cart;
+import com.devrun.entity.Contact;
 import com.devrun.youtube.Lecture;
 import com.devrun.entity.MemberEntity;
 import com.devrun.exception.RestApiException;
 import com.devrun.exception.UserErrorCode;
 import com.devrun.repository.CartRepo;
+import com.devrun.repository.ContactRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,6 +29,9 @@ public class CartService {
 
     @Autowired
     private MemberService memberService;
+    
+    @Autowired
+    private ContactRepository contactRepository;
 
     public CartDTO showCartInfo(String userid) {
 
@@ -53,8 +59,11 @@ public class CartService {
 
         result.setLectureInfo(lecutreInfo);
 
-        String userPhonumber = memberService.findById(userid).getPhonenumber();
-        String userEmail = memberService.findById(userid).getEmail();
+        MemberEntity m = memberService.findById(userid);
+        Contact c = contactRepository.findByMemberEntity(m);
+        
+        String userPhonumber = c.getPhonenumber();
+        String userEmail = c.getEmail();
         String username = memberService.findById(userid).getName();
 
         result.setUserPhonenumber(userPhonumber);

@@ -22,6 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.devrun.dto.member.SignupDTO;
 import com.devrun.dto.member.MemberDTO.Status;
+import com.devrun.entity.Consent;
+import com.devrun.entity.Contact;
+import com.devrun.entity.LoginInfo;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.PointEntity;
 import com.devrun.service.EmailSenderService;
@@ -103,21 +106,21 @@ public class SignupController {
 	// 해당 트랜잭션 내에서 실행되는 모든 데이터베이스 작업은 단일 트랜잭션으로 묶입니다. 
 	// 이렇게 하면 데이터 무결성이 보장되며, 예외가 발생하면 트랜잭션이 롤백되어 데이터베이스 상태가 이전 상태로 복원됩니다.
 	@Transactional																// code는 파라미터로													
-	public ResponseEntity<?> okay(@RequestBody @Valid MemberEntity memberEntity, String code) {
+	public ResponseEntity<?> okay(@RequestBody @Valid MemberEntity memberEntity, @Valid Contact contact, @Valid Consent consent, @Valid LoginInfo loginInfo, String code) {
 		// @Valid 어노테이션이 있는 경우, Spring은 요청 본문을 MemberEntity 객체로 변환하기 전에 Bean Validation API를 사용하여 유효성 검사를 수행
 		
 		System.out.println(memberEntity);
 		System.out.println(memberEntity.getPassword());
 		System.out.println("생일 : " + memberEntity.getBirthday());
 		
-		System.out.println("트루가 맞냐" + memberEntity.isAgeConsent());
+		System.out.println("트루가 맞냐" + consent.isAgeConsent());
 		System.out.println("아이디 유효성 검사 : " + memberService.validateId(memberEntity.getId()));
-		System.out.println("이메일 유효성 검사 : " + memberService.validateEmail(memberEntity.getEmail()));
+		System.out.println("이메일 유효성 검사 : " + memberService.validateEmail(contact.getEmail()));
 		System.out.println("비밀번호 유효성 검사" + memberService.validatePassword(memberEntity.getPassword()));
 		// 회원정보 입력
 		if (memberService.checkID(memberEntity.getId()) == 0 
-				&& memberService.checkEmail(memberEntity.getEmail()) == 0
-				&& memberService.checkphone(memberEntity.getPhonenumber()) == 0
+				&& memberService.checkEmail(contact.getEmail()) == 0
+				&& memberService.checkphone(contact.getPhonenumber()) == 0
 //				&& memberService.verifyCode(memberEntity.getPhonenumber(), code)
 				) {
 //			// 403 약관 미동의    
@@ -129,7 +132,7 @@ public class SignupController {
 			// 회원가입 성공
 //			else 
 				if (memberService.validateId(memberEntity.getId()) 
-					&& memberService.validateEmail(memberEntity.getEmail()) 
+					&& memberService.validateEmail(contact.getEmail()) 
 					&& memberService.validatePassword(memberEntity.getPassword())
 					) {
 					
@@ -189,18 +192,21 @@ public class SignupController {
 					        memberEntity.setPassword(encodedPassword); // 암호화된 비밀번호 설정
 					    	
 					    	// 사용자 등록 시도
-					    	MemberEntity m = memberService.insert(memberEntity);
+					    	MemberEntity member = memberService.insert(memberEntity);
+					    	Contact cont = memberService.insert(contact);
+					    	Consent cons = memberService.insert(consent);
+					    	LoginInfo Info = memberService.insert(loginInfo); 
 					    	
-					    	if (m != null) {
+					    	if (member != null && cont != null && cons != null && Info != null) {
 					    		
 					    		// 회원가입 축하 포인트 지급
 					    		PointEntity point = new PointEntity();
 					    		point.setMypoint(3000);
 					    		
 					    		// PointEntity 객체에 MemberEntity 객체를 설정
-						    	point.setMemberEntity(m);
+						    	point.setMemberEntity(member);
 						    	
-						    	System.out.println("멤버"+m);
+						    	System.out.println("멤버"+member);
 						    	System.out.println("포인트"+point);
 						    	
 						    	// PointEntity에 MemberEntity가 제대로 설정되었는지 검사
@@ -228,9 +234,9 @@ public class SignupController {
 						}
 					    
 					    // 회원가입 인증 메일 발송
-					    emailSenderService.sendSignupByEmail(memberEntity.getEmail(), memberEntity.getId());
+					    emailSenderService.sendSignupByEmail(contact.getEmail(), memberEntity.getId());
 					    // 메모리에 저장된 전화번호와 인증코드 제거
-					    memberService.removeVerifyCode(memberEntity.getPhonenumber());
+					    memberService.removeVerifyCode(contact.getPhonenumber());
 					    return new ResponseEntity<>("Signup successful", HttpStatus.OK);
 					    //ResponseEntity.ok("Signup successful");
 					    
@@ -252,17 +258,17 @@ public class SignupController {
 		    		//ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("UserId already taken");
 		
 		// 409 중복된 이메일
-		} else if(memberService.checkEmail(memberEntity.getEmail()) != 0) {
+		} else if(memberService.checkEmail(contact.getEmail()) != 0) {
 		    return new ResponseEntity<>("Email already registered", HttpStatus.CONFLICT);
 		    		//ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email already registered");
 		
 		// 409 중복된 핸드폰번호
-		} else if(memberService.checkphone(memberEntity.getPhonenumber()) != 0) {
+		} else if(memberService.checkphone(contact.getPhonenumber()) != 0) {
 		    return new ResponseEntity<>("Phone number already registered", HttpStatus.CONFLICT);
 		    		//ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Phone number already registered");
 		
 		// 403 인증되지 않은 전화번호
-		} else if(!memberService.verifyCode(memberEntity.getPhonenumber(), code)) {
+		} else if(!memberService.verifyCode(contact.getPhonenumber(), code)) {
 			
 			return new ResponseEntity<>("Verification failed Phonenumber", HttpStatus.FORBIDDEN);
 		// 기타 오류 500

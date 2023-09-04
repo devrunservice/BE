@@ -1,41 +1,44 @@
 package com.devrun.controller;
 
-import com.devrun.dto.MypageDTO;
-import com.devrun.entity.MemberEntity;
-import com.devrun.entity.editmyinfo;
-import com.devrun.service.AwsS3ReadService;
-import com.devrun.service.AwsS3UploadService;
-import com.devrun.service.MemberService;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.transaction.TransactionSystemException;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.transaction.TransactionalException;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Valid;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.devrun.dto.MypageDTO;
+import com.devrun.entity.Contact;
+import com.devrun.entity.MemberEntity;
+import com.devrun.repository.ContactRepository;
+import com.devrun.service.AwsS3ReadService;
+import com.devrun.service.AwsS3UploadService;
+import com.devrun.service.MemberService;
+
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @RestController
 public class MyPageController {
 
     @Autowired
     private MemberService memberService;
+    
+    @Autowired
+    private ContactRepository contactRepository;
 
     @Autowired
     private AwsS3ReadService awsS3ReadService;
@@ -64,13 +67,14 @@ public class MyPageController {
         }
 
         MemberEntity m = memberService.findById(userid);
-
+        Contact c = contactRepository.findByMemberEntity(m);
+        
         MypageDTO mypageDTO = new MypageDTO();
         mypageDTO.setId(m.getId());
         mypageDTO.setBirthday(m.getBirthday());
         mypageDTO.setName(m.getName());
-        mypageDTO.setPhonenumber(m.getPhonenumber());
-        mypageDTO.setEmail(m.getEmail());
+        mypageDTO.setPhonenumber(c.getPhonenumber());
+        mypageDTO.setEmail(c.getEmail());
         String profileimgurl = awsS3ReadService.findUploadKeyUrl(m.getProfileimgsrc());
         mypageDTO.setProfileimgsrc(profileimgurl);
 
@@ -114,8 +118,10 @@ public class MyPageController {
 
         if (memberService.verifyCode(editphone, verifycode)) {
             MemberEntity m = memberService.findById(v);
-            m.setPhonenumber(editphone);
+            Contact c = contactRepository.findByMemberEntity(m);
+            c.setPhonenumber(editphone);
             memberService.insert(m);
+            memberService.insert(c);
             memberService.removeVerifyCode(editphone);
 
             result.put("message", "Number edited successfully.");
@@ -141,6 +147,7 @@ public class MyPageController {
 
         String v = SecurityContextHolder.getContext().getAuthentication().getName();
         MemberEntity m = memberService.findById(v);
+        Contact c = contactRepository.findByMemberEntity(m);
         String editaemail = editdata.get("email");
 
         Map<String, String> result = new HashMap<String, String>();
@@ -158,9 +165,10 @@ public class MyPageController {
             return ResponseEntity.status(409).body(result);
 
         } else {
-            m.setEmail(editaemail);
+            c.setEmail(editaemail);
             memberService.insert(m);
-
+            memberService.insert(c);
+            
             result.put("message", "Email edited successfully.");
             result.put("email" , editaemail);
             return ResponseEntity.ok().body(result);

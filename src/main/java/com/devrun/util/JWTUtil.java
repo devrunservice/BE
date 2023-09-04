@@ -206,7 +206,7 @@ public class JWTUtil {
  	        		|| isBlacklistedRefreshToken(tokenType, token, response)
  	        		) return true;
  	        System.out.println("111");
- 	        if (isValidateJti(requestJti, storedJti, tokenType, userId)) {
+ 	        if (isValidateJti(requestJti, storedJti, userId)) {
  	        	System.out.println("1111");
 				if (validateAndProcessToken(token, request)) {
 					// 토큰 검증 및 처리 성공
@@ -223,7 +223,7 @@ public class JWTUtil {
  	}
  	
  	// 중복 로그인 방지를 위해 jti 검증
- 	private boolean isValidateJti(String requestJti, String storedJti, String tokenType, String userId) throws IOException {
+ 	private boolean isValidateJti(String requestJti, String storedJti, String userId) throws IOException {
  		if (storedJti == null || requestJti.equals(storedJti)) {
  			// redis에 jti 등록
 			redisCache.setJti(userId, requestJti);

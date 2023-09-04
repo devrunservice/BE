@@ -13,7 +13,12 @@ import org.springframework.stereotype.Service;
 
 import com.devrun.dto.member.LoginDTO.LoginStatus;
 import com.devrun.dto.member.MemberDTO.Status;
+import com.devrun.entity.Contact;
+import com.devrun.entity.LoginInfo;
 import com.devrun.entity.MemberEntity;
+import com.devrun.repository.ConsentRepository;
+import com.devrun.repository.ContactRepository;
+import com.devrun.repository.LoginInfoRepository;
 import com.devrun.repository.LoginRepository;
 import com.devrun.repository.MemberEntityRepository;
 
@@ -27,6 +32,12 @@ public class LoginService {
 	private MemberEntityRepository memberEntityRepository;
 	
 	@Autowired
+	private LoginInfoRepository loginInfoRepository;
+	
+	@Autowired
+	private ContactRepository contactRepository;
+	
+	@Autowired
 	private PasswordEncoder passwordEncoder;
 	
 	private LoginStatus loginStatus;
@@ -35,21 +46,29 @@ public class LoginService {
 	public void setLastLogin(MemberEntity memberEntity) {
 		Date currentDate = new Date();
     	System.out.println("현재시간 : " + currentDate);
-		memberEntity.setLastlogin(currentDate);
-		memberEntityRepository.save(memberEntity);
+    	LoginInfo loginInfo = loginInfoRepository.findByMemberEntity(memberEntity);
+        if (loginInfo == null) {
+            loginInfo = new LoginInfo();
+            loginInfo.setMemberEntity(memberEntity);
+        }
+
+        loginInfo.setLastlogin(currentDate);
+        loginInfoRepository.save(loginInfo);
 	}
+	
 	public LoginStatus validate(MemberEntity member) {
 		
 		MemberEntity existingMember = loginRepository.findById(member.getId());
+		LoginInfo existingLoginInfo = loginInfoRepository.findByMemberEntity(existingMember);
         
 		System.out.println("회원정보 : " + existingMember + "\n입력한 회원정보 : " + member);
 		
 		if (existingMember == null) {
 		    return LoginStatus.USER_NOT_FOUND;
-		} else if (existingMember.getLogintry() >= 5) {
+		} else if (existingLoginInfo.getLogintry() >= 5) {
 		    return LoginStatus.LOGIN_TRIES_EXCEEDED;
 		} else if (!passwordEncoder.matches(member.getPassword(), existingMember.getPassword())) {
-		    existingMember.setLogintry(existingMember.getLogintry() + 1);
+			existingLoginInfo.setLogintry(existingLoginInfo.getLogintry() + 1);
 		    memberEntityRepository.save(existingMember);
 		    return LoginStatus.PASSWORD_MISMATCH;
 		} else if (existingMember.getStatus() == Status.INACTIVE) {
@@ -57,7 +76,7 @@ public class LoginService {
 		} else if (existingMember.getStatus() == Status.WITHDRAWN) {
 		    return LoginStatus.ACCOUNT_WITHDRAWN;
 		} else {
-		    existingMember.setLogintry(existingMember.getLogintry() * 0); // reset login tries on successful login
+			existingLoginInfo.setLogintry(existingLoginInfo.getLogintry() * 0); // reset login tries on successful login
 		    memberEntityRepository.save(existingMember);
 		    return LoginStatus.SUCCESS;
 		}
@@ -71,7 +90,11 @@ public class LoginService {
 	    if (member == null) {
 	        return false;
 	    }
-	    return member.getPhonenumber().equals(phonenumber);
+	    Contact existingContact = contactRepository.findByMemberEntity(member);
+	    if (existingContact == null) {
+	        return false;
+	    }
+	    return existingContact.getPhonenumber().equals(phonenumber);
 	}
 	
 	public boolean verifyEmail(String id, String email) {
@@ -79,7 +102,11 @@ public class LoginService {
 	    if (member == null) {
 	        return false;
 	    }
-		return member.getEmail().equals(email);
+	    Contact existingContact = contactRepository.findByMemberEntity(member);
+	    if (existingContact == null) {
+	        return false;
+	    }
+		return existingContact.getEmail().equals(email);
 	}
 	
 	// Refresh_token HttpOnly 쿠키 생성
