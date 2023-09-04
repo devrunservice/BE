@@ -82,11 +82,11 @@ public class MemberService {
     }
 
     public int checkEmail(String email) {
-        return memberEntityRepository.countByEmail(email);
+        return contactRepository.countByEmail(email);
     }
 
     public int checkphone(String phonenumber) {
-        return memberEntityRepository.countByPhonenumber(phonenumber);
+        return contactRepository.countByPhonenumber(phonenumber);
     }
 
     public Mono<String> sendSmsCode(String recipientPhoneNumber) {
