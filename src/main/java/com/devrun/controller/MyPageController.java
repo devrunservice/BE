@@ -116,7 +116,7 @@ public class MyPageController {
             MemberEntity m = memberService.findById(v);
             m.setPhonenumber(editphone);
             memberService.insert(m);
-            memberService.removeSmsCode(editphone);
+            memberService.removeVerifyCode(editphone);
 
             result.put("message", "Number edited successfully.");
             result.put("phonenumber" , editphone);
