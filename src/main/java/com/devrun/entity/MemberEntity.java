@@ -76,7 +76,7 @@ public class MemberEntity {
     @Comment("카카오 간편로그인 Email + ID")
     private String kakaoEmailId;
 
-    @Column(name = "profileimgsrc")
+    @Column(name = "profileimgsrc", nullable = false)
     @NotBlank(message = "information cannot be null or empty")
     @Comment("유저 프로필 이미지 주소")
     private String profileimgsrc = "profile.png";

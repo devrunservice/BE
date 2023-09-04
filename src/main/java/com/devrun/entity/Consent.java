@@ -9,7 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Comment;
 
@@ -27,8 +27,8 @@ public class Consent {
     private int consentNo;
 
     @OneToOne
-    @JoinColumn(name = "userNo")
-    @NotBlank(message = "information cannot be null or empty")
+    @JoinColumn(name = "userNo", nullable = false)
+    @NotNull(message = "information cannot be null or empty")
     @Comment("유저 구분 번호")
     private MemberEntity memberEntity;
 
