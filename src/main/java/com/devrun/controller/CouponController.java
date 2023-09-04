@@ -127,20 +127,4 @@ public class CouponController {
     }
     
     
-    
-    
-    
-    
-    // 강의파트 구현시 변경 예정
-    @GetMapping("/couponlist")
-    public ResponseEntity<?> getcouponlist() {
-    	
-    	List<CouponViewEntity> couponlist = couponViewRepository.findAll();
-    	System.err.println(couponlist);
-    	
-        return ResponseEntity.ok(couponlist);
-        
-    }    
-	
-	
 }
