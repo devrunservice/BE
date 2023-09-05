@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -59,10 +60,15 @@ public class CouponController {
 		MemberEntity userEntity = memberService.findById(userid);
 		
 		Page<CouponViewEntity> couponlist = couponSerivce.readmycoupon(userEntity, pageable);
-		if (couponlist.getContent().isEmpty()) {
+		if (couponlist.getTotalElements() <= 0) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("보유한 쿠폰이 없습니다.");
 		}
-		return ResponseEntity.ok(couponlist.getContent());
+		
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("totalpages", couponlist.getTotalPages());
+		jsonObject.put("couponlist", couponlist.getContent());
+		
+		return ResponseEntity.ok(jsonObject);
 
 	}
 
@@ -127,7 +133,11 @@ public class CouponController {
 		int size = 10;
 		Pageable pageable = PageRequest.of(pageNo - 1, size);
 		Page<CouponListForMento> couponlist = couponSerivce.readCouponMadeByMento(userEntity, pageable);
-		return ResponseEntity.ok(couponlist.getContent());
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("totalpages", couponlist.getTotalPages());
+		jsonObject.put("couponlist", couponlist.getContent());
+		
+		return ResponseEntity.ok(jsonObject);
 	}
 
 }
