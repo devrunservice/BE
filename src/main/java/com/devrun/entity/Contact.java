@@ -13,6 +13,9 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Comment;
 
+import com.devrun.dto.NoticeDTO;
+import com.devrun.dto.member.SignupDTO;
+
 import lombok.Data;
 
 @Data
@@ -41,4 +44,15 @@ public class Contact {
 	@Comment("유저 연락처")
 	@NotBlank(message = "information cannot be null or empty")
 	private String phonenumber;
+    
+//    // SignupDTO로 변환하는 메소드
+//    public SignupDTO toSignupDTO() {
+//        SignupDTO dto = new SignupDTO();
+//        dto.setContactNo(this.contactNo);
+//        dto.setUserNo(this.memberEntity.getUserNo());
+//        dto.setEmail(this.email);
+//        dto.setPhonenumber(this.phonenumber);
+//        return dto;
+//    }
+
 }

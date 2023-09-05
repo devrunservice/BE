@@ -223,9 +223,9 @@ public class MemberService {
 
     public boolean validatePassword(String password) {
         // 숫자, 영문, 특수문자를 포함한 8자 이상 15이하
-        Pattern pattern = Pattern.compile("^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&]).{8,15}$");
+        Pattern pattern = Pattern.compile("^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&*]).{8,15}$");
         Matcher matcher = pattern.matcher(password);
-        return matcher.find();
+        return matcher.matches();
     }
 
 //    public boolean isUserIdEquals(String id) {
