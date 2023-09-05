@@ -7,6 +7,8 @@ public interface PaymentInfo {
 	int getPaidamount();
 	int getPayno();
 	String getReceipturl();
-	String getStatus();	
+	String getStatus();
+	String getPaymentDate();
+	int getUserpayno();
 	
 }
