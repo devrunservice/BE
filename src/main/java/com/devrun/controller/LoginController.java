@@ -563,7 +563,7 @@ public class LoginController {
         if(memberService.verifyCode(signupDTO.getPhonenumber(), signupDTO.getCode())){
         	
 	        // id를 핸드폰번호로 발송
-	        Mono<String> sendSmsResult = memberService.sendSmsFindid(signupDTO.getPhonenumber(), id);
+	        Mono<String> sendSmsResult = memberService.sendSmsFindId(signupDTO.getPhonenumber(), id);
 	
 	        // 메모리에 저장된 전화번호와 인증코드 제거
 	        memberService.removeVerifyCode(signupDTO.getPhonenumber());
@@ -582,13 +582,22 @@ public class LoginController {
 	// 인증 완료 후 비밀번호 변경
 	@ResponseBody
 	@PostMapping("/users/{userId}/edit-password")
-	public ResponseEntity<?> findpwPhone(@PathVariable String userId, @RequestBody SignupDTO signupDTO) {
+	public ResponseEntity<?> editPassword(@PathVariable String userId, @RequestBody SignupDTO signupDTO) {
 		
         MemberEntity memberEntity = loginRepository.findById(userId);
         // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(signupDTO.getPassword());
         
-        if (memberService.verifyCode(signupDTO.getPhonenumber(),signupDTO.getCode())
+        String key;
+        if (signupDTO.getPhonenumber() != null) {
+        	key = signupDTO.getPhonenumber();
+		} else if (signupDTO.getEmail() != null) {
+			key = signupDTO.getEmail();
+		} else {
+			return new ResponseEntity<>("Email or Phonenumber is null", HttpStatus.BAD_REQUEST);
+		}
+        
+        if (memberService.verifyCode(key, signupDTO.getCode())
 			&& memberService.validatePassword(signupDTO.getPassword())
 			&& !memberEntity.getPassword().equals(encodedPassword)
 			) {
@@ -664,7 +673,7 @@ public class LoginController {
 	
 	// 이메일로 아이디 전송
 	@ResponseBody
-	@PostMapping("/find/id/email")
+	@PostMapping("/find-id/send-email")
 	public ResponseEntity<?> findIdEmail(@RequestBody SignupDTO signupDTO){
 		
         String id = loginRepository.findByEmail(signupDTO.getEmail());

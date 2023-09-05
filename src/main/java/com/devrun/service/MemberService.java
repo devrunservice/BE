@@ -143,7 +143,7 @@ public class MemberService {
         return result;
     }
 
-    public Mono<String> sendSmsFindid(String recipientPhoneNumber, String id) {
+    public Mono<String> sendSmsFindId(String recipientPhoneNumber, String id) {
         WebClient webClient = WebClient.create("https://sens.apigw.ntruss.com");
         System.out.println("여기냐1");
         String method = "POST";
