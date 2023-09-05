@@ -21,23 +21,23 @@ public class LectureService {
         this.videoRepository = videoRepository;
     }
 
-    // 강의 카테고리를 변환하는 메서드
+ // 강의 카테고리를 변환하는 메서드
     private LectureCategory convertToLectureCategoryEntity(LecturecategoryDto categoryDto) {
         LectureCategory lectureCategory = new LectureCategory();
-        lectureCategory.setCategoryNo(categoryDto.getCategoryNo());
         lectureCategory.setLectureBigCategory(categoryDto.getLectureBigCategory());
         lectureCategory.setLectureMidCategory(categoryDto.getLectureMidCategory());
         return lectureCategory;
     }
-    
+
     public Lecture saveLecture(CreateLectureRequestDto requestDto, String thumbnailUrl) {
         // 강의 카테고리 저장
         LectureCategory lectureCategory = convertToLectureCategoryEntity(requestDto.getLectureCategory());
-        lectureCategory = categoryRepository.save(lectureCategory); // LectureCategory 저장
+        lectureCategory = categoryRepository.save(lectureCategory);
 
         // 강의 저장
         Lecture lecture = convertToLectureEntity(requestDto, lectureCategory);
-        lecture = lectureRepository.save(lecture); // Lecture 저장
+        lecture = lectureRepository.save(lecture);
+
 
         // 강의 썸네일 이미지 URL 저장
         lecture.setLectureThumbnail(thumbnailUrl);
@@ -133,17 +133,16 @@ public class LectureService {
     
     public void saveVideoInfo(List<VideoInfo> videoInfoList, Lecture lecture) {
         for (VideoInfo videoInfo : videoInfoList) {
-            Video video = new Video();
-            video.setUploadDate(videoInfo.getUploadDate());
-            video.setFileName(videoInfo.getFileName());
-            video.setVideoId(videoInfo.getVideoId());
-            video.setTotalPlayTime(videoInfo.getTotalPlayTime());
-            video.setVideoLink(videoInfo.getVideoLink());
-            video.setVideoTitle(videoInfo.getVideoTitle());
-            video.setLecture(lecture);
+            // Check if a video with the same videoId exists in the database
+            Video existingVideo = videoRepository.findByVideoId(videoInfo.getVideoId());
 
-            // Video 정보를 데이터베이스에 저장
-            videoRepository.save(video);
+                existingVideo.setUploadDate(videoInfo.getUploadDate());
+                existingVideo.setFileName(videoInfo.getFileName());
+                existingVideo.setTotalPlayTime(videoInfo.getTotalPlayTime());
+                existingVideo.setVideoLink(videoInfo.getVideoLink());
+                existingVideo.setUrl(videoInfo.getUrl()); // Set the URL property
+
+            
         }
     }
 }
