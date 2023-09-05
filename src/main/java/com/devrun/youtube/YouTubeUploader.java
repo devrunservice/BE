@@ -62,16 +62,16 @@ public class YouTubeUploader {
   /* 업로드되는 비디오의 형식(MIME 유형)을 나타내는 전역 인스턴스. */
   private static String VIDEO_FILE_FORMAT = "video/*";
 
-//  public YouTubeUploader() {
-//      // YouTube 객체 초기화
-//      try {
-//          Credential credential = authorize(Collections.singletonList("https://www.googleapis.com/auth/youtube.upload"));
-//          youtube = new YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
-//                  .setApplicationName("Devrun").build();
-//      } catch (Exception e) {
-//          e.printStackTrace();
-//      }
-//  }
+  public YouTubeUploader() {
+      // YouTube 객체 초기화
+      try {
+          Credential credential = authorize(Collections.singletonList("https://www.googleapis.com/auth/youtube.upload"));
+          youtube = new YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
+                  .setApplicationName("Devrun").build();
+      } catch (Exception e) {
+          e.printStackTrace();
+      }
+  }
 
  
   
@@ -238,9 +238,9 @@ public class YouTubeUploader {
 	        String videoUrl = "https://www.youtube.com/watch?v="+videoId;
 	        
 	        
-	        
-	        return new VideoInfo(videoId, videoUrl);
-	        
+
+	        return new VideoInfo(videoId,videoUrl);
+
 	    } catch (IOException e) {
 	        throw new IOException("비디오 업로드 중 오류가 발생했습니다.", e);
 	    }
