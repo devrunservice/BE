@@ -1,10 +1,14 @@
 package com.devrun.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -24,9 +28,10 @@ public class NoticeController {
 	@Autowired
 	private TextChange textChange;
 	
+	// 공지사항 작성 						아직 테스트
 	@Transactional
 	@ResponseBody
-	@PostMapping("/notice")
+	@PostMapping("/notice/write")
 	public ResponseEntity<?> notice(@RequestBody NoticeDTO noticeDTO) {
 		try {
 		    System.out.println("noticeDTO : " + noticeDTO);
@@ -62,4 +67,13 @@ public class NoticeController {
 	        return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
 	    }
 	}
+	
+	@ResponseBody
+	@GetMapping("/notice/list")
+	public List<NoticeDTO> noticeList() {
+	    List<Notice> notices = noticeService.findAllNotices();  // 가정: noticeService에서 모든 Notice를 가져오는 메소드
+	    return notices.stream().map(Notice::toDTO).collect(Collectors.toList());
+	}
+
+
 }
