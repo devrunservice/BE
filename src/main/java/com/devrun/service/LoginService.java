@@ -129,7 +129,7 @@ public class LoginService {
 		String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
 		ResponseCookie refresh_token = ResponseCookie
 			.from("Refresh_token", encodedValue)
-			.domain("devrun.site/")
+			.domain("devrun.site")
 			.path("/authz")
 			.sameSite("none")
 			.secure(true)
