@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,18 +44,18 @@ public class CouponController {
 	@Autowired
 	private CouponViewRepository couponViewRepository;
 
-	@GetMapping("/coupon/readmycoupon")
+	@GetMapping({"/coupon/readmycoupon","/coupon/readmycoupon/{pageno}"})
 	@ApiOperation(value = "쿠폰 조회하기", notes = "로그인 한 회원이 가진 쿠폰을 조회합니다.")
-	@ApiImplicitParam(name = "pageno", value = "조회할 페이지, 예시 : {pageno : 1}", dataType = "Map<String , Number>")
-	public ResponseEntity<?> readmycoupon(@RequestBody Map<String, Integer> pageno) {
+	@ApiImplicitParam(name = "pageno", value = "조회할 페이지", dataType = "Number")
+	public ResponseEntity<?> readmycoupon(@PathVariable(required = false) Integer pageno) {
 		System.out.println(
 				"---------------------------------CouponController readmycoupon method start---------------------------------");
-		Integer pageNo = pageno.get("pageno");
-		if (pageNo == null || pageNo <= 0) {
-			pageNo = 1;
+
+		if (pageno == null || pageno <= 0) {
+			pageno = 1;
 		}
 		int size = 10;
-		Pageable pageable = PageRequest.of(pageNo - 1, size);
+		Pageable pageable = PageRequest.of(pageno - 1, size);
 
 		String userid = SecurityContextHolder.getContext().getAuthentication().getName();
 		MemberEntity userEntity = memberService.findById(userid);
@@ -119,19 +120,18 @@ public class CouponController {
 		return ResponseEntity.ok(rsl);
 	}
 
-	@GetMapping("/coupon/mento/couponmanaging")
+	@GetMapping({"/coupon/mento/couponmanaging" , "/coupon/mento/couponmanaging/{pageno}"})
 	@ApiOperation(value = "멘토가 발행한 쿠폰 조회", notes = "멘토가 발행한 쿠폰을 개별적으로 조회합니다.", response = CouponListForMento.class)
-	@ApiImplicitParam(name = "pageno", value = "조회할 페이지, 예시 : {pageno : 1}", dataType = "Map<String , Number>")
+	@ApiImplicitParam(name = "pageno", value = "조회할 페이지", dataType = "Number")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "성공적으로 처리되었습니다") })
-	public ResponseEntity<?> couponmanagingByMento(@RequestBody Map<String, Integer> pageno) {
-		Integer pageNo = pageno.get("pageno");
-		if (pageNo == null || pageNo <= 0) {
-			pageNo = 1;
+	public ResponseEntity<?> couponmanagingByMento(@PathVariable(required = false) Integer pageno) {
+		if (pageno == null || pageno <= 0) {
+			pageno = 1;
 		}
 		String userid = SecurityContextHolder.getContext().getAuthentication().getName();
 		MemberEntity userEntity = memberService.findById(userid);
 		int size = 10;
-		Pageable pageable = PageRequest.of(pageNo - 1, size);
+		Pageable pageable = PageRequest.of(pageno - 1, size);
 		Page<CouponListForMento> couponlist = couponSerivce.readCouponMadeByMento(userEntity, pageable);
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("totalpages", couponlist.getTotalPages());
