@@ -3,6 +3,8 @@ package com.devrun.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,15 +21,18 @@ public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
 	@Query("SELECT p FROM PaymentEntity p WHERE p.paid_amount = :paid_amount")
 	PaymentEntity findByPaidAmount(@Param("paid_amount") String imp_uid);
 	
-	@Query("SELECT p.name AS name, p.receipt_url AS receipturl, "
-			+ "p.pay_no AS payno, p.merchant_uid AS merchantUid, p.paid_amount AS paidamount, p.status AS status, p.buyer_name AS buyername"
-			+ " FROM PaymentEntity p WHERE p.buyer_name = :name")
-    List<PaymentInfo> findAllProjectedBy(@Param("name") String name);
+	@Query(value = "SELECT p.name AS name, p.receipt_url AS receipturl, "
+	        + "p.pay_no AS payno, p.merchant_uid AS merchantUid, p.paid_amount AS paidamount, p.status AS status, p.buyer_name AS buyername, p.payment_date As paymentDate, "
+	        + "ROW_NUMBER() OVER(ORDER BY paymentDate DESC) AS userpayno "
+	        + "FROM payment p WHERE p.buyer_name = :name", nativeQuery = true)    
+	Page<PaymentInfo> findAllbyPaymentEntity(@Param("name") String name, PageRequest pageRequest);
 	
 	
 	@Query("SELECT p FROM PaymentEntity p WHERE p.merchant_uid = :merchant_uid")
 	PaymentEntity findByMerchantUid(@Param("merchant_uid") String merchant_uid);
-		    
+
+	
+	
 
       	 
 
