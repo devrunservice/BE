@@ -131,7 +131,7 @@ public class LoginService {
 //			.domain("devrun.site")
 			.path("/authz")
 			.sameSite("none")
-			.secure(true)
+//			.secure(true)
 			.httpOnly(true)
 			.build();
 		

@@ -6,5 +6,6 @@ import lombok.Data;
 public class SignupDTO {
 	
 	private String id, email, password, phonenumber, code;
+	private int userNo, contactNo;
 	
 }
