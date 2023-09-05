@@ -132,6 +132,7 @@ public class PaymentController {
 		}	
 		
 		//구매 정보 페이지
+		//푸쉬오류?
 		
 		@GetMapping("/PaymentInfo")
 		@ApiOperation("구매 정보 페이지, 로그인시 토큰에 들어있는 ID값을 가져와서 사용자 정보를 가져옵니다.")
