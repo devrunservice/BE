@@ -14,7 +14,6 @@ import java.sql.Date;
 @Entity
 @Immutable
 @Table(name= "coupon_manage")
-
 public class CouponViewEntity {
 	
 	@Id	
