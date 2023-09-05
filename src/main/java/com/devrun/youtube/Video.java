@@ -53,4 +53,12 @@ import lombok.Setter;
 	    // 생성자
 	    public Video() {
 	    }
+	    
+	    public void setVideoId(String videoId) {
+	        this.videoId = videoId;
+	    }
+
+		public void setUrl(String url) {
+			
+		}
 	}

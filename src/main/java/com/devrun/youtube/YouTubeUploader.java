@@ -238,9 +238,9 @@ public class YouTubeUploader {
 	        String videoUrl = "https://www.youtube.com/watch?v="+videoId;
 	        
 	        
-	        
-	        return new VideoInfo(videoId, videoUrl);
-	        
+
+	        return new VideoInfo(videoId,videoUrl);
+
 	    } catch (IOException e) {
 	        throw new IOException("비디오 업로드 중 오류가 발생했습니다.", e);
 	    }
