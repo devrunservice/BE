@@ -32,7 +32,7 @@ public class WebConfig implements WebMvcConfigurer {
         		.allowedMethods("*")
         		// 쿠키 전송 허용
         		.allowCredentials(true)
-        		.exposedHeaders("Cookie")
+//        		.exposedHeaders("Cookie", "Cookies", "Refresh_token")
         		// 모든 헤더 허용
         		.allowedHeaders("*");
     }

@@ -589,13 +589,14 @@ public class LoginController {
         String encodedPassword = passwordEncoder.encode(signupDTO.getPassword());
         
         String key;
-        if (signupDTO.getPhonenumber() != null) {
-        	key = signupDTO.getPhonenumber();
-		} else if (signupDTO.getEmail() != null) {
-			key = signupDTO.getEmail();
-		} else {
-			return new ResponseEntity<>("Email or Phonenumber is null", HttpStatus.BAD_REQUEST);
-		}
+        boolean hasPhoneNumber = signupDTO.getPhonenumber() != null;
+        boolean hasEmail = signupDTO.getEmail() != null;
+
+        if (hasPhoneNumber ^ hasEmail) {  // XOR 연산
+            key = hasPhoneNumber ? signupDTO.getPhonenumber() : signupDTO.getEmail();
+        } else {
+            return new ResponseEntity<>("Either Email or Phonenumber should be provided, not both or none.", HttpStatus.BAD_REQUEST);
+        }
         
         if (memberService.verifyCode(key, signupDTO.getCode())
 			&& memberService.validatePassword(signupDTO.getPassword())
