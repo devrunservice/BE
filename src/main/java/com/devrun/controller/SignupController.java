@@ -306,7 +306,8 @@ public class SignupController {
 	    // 유효성 검사 로직
 	    if (!memberService.validateId(memberEntity.getId()) 
 	        || !memberService.validateEmail(contact.getEmail()) 
-	        || !memberService.validatePassword(memberEntity.getPassword())) {
+	        || !memberService.validatePassword(memberEntity.getPassword())
+	        || !memberService.verifyCode(contact.getPhonenumber(), code)) {
 	        return new ResponseEntity<>("Invalid input data", HttpStatus.BAD_REQUEST);
 	    }
 
