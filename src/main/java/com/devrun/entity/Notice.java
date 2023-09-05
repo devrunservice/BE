@@ -21,6 +21,7 @@ import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.devrun.dto.NoticeDTO;
 import com.devrun.dto.NoticeDTO.Status;
 
 import lombok.Data;
@@ -72,5 +73,19 @@ public class Notice {
     @Enumerated(EnumType.STRING)
     @Comment("공지사항의 상태")
     private Status status = Status.ACTIVE;
+
+    // NoticeDTO로 변환하는 메소드
+    public NoticeDTO toDTO() {
+        return new NoticeDTO(
+            this.noticeNo,
+            this.viewCount,
+            this.memberEntity.getUserNo(),
+            this.title,
+            this.content,
+            this.createdDate,
+            this.modifiedDate,
+            this.status
+        );
+    }
 
 }

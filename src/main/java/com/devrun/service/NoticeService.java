@@ -1,9 +1,10 @@
 package com.devrun.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.devrun.dto.NoticeDTO;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.Notice;
 import com.devrun.repository.MemberEntityRepository;
@@ -29,5 +30,9 @@ public class NoticeService {
 	public Notice findByNoticeNo(int noticeNo) {
 		return noticeRepository.findByNoticeNo(noticeNo);
 	}
+
+	public List<Notice> findAllNotices() {
+        return noticeRepository.findAll();
+    }
 
 }
