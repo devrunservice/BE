@@ -25,22 +25,18 @@ public class VideoInfo {
 	}
 
 	public String getFileName() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public String getTotalPlayTime() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public String getVideoLink() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public String getVideoTitle() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 }

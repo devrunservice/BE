@@ -17,22 +17,23 @@ import lombok.Data;
 @Entity
 public class Couponregicode {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long couponcodeno;
-    
-    private String couponcode; // 쿠폰 등록 코드 - 자동 생성됨
-    
-    @ManyToOne
-    @JoinColumn(name = "issuedno")
-    private CouponIssued issuedno; //쿠폰발행번호 - 외래키
-    
-    @Enumerated(EnumType.STRING)
-    @ColumnDefault("'ACTIVE'")
-    private couponstate state; // 쿠폰 상태
-    private enum couponstate{
-        ACTIVE, // 사용 가능 (생성 시 기본값)
-        REMOVED, // 사용 정지 처리로 인한 사용 불가
-        EXPIRY, // 기간 만료로 인한 사용 불가
-    }
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long couponcodeno;
+
+	private String couponcode; // 쿠폰 등록 코드 - 자동 생성됨
+
+	@ManyToOne
+	@JoinColumn(name = "issuedno")
+	private CouponIssued issuedno; // 쿠폰발행번호 - 외래키
+
+	@Enumerated(EnumType.STRING)
+	@ColumnDefault("'ACTIVE'")
+	private couponstate state; // 쿠폰 상태
+
+	public enum couponstate {
+		ACTIVE, // 사용 가능 (생성 시 기본값)
+		REMOVED, // 사용 정지 처리로 인한 사용 불가
+		EXPIRY, // 기간 만료로 인한 사용 불가
+	}
 }
