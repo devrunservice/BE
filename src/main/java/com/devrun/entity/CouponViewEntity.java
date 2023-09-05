@@ -14,7 +14,6 @@ import java.sql.Date;
 @Entity
 @Immutable
 @Table(name= "coupon_manage")
-
 public class CouponViewEntity {
 	
 	@Id	
@@ -22,7 +21,7 @@ public class CouponViewEntity {
 
     private String couponcode;
 
-    private Long userno;
+    private int userno;
 
     private int discountrate;
 
@@ -34,6 +33,6 @@ public class CouponViewEntity {
 
     private String target;
 
-    private boolean remove;
+    private String state;
 
 }

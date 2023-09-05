@@ -4,9 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,15 +12,20 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.devrun.entity.Consent;
+import com.devrun.entity.Contact;
+import com.devrun.entity.LoginInfo;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.PointEntity;
+import com.devrun.repository.ConsentRepository;
+import com.devrun.repository.ContactRepository;
+import com.devrun.repository.LoginInfoRepository;
 import com.devrun.repository.MemberEntityRepository;
+import com.devrun.util.CaffeineCache;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -41,8 +44,11 @@ public class MemberService {
     private String serviceId;
 
     private final MemberEntityRepository memberEntityRepository;
+    private final ContactRepository contactRepository;
+    private final ConsentRepository consentRepository;
+    private final LoginInfoRepository loginInfoRepository;
     
-    private final CacheService cacheService; // 캐시 서비스 주입
+    private final CaffeineCache cacheService; // 캐시 서비스 주입
 
 //    private final Map<String, String> phoneCodeMap = new ConcurrentHashMap<>();
 
@@ -57,17 +63,29 @@ public class MemberService {
     public MemberEntity insert(MemberEntity memberEntity) {
 		return memberEntityRepository.save(memberEntity);
 	}
+    
+    public Contact insert(Contact contact) {
+		return contactRepository.save(contact);
+	}
+    
+    public Consent insert(Consent consent) {
+		return consentRepository.save(consent);
+	}
+
+	public LoginInfo insert(LoginInfo loginInfo) {
+		return loginInfoRepository.save(loginInfo);
+	}
 
     public int checkID(String id) {
         return memberEntityRepository.countById(id);
     }
 
     public int checkEmail(String email) {
-        return memberEntityRepository.countByEmail(email);
+        return contactRepository.countByEmail(email);
     }
 
     public int checkphone(String phonenumber) {
-        return memberEntityRepository.countByPhonenumber(phonenumber);
+        return contactRepository.countByPhonenumber(phonenumber);
     }
 
     public Mono<String> sendSmsCode(String recipientPhoneNumber) {
@@ -95,7 +113,7 @@ public class MemberService {
 //        phoneCodeMap.put(recipientPhoneNumber, smsCode);
         
         // Save the code for verification later
-        cacheService.saveSmsCode(recipientPhoneNumber, smsCode); // Caffeine 캐시에 코드 저장
+        cacheService.saveCaffeine(recipientPhoneNumber, smsCode); // Caffeine 캐시에 코드 저장
 
 
         String jsonBody = "{"
@@ -121,10 +139,11 @@ public class MemberService {
                 .body(BodyInserters.fromValue(jsonBody))
                 .retrieve()
                 .bodyToMono(String.class);
+        System.out.println("sms인증 : " + result);
         return result;
     }
 
-    public Mono<String> sendSmsFindid(String recipientPhoneNumber, String id) {
+    public Mono<String> sendSmsFindId(String recipientPhoneNumber, String id) {
         WebClient webClient = WebClient.create("https://sens.apigw.ntruss.com");
         System.out.println("여기냐1");
         String method = "POST";
@@ -155,7 +174,6 @@ public class MemberService {
                 + "]"
                 + "}";
 
-
         Mono<String> result = webClient.post()
                 .uri(uri)
                 .header("Content-Type", "application/json; charset=utf-8")
@@ -177,16 +195,16 @@ public class MemberService {
         return Base64.getEncoder().encodeToString(mac.doFinal(message.getBytes(StandardCharsets.UTF_8)));
     }
 
-    public boolean verifySmsCode(String phoneNumber, String code) {
+    public boolean verifyCode(String key, String code) {
 //        String savedCode = phoneCodeMap.get(phoneNumber);
-    	String savedCode = cacheService.getSmsCode(phoneNumber); // Caffeine 캐시에서 코드 검색
+    	String savedCode = cacheService.getCaffeine(key); // Caffeine 캐시에서 코드 검색
         System.out.println(savedCode + ":" + code);
         return savedCode != null && savedCode.equals(code);
     }
 
-    public void removeSmsCode(String phoneNumber) {
+    public void removeVerifyCode(String phoneNumber) {
 //        phoneCodeMap.remove(phoneNumber);
-    	cacheService.removeSmsCode(phoneNumber); // Caffeine 캐시에서 코드 제거
+    	cacheService.removeCaffeine(phoneNumber); // Caffeine 캐시에서 코드 제거
     }
 
     public boolean validateId(String id) {

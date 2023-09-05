@@ -2,7 +2,6 @@ package com.devrun.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
 @Getter
 @RequiredArgsConstructor

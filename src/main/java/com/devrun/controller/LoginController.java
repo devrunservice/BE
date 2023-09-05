@@ -1,17 +1,23 @@
 package com.devrun.controller;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,13 +28,15 @@ import com.devrun.dto.member.KakaoProfileDTO;
 import com.devrun.dto.member.LoginDTO;
 import com.devrun.dto.member.LoginDTO.LoginStatus;
 import com.devrun.dto.member.LogoutResponse;
+import com.devrun.dto.member.MemberDTO;
 import com.devrun.dto.member.SignupDTO;
 import com.devrun.entity.MemberEntity;
 import com.devrun.repository.LoginRepository;
+import com.devrun.service.EmailSenderService;
 import com.devrun.service.KakaoLoginService;
 import com.devrun.service.LoginService;
 import com.devrun.service.MemberService;
-import com.devrun.service.TokenBlacklistService;
+import com.devrun.util.CaffeineCache;
 import com.devrun.util.JWTUtil;
 
 import reactor.core.publisher.Mono;
@@ -41,22 +49,29 @@ public class LoginController {
 
     @Autowired
     private MemberService memberService;
+    
+    @Autowired
+	private PasswordEncoder passwordEncoder;
 
     @Autowired
     private KakaoLoginService kakaoLoginService;
     
     @Autowired
-    private TokenBlacklistService tokenBlacklistService;
+	private EmailSenderService emailSenderService;
+    
+    @Autowired
+    private CaffeineCache redisCache;
+//    private RedisCache redisCache;
     
     @Autowired
     private LoginRepository loginRepository;
-
+    
     @Value("${kakao.client_id}")
     private String client_id;
 
     @Value("${kakao.redirect_url}")
     private String redirect_uri;
-
+    
     @ResponseBody
     @PostMapping("/login")
     public ResponseEntity<?> login(HttpServletRequest request
@@ -137,11 +152,14 @@ public class LoginController {
                     memberEntity = loginRepository.findById(member.getId());
                     System.out.println("3단계" + memberEntity);
 
-                    // JWT토큰
-                    String access_token = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName());
+                    // jti 생성
+                    String jti = JWTUtil.generateJti();
+                    
+                    // Access_token 생성
+                    String access_token = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName(), jti);
 
-                    // JWT refresh 토큰
-                    String refresh_token = JWTUtil.generateRefreshToken(memberEntity.getId(), memberEntity.getName());
+                    // Refresh_token 생성
+                    String refresh_token = JWTUtil.generateRefreshToken(memberEntity.getId(), memberEntity.getName(), jti);
 
 
                     // 마지막 로그인 날짜 저장
@@ -154,10 +172,26 @@ public class LoginController {
                     loginDTO.setAccess_token("Bearer " + access_token);
 //                    loginDTO.setRefresh_token("Bearer " + refresh_token);
 
-                    loginService.setRefeshcookie(response, refresh_token);
+                    // HTTPONLY 쿠키 생성
+//                    loginService.setRefeshCookie(response, refresh_token);
+                    ResponseCookie HTTP_refresh_token = loginService.setRefeshCookie(refresh_token);
                     
+//                    String value = "Bearer " + refresh_token;
+//            	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
+//                    ResponseCookie HTTP_refresh_token = ResponseCookie
+//                    		.from("Refresh_token", encodedValue)
+//                    		.path("/authz")
+//                    		.sameSite("none")
+//                    		.secure(true)
+//                    		.httpOnly(true)
+//                    		.build();
+                    
+                    // HttpHeaders 객체 생성 및 쿠키 설정
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add("Set-Cookie", HTTP_refresh_token.toString());
+
                     // 로그인 성공 200
-                    return new ResponseEntity<>(loginDTO, HttpStatus.OK);
+                    return ResponseEntity.status(200).headers(headers).body(loginDTO);
 
                 case USER_NOT_FOUND:
                 case PASSWORD_MISMATCH:
@@ -208,8 +242,11 @@ public class LoginController {
     public ResponseEntity<?> refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
 
         // refreshToken이 헤더에 있는지 확인
-        String refreshToken = request.getHeader("Refresh_token");
-//
+//        String refreshToken = request.getHeader("Refresh_token");
+    	Cookie[] cookies = request.getCookies();
+	    System.out.println("리프레시 쿠키 : " + cookies);
+	    String refreshToken = JWTUtil.getRefreshTokenFromCookies(cookies);
+	    
 //	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
         if (refreshToken == null || refreshToken.isEmpty()) {
             // 400 : Refresh token 없음
@@ -218,6 +255,8 @@ public class LoginController {
 //	    String id = memberService.getIdFromToken(request);
         // 사용자 식별
         String userId = JWTUtil.getUserIdFromToken(refreshToken);
+        
+        
 //        if (memberService.isUserIdEquals(userId)) {
 
             // Refresh Token 검증
@@ -233,18 +272,47 @@ public class LoginController {
                 return new ResponseEntity<>("User not found", HttpStatus.UNAUTHORIZED);
             }
 
-            // 새로운 Access Token 생성
-            String newAccessToken = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName());
-            String newRefreshToken = JWTUtil.generateRefreshToken(memberEntity.getId(), memberEntity.getName());
+            // 기존 jti 추출
+            String jti = JWTUtil.getJtiFromToken(refreshToken);
+            
+            // redis에서 jti 제거
+            redisCache.removeJti(userId);
+            
+            // 새로운 jti 생성
+            jti = JWTUtil.generateJti();
+            
+            // redis에 jti 등록
+ 			redisCache.setJti(userId, jti);
+            
+            // 새로운 Token 생성
+            String newAccessToken = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName(), jti);
+            String newRefreshToken = JWTUtil.generateRefreshToken(memberEntity.getId(), memberEntity.getName(), jti);
 
-            loginService.setRefeshcookie(response, newRefreshToken);
+            // HttpOnly 쿠키 생성
+//            loginService.setRefeshCookie(response, newRefreshToken);
+            ResponseCookie HTTP_refresh_token = loginService.setRefeshCookie(newRefreshToken);
+            
+//            String value = "Bearer " + newRefreshToken;
+//    	    String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
+//            ResponseCookie HTTP_refresh_token = ResponseCookie
+//            		.from("Refresh_token", encodedValue)
+//            		.path("/authz")
+//            		.sameSite("none")
+//            		.secure(true)
+//            		.httpOnly(true)
+//            		.build();
+            
+            // HttpHeaders 객체 생성 및 쿠키 설정
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Set-Cookie", HTTP_refresh_token.toString());
+            
             // 새로운 Access Token 응답으로 전송
             Map<String, String> responseBody = new HashMap<>();
             responseBody.put("Access_token", "Bearer " + newAccessToken);
 //            responseBody.put("Refresh_token", "Bearer " + newRefreshToken);
 
             // 200 : Access_token 발급
-            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+            return ResponseEntity.status(200).headers(headers).body(responseBody);
 //        } else {
         	
             // 401 토큰의 사용자와 요청한 사용자 불일치
@@ -255,8 +323,20 @@ public class LoginController {
 	@ResponseBody
 	@PostMapping("/authz/logout")
 	public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response){
+		
 		// refreshToken이 헤더에 있는지 확인
-        String refreshToken = request.getHeader("Refresh_token");
+//        String refreshToken = request.getHeader("Refresh_token");
+		Cookie[] cookies = request.getCookies();
+	    System.out.println("리프레시 쿠키 : " + cookies);
+	    String refreshToken = null;
+	    if (cookies != null) {
+	        for (Cookie cookie : cookies) {
+	            if ("Refresh_token".equals(cookie.getName())) {
+	                String encodedRefreshToken = cookie.getValue();
+	                refreshToken = new String(Base64.getDecoder().decode(encodedRefreshToken));
+	            }
+	        }
+	    }
         
 //	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
         if (refreshToken == null || refreshToken.isEmpty()) {
@@ -265,7 +345,7 @@ public class LoginController {
         }
         
         // 사용자 식별
-//        String userId = JWTUtil.getUserIdFromToken(refreshToken);
+        String userId = JWTUtil.getUserIdFromToken(refreshToken);
         
 //        if (memberService.isUserIdEquals(userId)) {
 	    
@@ -274,19 +354,22 @@ public class LoginController {
 //		        // 401 : 유효하지 않은 Refresh token
 //		        return new ResponseEntity<>("Invalid refresh token", HttpStatus.UNAUTHORIZED);
 //		    }
-
+	        
+	        // redis에서 jti 제거
+	        redisCache.removeJti(userId);
+        
 	        // 토큰을 블랙리스트에 추가합니다
 //	        TokenBlacklist.blacklistToken(refreshToken);
-        	tokenBlacklistService.blacklistToken(refreshToken);										// 테스트 끝나면 TokenBlacklist 삭제
+        	redisCache.blacklistToken(refreshToken);										// 테스트 끝나면 TokenBlacklist 삭제
 	        
 	        // 토큰이 블랙리스트에 올바르게 추가 됐는지 확인
 //	        boolean isTokenBlacklisted = TokenBlacklist.isTokenBlacklisted(refreshToken);
 //	        System.out.println("블랙리스트 등록 확인 : " + isTokenBlacklisted);
-        	boolean isTokenBlacklisted = tokenBlacklistService.isTokenBlacklisted(refreshToken);
+        	boolean isTokenBlacklisted = redisCache.isTokenBlacklisted(refreshToken);
             System.out.println("블랙리스트 등록 확인 : " + isTokenBlacklisted);
 	
 	        // 200 : 로그아웃 성공
-	        return new ResponseEntity<>("Logout successful",HttpStatus.OK);
+	        return new ResponseEntity<>("Logout successful", HttpStatus.OK);
         
 //        } else {
             // 401 토큰의 사용자와 요청한 사용자 불일치
@@ -298,76 +381,78 @@ public class LoginController {
 	@ResponseBody
 	@GetMapping("/auth/kakao/callback")
 	public ResponseEntity<?> kakaoCallback(@RequestParam(required = false) String code
-									        ,@RequestParam(required = false) String error
-									        ,HttpServletResponse response){
+									        , @RequestParam(required = false) String error
+									        , HttpServletResponse response){
 		
-		System.out.println("코드"+code);
+		System.out.println("코드" + code);
 		
 		// 성공했을 경우 code라는 파라미터값이 생성되고 실패했을 경우 error라는 파라미터값이 생성된다
 		if ( code != null ) {
 			
 			// oauthToken 가져오기
-			OAuthToken oauthToken=kakaoLoginService.getOauthToken(code);
+			OAuthToken oauthToken = kakaoLoginService.getOauthToken(code);
 			System.out.println("여기");
 			
 			if( oauthToken == null || oauthToken.getAccess_token() == null ) {
 				
 			// 500 : 엑세스 토큰을 가져오지 못 함
-			return new ResponseEntity<>("Failed to retrieve access token",HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>("Failed to retrieve access token", HttpStatus.INTERNAL_SERVER_ERROR);
 			
 			}
 			
-			System.out.println("카카오 엑세스 토큰 : "+oauthToken.getAccess_token());
+			System.out.println("카카오 엑세스 토큰 : " + oauthToken.getAccess_token());
 			
 			// kakaoProfile 가져오기
-			KakaoProfileDTO kakaoProfile=kakaoLoginService.getKakaoProfile(oauthToken);
+			KakaoProfileDTO kakaoProfile = kakaoLoginService.getKakaoProfile(oauthToken);
 			System.out.println(kakaoProfile);
 			
 			if( kakaoProfile == null || kakaoProfile.getId() == null ) {
 				
 			// 500 : 카카오 프로필을 가져오지 못 함
-			return new ResponseEntity<>("Failed to retrieve profile information",HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>("Failed to retrieve profile information", HttpStatus.INTERNAL_SERVER_ERROR);
 			
 			}
 			
-			System.out.println("카카오 ID : "+kakaoProfile.getId());
-			System.out.println("카카오 Email : "+kakaoProfile.getKakao_account().getEmail());
+			System.out.println("카카오 ID : " + kakaoProfile.getId());
+			System.out.println("카카오 Email : " + kakaoProfile.getKakao_account().getEmail());
 			
-			String kakaoId=kakaoProfile.getId().toString();
-			String kakaoEmail=kakaoProfile.getKakao_account().getEmail();
-			String KakaoEmailId=kakaoId+kakaoEmail;
+			String kakaoId = kakaoProfile.getId().toString();
+			String kakaoEmail = kakaoProfile.getKakao_account().getEmail();
+			String KakaoEmailId = kakaoId + kakaoEmail;
 			
 			// SNS Access_token 생성
 			loginService.setEasycookie(response, oauthToken.getAccess_token(), kakaoProfile.getId());
 			
-			MemberEntity memberEntity=new MemberEntity();
+			MemberEntity memberEntity = new MemberEntity();
 			
-			memberEntity=loginRepository.findByKakaoEmailId(KakaoEmailId);
-			System.out.println("3단계"+memberEntity);
+			memberEntity = loginRepository.findByKakaoEmailId(KakaoEmailId);
+			System.out.println("3단계" + memberEntity);
 			
 			if ( memberEntity == null ) {
 			
 			// 카카오 계정에 연동된 아이디가 없는 경우
 			// 카카오 아이디와 이메일을 포함한 토큰 생성
-			String easylogin_token = JWTUtil.generateEasyloginToken(kakaoId,kakaoEmail);
+			String easylogin_token = JWTUtil.generateEasyloginToken(kakaoId, kakaoEmail);
 			System.out.println("이지로그인 토큰 : " + easylogin_token);
 			
-			Map<String, String> response2=new HashMap<>();
-			response2.put("Easylogin_token","Bearer " + easylogin_token);
-			response2.put("message","No linked account found. Please link your account.");
+			Map<String, String> response2 = new HashMap<>();
+			response2.put("Easylogin_token", "Bearer " + easylogin_token);
+			response2.put("message", "No linked account found. Please link your account.");
 			System.out.println("간편로그인 리스폰스 : " + response2);
 			
 			// 303 : 연동된 계정이 존재하지 않음
-			return new ResponseEntity<>(response,HttpStatus.SEE_OTHER);
+			return new ResponseEntity<>(response2, HttpStatus.SEE_OTHER);
 			
 			} else {
 			
+			// jti 생성
+            String jti = JWTUtil.generateJti();
+            
+			// Aeccess_token 생성
+			String access_token = JWTUtil.generateAccessToken(memberEntity.getId(), memberEntity.getName(), jti);
 			
-			// JWT토큰
-			String access_token = JWTUtil.generateAccessToken(memberEntity.getId(),memberEntity.getName());
-			
-			// JWT refresh 토큰
-			String refresh_token = JWTUtil.generateRefreshToken(memberEntity.getId(),memberEntity.getName());
+			// Refresh_token 생성
+			String refresh_token = JWTUtil.generateRefreshToken(memberEntity.getId(), memberEntity.getName(), jti);
 			
 			// 마지막 로그인 날짜 저장
 			loginService.setLastLogin(memberEntity);
@@ -375,28 +460,44 @@ public class LoginController {
 			LoginStatus status = loginService.validate(memberEntity);
 			
 			// 로그인 정보 전달 객체 생성
-			LoginDTO loginDTO = new LoginDTO(status,"KakaoLogin successful");
+			LoginDTO loginDTO = new LoginDTO(status, "KakaoLogin successful");
 			
 			// 토큰을 응답 본문에 추가
 			loginDTO.setAccess_token("Bearer " + access_token);
-//			loginDTO.setRefresh_token("Bearer "+refresh_token);
+//			loginDTO.setRefresh_token("Bearer " + refresh_token);
 			
-			loginService.setRefeshcookie(response, refresh_token);
+			// HttpOnly 쿠키 생성
+//          loginService.setRefeshCookie(response, refresh_token);
+			ResponseCookie HTTP_refresh_token = loginService.setRefeshCookie(refresh_token);
+			
+//			String value = "Bearer " + refresh_token;
+//			String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
+//			ResponseCookie HTTP_refresh_token = ResponseCookie
+//				.from("Refresh_token", encodedValue)
+//				.path("/authz")
+//				.sameSite("none")
+//				.secure(true)
+//				.httpOnly(true)
+//				.build();
+			  
+			// HttpHeaders 객체 생성 및 쿠키 설정
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("Set-Cookie", HTTP_refresh_token.toString());
 			
 			// 로그인 성공 200
-			return new ResponseEntity<>(loginDTO,HttpStatus.OK);
+			return ResponseEntity.status(200).headers(headers).body(loginDTO);
 			
 			}
 		
 		} else if ( error != null ) {
 		
 		// 400 로그인 에러
-		return new ResponseEntity<>("KakaoLogin failed",HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>("KakaoLogin failed", HttpStatus.BAD_REQUEST);
 		
 		} else {
 			
 		// 400 code, error 둘다 null 값인 경우
-		return new ResponseEntity<>("Invalid request",HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST);
 		
 		}
 
@@ -406,29 +507,29 @@ public class LoginController {
 	@PostMapping("/sns/logout/kakao")
 	public ResponseEntity<?> kakaoLogout(HttpServletRequest request){
 	
-		String token=request.getHeader("Access_token_easy");
-		String userIdString=request.getHeader("User_Id");
+		String token = request.getHeader("Access_token_easy");
+		String userIdString = request.getHeader("User_Id");
 		
 		if ( token == null ) {
 			
 		// 400 토큰 null
-		return new ResponseEntity<>("Access_token_easy is null",HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>("Access_token_easy is null", HttpStatus.BAD_REQUEST);
 		
 		}
 		
 		if ( userIdString == null ) {
 			
 		// 400 id null
-		return new ResponseEntity<>("ID is null",HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>("ID is null", HttpStatus.BAD_REQUEST);
 		
 		}
 		
 		Long id = Long.parseLong(userIdString);
 		LogoutResponse kakaoLogout = kakaoLoginService.kakaoLogout(token,id);
 		
-		System.out.println("로그아웃 성공 ID : "+kakaoLogout.getId());
+		System.out.println("로그아웃 성공 ID : " + kakaoLogout.getId());
 		
-		return new ResponseEntity<>("KakaoLogout successful",HttpStatus.OK);
+		return new ResponseEntity<>("KakaoLogout successful", HttpStatus.OK);
 	}
 	
 	//	@ResponseBody
@@ -438,78 +539,197 @@ public class LoginController {
 	//		return new RedirectView(test);
 	//	}
 	
+
+	// 회원의 핸드폰 번호가 맞는지 확인
 	@ResponseBody
-	@PostMapping("/find/id")
-	public Mono<ResponseEntity<?>>findId(@RequestBody SignupDTO signupDTO){
+	@PostMapping("/users/{userId}/verify/phone")
+	public boolean verifyPhone(@PathVariable String userId, @RequestBody LoginDTO loginDTO){
 		
-        String id=loginRepository.findByPhonenumber(signupDTO.getPhonenumber());
-        System.out.println("찾은 아이디 : "+id+signupDTO.getCode());
-//		memberService.sendSmsCode(signupDTO.getPhonenumber());
+		String phone = loginDTO.getPhonenumber();
+		
+		boolean isPhoneVerified = loginService.verifyPhone(userId, phone);
+		
+		return isPhoneVerified;
+	}
+	
+	// 찾은 아이디를 핸드폰 번호로 전송
+	@ResponseBody
+	@PostMapping("/find-id/send-phone")
+	public Mono<ResponseEntity<?>>sendIdBySms(@RequestBody SignupDTO signupDTO){
+		
+        String id = loginRepository.findByPhonenumber(signupDTO.getPhonenumber());
+        System.out.println("찾은 아이디 : " + id + signupDTO.getCode());
         
-        if(memberService.verifySmsCode(signupDTO.getPhonenumber(),signupDTO.getCode())){
+        if(memberService.verifyCode(signupDTO.getPhonenumber(), signupDTO.getCode())){
         	
 	        // id를 핸드폰번호로 발송
-	        Mono<String> sendSmsResult=memberService.sendSmsFindid(signupDTO.getPhonenumber(),id);
+	        Mono<String> sendSmsResult = memberService.sendSmsFindId(signupDTO.getPhonenumber(), id);
 	
 	        // 메모리에 저장된 전화번호와 인증코드 제거
-	        memberService.removeSmsCode(signupDTO.getPhonenumber());
+	        memberService.removeVerifyCode(signupDTO.getPhonenumber());
         
         // .then은 실행되지면 return에는 무시되고 .just만 return에 포함된다 실행여부와 상관없이 (단지)just만 return 된다는 뜻이다
-        return sendSmsResult.then(Mono.just(new ResponseEntity<>("Find ID successful",HttpStatus.OK)));
+        return sendSmsResult.then(Mono.just(new ResponseEntity<>("Find ID successful", HttpStatus.OK)));
 
         } else {
         	
         // 403 인증되지 않은 전화번호
-        return Mono.just(new ResponseEntity<>("Verification failed Phonenumber",HttpStatus.FORBIDDEN));
+        return Mono.just(new ResponseEntity<>("Verification failed Phonenumber", HttpStatus.FORBIDDEN));
         
         }
     }
 	
+	// 인증 완료 후 비밀번호 변경
 	@ResponseBody
-	@PostMapping("/find/password")
-	public ResponseEntity<?> findpw(@RequestBody SignupDTO signupDTO){
+	@PostMapping("/users/{userId}/edit-password")
+	public ResponseEntity<?> editPassword(@PathVariable String userId, @RequestBody SignupDTO signupDTO) {
 		
-        MemberEntity memberEntity = loginRepository.findById(signupDTO.getId());
+        MemberEntity memberEntity = loginRepository.findById(userId);
+        // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(signupDTO.getPassword());
         
-        if(memberService.verifySmsCode(signupDTO.getPhonenumber(),signupDTO.getCode())
+        String key;
+        boolean hasPhoneNumber = signupDTO.getPhonenumber() != null;
+        boolean hasEmail = signupDTO.getEmail() != null;
+
+        if (hasPhoneNumber ^ hasEmail) {  // XOR 연산
+            key = hasPhoneNumber ? signupDTO.getPhonenumber() : signupDTO.getEmail();
+        } else {
+            return new ResponseEntity<>("Either Email or Phonenumber should be provided, not both or none.", HttpStatus.BAD_REQUEST);
+        }
+        
+        if (memberService.verifyCode(key, signupDTO.getCode())
 			&& memberService.validatePassword(signupDTO.getPassword())
-			&& !memberEntity.getPassword().equals(signupDTO.getPassword())
-			){
-			memberEntity.setPassword(signupDTO.getPassword());
+			&& !memberEntity.getPassword().equals(encodedPassword)
+			) {
+        	
+			memberEntity.setPassword(encodedPassword);
+			
 			loginRepository.save(memberEntity);
-			memberService.removeSmsCode(signupDTO.getPhonenumber());
 			
-			return new ResponseEntity<>("Password change successful",HttpStatus.OK);
+			memberService.removeVerifyCode(signupDTO.getPhonenumber());
 			
-        } else if (!memberService.verifySmsCode(signupDTO.getPhonenumber(),signupDTO.getCode())){
+			return new ResponseEntity<>("Password change successful", HttpStatus.OK);
+			
+        } else if ( !memberService.verifyCode(signupDTO.getPhonenumber(), signupDTO.getCode()) ) {
         
         // 403 인증되지 않은 전화번호
-        return new ResponseEntity<>("Verification failed Phonenumber",HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>("Verification failed Phonenumber", HttpStatus.FORBIDDEN);
         
-        } else if (memberEntity.getPassword().equals(signupDTO.getPassword())){
-        	
+        } else if ( memberEntity.getPassword().equals(encodedPassword) ) {
+        
         // 400 현재 비밀번호와 같음
-        return new ResponseEntity<>("Same as current password",HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("Same as current password", HttpStatus.BAD_REQUEST);
         
         } else {
         
         // 400 비밀번호 유효성검사 실패
-        return new ResponseEntity<>("Invalid input data",HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("Invalid input data", HttpStatus.BAD_REQUEST);
         
         }
     }
 	
+	// 회원의 이메일이 맞는지 확인
 	@ResponseBody
-	@PostMapping("/verifyPhone")
-	public boolean verifyPhone(@RequestBody LoginDTO loginDTO){
+	@PostMapping("/users/{userId}/verify/email")
+	public boolean verifyEmail(@PathVariable String userId, @RequestBody LoginDTO loginDTO){
 		
-		String id=loginDTO.getId();
-		String phone=loginDTO.getPhonenumber();
+		String email = loginDTO.getEmail();
 		
-		boolean isPhoneVerified=loginService.verifyPhone(id,phone);
+		boolean isEmailVerified = loginService.verifyEmail(userId, email);
 		
-		return isPhoneVerified;
-		
+		return isEmailVerified;
 	}
 	
+	// 비밀번호 찾기 인증번호 이메일로 전송
+	@ResponseBody
+	@PostMapping("/auth/email")
+	public ResponseEntity<?> signupEmail(@RequestBody MemberDTO memberDTO) {
+		
+        try {
+        	emailSenderService.sendFindByEmail(memberDTO.getEmail(), memberDTO.getId());
+        	// 200 성공
+        	return ResponseEntity.status(200).body("Email sent successfully");
+        } catch (Exception e) {
+        	System.out.println("이메일 에러 : " + e);
+        	// 403 이메일 전송 실패
+        	return ResponseEntity.status(403).body("Failed to send email");
+        }
+	}
+	
+	// 이메일로 전송된 인증코드 맞는지 검증
+	@ResponseBody
+	@PostMapping("/verify/email")
+	public ResponseEntity<?> verify(@RequestBody SignupDTO signupDTO) {
+		String email = signupDTO.getEmail();
+		String code = signupDTO.getCode();
+        if (memberService.verifyCode(email, code)) {
+        	// 200 인증성공
+        	return new ResponseEntity<>("Verification successful", HttpStatus.OK);
+        } else {
+        	// 403 인증실패
+        	return new ResponseEntity<>("Verification failed", HttpStatus.FORBIDDEN);
+        }
+    }
+	
+	// 이메일로 아이디 전송
+	@ResponseBody
+	@PostMapping("/find-id/send-email")
+	public ResponseEntity<?> findIdEmail(@RequestBody SignupDTO signupDTO){
+		
+        String id = loginRepository.findByEmail(signupDTO.getEmail());
+        System.out.println("찾은 아이디 : " + id + signupDTO.getCode());
+        
+        if(memberService.verifyCode(signupDTO.getEmail(), signupDTO.getCode())){
+        	
+	        // id를 이메일로 발송
+	        emailSenderService.sendIdByEmail(signupDTO.getEmail(), id);
+	
+	        // 메모리에 저장된 이메일과 인증코드 제거
+	        memberService.removeVerifyCode(signupDTO.getEmail());
+	        
+	        // .then은 실행되지면 return에는 무시되고 .just만 return에 포함된다 실행여부와 상관없이 (단지)just만 return 된다는 뜻이다
+	        return new ResponseEntity<>("Find ID successful", HttpStatus.OK);
+
+        } else {
+        	
+	        // 403 인증되지 않은 전화번호
+	        return new ResponseEntity<>("Verification failed Email", HttpStatus.FORBIDDEN);
+        
+        }
+    }
+	
+	@Autowired
+    private CaffeineCache caffeineCache;
+	
+	// 이거 왜 만들었지 뭔가 임시로 만든 거 같은데 뭐지
+	// 이것저것 섞인 것 같은데 비밀번호 변경이겠지 하고 일단 수정하고 냅둠
+	// 아닌데 뭐지 그냥 테스트 였나
+	// 얘 진짜 뭐야 진짜 테스트인가
+	@ResponseBody
+	@PostMapping("/signup/ok")
+	public ResponseEntity<?> signupOk(@RequestBody MemberDTO memberDTO
+										, @RequestParam("key") String key){
+		
+		MemberEntity member = memberService.findById(memberDTO.getId());
+		String encodedPassword = passwordEncoder.encode(memberDTO.getPassword());
+		if (member != null) {
+			
+			String cachedKey = caffeineCache.getCaffeine(memberDTO.getId());
+			if (cachedKey != null && cachedKey.equals(key)) {
+				member.setPassword(encodedPassword);
+				memberService.insert(member);
+				caffeineCache.removeCaffeine(memberDTO.getId());
+				
+				return ResponseEntity.status(200).body("Edit password successful");
+			} else {
+				return ResponseEntity.status(400).body("Authentication key mismatch");
+			}
+				
+		} else {
+			// 회원을 찾을 수 없음
+			return ResponseEntity.status(404).body("Member not found");
+		}
+	}
+
 }

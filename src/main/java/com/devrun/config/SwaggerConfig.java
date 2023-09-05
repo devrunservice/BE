@@ -1,4 +1,4 @@
-package com.devrun.webconfig;
+package com.devrun.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

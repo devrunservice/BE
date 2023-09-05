@@ -14,7 +14,7 @@ public class MemberDTO {
 	
 	private String name, email, id, password, phonenumber;
 	private int userNo;
-	private Date signup;
+	private Date signupDate;
 	private LocalDate birthday;
 	private Status status;
 	private Role role;
