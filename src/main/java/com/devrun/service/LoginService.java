@@ -126,7 +126,7 @@ public class LoginService {
 		ResponseCookie refresh_token = ResponseCookie
 			.from("Refresh_token", encodedValue)
 //			.domain("devrun.site")
-			.path("/")
+			.path("/authz")
 			.sameSite("none")
 			.secure(true)
 			.httpOnly(true)
