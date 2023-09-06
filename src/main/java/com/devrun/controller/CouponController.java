@@ -66,9 +66,9 @@ public class CouponController {
 		}
 		
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("totalelements", couponlist.getTotalElements());
-		jsonObject.put("totalpages", couponlist.getTotalPages());
-		jsonObject.put("couponlist", couponlist.getContent());
+		jsonObject.put("totalElements", couponlist.getTotalElements());
+		jsonObject.put("totalPages", couponlist.getTotalPages());
+		jsonObject.put("content", couponlist.getContent());
 		
 		return ResponseEntity.ok(jsonObject);
 
@@ -135,9 +135,9 @@ public class CouponController {
 		Pageable pageable = PageRequest.of(pageno - 1, size);
 		Page<CouponListForMento> couponlist = couponSerivce.readCouponMadeByMento(userEntity, pageable);
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("totalelements", couponlist.getTotalElements());
-		jsonObject.put("totalpages", couponlist.getTotalPages());
-		jsonObject.put("couponlist", couponlist.getContent());
+		jsonObject.put("totalElements", couponlist.getTotalElements());
+		jsonObject.put("totalPages", couponlist.getTotalPages());
+		jsonObject.put("content", couponlist.getContent());
 		
 		return ResponseEntity.ok(jsonObject);
 	}
