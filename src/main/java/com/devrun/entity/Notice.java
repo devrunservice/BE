@@ -15,11 +15,13 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.devrun.dto.NoticeDTO;
 import com.devrun.dto.NoticeDTO.Status;
 
 import lombok.Data;
@@ -38,7 +40,7 @@ public class Notice {
 	@OneToOne
 	@JoinColumn(name = "userNo", nullable = false)
 	@Comment("작성자")
-	@NotBlank(message = "information cannot be null or empty")
+	@NotNull(message = "information cannot be null or empty")
 	private MemberEntity memberEntity;
 	
 	@Column(name = "title", nullable = false, length = 25)
@@ -57,13 +59,13 @@ public class Notice {
 
     @CreationTimestamp								// 엔티티가 처음으로 데이터베이스에 저장될 때 현재 시간을 자동으로 설정
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "createdDate", nullable = false)
+    @Column(name = "createdDate")
     @Comment("작성날짜")
     private Date createdDate;
 
     @UpdateTimestamp								// 엔티티가 수정될 때마다 현재 시간으로 자동으로 업데이트
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "modifiedDate")
+    @Column(name = "modifiedDate", insertable = false)
     @Comment("수정날짜")
     private Date modifiedDate;
 
@@ -71,5 +73,19 @@ public class Notice {
     @Enumerated(EnumType.STRING)
     @Comment("공지사항의 상태")
     private Status status = Status.ACTIVE;
-	
+
+    // NoticeDTO로 변환하는 메소드
+    public NoticeDTO toDTO() {
+        return new NoticeDTO(
+            this.noticeNo,
+            this.viewCount,
+            this.memberEntity.getUserNo(),
+            this.title,
+            this.content,
+            this.createdDate,
+            this.modifiedDate,
+            this.status
+        );
+    }
+
 }

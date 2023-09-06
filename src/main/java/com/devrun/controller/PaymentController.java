@@ -1,6 +1,7 @@
 package com.devrun.controller;
 
 
+import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -10,11 +11,16 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.devrun.dto.PaymentDTO;
 import com.devrun.entity.MemberEntity;
@@ -28,6 +34,8 @@ import com.devrun.service.MemberService;
 import com.devrun.service.PaymentService;
 import com.devrun.util.JWTUtil;
 
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
 
@@ -124,11 +132,17 @@ public class PaymentController {
 		}	
 		
 		//구매 정보 페이지
+		//푸쉬오류?
 		
 		@GetMapping("/PaymentInfo")
 		@ApiOperation("구매 정보 페이지, 로그인시 토큰에 들어있는 ID값을 가져와서 사용자 정보를 가져옵니다.")
+		@ApiImplicitParams({
+			@ApiImplicitParam(name = "page", value= "필요한 페이지"),
+			@ApiImplicitParam(name = "size", value= "각 페이지에 표시할 항목 수")
+		})
 
-		public ResponseEntity<?> tmi(HttpServletRequest request) {
+		public ResponseEntity<?> tmi(@RequestParam("page") int page, @RequestParam("size") int size,					
+				HttpServletRequest request) {
 			
 		    // refreshToken이 헤더에 있는지 확인
 		    String accessToken = request.getHeader("Access_token");
@@ -143,19 +157,21 @@ public class PaymentController {
 		    
 		        MemberEntity member = memberService.findById(id);	
 		        
-		        String name = member.getName();
+		        String name = member.getName();		
+		        
+		        PageRequest pageRequest = PageRequest.of(page -1, size);
+		        
 
 		        // 사용자의 이름으로 결제 정보 조회
+		        Page<PaymentInfo> paymentsPage = paymentRepository.findAllbyPaymentEntity(name,pageRequest);
+		        System.err.println(paymentsPage);
 
-		        List<PaymentInfo> payments = paymentRepository.findAllProjectedBy(name);
-		        System.err.println(payments);
-
-		        if (payments.isEmpty()) {
+		        if (paymentsPage.isEmpty()) {
 		            // 결제 정보가 없을 경우에 대한 처리
 		            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("결제 정보가 없습니다.");
 		        }
 
-		        return ResponseEntity.ok(payments);
+		        return ResponseEntity.ok(paymentsPage);
 		}
 
 		

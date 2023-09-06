@@ -16,7 +16,6 @@ import com.devrun.dto.member.MemberDTO.Status;
 import com.devrun.entity.Contact;
 import com.devrun.entity.LoginInfo;
 import com.devrun.entity.MemberEntity;
-import com.devrun.repository.ConsentRepository;
 import com.devrun.repository.ContactRepository;
 import com.devrun.repository.LoginInfoRepository;
 import com.devrun.repository.LoginRepository;
@@ -129,7 +128,7 @@ public class LoginService {
 		String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
 		ResponseCookie refresh_token = ResponseCookie
 			.from("Refresh_token", encodedValue)
-			.domain("devrun.site")
+//			.domain("devrun.site")
 			.path("/authz")
 			.sameSite("none")
 			.secure(true)
