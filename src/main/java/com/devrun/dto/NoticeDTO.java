@@ -4,11 +4,13 @@ import java.util.Date;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
+@AllArgsConstructor			// 모든 필드를 인수로 받는 생성자만 생성
+@NoArgsConstructor			// 기본 생성자가 생성
 public class NoticeDTO {
 	
 	private int noticeNo, viewCount, userNo;
