@@ -1,7 +1,6 @@
 package com.devrun.controller;
 
 
-import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -13,8 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,9 +24,11 @@ import com.devrun.dto.PaymentDTO;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.PaymentEntity;
 import com.devrun.entity.PointEntity;
+import com.devrun.entity.PointHistoryEntity;
 import com.devrun.repository.MemberEntityRepository;
 import com.devrun.repository.PaymentInfo;
 import com.devrun.repository.PaymentRepository;
+import com.devrun.repository.PointHistoryRepository;
 import com.devrun.repository.PointRepository;
 import com.devrun.service.MemberService;
 import com.devrun.service.PaymentService;
@@ -55,21 +55,26 @@ public class PaymentController {
 	
 	@Autowired
 	private MemberService memberService;
+	
+	@Autowired
+	private PointHistoryRepository pointHistoryRepository;
 
 	// 결제 정보 db에 저장
 		@PostMapping("/savePaymentInfo")
 		@ApiOperation("결제 완료 시 db에 필요한 정보들을 저장합니다.")
-		public ResponseEntity<String> savePaymentInfo(@RequestBody List<PaymentDTO> paymentDTOList) {
+        public ResponseEntity<String> savePaymentInfo(@RequestBody List<PaymentDTO> paymentDTOList) {
 			
 			LocalDateTime dateTime = LocalDateTime.now();
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd a hh:mm:ss", new Locale("ko"));
 			String paymentDate = dateTime.format(formatter);
-
+			
 			System.err.println(paymentDTOList);
 			
 			// 사용자의 포인트 정보를 조회
 			//2개이상 구매시 구매자는 이름이 같으니깐, 첫번째 배열에 있는 이름으로 point찾음.
 		    String name = paymentDTOList.get(0).getBuyer_name();
+		    //userno로 처리하기 
+		    
 		    System.err.println(name);
 		    PointEntity pointEntity = pointRepository.findByMemberEntity_name(name);
 		    System.err.println(pointEntity);
@@ -94,7 +99,7 @@ public class PaymentController {
 		    // 사용자의 포인트에서 지불할 금액만큼 차감
 		    int updatedPoint = nowPoint - userPoint;
 		    pointEntity.setMypoint(updatedPoint);
-		    pointRepository.save(pointEntity);
+		    pointRepository.save(pointEntity); 
 		    
 		    //외래키에 값 넣어주기.
 		    //결제 정보 사용자 이름으로 memberEntity에서 찾은후, 밑에 추가해주기. 
@@ -119,11 +124,40 @@ public class PaymentController {
 				System.out.println(paymentEntity);	
 				paymentEntity.setMemberEntity(memberEntity);
 				
-	            paymentList.add(paymentEntity);   
-		       }
+	            paymentList.add(paymentEntity);	            
+		       }		    
+			    pointRepository.save(pointEntity);			    
 		        
-		        System.err.println(paymentList);
-				paymentService.savePaymentInfo(paymentList);				
+			        System.err.println(paymentList);
+					paymentService.savePaymentInfo(paymentList);
+					System.err.println(pointEntity);
+					
+				    //포인트 적립하기
+					int totalPaidAmount = (int) paymentDTOList.stream()
+					        .mapToDouble(paymentDTO -> paymentDTO.getPaid_amount() * 0.1)
+					        .sum();
+			        int uppoint = totalPaidAmount + updatedPoint;
+				    pointEntity.setMypoint(uppoint);
+					
+				    //포인트 사용했으면 실행
+				    if(userPoint > 0) {
+					PointHistoryEntity historyEntity = new PointHistoryEntity();
+		            historyEntity.setMemberEntity(memberEntity);
+		            historyEntity.setUpdatetime(paymentDate);
+		            historyEntity.setPointupdown(-userPoint);
+		            String explanation="결제시 사용한 포인트";
+		            historyEntity.setExplanation(explanation);
+		            pointHistoryRepository.save(historyEntity); 
+				    }
+		            
+		            // 포인트 획득 시
+		            PointHistoryEntity historyEntityGain = new PointHistoryEntity();
+		            historyEntityGain.setMemberEntity(memberEntity); 
+		            historyEntityGain.setUpdatetime(paymentDate); 
+		            historyEntityGain.setPointupdown(totalPaidAmount); 
+		            String gainExplanation = "결제시 얻은 포인트"; 
+		            historyEntityGain.setExplanation(gainExplanation);
+		            pointHistoryRepository.save(historyEntityGain);  
 				
 				return ResponseEntity.ok("결제 정보가 성공적으로 저장되었습니다.");
 			} catch (Exception e) {
@@ -132,7 +166,6 @@ public class PaymentController {
 		}	
 		
 		//구매 정보 페이지
-		//푸쉬오류?
 		
 		@GetMapping("/PaymentInfo")
 		@ApiOperation("구매 정보 페이지, 로그인시 토큰에 들어있는 ID값을 가져와서 사용자 정보를 가져옵니다.")
@@ -144,7 +177,7 @@ public class PaymentController {
 		public ResponseEntity<?> tmi(@RequestParam("page") int page, @RequestParam("size") int size,					
 				HttpServletRequest request) {
 			
-		    // refreshToken이 헤더에 있는지 확인
+			 // refreshToken이 헤더에 있는지 확인
 		    String accessToken = request.getHeader("Access_token");
 
 		    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
