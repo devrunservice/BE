@@ -31,7 +31,7 @@ public class Contact {
 
     @OneToOne
     @JoinColumn(name = "userNo", nullable = false)
-    @NotNull(message = "information cannot be null or empty")
+//    @NotNull(message = "information cannot be null or empty")
     @Comment("유저 구분 번호")
     private MemberEntity memberEntity;
 

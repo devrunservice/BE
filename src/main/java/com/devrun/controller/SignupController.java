@@ -5,7 +5,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Locale;
 
 import javax.validation.Valid;
 
@@ -28,6 +30,7 @@ import com.devrun.entity.Consent;
 import com.devrun.entity.Contact;
 import com.devrun.entity.LoginInfo;
 import com.devrun.entity.MemberEntity;
+import com.devrun.entity.PointEntity;
 import com.devrun.service.EmailSenderService;
 import com.devrun.service.MemberService;
 import com.devrun.util.CaffeineCache;
@@ -50,8 +53,8 @@ public class SignupController {
     private CaffeineCache caffeineCache;
 	
 	// ID 중복확인
-	@PostMapping("/checkID")
 	@ResponseBody
+	@PostMapping("/checkID")
     public String checkID(@RequestBody SignupDTO signupDTO) {
 		String id = signupDTO.getId();
         int result = memberService.checkID(id);
@@ -59,8 +62,8 @@ public class SignupController {
     }
 	
 	// Email 중복확인
-	@PostMapping("/checkEmail")
 	@ResponseBody
+	@PostMapping("/checkEmail")
     public String checkEmail(@RequestBody SignupDTO signupDTO) {
 		String email = signupDTO.getEmail();
 		int result = memberService.checkEmail(email);
@@ -68,8 +71,8 @@ public class SignupController {
     }
 
 	// Phone 중복확인
-	@PostMapping("/checkPhone")
 	@ResponseBody
+	@PostMapping("/checkPhone")
 	public String checkPhone(@RequestBody SignupDTO signupDTO) {
 		String phonenumber = signupDTO.getPhonenumber();
 		int result = memberService.checkphone(phonenumber);
@@ -77,8 +80,8 @@ public class SignupController {
 	}
 
 	// 핸드폰 인증번호 전송
-	@PostMapping("/auth/phone")
 	@ResponseBody
+	@PostMapping("/auth/phone")
 	public Mono<String> authPhonenumber(@RequestBody SignupDTO signupDTO) {
 		String phonenumber = signupDTO.getPhonenumber();
 		System.out.println("폰" + phonenumber);
@@ -289,94 +292,37 @@ public class SignupController {
 	@PostMapping("/signup/okay")
 	@Transactional
 	public ResponseEntity<?> okay(@RequestBody @Valid SignupWrapper signupWrapper, String code) {
+		
 	    MemberEntity memberEntity = signupWrapper.getMemberEntity();
-	    Contact contact = signupWrapper.getContact();
-	    Consent consent = signupWrapper.getConsent();
-	    LoginInfo loginInfo = signupWrapper.getLoginInfo();
-	    // 연관된 엔터티 설정
-	    contact.setMemberEntity(memberEntity);
-	    consent.setMemberEntity(memberEntity);
-	    loginInfo.setMemberEntity(memberEntity);
-	    
-		System.out.println("아이디 유효성 검사 : " + memberService.validateId(memberEntity.getId()));
-		System.out.println("이메일 유효성 검사 : " + memberService.validateEmail(contact.getEmail()));
-		System.out.println(memberEntity.getPassword());
-		System.out.println("비밀번호 유효성 검사" + memberService.validatePassword(memberEntity.getPassword()));
-
-	    // 유효성 검사 로직
-	    if (!memberService.validateId(memberEntity.getId()) 
-	        || !memberService.validateEmail(contact.getEmail()) 
-	        || !memberService.validatePassword(memberEntity.getPassword())
-	        || !memberService.verifyCode(contact.getPhonenumber(), code)) {
+	    if (memberEntity == null) {
+	        return new ResponseEntity<>("MemberEntity should not be null", HttpStatus.BAD_REQUEST);
+	    }
+	    // 유효성 검증
+	    if (!validateInputData(memberEntity, signupWrapper.getContact(), code)) {
 	        return new ResponseEntity<>("Invalid input data", HttpStatus.BAD_REQUEST);
 	    }
-
-	    // 중복 검사 로직
-	    if (memberService.checkID(memberEntity.getId()) != 0
-	        || memberService.checkEmail(contact.getEmail()) != 0
-	        || memberService.checkphone(contact.getPhonenumber()) != 0) {
+	    // 중복확인
+	    if (isDuplicate(memberEntity, signupWrapper.getContact())) {
 	        return new ResponseEntity<>("Duplicate data", HttpStatus.CONFLICT);
 	    }
 
-	    // 약관 동의 검사 로직
-	    if (!consent.isAgeConsent() || !consent.isTermsOfService() || !consent.isPrivacyConsent()) {
-	        return new ResponseEntity<>("User has not agreed to the terms", HttpStatus.FORBIDDEN);
-	    }
-
-	    // 나이 검사 로직
-	    LocalDate localCurrentDate = LocalDate.now();
-	    LocalDate userBirthday = memberEntity.getBirthday();
-	    LocalDate after19Years = userBirthday.plusYears(19);
-	    if (!(localCurrentDate.isAfter(after19Years) || localCurrentDate.isEqual(after19Years))) {
-	        return new ResponseEntity<>("User is under 19 years old", HttpStatus.BAD_REQUEST);
-	    }
-
 	    try {
-	    	// 가입일자 설정
-	    	
-	    	// 원하는 시간대로 변경 가능
-	    	ZoneId zoneId = ZoneId.systemDefault();
-	    	
-	    	// 현재 날짜와 시간을 LocalDateTime 형식으로 가져오기
-	    	LocalDateTime localCurrentDateTime = LocalDateTime.now(zoneId);
-
-	    	// LocalDateTime을 Instant로 변환하기
-	    	Instant currentInstant = localCurrentDateTime
-	    			// atZone() 메서드를 사용하여 시스템 기본 시간대를 사용
-	    			.atZone(zoneId)
-	    			// toInstant() 메서드를 사용하여 Instant로 변환
-	    			.toInstant();
-
-	    	// Instant를 java.util.Date 객체로 변환
-	    	// 이를 위해 Date.from() 메서드를 사용
-	    	Date currentDate = Date.from(currentInstant);
-
-	    	// 가입일자를 현재 날짜와 시간으로 설정
-	    	memberEntity.setSignupDate(currentDate);
-	        // 데이터 저장 로직
-	        String encodedPassword = passwordEncoder.encode(memberEntity.getPassword());
-	        memberEntity.setPassword(encodedPassword);
-	        System.out.println("여긴가");
-	        MemberEntity savedMember = memberService.insert(memberEntity);
-	        System.out.println("여긴가2");
-	        Contact savedContact = memberService.insert(contact);
-	        System.out.println("여긴가3");
-	        Consent savedConsent = memberService.insert(consent);
-	        System.out.println("여긴가4");
-	        LoginInfo savedLoginInfo = memberService.insert(loginInfo);
-	        System.out.println("여긴가5");
-
-	        if (savedMember == null || savedContact == null || savedConsent == null || savedLoginInfo == null) {
+	        // 데이터 저장
+	        MemberEntity savedMember = saveMemberEntities(signupWrapper);
+	        if (savedMember == null) {
 	            return new ResponseEntity<>("Failed to register the user", HttpStatus.INTERNAL_SERVER_ERROR);
 	        }
 
-	        // 회원가입 성공 로직
-	        memberService.removeVerifyCode(contact.getPhonenumber());
-	        try {
-	            emailSenderService.sendSignupByEmail(contact.getEmail(), memberEntity.getId());
-	        } catch (MailException e) {
-	            return new ResponseEntity<>("Error occurred while sending email", HttpStatus.INTERNAL_SERVER_ERROR);
+	        // 포인트 저장
+	        if (!savePoints(memberEntity)) {
+	            return new ResponseEntity<>("Failed to save points", HttpStatus.INTERNAL_SERVER_ERROR);
 	        }
+
+	        // 캐시 제거
+	        memberService.removeVerifyCode(signupWrapper.getContact().getPhonenumber());
+
+	        // 이메일 전송
+	        emailSenderService.sendSignupByEmail(signupWrapper.getContact().getEmail(), memberEntity.getId());
 
 	        return new ResponseEntity<>("Signup successful", HttpStatus.OK);
 	    } catch (Exception e) {
@@ -385,14 +331,63 @@ public class SignupController {
 	    }
 	}
 
-	
+	// 회원정보 유효성 검증
+	private boolean validateInputData(MemberEntity memberEntity, Contact contact, String code) {
+	    return memberService.validateId(memberEntity.getId()) &&
+	           memberService.validateEmail(contact.getEmail()) &&
+	           memberService.validatePassword(memberEntity.getPassword()) &&
+	           memberService.verifyCode(contact.getPhonenumber(), code);
+	}
+
+	// 회원정보 중복확인
+	private boolean isDuplicate(MemberEntity memberEntity, Contact contact) {
+	    return memberService.checkID(memberEntity.getId()) != 0 ||
+	           memberService.checkEmail(contact.getEmail()) != 0 ||
+	           memberService.checkphone(contact.getPhonenumber()) != 0;
+	}
+
+	// 회원정보 DB에 저장
+	private MemberEntity saveMemberEntities(SignupWrapper signupWrapper) throws Exception {
+	    MemberEntity memberEntity = signupWrapper.getMemberEntity();
+	    Contact contact = signupWrapper.getContact();
+	    Consent consent = signupWrapper.getConsent();
+	    LoginInfo loginInfo = signupWrapper.getLoginInfo();
+
+	    // 연관된 엔터티 설정
+	    contact.setMemberEntity(memberEntity);
+	    consent.setMemberEntity(memberEntity);
+	    loginInfo.setMemberEntity(memberEntity);
+
+	    String encodedPassword = passwordEncoder.encode(memberEntity.getPassword());
+	    memberEntity.setPassword(encodedPassword);
+
+	    MemberEntity savedMember = memberService.insert(memberEntity);
+	    if (savedMember != null &&
+	        memberService.insert(contact) != null &&
+	        memberService.insert(consent) != null &&
+	        memberService.insert(loginInfo) != null) {
+	        return savedMember;
+	    }
+
+	    return null;
+	}
+
+	// 회원가입 축하 포인트 저장
+	private boolean savePoints(MemberEntity memberEntity) {
+	    PointEntity point = new PointEntity();
+	    point.setMypoint(3000);
+	    point.setMemberEntity(memberEntity);
+	    return memberService.insert(point) != null;
+	}
 	
 	// 회원가입 인증 이메일 재발송
 	@ResponseBody
 	@PostMapping("/signup/resend/confirm-email")
 	public ResponseEntity<?> signupEmail(@RequestParam("email") String toEmail
 										, @RequestParam("id") String id) {
-		
+		return sendEmail(toEmail, id);
+	}
+	private ResponseEntity<?> sendEmail(String toEmail, String id) {
         try {
         	emailSenderService.sendSignupByEmail(toEmail, id);
         	// 200 성공
@@ -413,43 +408,38 @@ public class SignupController {
 		
 		MemberEntity member = memberService.findById(id);
 		
-		if (member != null) {
-			// 현재 시간
-			Instant currentDate = Instant.now();
-			// 회원가입 시간
-			Instant signupDate = member.getSignupDate().toInstant();
-			long diffInMinutes = Duration.between(signupDate, currentDate).toMinutes();
-			
-			System.out.println("현재시간 : " + currentDate);
-			System.out.println("가입시간 : " + signupDate);
-			System.out.println("시간 차이 : " + diffInMinutes);
-			
-			if (diffInMinutes < 60) {
-				
-				String cachedKey = caffeineCache.getCaffeine(id);
-				if (cachedKey != null && cachedKey.equals(key)) {
-					
-					member.setStatus(Status.ACTIVE);
-					
-					memberService.insert(member);
-					caffeineCache.removeCaffeine(id);
-					
-					// 이메일 인증 성공 회원 활성화
-					return ResponseEntity.status(200).body("Email verification successful, account activated");
-				} else {
-					// 유효하지 않은 키
-					return ResponseEntity.status(400).body("Invalid key");
-				}
-				
-			} else {
-				// 회원가입 1시간 경과
-				return ResponseEntity.status(400).body("Verification expired");
-			}
-			
-		} else {
+		if (member == null) {
 			// 회원을 찾을 수 없음
-			return ResponseEntity.status(404).body("Member not found");
-		}
+	        return ResponseEntity.status(404).body("Member not found");
+	    }
+		
+		if (isVerificationExpired(member.getSignupDate())) {
+			// 회원가입 1시간 경과
+	        return ResponseEntity.status(400).body("Verification expired");
+	    }
+
+	    return verifyKeyAndActivateAccount(id, key, member);
 	}
-	
+
+	private boolean isVerificationExpired(Date signupDate) {
+		// 현재 시간
+	    Instant currentDate = Instant.now();
+	    // 회원가입 시간
+	    Instant memberSignupDate = signupDate.toInstant();
+	    long diffInMinutes = Duration.between(memberSignupDate, currentDate).toMinutes();
+	    return diffInMinutes >= 60;
+	}
+
+	private ResponseEntity<?> verifyKeyAndActivateAccount(String id, String key, MemberEntity member) {
+	    String cachedKey = caffeineCache.getCaffeine(id);
+	    if (cachedKey != null && cachedKey.equals(key)) {
+	        member.setStatus(Status.ACTIVE);
+	        memberService.insert(member);
+	        caffeineCache.removeCaffeine(id);
+	        // 이메일 인증 성공 회원 활성화
+	        return ResponseEntity.status(200).body("Email verification successful, account activated");
+	    }
+	    // 유효하지 않은 키
+	    return ResponseEntity.status(400).body("Invalid key");
+	}
 }

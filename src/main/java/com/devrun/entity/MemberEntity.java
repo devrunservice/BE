@@ -11,10 +11,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Comment;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.devrun.dto.member.MemberDTO.Role;
@@ -64,6 +67,8 @@ public class MemberEntity {
 	@Comment("활성 : ACTIVE / 휴면 : INACTIVE / 탈퇴 : WITHDRAWN")
 	private Status status = Status.INACTIVE;
 	
+	@UpdateTimestamp
+	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "signupDate", nullable = false)
 	@Comment("유저 가입일")
 	private Date signupDate;
