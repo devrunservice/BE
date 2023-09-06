@@ -159,7 +159,7 @@ public class PaymentController {
 		        
 		        String name = member.getName();		
 		        
-		        PageRequest pageRequest = PageRequest.of(page, size);
+		        PageRequest pageRequest = PageRequest.of(page -1, size);
 		        
 
 		        // 사용자의 이름으로 결제 정보 조회
