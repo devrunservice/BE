@@ -64,7 +64,6 @@ public class KakaoLoginService {
 		OAuthToken oauthToken = null;
 		try {
 			oauthToken = objectMapper.readValue(response.getBody(), OAuthToken.class);	// 카카오의 응답을 Java 객체로 변환하는 부분입니다.
-																						// 응답 본문은 JSON 형식이므로 이를 OAuthToken 클래스의 인스턴스로 변환합니다.
 		} catch (JsonMappingException e) {
 			e.printStackTrace();
 		} catch (JsonProcessingException e) {
@@ -127,7 +126,6 @@ public class KakaoLoginService {
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
-		
 		return kakaoProfile;
     }
     
@@ -162,9 +160,9 @@ public class KakaoLoginService {
 			logoutResponse = objectMapper3.readValue(response3.getBody(), LogoutResponse.class);	// 카카오의 응답을 Java 객체로 변환하는 부분입니다.
 		// 응답 본문은 JSON 형식이므로 이를 OAuthToken 클래스의 인스턴스로 변환합니다.
 		} catch (JsonMappingException e) {
-		e.printStackTrace();
+			e.printStackTrace();
 		} catch (JsonProcessingException e) {
-		e.printStackTrace();
+			e.printStackTrace();
 		}
 		System.out.println("kakaoId : " + logoutResponse);
 		return logoutResponse;
