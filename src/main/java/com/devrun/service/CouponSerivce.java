@@ -76,7 +76,7 @@ public class CouponSerivce {
 		return res;
 	}
 
-	public String removecode(MemberEntity userEntity, List<String> TargetCouponCodeList) {
+	public String removecode(MemberEntity userEntity, String TargetCouponCode) {
 
 		List<CouponIssued> couponIssuedlist = couponIssuedRepository.findAllByIssueduser(userEntity);
 		List<Couponregicode> couponcodes = new ArrayList<Couponregicode>();
@@ -89,15 +89,12 @@ public class CouponSerivce {
 
 		String rsl = "해당 멘토가 발행한 쿠폰이 아닙니다.";
 		for (Couponregicode couponregicode : couponcodes) {
-			for (String TargetCouponCode : TargetCouponCodeList) {
 				if (couponregicode.getCouponcode().equals(TargetCouponCode)) {
 					System.out.println("해당 멘토가 발행한 쿠폰으로 확인 되었으므로, 삭제");
-					rsl = couponregicodeRepository.removecode(TargetCouponCode, "REMOVED");
-
+					couponregicodeRepository.removecode(TargetCouponCode, "REMOVED");
+					rsl = "정지 처리 되었습니다.";
 				}
-			}
 		}
-
 		return rsl;
 	}
 
