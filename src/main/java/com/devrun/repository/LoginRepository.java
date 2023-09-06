@@ -14,10 +14,10 @@ public interface LoginRepository extends JpaRepository<MemberEntity, Long> {
 
 	MemberEntity findByKakaoEmailId(String kakaoEmailId);
 	
-	@Query("SELECT c.memberEntity.userNo FROM Contact c WHERE c.phonenumber = :phonenumber")
+	@Query("SELECT c.memberEntity.id FROM Contact c WHERE c.phonenumber = :phonenumber")
 	String findByPhonenumber(@Param("phonenumber") String phonenumber);
 
-	@Query("SELECT c.memberEntity.userNo FROM Contact c WHERE c.email = :email")
+	@Query("SELECT c.memberEntity.id FROM Contact c WHERE c.email = :email")
 	String findByEmail(@Param("email") String email);
 
 }
