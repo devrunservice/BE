@@ -291,15 +291,14 @@ public class LoginController {
         if (isValidEasyLoginToken(request)) {
             // 이지로그인 처리
             if (!processEasyLogin(member, request, response)) {
-                return new ResponseEntity<>("이미 다른 사용자와 연동됨", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("Already linked to another user", HttpStatus.BAD_REQUEST);
             }
         }
 
         // 로그인 마무리 및 토큰 생성
         member = finalizeLoginProcess(member);
-
         // LoginDTO에 SUCCESS 상태 설정
-        LoginDTO loginDTO = new LoginDTO(LoginStatus.SUCCESS, "로그인 성공");
+        LoginDTO loginDTO = new LoginDTO(LoginStatus.SUCCESS, "Login successful");
 
         // 토큰 생성 및 설정
         Map<String, String> tokens = generateTokens(member);

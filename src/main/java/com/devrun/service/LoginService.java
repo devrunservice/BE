@@ -44,13 +44,12 @@ public class LoginService {
 	// 마지막 로그인 날짜 수정
 	public void setLastLogin(MemberEntity memberEntity) {
 		Date currentDate = new Date();
-    	System.out.println("현재시간 : " + currentDate);
-    	LoginInfo loginInfo = loginInfoRepository.findByMemberEntity(memberEntity);
+    	MemberEntity existingMember = loginRepository.findById(memberEntity.getId());
+    	LoginInfo loginInfo = loginInfoRepository.findByMemberEntity(existingMember);
         if (loginInfo == null) {
             loginInfo = new LoginInfo();
             loginInfo.setMemberEntity(memberEntity);
         }
-
         loginInfo.setLastlogin(currentDate);
         loginInfoRepository.save(loginInfo);
 	}
@@ -60,8 +59,6 @@ public class LoginService {
 		MemberEntity existingMember = loginRepository.findById(member.getId());
 		LoginInfo existingLoginInfo = loginInfoRepository.findByMemberEntity(existingMember);
         
-		System.out.println("회원정보 : " + existingMember + "\n입력한 회원정보 : " + member);
-		
 		if (existingMember == null) {
 		    return LoginStatus.USER_NOT_FOUND;
 		} else if (existingLoginInfo.getLogintry() >= 5) {
