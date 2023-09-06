@@ -66,9 +66,9 @@ public class CouponController {
 		}
 		
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("totalelements", couponlist.getTotalElements());
-		jsonObject.put("totalpages", couponlist.getTotalPages());
-		jsonObject.put("couponlist", couponlist.getContent());
+		jsonObject.put("totalElements", couponlist.getTotalElements());
+		jsonObject.put("totalPages", couponlist.getTotalPages());
+		jsonObject.put("content", couponlist.getContent());
 		
 		return ResponseEntity.ok(jsonObject);
 
@@ -105,19 +105,21 @@ public class CouponController {
 	}
 
 	@PostMapping("/coupon/shrewder")
-	@ApiOperation(value = "쿠폰 파쇄기", notes = "특정 쿠폰을 사용 정지 처리하거나 복구합니다. 다중선택이 가능합니다.")
-	@ApiImplicitParam(name = "codelist", value = "사용 정지할 쿠폰 코드", required = true, dataType = "Map<String , List<String>>")
+	@ApiOperation(value = "쿠폰 파쇄기", notes = "특정 쿠폰을 사용 정지 처리하거나 복구합니다. 단건별로 처리합니다.")
+	@ApiImplicitParam(name = "codelist", value = "사용 정지할 쿠폰 코드 / {\r\n"
+			+ "  \"code\":  \"76705-QrfC7KEzfezV\"\r\n"
+			+ "}", required = true, dataType = "Map<String, String>")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "성공적으로 처리되었습니다"),
 			@ApiResponse(code = 400, message = "옳지 않은 키 값입니다. 키 값 : code") })
-	public ResponseEntity<?> couponremove(@RequestBody Map<String, List<String>> codelist) {
+	public ResponseEntity<?> couponremove(@RequestBody Map<String, String> codelist) {
 		String userid = SecurityContextHolder.getContext().getAuthentication().getName();
 		MemberEntity userEntity = memberService.findById(userid);
 
-		List<String> targetcodelist = codelist.get("codelist");
-		if (targetcodelist.isEmpty()) {
+		 String targetcode = codelist.get("code");
+		if (targetcode.isEmpty()) {
 			return ResponseEntity.ok("쿠폰코드가 입력되지 않았습니다.");
 		}
-		String rsl = couponSerivce.removecode(userEntity, targetcodelist);
+		String rsl = couponSerivce.removecode(userEntity, targetcode);
 		return ResponseEntity.ok(rsl);
 	}
 
@@ -135,9 +137,9 @@ public class CouponController {
 		Pageable pageable = PageRequest.of(pageno - 1, size);
 		Page<CouponListForMento> couponlist = couponSerivce.readCouponMadeByMento(userEntity, pageable);
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("totalelements", couponlist.getTotalElements());
-		jsonObject.put("totalpages", couponlist.getTotalPages());
-		jsonObject.put("couponlist", couponlist.getContent());
+		jsonObject.put("totalElements", couponlist.getTotalElements());
+		jsonObject.put("totalPages", couponlist.getTotalPages());
+		jsonObject.put("content", couponlist.getContent());
 		
 		return ResponseEntity.ok(jsonObject);
 	}

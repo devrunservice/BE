@@ -6,7 +6,7 @@ import com.devrun.entity.Couponregicode.couponstate;
 
 public interface CouponListForMento {
 	
-	String gettarget();
+	String getlecturename();
 
 	String getcouponcode();
 
