@@ -93,7 +93,7 @@ public class EmailSenderService {
 
         
         String subject = "[Devrun] " + id + "님 회원가입을 축하합니다. 이메일 인증을 완료해주세요.";
-        String url = "https://devrun.net/signup/ok";
+        String url = "https://devrun.net/signupcompletion";
         RandomString rs = new RandomString(35);
         String tempkey = rs.nextString();
         

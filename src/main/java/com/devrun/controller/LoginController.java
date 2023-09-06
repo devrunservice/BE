@@ -585,6 +585,7 @@ public class LoginController {
 	public ResponseEntity<?> editPassword(@PathVariable String userId, @RequestBody SignupDTO signupDTO) {
 		
         MemberEntity memberEntity = loginRepository.findById(userId);
+        System.out.println("회원 : " + memberEntity);
         // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(signupDTO.getPassword());
         
@@ -594,20 +595,25 @@ public class LoginController {
 
         if (hasPhoneNumber ^ hasEmail) {  // XOR 연산
             key = hasPhoneNumber ? signupDTO.getPhonenumber() : signupDTO.getEmail();
+            System.out.println("hasPhoneNumber : " + hasPhoneNumber);
+            System.out.println("hasEmail : " + hasEmail);
+            System.out.println("key : " + key);
         } else {
             return new ResponseEntity<>("Either Email or Phonenumber should be provided, not both or none.", HttpStatus.BAD_REQUEST);
         }
-        
+        System.out.println("1 : " + memberService.verifyCode(key, signupDTO.getCode()));
+        System.out.println("2 : " + memberService.validatePassword(signupDTO.getPassword()));
+        System.out.println("3 : " + memberEntity.getPassword());
         if (memberService.verifyCode(key, signupDTO.getCode())
 			&& memberService.validatePassword(signupDTO.getPassword())
 			&& !memberEntity.getPassword().equals(encodedPassword)
 			) {
         	
 			memberEntity.setPassword(encodedPassword);
-			
+			System.out.println("저장직전");
 			loginRepository.save(memberEntity);
-			
-			memberService.removeVerifyCode(signupDTO.getPhonenumber());
+			System.out.println("저장되나?");
+			memberService.removeVerifyCode(key);
 			
 			return new ResponseEntity<>("Password change successful", HttpStatus.OK);
 			
@@ -645,7 +651,8 @@ public class LoginController {
 	@ResponseBody
 	@PostMapping("/auth/email")
 	public ResponseEntity<?> signupEmail(@RequestBody MemberDTO memberDTO) {
-		
+		System.out.println("email : " + memberDTO.getEmail());
+		System.out.println("id : " + memberDTO.getId());
         try {
         	emailSenderService.sendFindByEmail(memberDTO.getEmail(), memberDTO.getId());
         	// 200 성공

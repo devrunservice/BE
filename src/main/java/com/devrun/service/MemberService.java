@@ -202,9 +202,9 @@ public class MemberService {
         return savedCode != null && savedCode.equals(code);
     }
 
-    public void removeVerifyCode(String phoneNumber) {
+    public void removeVerifyCode(String key) {
 //        phoneCodeMap.remove(phoneNumber);
-    	cacheService.removeCaffeine(phoneNumber); // Caffeine 캐시에서 코드 제거
+    	cacheService.removeCaffeine(key); // Caffeine 캐시에서 코드 제거
     }
 
     public boolean validateId(String id) {
