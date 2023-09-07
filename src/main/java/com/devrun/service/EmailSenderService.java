@@ -93,7 +93,8 @@ public class EmailSenderService {
 
         
         String subject = "[Devrun] " + id + "님 회원가입을 축하합니다. 이메일 인증을 완료해주세요.";
-        String url = "https://devrun.net/signupcompletion";
+//        String url = "https://devrun.net/signupcompletion";
+        String url = "https://devrun.site/verify/signupEmail";
         RandomString rs = new RandomString(35);
         String tempkey = rs.nextString();
         
@@ -105,7 +106,7 @@ public class EmailSenderService {
                 "<p style=\"font-size:1rem;color:#676767;line-height: 1;margin:0; font-family: \"Pretendard\";font-weight:400;\">아래 링크를 클릭하여 회원가입을 완료해 주세요.</p>" +
                 "<div style=\"border-top:1px solid #ddd; border-bottom:1px solid #ddd; padding: 25px 0;margin-top: 35px;\">" +
                 
-				"<form id=\"confirmationForm\" method=\"post\" action=\"" + url + "\">" +
+				"<form id=\"confirmationForm\" method=\"POST\" action=\"" + url + "\">" +
 				"<input type='hidden' id='id' name='id' value='" + id + "'/>" +
 				"<input type='hidden' id='key' name='key' value='" + tempkey + "'/>" +
 				"<p style=\"font-size: 0; padding:0px 30px;display: flex;align-items: center;justify-content: center;\">" +

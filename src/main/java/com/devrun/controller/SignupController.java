@@ -412,13 +412,16 @@ public class SignupController {
 		MemberEntity member = memberService.findById(id);
 		
 		if (member == null) {
-			// 회원을 찾을 수 없음
-	        return ResponseEntity.status(404).body("Member not found");
+			// 302 : 회원을 찾을 수 없음
+//	        return ResponseEntity.status(404).body("Member not found");
+			return ResponseEntity.status(HttpStatus.FOUND).header("Location", "https://devrun.net/signupcompletion?status=notfound").build();
+
 	    }
 		
 		if (isVerificationExpired(member.getSignupDate())) {
 			// 회원가입 1시간 경과
-	        return ResponseEntity.status(400).body("Verification expired");
+//	        return ResponseEntity.status(400).body("Verification expired");
+			return ResponseEntity.status(HttpStatus.FOUND).header("Location", "https://devrun.net/signupcompletion?status=expired").build();
 	    }
 
 	    return verifyKeyAndActivateAccount(id, key, member);
@@ -440,9 +443,11 @@ public class SignupController {
 	        memberService.insert(member);
 	        caffeineCache.removeCaffeine(id);
 	        // 이메일 인증 성공 회원 활성화
-	        return ResponseEntity.status(200).body("Email verification successful, account activated");
+//	        return ResponseEntity.status(200).body("Email verification successful, account activated");
+	        return ResponseEntity.status(HttpStatus.FOUND).header("Location", "https://devrun.net/signupcompletion?status=success").build();
 	    }
 	    // 유효하지 않은 키
-	    return ResponseEntity.status(400).body("Invalid key");
+//	    return ResponseEntity.status(400).body("Invalid key");
+	    return ResponseEntity.status(HttpStatus.FOUND).header("Location", "https://devrun.net/signupcompletion?status=failure").build();
 	}
 }

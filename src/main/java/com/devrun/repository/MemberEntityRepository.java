@@ -19,6 +19,4 @@ public interface MemberEntityRepository extends JpaRepository<MemberEntity, Long
 
 	MemberEntity findByName(String name);
 
-	MemberEntity findByUserNo(int userNo);
-
 }
