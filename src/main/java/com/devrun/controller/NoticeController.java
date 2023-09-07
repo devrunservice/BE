@@ -59,7 +59,6 @@ public class NoticeController {
 		        
 		        // Notice 엔터티에 MemberEntity 설정
 		        notice.setMemberEntity(memberEntity);
-		        
 		    }
 	
 		    System.out.println("notice2 : " + notice);
