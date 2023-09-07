@@ -34,7 +34,7 @@ public class S3Controller {
 
 	@PostMapping("/{path}/upload")
 	@ApiOperation("첨부된 파일을 S3 폴더에 저장합니다.")
-	@ApiImplicitParam(name = "첨부파일", value = "files", dataType = "HTTP multipart/form-data")
+	@ApiImplicitParam(name = "file", value = "첨부파일", dataType = "HTTP multipart/form-data")
 	public ResponseEntity<?> TransferToS3(@PathVariable String path,
 			@RequestParam(name = "file") List<MultipartFile> files) {
 		try {
