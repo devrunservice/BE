@@ -1,5 +1,6 @@
 package com.devrun.entity;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Date;
 
@@ -28,7 +29,8 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "user")
-public class MemberEntity {
+public class MemberEntity implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

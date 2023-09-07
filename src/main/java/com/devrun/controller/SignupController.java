@@ -288,14 +288,14 @@ public class SignupController {
 	@ResponseBody
 	@PostMapping("/signup/okay")
 	@Transactional
-	public ResponseEntity<?> okay(@RequestBody @Valid SignupWrapper signupWrapper, String code) {
+	public ResponseEntity<?> okay(@RequestBody @Valid SignupWrapper signupWrapper) {
 		
 	    MemberEntity memberEntity = signupWrapper.getMemberEntity();
 	    if (memberEntity == null) {
 	        return new ResponseEntity<>("MemberEntity should not be null", HttpStatus.BAD_REQUEST);
 	    }
 	    // 유효성 검증
-	    if (!validateInputData(memberEntity, signupWrapper.getContact(), code)) {
+	    if (!validateInputData(memberEntity, signupWrapper.getContact(), signupWrapper.getCode())) {
 	        return new ResponseEntity<>("Invalid input data", HttpStatus.BAD_REQUEST);
 	    }
 	    // 중복확인
@@ -410,8 +410,7 @@ public class SignupController {
 		HttpHeaders headers = new HttpHeaders();
 		MemberEntity member = memberService.findById(id);
 		String encodedId = Base64.getEncoder().encodeToString(id.getBytes());
-		String encodedEmail = Base64.getEncoder().encodeToString(email.getBytes()); 
-
+		String encodedEmail = Base64.getEncoder().encodeToString(email.getBytes());
 		
 		if (member == null) {
 			// 302 : 회원을 찾을 수 없음

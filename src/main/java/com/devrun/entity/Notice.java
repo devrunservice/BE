@@ -11,6 +11,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -38,8 +40,10 @@ public class Notice {
 	@Comment("공지사항 번호")
 	private int noticeNo;
 	
-	@OneToOne
-	@JoinColumn(name = "id", referencedColumnName = "id", nullable = false)
+	@ManyToOne
+	@JoinColumns({
+	@JoinColumn(name = "userNo", referencedColumnName = "userNo", nullable = false),
+	@JoinColumn(name = "id", referencedColumnName = "id", nullable = false)})
 	@Comment("작성자")
 	@NotNull(message = "information cannot be null or empty")
 	private MemberEntity memberEntity;
@@ -80,6 +84,7 @@ public class Notice {
         return new NoticeDTO(
             this.noticeNo,
             this.viewCount,
+            this.memberEntity.getUserNo(),
             this.title,
             this.content,
             this.memberEntity.getId(),
