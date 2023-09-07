@@ -1,10 +1,9 @@
 package com.devrun.controller;
 
 import java.net.URI;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.Date;
 
 import javax.validation.Valid;
@@ -410,8 +409,8 @@ public class SignupController {
 										){
 		HttpHeaders headers = new HttpHeaders();
 		MemberEntity member = memberService.findById(id);
-		String encodedId = URLEncoder.encode(id, StandardCharsets.UTF_8);
-		String encodedEmail = URLEncoder.encode(email, StandardCharsets.UTF_8);
+		String encodedId = Base64.getEncoder().encodeToString(id.getBytes());
+		String encodedEmail = Base64.getEncoder().encodeToString(email.getBytes()); 
 
 		
 		if (member == null) {
@@ -422,7 +421,7 @@ public class SignupController {
 		
 		if (isVerificationExpired(member.getSignupDate())) {
 			// 회원가입 1시간 경과
-			headers.setLocation(URI.create("https://devrun.net/signupverification?status=expired" + encodedId + "&email=" + encodedEmail));
+			headers.setLocation(URI.create("https://devrun.net/signupverification?status=expired&id=" + encodedId + "&email=" + encodedEmail));
 	        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	    }
 	    return verifyKeyAndActivateAccount(id, key, member, encodedId, encodedEmail);
@@ -445,11 +444,11 @@ public class SignupController {
 	        memberService.insert(member);
 	        caffeineCache.removeCaffeine(id);
 	        // 이메일 인증 성공 회원 활성화
-	        headers.setLocation(URI.create("https://devrun.net/signupverification?status=success" + encodedId + "&email=" + encodedEmail));
+	        headers.setLocation(URI.create("https://devrun.net/signupverification?status=success&id=" + encodedId + "&email=" + encodedEmail));
 	        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	    }
 	    // 유효하지 않은 키
-	    headers.setLocation(URI.create("https://devrun.net/signupverification?status=failure" + encodedId + "&email=" + encodedEmail));
+	    headers.setLocation(URI.create("https://devrun.net/signupverification?status=failure&id=" + encodedId + "&email=" + encodedEmail));
 	    return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	}
 }
