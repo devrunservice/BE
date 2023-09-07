@@ -401,7 +401,7 @@ public class SignupController {
 	// 회원가입 인증 확인
 	@ResponseBody
 	@Transactional
-	@CrossOrigin(origins = "https://mail.naver.com")
+	@CrossOrigin(origins = {"https://mail.naver.com", "https://mail.daum.net", "https://mail.google.com"})
 	@PostMapping("/verify/signupEmail")
 	public ResponseEntity<?> signupOk(@RequestParam("id") String id
 										, @RequestParam("key") String key){
@@ -410,7 +410,6 @@ public class SignupController {
 		
 		if (member == null) {
 			// 302 : 회원을 찾을 수 없음
-//	        return ResponseEntity.status(404).body("Member not found");
 			headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=notfound"));
 	        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 			
@@ -419,7 +418,6 @@ public class SignupController {
 		
 		if (isVerificationExpired(member.getSignupDate())) {
 			// 회원가입 1시간 경과
-//	        return ResponseEntity.status(400).body("Verification expired");
 			headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=expired"));
 	        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	    }
@@ -444,12 +442,10 @@ public class SignupController {
 	        memberService.insert(member);
 	        caffeineCache.removeCaffeine(id);
 	        // 이메일 인증 성공 회원 활성화
-//	        return ResponseEntity.status(200).body("Email verification successful, account activated");
 	        headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=success"));
 	        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	    }
 	    // 유효하지 않은 키
-//	    return ResponseEntity.status(400).body("Invalid key");
 	    headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=failure"));
 	    return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	}
