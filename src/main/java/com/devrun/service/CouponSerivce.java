@@ -90,9 +90,9 @@ public class CouponSerivce {
 		String rsl = "해당 멘토가 발행한 쿠폰이 아닙니다.";
 		for (Couponregicode couponregicode : couponcodes) {
 				if (couponregicode.getCouponcode().equals(TargetCouponCode)) {
-					System.out.println("해당 멘토가 발행한 쿠폰으로 확인 되었으므로, 삭제");
-					couponregicodeRepository.removecode(TargetCouponCode, "REMOVED");
-					rsl = "정지 처리 되었습니다.";
+					System.out.println("해당 멘토가 발행한 쿠폰으로 확인 되었음");
+					if(couponregicode.getState().toString().equals("REMOVED")) {couponregicodeRepository.removecode(TargetCouponCode, "ACTIVE"); rsl = "복구 처리 되었습니다.";}
+					if(couponregicode.getState().toString().equals("ACTIVE")) {couponregicodeRepository.removecode(TargetCouponCode, "REMOVED"); rsl = "정지 처리 되었습니다.";}
 				}
 		}
 		return rsl;
