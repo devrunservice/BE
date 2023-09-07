@@ -400,7 +400,7 @@ public class SignupController {
 	
 	// 회원가입 인증 확인
 	@ResponseBody
-	@CrossOrigin(origins = {"https://mail.naver.com", "https://mail.daum.net", "https://mail.google.com"})
+	@CrossOrigin(origins = {"https://naver.com", "https://mail.daum.net", "https://mail.google.com"})
 	@PostMapping("/verify/signupEmail")
 	public ResponseEntity<?> signupOk(@RequestParam("id") String id
 										, @RequestParam("key") String key){
