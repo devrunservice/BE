@@ -76,7 +76,7 @@ public class CouponController {
 
 	@PostMapping("/coupon/publish")
 	@ApiOperation(value = "쿠폰 생성기", notes = "쿠폰을 생성하여 DB에 저장합니다.")
-	@ApiImplicitParam(name = "couponBlueprint", value = "생성할 쿠폰 디테일", required = true, dataType = "CouponIssued")
+	@ApiImplicitParam(name = "couponBlueprint", value = "생성할 쿠폰 디테일", required = true)
 	public ResponseEntity<?> couponGeneration(@RequestBody @Valid CouponIssued couponBlueprint) {
 //    	String userid = SecurityContextHolder.getContext().getAuthentication().getName();
 //    	MemberEntity userEntity = memberService.findById(userid);
