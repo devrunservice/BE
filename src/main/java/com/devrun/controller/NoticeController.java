@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -57,6 +59,11 @@ public class NoticeController {
 		        // 관련된 MemberEntity 찾기
 		        MemberEntity memberEntity = noticeService.findById(noticeDTO.getId());
 		        
+		        // MemberEntity가 null인지 확인
+		        if (memberEntity == null) {
+		            return ResponseEntity.status(400).body("MemberEntity not found");
+		        }
+		        
 		        // Notice 엔터티에 MemberEntity 설정
 		        notice.setMemberEntity(memberEntity);
 		    }
@@ -75,22 +82,17 @@ public class NoticeController {
 	        return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
 	    }
 	}
-	
+
 	@ResponseBody
-	@GetMapping("/notice/list")
-	public ResponseEntity<List<NoticeDTO>> noticeList() {
-	    try {
-	        List<Notice> notices = noticeService.getNoticeList();
-	        System.out.println("되나 : " + notices);
-	        List<NoticeDTO> noticeDTOs = notices.stream().map(Notice::toDTO).collect(Collectors.toList());
-	        return new ResponseEntity<>(noticeDTOs, HttpStatus.OK);
-	    } catch (Exception e) {
-	        // 예외 처리
-	    	e.printStackTrace();
-	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-	    }
-	}
-
-
-
+    @GetMapping("/notice/list")
+    public List<NoticeDTO> noticeList() {
+        List<Notice> notices = noticeService.getNoticeList();
+        return notices.stream().map(Notice::toDTO).collect(Collectors.toList());
+    }
+	
+	@GetMapping("/notices")
+    public ResponseEntity<Page<NoticeDTO>> getAllNotices(Pageable pageable) {
+        Page<NoticeDTO> noticeDTOs = noticeService.getAllNotices(pageable);
+        return new ResponseEntity<>(noticeDTOs, HttpStatus.OK);
+    }
 }

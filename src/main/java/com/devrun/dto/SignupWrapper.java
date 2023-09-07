@@ -35,4 +35,6 @@ public class SignupWrapper {
     @JsonUnwrapped
     private LoginInfo loginInfo;
     
+    private String code;
+    
 }

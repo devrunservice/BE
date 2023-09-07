@@ -3,8 +3,11 @@ package com.devrun.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.devrun.dto.NoticeDTO;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.Notice;
 import com.devrun.repository.MemberEntityRepository;
@@ -34,5 +37,24 @@ public class NoticeService {
 	public MemberEntity findById(String id) {
 		return memberEntityRepository.findById(id);
 	}
+
+	public Page<NoticeDTO> getAllNotices(Pageable pageable) {
+        Page<Notice> notices = noticeRepository.findAll(pageable);
+        
+        return notices.map(notice -> {
+            NoticeDTO dto = new NoticeDTO();
+            dto.setNoticeNo(notice.getNoticeNo());
+            dto.setViewCount(notice.getViewCount());
+            dto.setUserNo(notice.getMemberEntity().getUserNo());
+            dto.setTitle(notice.getTitle());
+            dto.setContent(notice.getContent());
+            dto.setId(notice.getMemberEntity().getId());
+            dto.setCreatedDate(notice.getCreatedDate());
+            dto.setModifiedDate(notice.getModifiedDate());
+            dto.setStatus(notice.getStatus());
+            
+            return dto;
+        });
+    }
 
 }

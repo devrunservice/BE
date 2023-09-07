@@ -13,7 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor			// 기본 생성자가 생성
 public class NoticeDTO {
 	
-	private int noticeNo, viewCount;
+	private int noticeNo, viewCount, userNo;
     private String title, content, id;
     private Date createdDate, modifiedDate;
     private Status status;
