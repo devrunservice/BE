@@ -38,6 +38,7 @@ public class NoticeService {
 		return memberEntityRepository.findById(id);
 	}
 
+	// 공지사항 페이징
 	public Page<NoticeDTO> getAllNotices(Pageable pageable) {
         Page<Notice> notices = noticeRepository.findAll(pageable);
         
@@ -56,5 +57,20 @@ public class NoticeService {
             return dto;
         });
     }
+	
+	// 공지사항 읽기
+	public Notice getNoticeByNoticeNo(int noticeNo) {
+	    return noticeRepository.findByNoticeNo(noticeNo);
+	}
+	
+	public void updateNotice(int noticeNo, String newTitle, String newContent) {
+		Notice notice = noticeRepository.findByNoticeNo(noticeNo);
+		if (notice == null) {
+		    throw new IllegalArgumentException("해당 글번호의 공지사항이 없습니다.");
+		}
+		notice.setTitle(newTitle);
+		notice.setContent(newContent);
+		noticeRepository.save(notice);
+	}
 
 }
