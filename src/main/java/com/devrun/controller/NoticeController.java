@@ -12,8 +12,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.devrun.dto.NoticeDTO;
@@ -83,6 +86,7 @@ public class NoticeController {
 	    }
 	}
 
+	// 공지사항 단순 리스트
 	@ResponseBody
     @GetMapping("/notice/list")
     public List<NoticeDTO> noticeList() {
@@ -90,9 +94,48 @@ public class NoticeController {
         return notices.stream().map(Notice::toDTO).collect(Collectors.toList());
     }
 	
+	// 공지사항 페이징
 	@GetMapping("/notices")
     public ResponseEntity<Page<NoticeDTO>> getAllNotices(Pageable pageable) {
         Page<NoticeDTO> noticeDTOs = noticeService.getAllNotices(pageable);
         return new ResponseEntity<>(noticeDTOs, HttpStatus.OK);
     }
+	
+	// 공지사항 읽기
+	@ResponseBody
+	@GetMapping("/notice/detail/{noticeNo}")
+	public ResponseEntity<?> getNotice(@PathVariable int noticeNo) {
+	    try {
+	        Notice notice = noticeService.getNoticeByNoticeNo(noticeNo);
+	        System.out.println(notice);
+	        if (notice == null) {
+	            return ResponseEntity.status(404).body("Notice not found");
+	        }
+	        
+	        // 조회수 증가
+	        notice.setViewCount(notice.getViewCount() + 1);
+	        noticeService.insert(notice);
+	        
+	        return ResponseEntity.status(200).body(notice.toDTO());
+	    } catch (Exception e) {
+	        return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
+	    }
+	}
+	
+	// 공지사항 수정
+	@PutMapping("/notice/edit/{noticeNo}")
+	public ResponseEntity<?> updateNotice(@PathVariable int noticeNo, @RequestBody NoticeDTO noticeDTO) {
+	    try {
+	        String newTitle = noticeDTO.getTitle();
+	        String newContent = noticeDTO.getContent();
+	        
+	        noticeService.updateNotice(noticeNo, newTitle, newContent);
+	        return ResponseEntity.status(200).body("공지사항 (글번호: " + noticeNo + ") 이 성공적으로 업데이트 되었습니다.");
+	    } catch (IllegalArgumentException e) {
+	        return ResponseEntity.status(400).body(e.getMessage());
+	    } catch (Exception e) {
+	        return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
+	    }
+	}
+
 }
