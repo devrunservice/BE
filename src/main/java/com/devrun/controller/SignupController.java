@@ -1,6 +1,8 @@
 package com.devrun.controller;
 
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -400,28 +402,30 @@ public class SignupController {
 	
 	// 회원가입 인증 확인
 	@ResponseBody
-	@CrossOrigin(origins = {"https://*.naver.com", "https://mail.daum.net", "https://mail.google.com"})
+	@CrossOrigin(origins = {"https://mail.naver.com", "https://mail.daum.net", "https://mail.google.com","https://mail.nate.com"})
 	@PostMapping("/verify/signupEmail")
 	public ResponseEntity<?> signupOk(@RequestParam("id") String id
-										, @RequestParam("key") String key){
+										, @RequestParam("key") String key
+										, @RequestParam("email") String email
+										){
 		HttpHeaders headers = new HttpHeaders();
 		MemberEntity member = memberService.findById(id);
+		String encodedId = URLEncoder.encode(id, StandardCharsets.UTF_8);
+		String encodedEmail = URLEncoder.encode(email, StandardCharsets.UTF_8);
+
 		
 		if (member == null) {
 			// 302 : 회원을 찾을 수 없음
-			headers.setLocation(URI.create("https://devrun.net/signupverification?status=notfound"));
+			headers.setLocation(URI.create("https://devrun.net/signupverification?status=notfound&id=" + encodedId + "&email=" + encodedEmail));
 	        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
-			
-
 	    }
 		
 		if (isVerificationExpired(member.getSignupDate())) {
 			// 회원가입 1시간 경과
-			headers.setLocation(URI.create("https://devrun.net/signupverification?status=expired"));
+			headers.setLocation(URI.create("https://devrun.net/signupverification?status=expired" + encodedId + "&email=" + encodedEmail));
 	        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	    }
-
-	    return verifyKeyAndActivateAccount(id, key, member);
+	    return verifyKeyAndActivateAccount(id, key, member, encodedId, encodedEmail);
 	}
 
 	private boolean isVerificationExpired(Date signupDate) {
@@ -433,7 +437,7 @@ public class SignupController {
 	    return diffInMinutes >= 60;
 	}
 
-	private ResponseEntity<?> verifyKeyAndActivateAccount(String id, String key, MemberEntity member) {
+	private ResponseEntity<?> verifyKeyAndActivateAccount(String id, String key, MemberEntity member, String encodedId, String encodedEmail) {
 		HttpHeaders headers = new HttpHeaders();
 	    String cachedKey = caffeineCache.getCaffeine(id);
 	    if (cachedKey != null && cachedKey.equals(key)) {
@@ -441,11 +445,11 @@ public class SignupController {
 	        memberService.insert(member);
 	        caffeineCache.removeCaffeine(id);
 	        // 이메일 인증 성공 회원 활성화
-	        headers.setLocation(URI.create("https://devrun.net/signupverification?status=success"));
+	        headers.setLocation(URI.create("https://devrun.net/signupverification?status=success" + encodedId + "&email=" + encodedEmail));
 	        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	    }
 	    // 유효하지 않은 키
-	    headers.setLocation(URI.create("https://devrun.net/signupverification?status=failure"));
+	    headers.setLocation(URI.create("https://devrun.net/signupverification?status=failure" + encodedId + "&email=" + encodedEmail));
 	    return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	}
 }
