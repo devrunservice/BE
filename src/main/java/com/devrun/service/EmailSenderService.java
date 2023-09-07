@@ -109,6 +109,7 @@ public class EmailSenderService {
 				"<form id=\"confirmationForm\" method=\"POST\" action=\"" + url + "\">" +
 				"<input type='hidden' id='id' name='id' value='" + id + "'/>" +
 				"<input type='hidden' id='key' name='key' value='" + tempkey + "'/>" +
+				"<input type='hidden' id='email' name='email' value='" + toEmail + "'/>" +
 				"<p style=\"font-size: 0; padding:0px 30px;display: flex;align-items: center;justify-content: center;\">" +
 				"<button type=\"submit\" style=\"background-color: #5F4B8B; color: #FFFFFF; width: 140px; height: 45px; text-align: center; border: none; font-family: 'Pretendard'; font-weight: 400; display: flex; align-items: center; justify-content: center;\"><b>이메일 인증하기</b></button>" +
 				"</p>" +
