@@ -1,20 +1,16 @@
 package com.devrun.controller;
 
+import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.Locale;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.MailException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,7 +24,6 @@ import com.devrun.dto.member.MemberDTO.Status;
 import com.devrun.dto.member.SignupDTO;
 import com.devrun.entity.Consent;
 import com.devrun.entity.Contact;
-import com.devrun.entity.LoginInfo;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.PointEntity;
 import com.devrun.service.EmailSenderService;
@@ -408,20 +403,23 @@ public class SignupController {
 	@PostMapping("/verify/signupEmail")
 	public ResponseEntity<?> signupOk(@RequestParam("id") String id
 										, @RequestParam("key") String key){
-		
+		HttpHeaders headers = new HttpHeaders();
 		MemberEntity member = memberService.findById(id);
 		
 		if (member == null) {
 			// 302 : 회원을 찾을 수 없음
 //	        return ResponseEntity.status(404).body("Member not found");
-			return ResponseEntity.status(HttpStatus.FOUND).header("Location", "https://devrun.net/signupcompletion?status=notfound").build();
+			headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=notfound"));
+	        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
+			
 
 	    }
 		
 		if (isVerificationExpired(member.getSignupDate())) {
 			// 회원가입 1시간 경과
 //	        return ResponseEntity.status(400).body("Verification expired");
-			return ResponseEntity.status(HttpStatus.FOUND).header("Location", "https://devrun.net/signupcompletion?status=expired").build();
+			headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=expired"));
+	        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	    }
 
 	    return verifyKeyAndActivateAccount(id, key, member);
@@ -437,6 +435,7 @@ public class SignupController {
 	}
 
 	private ResponseEntity<?> verifyKeyAndActivateAccount(String id, String key, MemberEntity member) {
+		HttpHeaders headers = new HttpHeaders();
 	    String cachedKey = caffeineCache.getCaffeine(id);
 	    if (cachedKey != null && cachedKey.equals(key)) {
 	        member.setStatus(Status.ACTIVE);
@@ -444,10 +443,12 @@ public class SignupController {
 	        caffeineCache.removeCaffeine(id);
 	        // 이메일 인증 성공 회원 활성화
 //	        return ResponseEntity.status(200).body("Email verification successful, account activated");
-	        return ResponseEntity.status(HttpStatus.FOUND).header("Location", "https://devrun.net/signupcompletion?status=success").build();
+	        headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=success"));
+	        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	    }
 	    // 유효하지 않은 키
 //	    return ResponseEntity.status(400).body("Invalid key");
-	    return ResponseEntity.status(HttpStatus.FOUND).header("Location", "https://devrun.net/signupcompletion?status=failure").build();
+	    headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=failure"));
+	    return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	}
 }
