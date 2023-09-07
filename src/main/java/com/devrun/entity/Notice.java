@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -38,7 +39,7 @@ public class Notice {
 	private int noticeNo;
 	
 	@OneToOne
-	@JoinColumn(name = "userNo", nullable = false)
+	@JoinColumn(name = "id", referencedColumnName = "id", nullable = false)
 	@Comment("작성자")
 	@NotNull(message = "information cannot be null or empty")
 	private MemberEntity memberEntity;
@@ -79,9 +80,9 @@ public class Notice {
         return new NoticeDTO(
             this.noticeNo,
             this.viewCount,
-            this.memberEntity.getUserNo(),
             this.title,
             this.content,
+            this.memberEntity.getId(),
             this.createdDate,
             this.modifiedDate,
             this.status

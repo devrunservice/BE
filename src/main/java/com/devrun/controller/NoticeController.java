@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,8 +36,16 @@ public class NoticeController {
 	public ResponseEntity<?> notice(@RequestBody NoticeDTO noticeDTO) {
 		try {
 		    System.out.println("noticeDTO : " + noticeDTO);
-		    String title = textChange.changeText(noticeDTO.getTitle());
-		    String content = textChange.changeText(noticeDTO.getContent());
+		    String title = 
+//		    		textChange.changeText(
+		    				noticeDTO.getTitle()
+//		    				)
+		    		;
+		    String content = 
+//		    		textChange.changeText(
+		    				noticeDTO.getContent()
+//		    				)
+		    		;
 		    // 기존 Notice 찾기, 없으면 새로 생성
 		    Notice notice = noticeService.findByNoticeNo(noticeDTO.getNoticeNo());
 		    System.out.println("notice : " + notice);
@@ -46,7 +55,7 @@ public class NoticeController {
 		        notice.setNoticeNo(noticeDTO.getNoticeNo());
 		        
 		        // 관련된 MemberEntity 찾기
-		        MemberEntity memberEntity = noticeService.findByUserNo(noticeDTO.getUserNo());
+		        MemberEntity memberEntity = noticeService.findById(noticeDTO.getId());
 		        
 		        // Notice 엔터티에 MemberEntity 설정
 		        notice.setMemberEntity(memberEntity);
@@ -70,10 +79,19 @@ public class NoticeController {
 	
 	@ResponseBody
 	@GetMapping("/notice/list")
-	public List<NoticeDTO> noticeList() {
-	    List<Notice> notices = noticeService.findAllNotices();  // 가정: noticeService에서 모든 Notice를 가져오는 메소드
-	    return notices.stream().map(Notice::toDTO).collect(Collectors.toList());
+	public ResponseEntity<List<NoticeDTO>> noticeList() {
+	    try {
+	        List<Notice> notices = noticeService.getNoticeList();
+	        System.out.println("되나 : " + notices);
+	        List<NoticeDTO> noticeDTOs = notices.stream().map(Notice::toDTO).collect(Collectors.toList());
+	        return new ResponseEntity<>(noticeDTOs, HttpStatus.OK);
+	    } catch (Exception e) {
+	        // 예외 처리
+	    	e.printStackTrace();
+	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
 	}
+
 
 
 }

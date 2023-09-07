@@ -19,10 +19,6 @@ public class NoticeService {
 	@Autowired
 	private MemberEntityRepository memberEntityRepository;
 
-	public MemberEntity findByUserNo(int userNo) {
-		return memberEntityRepository.findByUserNo(userNo);
-	}
-
 	public void insert(Notice notice) {
 		noticeRepository.save(notice);
 	}
@@ -31,8 +27,12 @@ public class NoticeService {
 		return noticeRepository.findByNoticeNo(noticeNo);
 	}
 
-	public List<Notice> findAllNotices() {
+	public List<Notice> getNoticeList() {
         return noticeRepository.findAll();
     }
+
+	public MemberEntity findById(String id) {
+		return memberEntityRepository.findById(id);
+	}
 
 }
