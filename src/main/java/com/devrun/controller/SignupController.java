@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -400,6 +401,7 @@ public class SignupController {
 	// 회원가입 인증 확인
 	@ResponseBody
 	@Transactional
+	@CrossOrigin(origins = "https://mail.naver.com")
 	@PostMapping("/verify/signupEmail")
 	public ResponseEntity<?> signupOk(@RequestParam("id") String id
 										, @RequestParam("key") String key){
