@@ -61,12 +61,11 @@ public class AwsS3UploadService extends AWSS3Service{
             String uniqueFileName = generateUniqueFileName(originalFilename); // Generate a unique filename using UUID.
             uploadpath += "/" + uniqueFileName;
             PutObjectRequest uploadRequest = getPutObjectRequest(uploadpath, contentType);
+
             s3Client.putObject(uploadRequest, uploadfile);
-             
-            
+
         }
-        String fileURL = "https://devrun-dev-bucket.s3.ap-northeast-2.amazonaws.com/" + uploadpath;
-        return fileURL; //저장한 파일 URL Key Name으로 사용 가능
+        return uploadpath;
     }
 
     private String generateUniqueFileName(String originalFilename) throws StringIndexOutOfBoundsException{
