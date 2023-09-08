@@ -37,12 +37,12 @@ public class Comment {
 
     @ManyToOne
     @JoinColumn(name = "noticeNo")
-    @org.hibernate.annotations.Comment("공지사항과의 관계 설정")
+    @org.hibernate.annotations.Comment("댓글이 달린 공지사항의 번호")
     private Notice notice;
     
     @ManyToOne
     @JoinColumn(name = "parentCommentNo", nullable = true)
-    @org.hibernate.annotations.Comment("부모 댓글과의 관계 설정")
+    @org.hibernate.annotations.Comment("댓글이 달린 댓글의 번호")
     private Comment parentComment;
 
     @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL)
