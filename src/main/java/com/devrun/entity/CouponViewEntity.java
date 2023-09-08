@@ -6,6 +6,8 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Immutable;
 
+import com.devrun.entity.Couponregicode.couponstate;
+
 import lombok.Data;
 
 import java.sql.Date;
@@ -33,6 +35,6 @@ public class CouponViewEntity {
 
     private String target;
 
-    private String state;
+    private couponstate state;
 
 }
