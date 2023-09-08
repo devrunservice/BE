@@ -30,7 +30,7 @@ public interface CouponregicodeRepository extends JpaRepository<Couponregicode, 
 
 	List<Couponregicode> findAllByIssuedno(CouponIssued couponIssued);
 
-	@Query(value = "SELECT d.target AS lecturename, c.couponcode AS couponcode, d.discountrate AS discountrate , d.expirydate AS expirydate, d.issueddate AS issueddate, d.quantity AS quantity , c.state AS state, ROW_NUMBER() OVER(ORDER BY target ASC , issueddate DESC) AS issuedno FROM couponregicode c JOIN couponissued d ON d.issuedno = c.issuedno WHERE d.issueduser = :userno ORDER BY target ASC, issueddate DESC", nativeQuery = true)
+	@Query(value = "SELECT d.target AS lecturename, c.couponcode AS couponcode, d.discountrate AS discountrate , d.expirydate AS expirydate, d.issueddate AS issueddate, d.quantity AS quantity , c.state AS state, ROW_NUMBER() OVER() AS issuedno FROM couponregicode c JOIN couponissued d ON d.issuedno = c.issuedno WHERE d.issueduser = :userno ORDER BY target ASC, issueddate DESC", nativeQuery = true)
 	Page<CouponListForMento> findCouponsByIssuedUser(@Param("userno") int userNo, Pageable pageable);
 
 }
