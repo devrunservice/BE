@@ -1,4 +1,4 @@
-package com.devrun.dto;
+package com.devrun.dto.member;
 
 import javax.validation.Valid;
 
