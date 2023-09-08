@@ -21,9 +21,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.devrun.dto.SignupWrapper;
 import com.devrun.dto.member.MemberDTO.Status;
 import com.devrun.dto.member.SignupDTO;
+import com.devrun.dto.member.SignupWrapper;
 import com.devrun.entity.Consent;
 import com.devrun.entity.Contact;
 import com.devrun.entity.MemberEntity;
@@ -414,13 +414,13 @@ public class SignupController {
 		
 		if (member == null) {
 			// 302 : 회원을 찾을 수 없음
-			headers.setLocation(URI.create("https://devrun.net/signupverification?status=notfound&id=" + encodedId + "&email=" + encodedEmail));
+			headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=notfound&id=" + encodedId + "&email=" + encodedEmail));
 	        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	    }
 		
 		if (isVerificationExpired(member.getSignupDate())) {
 			// 회원가입 1시간 경과
-			headers.setLocation(URI.create("https://devrun.net/signupverification?status=expired&id=" + encodedId + "&email=" + encodedEmail));
+			headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=expired&id=" + encodedId + "&email=" + encodedEmail));
 	        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	    }
 	    return verifyKeyAndActivateAccount(id, key, member, encodedId, encodedEmail);
@@ -443,11 +443,11 @@ public class SignupController {
 	        memberService.insert(member);
 	        caffeineCache.removeCaffeine(id);
 	        // 이메일 인증 성공 회원 활성화
-	        headers.setLocation(URI.create("https://devrun.net/signupverification?status=success&id=" + encodedId + "&email=" + encodedEmail));
+	        headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=success&id=" + encodedId + "&email=" + encodedEmail));
 	        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	    }
 	    // 유효하지 않은 키
-	    headers.setLocation(URI.create("https://devrun.net/signupverification?status=failure&id=" + encodedId + "&email=" + encodedEmail));
+	    headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=failure&id=" + encodedId + "&email=" + encodedEmail));
 	    return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	}
 }

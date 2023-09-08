@@ -195,19 +195,13 @@ public class JWTUtil {
  	    if (token != null && token.startsWith("Bearer ")) {
  	        String jwt = token.substring(7);
  	        String userId = getUserIdFromToken(token);
- 	        System.out.println(userId);
  	        String requestJti = getJtiFromToken(token);
- 	        System.out.println(requestJti);
- 	        System.out.println("3213");
  	        String storedJti = redisCache.getJti(userId);
  	        
- 	        System.out.println("11");
  	        if ( !isValidAlgorithm(jwt, response) 
  	        		|| isBlacklistedRefreshToken(tokenType, token, response)
  	        		) return true;
- 	        System.out.println("111");
  	        if (isValidateJti(requestJti, storedJti, userId)) {
- 	        	System.out.println("1111");
 				if (validateAndProcessToken(token, request)) {
 					// 토큰 검증 및 처리 성공
 					chain.doFilter(request, response);
@@ -244,10 +238,8 @@ public class JWTUtil {
  	
 	// 블랙리스트에 등록된 토큰인지 검증
 	private boolean isBlacklistedRefreshToken(String tokenType, String token, HttpServletResponse response) throws IOException {
-	    if (tokenType.equals("Refresh_token") && redisCache.isTokenBlacklisted(token)
-	    		) {
+	    if (tokenType.equals("Refresh_token") && redisCache.isTokenBlacklisted(token)) {
 	    	// 블랙리스트에 등록된 토큰 사용
-	    	System.out.println("33");
 	        sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "Logout user");
 	        return true;
 	    }
@@ -258,7 +250,6 @@ public class JWTUtil {
 	private boolean validateAndProcessToken(String token, HttpServletRequest request) {
 		String subToken = token.substring(7);
 	    if (token != null && token.startsWith("Bearer ")) {
-	    	System.out.println("22222"+token);
 	        String username = extractUsername(subToken);
 	        // 사용자 이름이 null이 아니고, 현재 Security Context에 인증 정보가 없는 경우
 	        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -286,7 +277,6 @@ public class JWTUtil {
         usernamePasswordAuthenticationToken.setDetails(
         		// new WebAuthenticationDetailsSource().buildDetails(request)는 요청에 대한 세부 정보를 생성하는 역할. 이 정보는 후속 보안 작업에서 사용
         		new WebAuthenticationDetailsSource().buildDetails(request));
-        System.out.println(usernamePasswordAuthenticationToken + "너냐5");
         // SecurityContext에 Authentication 객체를 설정하는 역할. Authentication 객체는 Spring Security의 다른 부분에서 현재 사용자의 인증 정보를 접근하는데 사용
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
     }
@@ -326,7 +316,6 @@ public class JWTUtil {
  	// 쿠키에서 refreshToken 반환
     public static String getRefreshTokenFromCookies(Cookie[] cookies) {
         String refreshToken = null;
-        System.out.println("쿠키 있냐 : " + cookies);
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("Refresh_token".equals(cookie.getName())) {

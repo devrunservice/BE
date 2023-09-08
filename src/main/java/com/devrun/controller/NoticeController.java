@@ -16,14 +16,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.devrun.dto.NoticeDTO;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.Notice;
 import com.devrun.service.NoticeService;
-import com.devrun.util.TextChange;
 
 @Controller
 public class NoticeController {
@@ -31,10 +29,7 @@ public class NoticeController {
 	@Autowired
 	private NoticeService noticeService;
 	
-	@Autowired
-	private TextChange textChange;
-	
-	// 공지사항 작성 						아직 테스트
+	// 공지사항 작성
 	@Transactional
 	@ResponseBody
 	@PostMapping("/notice/write")
@@ -82,7 +77,7 @@ public class NoticeController {
 	
 		    return ResponseEntity.status(200).body("ok");
 		} catch (Exception e) {
-	        return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
+	        return ResponseEntity.status(500).body("Internal Server Error");
 	    }
 	}
 
@@ -118,7 +113,7 @@ public class NoticeController {
 	        
 	        return ResponseEntity.status(200).body(notice.toDTO());
 	    } catch (Exception e) {
-	        return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
+	        return ResponseEntity.status(500).body("Internal Server Error");
 	    }
 	}
 	
@@ -130,11 +125,11 @@ public class NoticeController {
 	        String newContent = noticeDTO.getContent();
 	        
 	        noticeService.updateNotice(noticeNo, newTitle, newContent);
-	        return ResponseEntity.status(200).body("공지사항 (글번호: " + noticeNo + ") 이 성공적으로 업데이트 되었습니다.");
+	        return ResponseEntity.status(200).body("Successfully updated notice with ID: " + noticeNo);
 	    } catch (IllegalArgumentException e) {
-	        return ResponseEntity.status(400).body(e.getMessage());
+	        return ResponseEntity.status(400).body("Invalid arguments");
 	    } catch (Exception e) {
-	        return ResponseEntity.status(500).body("Internal Server Error: " + e.getMessage());
+	        return ResponseEntity.status(500).body("Internal Server Error");
 	    }
 	}
 
