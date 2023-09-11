@@ -1051,7 +1051,7 @@ public class LoginController {
     }
 	
 	@ResponseBody
-	@GetMapping("/users/info-role")
+	@GetMapping("/users/login-info")
 	public ResponseEntity<?> infoRole(HttpServletRequest request){
 		// AccessToken이 헤더에 있는지 확인
 		String accessToken = request.getHeader("Access_token");
