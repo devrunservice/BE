@@ -34,19 +34,16 @@ public class TestController {
 //	@CrossOrigin(origins = "localhost:3000" , allowedHeaders = {"GET"})
 	@GetMapping("/tmi")
 	public ResponseEntity<?> tmi(HttpServletRequest request) {
-		// refreshToken이 헤더에 있는지 확인
+		// AccessToken이 헤더에 있는지 확인
 		String accessToken = request.getHeader("Access_token");
 
-		System.out.println("엑세스 토큰 : " + accessToken);
-//	    // Refresh Token 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
+	    // AccessToken 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
 		if (accessToken == null || accessToken.isEmpty()) {
 			// 400 : Access token 없음
 			return new ResponseEntity<>("Access token is required", HttpStatus.BAD_REQUEST);
 		}
 		
-		System.out.println("11111111");
 		String id = JWTUtil.getUserIdFromToken(accessToken);
-		System.out.println("아이디 : " + id);
 		
 //			if (memberService.isUserIdEquals(id)) {
 				MemberEntity member = memberService.findById(id);
