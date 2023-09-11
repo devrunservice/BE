@@ -132,32 +132,49 @@ public class PaymentController {
 					paymentService.savePaymentInfo(paymentList);
 					System.err.println(pointEntity);
 					
-				    //포인트 적립하기
-					int totalPaidAmount = (int) paymentDTOList.stream()
-					        .mapToDouble(paymentDTO -> paymentDTO.getPaid_amount() * 0.1)
-					        .sum();
-			        int uppoint = totalPaidAmount + updatedPoint;
-				    pointEntity.setMypoint(uppoint);
-					
+				   
+				    
+				  
 				    //포인트 사용했으면 실행
 				    if(userPoint > 0) {
+				    	
+				    	  String productName = "";
+						    int productCount = paymentDTOList.size();
+
+						    if (productCount > 1) {
+						        productName = paymentDTOList.get(0).getName()+"외 " + (productCount - 1) + "개";
+						    } else if (productCount == 1) {
+						        productName = paymentDTOList.get(0).getName();
+						    }
+						    
 					PointHistoryEntity historyEntity = new PointHistoryEntity();
 		            historyEntity.setMemberEntity(memberEntity);
 		            historyEntity.setUpdatetime(paymentDate);
 		            historyEntity.setPointupdown(-userPoint);
 		            String explanation="결제시 사용한 포인트";
-		            historyEntity.setExplanation(explanation);
+		            historyEntity.setProductname(productName);
+		            historyEntity.setExplanation(explanation);			   
 		            pointHistoryRepository.save(historyEntity); 
 				    }
-		            
+				 
+				    
 		            // 포인트 획득 시
+				    for (PaymentDTO paymentDTO : paymentDTOList) {
+				        int paidAmount = paymentDTO.getPaid_amount();
+				        int individualPoint = (int) (paidAmount * 0.1); // 각 상품의 10% 적립
+				        updatedPoint += individualPoint;
+				    
 		            PointHistoryEntity historyEntityGain = new PointHistoryEntity();
 		            historyEntityGain.setMemberEntity(memberEntity); 
 		            historyEntityGain.setUpdatetime(paymentDate); 
-		            historyEntityGain.setPointupdown(totalPaidAmount); 
+		            historyEntityGain.setPointupdown(individualPoint);
+		            String gainname = paymentDTO.getName();
+		            historyEntityGain.setProductname(gainname);
 		            String gainExplanation = "결제시 얻은 포인트"; 
 		            historyEntityGain.setExplanation(gainExplanation);
 		            pointHistoryRepository.save(historyEntityGain);  
+		            
+				   }
 				
 				return ResponseEntity.ok("결제 정보가 성공적으로 저장되었습니다.");
 			} catch (Exception e) {

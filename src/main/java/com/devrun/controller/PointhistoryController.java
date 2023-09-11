@@ -57,7 +57,7 @@ public class PointhistoryController {
         int mypoint = PointEntity.getMypoint();
         
         PointHistoryDTO HistoryDTO = new PointHistoryDTO(mypoint, PointhistoryPage);
-        return ResponseEntity.ok(HistoryDTO);
+        return ResponseEntity.ok(HistoryDTO);	
         
        }
 		

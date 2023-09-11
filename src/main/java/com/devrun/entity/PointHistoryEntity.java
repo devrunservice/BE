@@ -31,7 +31,11 @@ public class PointHistoryEntity {
 	
 	@Column(name = "updatetime")
 	@Comment("updatetime")
-	private String updatetime; 	
+	private String updatetime;
+	
+	@Column(name = "productname" ,nullable = true, length = 50)
+	@Comment("포인트와 관련 있는 상품")
+	private String productname;
 
 	@OneToOne
 	@JoinColumn(name = "user_no") //외래키 컬럼명

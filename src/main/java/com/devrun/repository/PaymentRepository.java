@@ -32,6 +32,8 @@ public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
 	PaymentEntity findByMerchantUid(@Param("merchant_uid") String merchant_uid);
 
 
+
+
 	
 	
 
