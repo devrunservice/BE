@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.devrun.dto.CouponListForMento;
+import com.devrun.dto.CouponListForStudent;
 import com.devrun.entity.CouponIssued;
 import com.devrun.entity.CouponViewEntity;
 import com.devrun.entity.MemberEntity;
@@ -44,31 +45,24 @@ public class CouponController {
 	@Autowired
 	private CouponViewRepository couponViewRepository;
 
-	@GetMapping({"/coupon/readmycoupon","/coupon/readmycoupon/{pageno}"})
+	@GetMapping({"/coupon/readmycoupon"})
 	@ApiOperation(value = "쿠폰 조회하기", notes = "로그인 한 회원이 가진 쿠폰을 조회합니다.")
 	@ApiImplicitParam(name = "pageno", value = "조회할 페이지", dataType = "Number")
-	public ResponseEntity<?> readmycoupon(@PathVariable(required = false) Integer pageno) {
+	public ResponseEntity<?> readmycoupon() {
 		System.out.println(
 				"---------------------------------CouponController readmycoupon method start---------------------------------");
 
-		if (pageno == null || pageno <= 0) {
-			pageno = 1;
-		}
-		int size = 10;
-		Pageable pageable = PageRequest.of(pageno - 1, size);
 
 		String userid = SecurityContextHolder.getContext().getAuthentication().getName();
 		MemberEntity userEntity = memberService.findById(userid);
 		
-		Page<CouponViewEntity> couponlist = couponSerivce.readmycoupon(userEntity, pageable);
-		if (couponlist.getTotalElements() <= 0) {
+		List<CouponListForStudent> couponlist = couponSerivce.readmycoupon(userEntity);
+		if (couponlist.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("보유한 쿠폰이 없습니다.");
 		}
 		
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("totalElements", couponlist.getTotalElements());
-		jsonObject.put("totalPages", couponlist.getTotalPages());
-		jsonObject.put("content", couponlist.getContent());
+		jsonObject.put("content", couponlist);
 		
 		return ResponseEntity.ok(jsonObject);
 

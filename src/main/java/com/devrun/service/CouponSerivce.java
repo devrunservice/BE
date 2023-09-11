@@ -13,9 +13,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.devrun.dto.CouponListForMento;
+import com.devrun.dto.CouponListForStudent;
 import com.devrun.entity.CouponIssued;
-import com.devrun.entity.CouponViewEntity;
 import com.devrun.entity.Couponregicode;
+import com.devrun.entity.Couponregicode.couponstate;
 import com.devrun.entity.MemberEntity;
 import com.devrun.repository.CouponIssuedRepository;
 import com.devrun.repository.CouponViewRepository;
@@ -98,14 +99,8 @@ public class CouponSerivce {
 		return rsl;
 	}
 
-	public Page<CouponViewEntity> readmycoupon(MemberEntity userEntity, Pageable pageable) {
-		Page<CouponViewEntity> couponlist = couponviewRepositroy.findAllByUserno2(userEntity.getUserNo(), pageable);
-		for (CouponViewEntity couponViewEntity : couponlist.getContent()) {
-			if (couponViewEntity.getExpirydate().after(Date.valueOf(LocalDate.now()))) {
-				System.out.println("유효기간이 만료된 쿠폰입니다. 쿠폰 코드 : " + couponViewEntity.getCouponcode());
-				couponViewEntity.setState("EXPIRY");
-			}
-		}
+	public List<CouponListForStudent> readmycoupon(MemberEntity userEntity) {
+		List<CouponListForStudent> couponlist = couponviewRepositroy.findAllByUserno2(userEntity.getUserNo());
 		return couponlist;
 	}
 
