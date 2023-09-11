@@ -1,6 +1,8 @@
 package com.devrun.entity;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -21,7 +23,7 @@ public class CouponViewEntity {
 
     private String couponcode;
 
-    private int userno;
+    private Integer userno;
 
     private int discountrate;
 
@@ -32,7 +34,15 @@ public class CouponViewEntity {
     private int quantity;
 
     private String target;
+   
+    @Enumerated(EnumType.STRING)
+    private couponstate state; // 이 부분 추가
 
-    private String state;
+    public enum couponstate {
+        ACTIVE, // 사용 가능 (생성 시 기본값)
+        REMOVED, // 사용 정지 처리로 인한 사용 불가
+        EXPIRY, // 기간 만료로 인한 사용 불가
 
+  
+    }
 }
