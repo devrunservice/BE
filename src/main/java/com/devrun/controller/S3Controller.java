@@ -20,6 +20,7 @@ import com.devrun.service.AwsS3UploadService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
@@ -34,7 +35,9 @@ public class S3Controller {
 
 	@PostMapping("/{path}/upload")
 	@ApiOperation("첨부된 파일을 S3 폴더에 저장합니다.")
-	@ApiImplicitParam(name = "file", value = "첨부파일", dataType = "HTTP multipart/form-data")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "path", value = "첨부파일 경로", paramType = "path"),
+			@ApiImplicitParam(name = "file", value = "첨부파일", paramType = "formData", dataTypeClass = MultipartFile.class) })
 	public ResponseEntity<?> TransferToS3(@PathVariable String path,
 			@RequestParam(name = "file") List<MultipartFile> files) {
 		try {

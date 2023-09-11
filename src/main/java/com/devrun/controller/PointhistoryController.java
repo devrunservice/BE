@@ -34,8 +34,8 @@ public class PointhistoryController {
 	@GetMapping("/PointHistory")
 	@ApiOperation("포인트 히스토리, user_no로 조회하여 포인트 히스토리 불러옵니다.")
 	@ApiImplicitParams({
-		@ApiImplicitParam(name = "page", value= "필요한 페이지"),
-		@ApiImplicitParam(name = "size", value= "각 페이지에 표시할 항목 수")
+		@ApiImplicitParam(name = "page", value= "필요한 페이지" , paramType = "header",dataTypeClass = Integer.class, example = "1"),
+		@ApiImplicitParam(name = "size", value= "각 페이지에 표시할 항목 수", paramType = "header",dataTypeClass = Integer.class, example = "10")
 	})
 	public ResponseEntity<?> pointhistory(@RequestParam("page") int page, @RequestParam("size") int size){
 		
