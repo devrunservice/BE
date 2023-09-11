@@ -48,7 +48,7 @@ public class MyPageController {
 
     @GetMapping("/mypage/{userid}")
     @ApiOperation(value = "프로필 불러오기", notes = "헤더에 삽입된 액세스 토큰으로부터 id를 조회하여, 해당 유저의 프로필을 불러옵니다.")
-    @ApiImplicitParam(name = "userid" , value = "주소창에 표시할 유저 id" , required = true)
+    @ApiImplicitParam(name = "userid" , value = "주소창에 표시할 유저 id" , required = true , paramType = "path", dataTypeClass = String.class , example = "seokhwan1")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "성공적으로 처리되었습니다"),
             @ApiResponse(code = 400, message = "액세스 토큰이 입력되지 않았거나, 존재하지 않는 유저입니다.")
@@ -97,7 +97,7 @@ public class MyPageController {
 
     @PostMapping("/edit/phone")
     @ApiOperation(value = "연락처 수정", notes = "헤더에 삽입된 액세스 토큰으로부터 id를 조회하여, 해당 유저의 연락처를 수정합니다.")
-    @ApiImplicitParam(name = "editdata" , value = "연락처와 인증번호" , required = true)
+    @ApiImplicitParam(name = "editdata" , value = "연락처와 인증번호" , required = true , paramType = "body", dataTypeClass = Map.class , example = "{\"phonenumber\" : \"01000000000\"}")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "성공적으로 처리되었습니다"),
             @ApiResponse(code = 400, message = "액세스 토큰과 키 값을 확인해주세요(phonenumber , code)"),
@@ -136,7 +136,7 @@ public class MyPageController {
 
     @PostMapping(value = "/edit/email")
     @ApiOperation(value = "이메일 수정", notes = "헤더에 삽입된 액세스 토큰으로부터 id를 조회하여, 해당 유저의 이메일주소를 수정합니다.")
-    @ApiImplicitParam(name = "editdata" , value = "이메일주소" , required = true)
+    @ApiImplicitParam(name = "editdata" , value = "이메일주소" , required = true , paramType = "body",dataTypeClass = Map.class , example = "{\"email\":\"http1220@kakao.net\"}")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "성공적으로 처리되었습니다"),
             @ApiResponse(code = 400, message = "액세스 토큰과 키 값을 확인해주세요(email)"),
@@ -195,7 +195,7 @@ public class MyPageController {
 
     @PostMapping("/edit/profileimg")
     @ApiOperation(value = "프로필 이미지 수정", notes = "헤더에 삽입된 액세스 토큰으로부터 id를 조회하여, 해당 유저의 프로필 이미지를 수정합니다.")
-    //@ApiImplicitParam(value = "프로필 이미지 파일") 왠지 모르겠는 데 nullpointer error 뜸
+    @ApiImplicitParam(name = "editimg" , value = "프로필 이미지 파일" , paramType = "formData",dataTypeClass = MultipartFile.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "성공적으로 처리되었습니다"),
             @ApiResponse(code = 400, message = "액세스 토큰과 키 값을 확인해주세요(phonenumber , code"),

@@ -170,10 +170,9 @@ public class PaymentController {
 		@GetMapping("/PaymentInfo")
 		@ApiOperation("구매 정보 페이지, 로그인시 토큰에 들어있는 ID값을 가져와서 사용자 정보를 가져옵니다.")
 		@ApiImplicitParams({
-			@ApiImplicitParam(name = "page", value= "필요한 페이지"),
-			@ApiImplicitParam(name = "size", value= "각 페이지에 표시할 항목 수")
+			@ApiImplicitParam(name = "page", value= "필요한 페이지" , paramType = "header",dataTypeClass = Integer.class, example = "1"),
+			@ApiImplicitParam(name = "size", value= "각 페이지에 표시할 항목 수", paramType = "header",dataTypeClass = Integer.class, example = "10")
 		})
-
 		public ResponseEntity<?> tmi(@RequestParam("page") int page, @RequestParam("size") int size,					
 				HttpServletRequest request) {
 			
