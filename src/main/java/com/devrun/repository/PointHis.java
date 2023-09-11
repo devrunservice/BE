@@ -6,5 +6,6 @@ public interface PointHis {
 	int getPointupdown();
 	String getUpdatetime();	
 	int getPointno();
+	String getProductname();
 
 }

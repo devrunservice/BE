@@ -72,11 +72,11 @@ public class PaymentController {
 			
 			// 사용자의 포인트 정보를 조회
 			//2개이상 구매시 구매자는 이름이 같으니깐, 첫번째 배열에 있는 이름으로 point찾음.
-		    String name = paymentDTOList.get(0).getBuyer_name();
+		    int usrno = paymentDTOList.get(0).getUserno();
 		    //userno로 처리하기 
 		    
-		    System.err.println(name);
-		    PointEntity pointEntity = pointRepository.findByMemberEntity_name(name);
+		    System.err.println(usrno);
+		    PointEntity pointEntity = pointRepository.findByMemberEntity_userNo(usrno);
 		    System.err.println(pointEntity);
 
 		    if (pointEntity == null) {
@@ -104,7 +104,7 @@ public class PaymentController {
 		    //외래키에 값 넣어주기.
 		    //결제 정보 사용자 이름으로 memberEntity에서 찾은후, 밑에 추가해주기. 
 		    //외래키가 user_no지만 memberEntity로 정의해서 저렇게 넣어줘야함.
-		    MemberEntity memberEntity = memberEntityRepository.findByName(name);
+		    MemberEntity memberEntity = memberEntityRepository.findByUserNo(usrno);
 		    System.err.println(memberEntity);
 			
 			try {			
@@ -132,32 +132,49 @@ public class PaymentController {
 					paymentService.savePaymentInfo(paymentList);
 					System.err.println(pointEntity);
 					
-				    //포인트 적립하기
-					int totalPaidAmount = (int) paymentDTOList.stream()
-					        .mapToDouble(paymentDTO -> paymentDTO.getPaid_amount() * 0.1)
-					        .sum();
-			        int uppoint = totalPaidAmount + updatedPoint;
-				    pointEntity.setMypoint(uppoint);
-					
+				   
+				    
+				  
 				    //포인트 사용했으면 실행
 				    if(userPoint > 0) {
+				    	
+				    	  String productName = "";
+						    int productCount = paymentDTOList.size();
+
+						    if (productCount > 1) {
+						        productName = paymentDTOList.get(0).getName()+"외 " + (productCount - 1) + "개";
+						    } else if (productCount == 1) {
+						        productName = paymentDTOList.get(0).getName();
+						    }
+						    
 					PointHistoryEntity historyEntity = new PointHistoryEntity();
 		            historyEntity.setMemberEntity(memberEntity);
 		            historyEntity.setUpdatetime(paymentDate);
 		            historyEntity.setPointupdown(-userPoint);
 		            String explanation="결제시 사용한 포인트";
-		            historyEntity.setExplanation(explanation);
+		            historyEntity.setProductname(productName);
+		            historyEntity.setExplanation(explanation);			   
 		            pointHistoryRepository.save(historyEntity); 
 				    }
-		            
+				 
+				    
 		            // 포인트 획득 시
+				    for (PaymentDTO paymentDTO : paymentDTOList) {
+				        int paidAmount = paymentDTO.getPaid_amount();
+				        int individualPoint = (int) (paidAmount * 0.1); // 각 상품의 10% 적립
+				        updatedPoint += individualPoint;
+				    
 		            PointHistoryEntity historyEntityGain = new PointHistoryEntity();
 		            historyEntityGain.setMemberEntity(memberEntity); 
 		            historyEntityGain.setUpdatetime(paymentDate); 
-		            historyEntityGain.setPointupdown(totalPaidAmount); 
+		            historyEntityGain.setPointupdown(individualPoint);
+		            String gainname = paymentDTO.getName();
+		            historyEntityGain.setProductname(gainname);
 		            String gainExplanation = "결제시 얻은 포인트"; 
 		            historyEntityGain.setExplanation(gainExplanation);
 		            pointHistoryRepository.save(historyEntityGain);  
+		            
+				   }
 				
 				return ResponseEntity.ok("결제 정보가 성공적으로 저장되었습니다.");
 			} catch (Exception e) {
@@ -170,10 +187,9 @@ public class PaymentController {
 		@GetMapping("/PaymentInfo")
 		@ApiOperation("구매 정보 페이지, 로그인시 토큰에 들어있는 ID값을 가져와서 사용자 정보를 가져옵니다.")
 		@ApiImplicitParams({
-			@ApiImplicitParam(name = "page", value= "필요한 페이지"),
-			@ApiImplicitParam(name = "size", value= "각 페이지에 표시할 항목 수")
+			@ApiImplicitParam(name = "page", value= "필요한 페이지" , paramType = "header",dataTypeClass = Integer.class, example = "1"),
+			@ApiImplicitParam(name = "size", value= "각 페이지에 표시할 항목 수", paramType = "header",dataTypeClass = Integer.class, example = "10")
 		})
-
 		public ResponseEntity<?> tmi(@RequestParam("page") int page, @RequestParam("size") int size,					
 				HttpServletRequest request) {
 			
@@ -190,13 +206,13 @@ public class PaymentController {
 		    
 		        MemberEntity member = memberService.findById(id);	
 		        
-		        String name = member.getName();		
+		        int usrno = member.getUserNo();		
 		        
 		        PageRequest pageRequest = PageRequest.of(page -1, size);
 		        
 
-		        // 사용자의 이름으로 결제 정보 조회
-		        Page<PaymentInfo> paymentsPage = paymentRepository.findAllbyPaymentEntity(name,pageRequest);
+		        // 사용자의 고유번호로 결제 정보 조회
+		        Page<PaymentInfo> paymentsPage = paymentRepository.findAllbyPaymentEntity(usrno,pageRequest);
 		        System.err.println(paymentsPage);
 
 		        if (paymentsPage.isEmpty()) {
