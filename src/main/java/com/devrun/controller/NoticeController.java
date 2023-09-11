@@ -83,21 +83,23 @@ public class NoticeController {
 	    }
 	}
 
-	// 공지사항 단순 리스트
-	@ResponseBody
-    @GetMapping("/notice/list")
-    public List<NoticeDTO> noticeList() {
-        List<Notice> notices = noticeService.getNoticeList();
-        return notices.stream().map(Notice::toDTO).collect(Collectors.toList());
-    }
+//	// 공지사항 단순 리스트
+//	@ResponseBody
+//    @GetMapping("/notice/list")
+//    public List<NoticeDTO> noticeList() {
+//        List<Notice> notices = noticeService.getNoticeList();
+//        return notices.stream().map(Notice::toDTO).collect(Collectors.toList());
+//    }
 	
 	// 공지사항 페이징
 	@GetMapping("/notice/{pageNumber}")
 	public ResponseEntity<Page<NoticeDTO>> getAllNotices(@PathVariable int pageNumber) {
 	    // 'createdDate'를 기준으로 내림차순 정렬
-	    Pageable pageable = PageRequest.of(pageNumber - 1, 10, Sort.by(Sort.Direction.DESC, "createdDate"));
+	    Pageable pageable = PageRequest.of(pageNumber - 1, 10, Sort.by(
+//	    		Sort.Direction.DESC, "createdDate")									// 열거형 - 다중 속성 설정하기에 좋음
+	    		"createdDate").descending()											// 체인형 - 단일 속성에 여러 조건을 설정하기 좋음
+	    		);
 	    
-	    // 페이지 정보를 가져오기 전에 null 체크
 	    Page<NoticeDTO> noticeDTOs = noticeService.getAllNotices(pageable);
 	    if (noticeDTOs == null) {
 	        return new ResponseEntity<>(HttpStatus.NOT_FOUND);

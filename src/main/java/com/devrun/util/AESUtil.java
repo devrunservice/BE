@@ -6,12 +6,14 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AESUtil {
 	
     private static String SECRET_KEY;
     
-    @Value("${AEC.SECRET_KEY}")
+    @Value("${aes.secretKey}")
     private void setSECRET_KEY(String SECRET_KEY) {
     	AESUtil.SECRET_KEY = SECRET_KEY;
     }
@@ -23,6 +25,7 @@ public class AESUtil {
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
         byte[] encrypted = cipher.doFinal(data.getBytes());
+        System.out.println("encrypted : " + encrypted);
         return Base64.getEncoder().encodeToString(encrypted);
     }
 
