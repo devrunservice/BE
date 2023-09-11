@@ -3,6 +3,8 @@ package com.devrun.dto.member;
 import java.time.LocalDate;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,6 +14,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class MemberDTO {
 	
 	private String name, email, id, password, phonenumber;

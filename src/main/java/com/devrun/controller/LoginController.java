@@ -1050,6 +1050,33 @@ public class LoginController {
         }
     }
 	
+	@ResponseBody
+	@GetMapping("/users/info-role")
+	public ResponseEntity<?> infoRole(HttpServletRequest request){
+		// AccessToken이 헤더에 있는지 확인
+		String accessToken = request.getHeader("Access_token");
+
+	    // AccessToken 존재 여부 확인 (null 혹은 빈문자열 인지 확인)
+		if (accessToken == null || accessToken.isEmpty()) {
+			// 400 : Access token 없음
+			return new ResponseEntity<>("Access token is required", HttpStatus.BAD_REQUEST);
+		}
+		
+		String id = JWTUtil.getUserIdFromToken(accessToken);
+		
+		MemberEntity member = memberService.findById(id);
+		
+		MemberDTO memberDTO = new MemberDTO();
+		
+		if (member != null) {
+			memberDTO.setUserNo(member.getUserNo());
+			memberDTO.setId(member.getId());
+			memberDTO.setRole(member.getRole());
+		}
+		
+		return new ResponseEntity<>(memberDTO, HttpStatus.OK);
+	}
+	
 	@Autowired
     private CaffeineCache caffeineCache;
 	
