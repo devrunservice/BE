@@ -72,11 +72,11 @@ public class PaymentController {
 			
 			// 사용자의 포인트 정보를 조회
 			//2개이상 구매시 구매자는 이름이 같으니깐, 첫번째 배열에 있는 이름으로 point찾음.
-		    String name = paymentDTOList.get(0).getBuyer_name();
+		    int usrno = paymentDTOList.get(0).getUserno();
 		    //userno로 처리하기 
 		    
-		    System.err.println(name);
-		    PointEntity pointEntity = pointRepository.findByMemberEntity_name(name);
+		    System.err.println(usrno);
+		    PointEntity pointEntity = pointRepository.findByMemberEntity_userNo(usrno);
 		    System.err.println(pointEntity);
 
 		    if (pointEntity == null) {
@@ -104,7 +104,7 @@ public class PaymentController {
 		    //외래키에 값 넣어주기.
 		    //결제 정보 사용자 이름으로 memberEntity에서 찾은후, 밑에 추가해주기. 
 		    //외래키가 user_no지만 memberEntity로 정의해서 저렇게 넣어줘야함.
-		    MemberEntity memberEntity = memberEntityRepository.findByName(name);
+		    MemberEntity memberEntity = memberEntityRepository.findByUserNo(usrno);
 		    System.err.println(memberEntity);
 			
 			try {			
@@ -190,13 +190,13 @@ public class PaymentController {
 		    
 		        MemberEntity member = memberService.findById(id);	
 		        
-		        String name = member.getName();		
+		        int usrno = member.getUserNo();		
 		        
 		        PageRequest pageRequest = PageRequest.of(page -1, size);
 		        
 
-		        // 사용자의 이름으로 결제 정보 조회
-		        Page<PaymentInfo> paymentsPage = paymentRepository.findAllbyPaymentEntity(name,pageRequest);
+		        // 사용자의 고유번호로 결제 정보 조회
+		        Page<PaymentInfo> paymentsPage = paymentRepository.findAllbyPaymentEntity(usrno,pageRequest);
 		        System.err.println(paymentsPage);
 
 		        if (paymentsPage.isEmpty()) {

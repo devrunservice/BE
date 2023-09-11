@@ -9,7 +9,8 @@ import com.devrun.entity.PointEntity;
 @Repository
 public interface PointRepository extends JpaRepository<PointEntity, Long> {
 
-	PointEntity findByMemberEntity_name(String name);
+
+	PointEntity findByMemberEntity_userNo(int usrno);
 
 
    
