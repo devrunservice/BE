@@ -13,6 +13,9 @@ public interface PointRepository extends JpaRepository<PointEntity, Long> {
 	PointEntity findByMemberEntity_userNo(int usrno);
 
 
+	
+
+
    
 
 
