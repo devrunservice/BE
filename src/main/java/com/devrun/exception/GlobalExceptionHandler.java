@@ -74,7 +74,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             Map<String ,String> responemap = new HashMap<>();
             responemap.put("message" , "Can't Read HTTP Request, Check Your Request data type. ex json, xml, text, Number, Array, Object etc. -By DevRun");
 
-
         return handleExceptionInternal(ex, responemap, headers, status, request);
     }
 

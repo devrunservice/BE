@@ -7,7 +7,9 @@ import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -90,11 +92,19 @@ public class NoticeController {
     }
 	
 	// 공지사항 페이징
-	@GetMapping("/notices")
-    public ResponseEntity<Page<NoticeDTO>> getAllNotices(Pageable pageable) {
-        Page<NoticeDTO> noticeDTOs = noticeService.getAllNotices(pageable);
-        return new ResponseEntity<>(noticeDTOs, HttpStatus.OK);
-    }
+	@GetMapping("/notice/{pageNumber}")
+	public ResponseEntity<Page<NoticeDTO>> getAllNotices(@PathVariable int pageNumber) {
+	    // 'createdDate'를 기준으로 내림차순 정렬
+	    Pageable pageable = PageRequest.of(pageNumber - 1, 10, Sort.by(Sort.Direction.DESC, "createdDate"));
+	    
+	    // 페이지 정보를 가져오기 전에 null 체크
+	    Page<NoticeDTO> noticeDTOs = noticeService.getAllNotices(pageable);
+	    if (noticeDTOs == null) {
+	        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	    }
+	    
+	    return new ResponseEntity<>(noticeDTOs, HttpStatus.OK);
+	}
 	
 	// 공지사항 읽기
 	@ResponseBody

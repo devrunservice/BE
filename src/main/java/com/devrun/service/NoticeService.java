@@ -41,7 +41,6 @@ public class NoticeService {
 	// 공지사항 페이징
 	public Page<NoticeDTO> getAllNotices(Pageable pageable) {
         Page<Notice> notices = noticeRepository.findAll(pageable);
-        
         return notices.map(notice -> {
             NoticeDTO dto = new NoticeDTO();
             dto.setNoticeNo(notice.getNoticeNo());
