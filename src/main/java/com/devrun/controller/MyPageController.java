@@ -204,7 +204,7 @@ public class MyPageController {
     public ResponseEntity<?> editProfileImg(@RequestPart(required = true) List<MultipartFile> editimg) throws IOException {
         String v = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        MemberEntity m = memberService.findById(v);
+        
         Map<String, String> result = new HashMap<String, String>();
         if (editimg != null) {
             if (editimg.size() >= 2) {
@@ -213,14 +213,14 @@ public class MyPageController {
 
                 return ResponseEntity.status(409).body(result);
             } else {
-
+            	
                 String uploadpath = awsS3UploadService.putS3(editimg, "profile");
-                String newprofileimgsrc = awsS3ReadService.findUploadKeyUrl(uploadpath);
+                MemberEntity m = memberService.findById(v);
                 m.setProfileimgsrc(uploadpath);
                 memberService.insert(m);
-
+                
                 result.put("message", "profile image edited successfully.");
-                result.put("profileimg" , newprofileimgsrc);
+                result.put("profileimg" , uploadpath);
                 return ResponseEntity.ok(result);
             }
         } else {
