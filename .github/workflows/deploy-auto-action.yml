@@ -77,7 +77,7 @@ jobs:
           echo "spring.security.oauth2.client.registration.google.client-id=${{ secrets.GOOGLE_CLIENT_ID }}" >> application.properties
           echo "spring.security.oauth2.client.registration.google.client-secret=${{ secrets.GOOGLE_SECRET_KEY }}" >> application.properties
           echo "" >> application.properties
-          echo "aes.aes.secretKey=${{ secrets.AES_SECRET_KEY }}" >> application.properties
+          echo "aes.secretKey=${{ secrets.AES_SECRET_KEY }}" >> application.properties
           
         working-directory : ./src/main/resources
         
