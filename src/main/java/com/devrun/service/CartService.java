@@ -1,121 +1,147 @@
 package com.devrun.service;
 
-
-import com.devrun.dto.CartDTO;
-import com.devrun.entity.Cart;
-import com.devrun.entity.Contact;
-import com.devrun.youtube.Lecture;
-import com.devrun.entity.MemberEntity;
-import com.devrun.exception.RestApiException;
-import com.devrun.exception.UserErrorCode;
-import com.devrun.repository.CartRepo;
-import com.devrun.repository.ContactRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.devrun.dto.CouponListInCart;
+import com.devrun.dto.LectureInfo;
+import com.devrun.entity.Cart;
+import com.devrun.entity.Contact;
+import com.devrun.entity.MemberEntity;
+import com.devrun.entity.PointEntity;
+import com.devrun.repository.CartRepo;
+import com.devrun.repository.ContactRepository;
+import com.devrun.repository.CouponViewRepository;
+import com.devrun.repository.PointRepository;
+import com.devrun.youtube.Lecture;
+import com.devrun.youtube.LectureRepository;
+
 @Service
 public class CartService {
 
-    @Autowired
-    private CartRepo cartRepo;
+	@Autowired
+	private CartRepo cartRepo;
 
-    @Autowired
-    private MemberService memberService;
-    
-    @Autowired
-    private ContactRepository contactRepository;
+	@Autowired
+	private ContactRepository contactRepository;
 
-    public CartDTO showCartInfo(String userid) {
+	@Autowired
+	private LectureRepository lectureRepository;
 
-        List<Cart> Carts = cartRepo.findAllByMemberEntity_id(userid);
-        CartDTO result = new CartDTO();
-        List<Map<String , String>> lecutreInfo = new ArrayList<Map<String , String>>();
+	@Autowired
+	private PointRepository pointRepository;
 
-        for (Cart e: Carts) {
+	@Autowired
+	private CouponViewRepository couponViewRepository;
 
-            int lecturePrice = e.getLecture().getLecturePrice();
-            String mentoName = "gotka153";
-            String lectureIntro = e.getLecture().getLectureIntro();
-            String lectureTitle = e.getLecture().getLectureName();
-            Long lectureNo = e.getLecture().getLectureid();
-            Map<String , String> singglelectureinfo = new HashMap<String , String>();
-           // singglelectureinfo.put("lectureNo" , Integer.toString(lectureNo));
-            singglelectureinfo.put("lectureTitle" , lectureTitle);
-            singglelectureinfo.put("lectrueIntro" , lectureIntro);
-            singglelectureinfo.put("mentoName" , mentoName);
-            singglelectureinfo.put("lecturePrice" , Integer.toString(lecturePrice));
-            lecutreInfo.add(singglelectureinfo);
+	public List<LectureInfo> showlectureInfo(MemberEntity userEntity) {
 
-        }
+		List<Cart> Carts = cartRepo.findAllByMemberEntity(userEntity);
+		List<LectureInfo> lecutreInfolist = new ArrayList<LectureInfo>();
 
+		Carts.removeIf(cart -> (cart.isDeleteop()));
 
-        result.setLectureInfo(lecutreInfo);
+		for (Cart e : Carts) {
+			LectureInfo lectureInfo = e.getLectureInfo();
+			lecutreInfolist.add(lectureInfo);
+		}
 
-        MemberEntity m = memberService.findById(userid);
-        Contact c = contactRepository.findByMemberEntity(m);
-        
-        String userPhonumber = c.getPhonenumber();
-        String userEmail = c.getEmail();
-        String username = memberService.findById(userid).getName();
+		return lecutreInfolist;
+	}
 
-        result.setUserPhonenumber(userPhonumber);
-        result.setUserEmail(userEmail);
-        result.setUserName(username);
+	public Map<String, Object> showBuyerInfo(MemberEntity userEntity) {
 
-        result.setUserPoint(500);
-        result.setAbleCouponCount(1);
-        return result;
+		Map<String, Object> BuyerInfo = new HashMap<String, Object>();
 
-    }
+		// BuyerInfo
+		Contact c = contactRepository.findByMemberEntity(userEntity);
 
-    public String putInCart(String lectureTitle){
-        String resultMsg;
+		String userPhonumber = c.getPhonenumber();
+		String userEmail = c.getEmail();
+		String username = userEntity.getName();
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		BuyerInfo.put("userName", username);
+		BuyerInfo.put("userEmail", userEmail);
+		BuyerInfo.put("userPhonumber", userPhonumber);
 
-        String userid = authentication.getName();
+		// point
+		PointEntity pointEntity = pointRepository.findByMemberEntity_userNo(userEntity.getUserNo());
+		int myPoint = pointEntity.getMypoint();
+		BuyerInfo.put("userPoint", myPoint);
 
-        MemberEntity memberEntity = memberService.findById(userid);
+		return BuyerInfo;
 
+	}
 
-        if(memberEntity != null){
-            Cart cart = new Cart();
-            Lecture lecture = new Lecture();
-            lecture.setLectureid((long) 1);
-            cart.setLecture(lecture);
-            cart.setMemberEntity(memberEntity);
-            //cartRepo.save(cart);
-            resultMsg = "저장 성공";
+	public List<CouponListInCart> showUserCoupon(MemberEntity userEntity) {
 
-        } else {
-            resultMsg = "저장 실패";
-        }
+		List<CouponListInCart> couponListInCart = couponViewRepository.showUserCouponByUserno(userEntity.getUserNo());
 
-        return resultMsg;
+		return couponListInCart;
 
-    }
+	}
 
-    public String deleteInCart(String lectureTitle){
+	public String putInCart(MemberEntity userEntity, String lectureName) {
+		String resultMsg;
 
-        String resultMsg;
+		if (userEntity != null) {
+			Lecture lecture = lectureRepository.findByLectureName(lectureName);
+			if (lecture == null) {// 강의가 존재하지 않는 경우
+				return resultMsg = "존재하지 않는 강의입니다.";
+			} else {
+				Cart cart = cartRepo.findByMemberEntityAndLecture(userEntity, lecture);
+				if (cart != null && cart.isDeleteop()) {// 장바구니에 담겨 있으나 삭제 처리 됐던 경우
+					cart.setDeleteop(false);
+					cartRepo.save(cart);
+					resultMsg = "장바구니에 다시 담았습니다.";
+				} else if (cart != null && !cart.isDeleteop()) {// 장바구니에 담겨 있고, 이미 등록 처리 됐을 경우
+					resultMsg = "장바구니에 이미 존재합니다.";
+				} else {// 처음 장바구니에 등록하는 경우
+					Cart newcart = new Cart();
+					newcart.setLecture(lecture);
+					newcart.setDeleteop(false);
+					newcart.setMemberEntity(userEntity);
+					cartRepo.save(newcart);
+					resultMsg = "장바구니에 담았습니다.";
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userid = authentication.getName();
+				}
+			}
+		} else {// 유저가 존재하지 않는 경우
+			resultMsg = "사용자가 확인되지 않았으므로, 저장 실패";
 
-        //reulstmsg = cartRepo.deleteInCart(userid , lecturetitle);
+		}
 
-        resultMsg = "삭제 완료";
+		return resultMsg;
 
-        return resultMsg;
+	}
 
-    }
+	public String deleteInCart(MemberEntity userEntity, String lectureName) {
+
+		String resultMsg = null;
+
+		List<Cart> cartEntity = cartRepo.findAllByMemberEntity(userEntity);
+		for (Cart cart : cartEntity) {
+			if (cart.getLecture().getLectureName().equals(lectureName)) {
+				if (cart.isDeleteop()) {
+					resultMsg = "이미 삭제된 강의입니다.";
+				} else {
+					cart.setDeleteop(true);
+					cartRepo.save(cart);
+					resultMsg = "삭제 완료";
+				}
+				break;
+			} else {
+				resultMsg = "장바구니에 존재하지 않는 강의입니다.";
+			}
+		}
+
+		return resultMsg;
+
+	}
 
 }
