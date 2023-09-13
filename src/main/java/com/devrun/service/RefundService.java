@@ -54,7 +54,8 @@ public class RefundService {
             System.err.println(merchantUid);
 
            // 결제 정보 조회
-//            PaymentEntity paymentEntity = paymentRepository.findByMerchantUid(merchantUid);
+           // 가격만 비교시키면 같은 가격 전부다 환불하므로 이름도 같이 비교            
+
             List<PaymentEntity> paymentEntity = paymentRepository.findByListMerchantUidAndName(merchantUid, name);
 
             System.err.println(paymentEntity);
