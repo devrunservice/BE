@@ -30,7 +30,7 @@ public interface CouponViewRepository extends JpaRepository<CouponViewEntity, Lo
 			+ "	cm.state AS state\r\n"
 			+ "FROM\r\n"
 			+ "(SELECT ca.lectureid , lt.lecture_name AS lecture_name, lt.lecture_thumbnail AS lecture_thumbnail, lt.lecture_intro AS lecture_intro, lt.lecture_price AS lecture_price, ca.user_no AS user_no\r\n"
-			+ "FROM lecture AS lt JOIN cart AS ca ON lt.lectureid = ca.lectureid WHERE ca.user_no= :userno) AS join_lt_ca LEFT JOIN coupon_manage AS cm ON join_lt_ca.lecture_name = cm.target WHERE cm.userno = :userno", nativeQuery = true)
+			+ "FROM lecture AS lt JOIN cart AS ca ON lt.lectureid = ca.lectureid WHERE ca.user_no= :userno) AS join_lt_ca RIGHT JOIN coupon_manage AS cm ON join_lt_ca.lecture_name = cm.target WHERE cm.userno = :userno", nativeQuery = true)
 	List<CouponListInCart> showUserCouponByUserno(@Param("userno") int userNo);
 
 

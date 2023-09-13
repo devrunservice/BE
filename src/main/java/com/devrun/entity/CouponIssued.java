@@ -10,9 +10,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+
+import com.devrun.youtube.Lecture;
 
 import lombok.Data;
 
@@ -37,7 +40,10 @@ public class CouponIssued {
 	@Max(value = 100)
 	@Min(value = 1)
 	private int quantity; // 쿠폰 발행 수량
-	private String target; // 쿠폰 적용 대상 (특정 강의 번호 또는 특정 강사 번호 또는 카테고리)
+	
+	@ManyToOne
+	@JoinColumn(name = "lectureid")
+	private Lecture lectureid; // 쿠폰 적용 대상 (특정 강의 번호 또는 특정 강사 번호 또는 카테고리)
 
 	private enum coupontype {
 		all, category, lecture, mento,
