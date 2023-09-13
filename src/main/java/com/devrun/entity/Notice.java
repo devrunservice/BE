@@ -42,13 +42,13 @@ public class Notice implements Serializable {
 	
 	@ManyToOne
 	@JoinColumns({
-	@JoinColumn(name = "userNo", referencedColumnName = "userNo", nullable = false),
-	@JoinColumn(name = "id", referencedColumnName = "id", nullable = false)})
+		@JoinColumn(name = "userNo", referencedColumnName = "userNo", nullable = false),
+		@JoinColumn(name = "id", referencedColumnName = "id", nullable = false)})
 	@Comment("작성자")
 	@NotNull(message = "information cannot be null or empty")
 	private MemberEntity memberEntity;
 	
-	@Column(name = "title", nullable = false, length = 25)
+	@Column(name = "title", nullable = false, length = 128)
 	@Comment("공지사항 타이틀")
     @NotBlank(message = "information cannot be null or empty")
     private String title;
@@ -68,8 +68,6 @@ public class Notice implements Serializable {
     @Comment("작성날짜")
     private Date createdDate;
 
-    @UpdateTimestamp								// 엔티티가 수정될 때마다 현재 시간으로 자동으로 업데이트
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "modifiedDate", insertable = false)
     @Comment("수정날짜")
     private Date modifiedDate;

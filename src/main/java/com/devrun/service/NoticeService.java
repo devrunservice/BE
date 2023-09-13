@@ -1,5 +1,6 @@
 package com.devrun.service;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +70,7 @@ public class NoticeService {
 		}
 		notice.setTitle(newTitle);
 		notice.setContent(newContent);
+		notice.setModifiedDate(new Date());
 		noticeRepository.save(notice);
 	}
 
