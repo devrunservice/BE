@@ -15,8 +15,8 @@ import com.devrun.entity.PaymentEntity;
 public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
 	
 	//결제 정보가 db에 있을 경우만 환불진행 
-	@Query("SELECT p FROM PaymentEntity p WHERE p.merchant_uid = :merchant_uid")
-	List<PaymentEntity> findByListMerchantUid(@Param("merchant_uid") String merchant_uid);
+	@Query("SELECT p FROM PaymentEntity p WHERE p.merchant_uid = :merchant_uid AND p.name = :name")
+	List<PaymentEntity> findByListMerchantUidAndName(@Param("merchant_uid") String merchant_uid, @Param("name") String name);
 		 
 	@Query("SELECT p FROM PaymentEntity p WHERE p.paid_amount = :paid_amount")
 	PaymentEntity findByPaidAmount(@Param("paid_amount") String imp_uid);
@@ -30,6 +30,7 @@ public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
 	
 	@Query("SELECT p FROM PaymentEntity p WHERE p.merchant_uid = :merchant_uid")
 	PaymentEntity findByMerchantUid(@Param("merchant_uid") String merchant_uid);
+
 
 
 
