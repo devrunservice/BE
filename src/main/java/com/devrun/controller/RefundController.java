@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.devrun.dto.RefundDTO;
 import com.devrun.service.RefundService;
 
 import io.swagger.annotations.ApiOperation;
@@ -30,11 +32,12 @@ public class RefundController {
 	 @PostMapping("/payment")
 	 @ApiOperation("아임포트 api를 이용하여 환불정보와 Key,Secret값들을 이용하여 환불합니다.")
 
-	 public ResponseEntity<String> refundPay(@RequestBody Map<String, Object> refundData) {
+	 public ResponseEntity<String> refundPay(@RequestBody RefundDTO refundDTO) {
+		 System.err.println(refundDTO);
 		 
 	     try {	    	 
-	         refundService.refundPayment(refundData, KEY, SECRET);	     		
-	         refundService.saveRefund(refundData);	         
+	         refundService.refundPayment(refundDTO, KEY, SECRET);	     		
+	         refundService.saveRefund(refundDTO);	         
 	         return ResponseEntity.ok("환불이 성공적으로 처리되었습니다.");
 	 } catch (Exception e) {
 		 
