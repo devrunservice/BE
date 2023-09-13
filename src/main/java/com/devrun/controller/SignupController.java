@@ -214,7 +214,7 @@ public class SignupController {
 	    historyEntityGain.setPointupdown(3000);
 	    String gainname = "회원가입 축하";
 	    historyEntityGain.setProductname(gainname);
-	    String gainExplanation = "회원가입시 얻은 포인트"; 
+	    String gainExplanation = "회원가입시 얻은 포인트";
 	    historyEntityGain.setExplanation(gainExplanation);
 	    pointHistoryRepository.save(historyEntityGain);
 	    return memberService.insert(point) != null;

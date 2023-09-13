@@ -1,8 +1,5 @@
 package com.devrun.controller;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,8 +136,10 @@ public class NoticeController {
 	        noticeService.updateNotice(noticeNo, newTitle, newContent);
 	        return ResponseEntity.status(200).body("Successfully updated notice with ID: " + noticeNo);
 	    } catch (IllegalArgumentException e) {
+	    	e.printStackTrace();
 	        return ResponseEntity.status(400).body("Invalid arguments");
 	    } catch (Exception e) {
+	    	e.printStackTrace();
 	        return ResponseEntity.status(500).body("Internal Server Error");
 	    }
 	}
