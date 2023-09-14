@@ -37,8 +37,8 @@ public class AuthController {
 	
 	
     @PostMapping("/googlelogin")
-    public ResponseEntity<String> googleLogin(@RequestBody Map<String, String> body) {
-        String token = body.get("token");
+    public ResponseEntity<String> googleLogin(@RequestBody TokenRequest tokenRequest) {
+    	 String token = tokenRequest.getToken();
         GoogleIdTokenVerifier verifier = initializeGoogleIdTokenVerifier();
 
         try {

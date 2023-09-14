@@ -48,6 +48,8 @@ public class LectureregistController {
             // 이미지 업로드 후 URL 가져오기
             String imageUrls = awsS3UploadService.putS3(imageFiles, "public.lecture.images");
 
+            
+            
             // 강의 및 비디오 정보를 데이터베이스에 저장하고, 강의 썸네일 이미지를 S3에 업로드한 URL을 가져옴
             Lecture savedLecture = lectureService.saveLecture(requestDto, imageUrls);
             
@@ -58,9 +60,9 @@ public class LectureregistController {
             List<VideoInfo> videoInfoList = new ArrayList<>();
             for (MultipartFile videoFile : videoFiles) {
             	
-                System.out.println("Uploading video: " + videoFile.getOriginalFilename());
 
                 VideoInfo videoInfo = youTubeUploader.uploadVideo(videoFile, savedLecture.getId()); // savedLecture의 ID 사용
+                System.out.println("아이디???? " +savedLecture.getId());
                 videoInfoList.add(videoInfo);
             }
 
