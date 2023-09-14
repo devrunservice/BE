@@ -68,7 +68,7 @@ public class Notice implements Serializable {
     @Comment("작성날짜")
     private Date createdDate;
 
-    @Column(name = "modifiedDate", insertable = false)
+    @Column(name = "modifiedDate")
     @Comment("수정날짜")
     private Date modifiedDate;
 

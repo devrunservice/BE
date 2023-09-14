@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 
 import javax.validation.Valid;
@@ -36,6 +37,7 @@ import com.devrun.service.EmailSenderService;
 import com.devrun.service.MemberService;
 import com.devrun.util.AESUtil;
 import com.devrun.util.CaffeineCache;
+import com.google.gson.Gson;
 
 import reactor.core.publisher.Mono;
 
@@ -249,22 +251,31 @@ public class SignupController {
 										){
 		HttpHeaders headers = new HttpHeaders();
 		MemberEntity member = memberService.findById(id);
+		Gson gson = new Gson();  // Gson 객체 생성
+
+		// id, email, key를 JSON 형식으로 만들기
+		String jsonFormatData = gson.toJson(new HashMap<String, String>() {
+			private static final long serialVersionUID = 1L;
+		{
+			put("id", id);
+			put("email", email);
+		}});
 		try {
-	        String encryptedId = AESUtil.encrypt(id);
-	        String encryptedEmail = AESUtil.encrypt(email);
+			// JSON 형식의 데이터를 암호화
+			String encryptedData = AESUtil.encrypt(jsonFormatData);
 	        
 			if (member == null) {
 				// 302 : 회원을 찾을 수 없음
-				headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=notfound&id=" + encryptedId + "&email=" + encryptedEmail));
+				headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=notfound&data=" + encryptedData));
 		        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 		    }
 			
 			if (isVerificationExpired(member.getSignupDate())) {
 				// 회원가입 1시간 경과
-				headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=expired&id=" + encryptedId + "&email=" + encryptedEmail));
+				headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=expired&data=" + encryptedData));
 		        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 		    }
-		    return verifyKeyAndActivateAccount(id, key, member, encryptedId, encryptedEmail);
+		    return verifyKeyAndActivateAccount(id, key, member, jsonFormatData);
 		} catch (Exception e) {
 			// 암호화 실패
 			return new ResponseEntity<>("Encryption failed", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -280,7 +291,7 @@ public class SignupController {
 	    return diffInMinutes >= 60;
 	}
 
-	private ResponseEntity<?> verifyKeyAndActivateAccount(String id, String key, MemberEntity member, String encryptedId, String encryptedEmail) {
+	private ResponseEntity<?> verifyKeyAndActivateAccount(String id, String key, MemberEntity member, String encryptedData) {
 		HttpHeaders headers = new HttpHeaders();
 	    String cachedKey = caffeineCache.getCaffeine(id);
 	    if (cachedKey != null && cachedKey.equals(key)) {
@@ -288,11 +299,11 @@ public class SignupController {
 	        memberService.insert(member);
 	        caffeineCache.removeCaffeine(id);
 	        // 이메일 인증 성공 회원 활성화
-	        headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=success&id=" + encryptedId + "&email=" + encryptedEmail));
+	        headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=success&data=" + encryptedData));
 	        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	    }
 	    // 유효하지 않은 키
-	    headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=failure&id=" + encryptedId + "&email=" + encryptedEmail));
+	    headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=failure&data=" + encryptedData));
 	    return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	}
 }

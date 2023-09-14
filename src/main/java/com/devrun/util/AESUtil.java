@@ -25,7 +25,6 @@ public class AESUtil {
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
         byte[] encrypted = cipher.doFinal(data.getBytes());
-        System.out.println("encrypted : " + encrypted);
         return Base64.getEncoder().encodeToString(encrypted);
     }
 
