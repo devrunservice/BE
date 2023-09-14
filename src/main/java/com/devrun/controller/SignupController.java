@@ -1,5 +1,6 @@
 package com.devrun.controller;
 
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
@@ -38,6 +39,7 @@ import com.devrun.service.MemberService;
 import com.devrun.util.AESUtil;
 import com.devrun.util.CaffeineCache;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import reactor.core.publisher.Mono;
 
@@ -144,7 +146,7 @@ public class SignupController {
 	        memberService.removeVerifyCode(signupWrapper.getContact().getPhonenumber());
 
 	        // 이메일 전송
-	        emailSenderService.sendSignupByEmail(signupWrapper.getContact().getEmail(), memberEntity.getId());
+	        sendEmail(signupWrapper.getContact().getEmail(), memberEntity.getId());
 
 	        return new ResponseEntity<>("Signup successful", HttpStatus.OK);
 	    } catch (Exception e) {
@@ -245,25 +247,21 @@ public class SignupController {
 	@ResponseBody
 	@CrossOrigin(origins = {"https://mail.naver.com", "https://mail.daum.net", "https://mail.google.com","https://mail.nate.com"})
 	@PostMapping("/verify/signupEmail")
-	public ResponseEntity<?> signupOk(@RequestParam("id") String id
-										, @RequestParam("key") String key
-										, @RequestParam("email") String email
-										){
+	public ResponseEntity<?> signupOk(@RequestParam("data") String encryptedData){
 		HttpHeaders headers = new HttpHeaders();
-		MemberEntity member = memberService.findById(id);
-		Gson gson = new Gson();  // Gson 객체 생성
-
-		// id, email, key를 JSON 형식으로 만들기
-		String jsonFormatData = gson.toJson(new HashMap<String, String>() {
-			private static final long serialVersionUID = 1L;
-		{
-			put("id", id);
-			put("email", email);
-		}});
 		try {
-			// JSON 형식의 데이터를 암호화
-			String encryptedData = AESUtil.encrypt(jsonFormatData);
-	        
+	        // 암호화된 데이터를 복호화
+	        String decryptedData = AESUtil.decrypt(encryptedData);
+
+	        // 복호화된 데이터를 JSON 형식으로 파싱
+	        Type type = new TypeToken<HashMap<String, String>>() {}.getType();
+	        HashMap<String, String> map = new Gson().fromJson(decryptedData, type);
+
+	        // id, email, key 값 추출
+	        String id = map.get("id");
+	        String key = map.get("key");
+			MemberEntity member = memberService.findById(id);
+	
 			if (member == null) {
 				// 302 : 회원을 찾을 수 없음
 				headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=notfound&data=" + encryptedData));
@@ -275,10 +273,10 @@ public class SignupController {
 				headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=expired&data=" + encryptedData));
 		        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 		    }
-		    return verifyKeyAndActivateAccount(id, key, member, jsonFormatData);
+		    return verifyKeyAndActivateAccount(id, key, member, encryptedData);
 		} catch (Exception e) {
 			// 암호화 실패
-			return new ResponseEntity<>("Encryption failed", HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>("Decryption failed", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 

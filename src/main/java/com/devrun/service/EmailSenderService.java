@@ -3,6 +3,7 @@ package com.devrun.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Random;
 
 import javax.mail.MessagingException;
@@ -13,7 +14,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import com.devrun.util.AESUtil;
 import com.devrun.util.CaffeineCache;
+import com.google.gson.Gson;
 
 import net.bytebuddy.utility.RandomString;
 
@@ -75,29 +78,38 @@ public class EmailSenderService {
     		"</body>" +
     		"</html>";
     
+    // 이미지를 Base64로 인코딩하고, 해당 데이터를 포함한 HTML img 태그를 반환하는 메소드
+    public String createImgTagWithBase64(String imagePath) throws IOException {
+        String encodedString = encodeImageToBase64(imagePath);
+        return "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width:144px; height:144px;\"/>";
+    }
+
+    // 이미지를 Base64로 인코딩하는 메소드
+    public String encodeImageToBase64(String imagePath) throws IOException {
+        InputStream in = getClass().getResourceAsStream(imagePath);
+        byte[] imageBytes = in.readAllBytes();
+        return Base64.getEncoder().encodeToString(imageBytes);
+    }
+    
     public void sendSignupByEmail(String toEmail, String id) {
     	MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper;
     	
-        // 경로에 파일이 없거나 파일을 읽을 권한이 없을 경우 예외처리를 하기 위해 try/catch를 사용
         try {
-        	// dataURL을 사용하여 이미지 첨부
-        	InputStream in = getClass().getResourceAsStream("/img/logo.png");
-        	byte[] imageBytes = in.readAllBytes();
-            String encodedString = Base64.getEncoder().encodeToString(imageBytes);
-            imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width:144px; height:144px;\"/>";
-		} catch (IOException e) {
-			System.out.println("이미지 인코딩 실패");
-			e.printStackTrace();
-		}
-
+            imgTag = createImgTagWithBase64("/img/logo.png");
+        } catch (IOException e) {
+            System.out.println("이미지 인코딩 실패");
+            e.printStackTrace();
+        }
         
         String subject = "[Devrun] " + id + "님 회원가입을 축하합니다. 이메일 인증을 완료해주세요.";
 //        String url = "https://devrun.net/signupcompletion";
         String url = "https://devrun.site/verify/signupEmail";
         RandomString rs = new RandomString(35);
         String tempkey = rs.nextString();
-        
+        String encryptedData;
+        try {
+        	encryptedData = createEncryptedData(id, toEmail, tempkey);
         String body = bodyTop +
         		
          		"<div style=\"background: #5F4B8B; font-size: 0; padding: 0 30px; height: 144px; line-height:144px; \">" + imgTag + "</div>" +
@@ -107,9 +119,7 @@ public class EmailSenderService {
                 "<div style=\"border-top:1px solid #ddd; border-bottom:1px solid #ddd; padding: 25px 0;margin-top: 35px;\">" +
                 
 				"<form id=\"confirmationForm\" method=\"POST\" action=\"" + url + "\">" +
-				"<input type='hidden' id='id' name='id' value='" + id + "'/>" +
-				"<input type='hidden' id='key' name='key' value='" + tempkey + "'/>" +
-				"<input type='hidden' id='email' name='email' value='" + toEmail + "'/>" +
+				"<input type='hidden' id='id' name='data' value='" + encryptedData + "'/>" +
 				"<p style=\"font-size: 0; padding:0px 30px;display: flex;align-items: center;justify-content: center;\">" +
 				"<button type=\"submit\" style=\"background-color: #5F4B8B; color: #FFFFFF; width: 140px; height: 45px; text-align: center; border: none; font-family: 'Pretendard'; font-weight: 400; display: flex; align-items: center; justify-content: center;\"><b>이메일 인증하기</b></button>" +
 				"</p>" +
@@ -119,16 +129,15 @@ public class EmailSenderService {
         
         System.out.println("EmailSenderService 이메일주소 : " + toEmail);
         
-        try {
             helper = new MimeMessageHelper(message, true);
-            helper.setFrom("emaildragon2@gmail.com");
+            helper.setFrom("devrun66@gmail.com");
             helper.setTo(toEmail);
             helper.setSubject(subject);
             helper.setText(body, true); // Set the second parameter to 'true' to send HTML content
 
             cacheService.saveCaffeine(id, tempkey);
             mailSender.send(message);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -137,17 +146,12 @@ public class EmailSenderService {
     	MimeMessage message = mailSender.createMimeMessage();
     	MimeMessageHelper helper;
     	
-    	// 경로에 파일이 없거나 파일을 읽을 권한이 없을 경우 예외처리를 하기 위해 try/catch를 사용
     	try {
-    		// dataURL을 사용하여 이미지 첨부
-    		InputStream in = getClass().getResourceAsStream("/img/logo.png");
-    		byte[] imageBytes = in.readAllBytes();
-    		String encodedString = Base64.getEncoder().encodeToString(imageBytes);
-    		imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width:144px; height:144px;\"/>";
-    	} catch (IOException e) {
-    		System.out.println("이미지 인코딩 실패");
-    		e.printStackTrace();
-    	}
+            imgTag = createImgTagWithBase64("/img/logo.png");
+        } catch (IOException e) {
+            System.out.println("이미지 인코딩 실패");
+            e.printStackTrace();
+        }
     	
     	String subject = "[Devrun] " + id + "님 이메일 인증을 완료해주세요.";
     	
@@ -177,7 +181,7 @@ public class EmailSenderService {
     	
     	try {
     		helper = new MimeMessageHelper(message, true);
-    		helper.setFrom("emaildragon2@gmail.com");
+    		helper.setFrom("devrun66@gmail.com");
     		helper.setTo(toEmail);
     		helper.setSubject(subject);
     		helper.setText(body, true); // Set the second parameter to 'true' to send HTML content
@@ -194,17 +198,12 @@ public class EmailSenderService {
     	MimeMessageHelper helper;
     	String imgTag = "";
     	
-    	// 경로에 파일이 없거나 파일을 읽을 권한이 없을 경우 예외처리를 하기 위해 try/catch를 사용
     	try {
-    		// dataURL을 사용하여 이미지 첨부
-    		InputStream in = getClass().getResourceAsStream("/img/logo.png");
-    		byte[] imageBytes = in.readAllBytes();
-    		String encodedString = Base64.getEncoder().encodeToString(imageBytes);
-    		imgTag = "<img src=\"data:image/png;base64," + encodedString + "\" alt=\"devrun로고\" style=\"width:144px; height:144px;\"/>";
-    	} catch (IOException e) {
-    		System.out.println("이미지 인코딩 실패");
-    		e.printStackTrace();
-    	}
+            imgTag = createImgTagWithBase64("/img/logo.png");
+        } catch (IOException e) {
+            System.out.println("이미지 인코딩 실패");
+            e.printStackTrace();
+        }
     	
     	String subject = "[Devrun] 아이디를 확인해주세요.";
 
@@ -227,7 +226,7 @@ public class EmailSenderService {
     	
     	try {
     		helper = new MimeMessageHelper(message, true);
-    		helper.setFrom("emaildragon2@gmail.com");
+    		helper.setFrom("devrun66@gmail.com");
     		helper.setTo(toEmail);
     		helper.setSubject(subject);
     		helper.setText(body, true); // Set the second parameter to 'true' to send HTML content
@@ -236,5 +235,24 @@ public class EmailSenderService {
     	} catch (MessagingException e) {
     		e.printStackTrace();
     	}
+    	
+    }
+    
+    // JSON 변환후 암호화
+    public String createEncryptedData(String id, String email, String tempkey) throws Exception {
+        Gson gson = new Gson();  // Gson 객체 생성
+
+        // id, email, key를 JSON 형식으로 만들기
+        String jsonFormatData = gson.toJson(new HashMap<String, String>() {
+            private static final long serialVersionUID = 1L;
+            {
+                put("id", id);
+                put("email", email);
+                put("key", tempkey);
+            }
+        });
+
+        // JSON 형식의 데이터를 암호화
+        return AESUtil.encrypt(jsonFormatData);
     }
 }
