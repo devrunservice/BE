@@ -18,9 +18,16 @@ public class VideoDto {
         this.lectureSectionId = lectureSectionId;
     }
 
-    public LectureSection getLectureSection() {
-        LectureSection section = new LectureSection();
-        section.setSectionid(lectureSectionId); // 섹션 ID를 설정하여 실제 객체를 찾도록 함
-        return section;
+    
+    
+    public LectureSection getLectureSection(LectureSectionRepository sectionRepository) {
+        if (lectureSectionId != null) {
+            return sectionRepository.findById(lectureSectionId).orElse(null);
+        }
+        return null; 
     }
+    
+	public void setLectureSection(LectureSectionDto sectionDto) {
+		
+	}
 }

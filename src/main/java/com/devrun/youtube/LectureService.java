@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 @Service
 public class LectureService {
 
@@ -21,7 +22,31 @@ public class LectureService {
         this.videoRepository = videoRepository;
     }
 
- // 강의 카테고리를 변환하는 메서드
+    public Lecture saveLecture(CreateLectureRequestDto requestDto, String thumbnailUrl) {
+        LectureCategory lectureCategory = convertToLectureCategoryEntity(requestDto.getLectureCategory());
+        lectureCategory = categoryRepository.save(lectureCategory);
+
+        Lecture lecture = convertToLectureEntity(requestDto, lectureCategory);
+        lecture.setLectureThumbnail(thumbnailUrl);
+
+        List<LectureSection> sections = saveLectureSections(requestDto.getLectureSectionList(), lecture);
+        lecture.setLectureSection(sections);
+
+        List<Video> videos = saveVideos(requestDto.getVideoList(), lecture );
+        lecture.setVideos(videos);
+
+     // Set Lecture Tags
+        if (requestDto.getLectureTag() != null) {
+            lecture.setLectureTag(requestDto.getLectureTag());
+        }
+        
+     // 동영상 정보를 업데이트합니다.
+        List<VideoInfo> videoInfoList = new ArrayList<>();
+        saveVideoInfo(videoInfoList, lecture);
+        
+        return lecture;
+    }
+
     private LectureCategory convertToLectureCategoryEntity(LecturecategoryDto categoryDto) {
         LectureCategory lectureCategory = new LectureCategory();
         lectureCategory.setLectureBigCategory(categoryDto.getLectureBigCategory());
@@ -29,51 +54,55 @@ public class LectureService {
         return lectureCategory;
     }
 
-    public Lecture saveLecture(CreateLectureRequestDto requestDto, String thumbnailUrl) {
-        // 강의 카테고리 저장
-        LectureCategory lectureCategory = convertToLectureCategoryEntity(requestDto.getLectureCategory());
-        lectureCategory = categoryRepository.save(lectureCategory);
-
-        // 강의 저장
-        Lecture lecture = convertToLectureEntity(requestDto, lectureCategory);
-        lecture = lectureRepository.save(lecture);
-
-
-        // 강의 썸네일 이미지 URL 저장
-        lecture.setLectureThumbnail(thumbnailUrl);
-
-        // LectureSection 저장
-        for (LectureSectionDto sectionDto : requestDto.getLectureSectionList()) {
-            LectureSection section = new LectureSection();
-            section.setSectionNumber(sectionDto.getSectionNumber());
-            section.setSectionTitle(sectionDto.getSectionTitle());
-            section.setLecture(lecture); // Lecture와 연결
-            sectionRepository.save(section); // LectureSection 저장
+    private List<LectureSection> saveLectureSections(List<LectureSectionDto> sectionDtoList, Lecture lecture) {
+        List<LectureSection> sections = new ArrayList<>();
+        for (LectureSectionDto sectionDto : sectionDtoList) {
+            LectureSection section = convertToLectureSectionEntity(sectionDto, lecture);
+            sections.add(section);
         }
+        return sectionRepository.saveAll(sections);
+    }
 
-        // Video 저장
-        for (VideoDto videoDto : requestDto.getVideoList()) {
-            Video video = new Video();
-            video.setUploadDate(videoDto.getUploadDate());
-            video.setFileName(videoDto.getFileName());
-            video.setVideoId(videoDto.getVideoId());
-            video.setTotalPlayTime(videoDto.getTotalPlayTime());
-            video.setVideoLink(videoDto.getVideoLink());
-            video.setVideoTitle(videoDto.getVideoTitle());
+    private LectureSection convertToLectureSectionEntity(LectureSectionDto sectionDto, Lecture lecture) {
+        LectureSection section = new LectureSection();
+        section.setSectionNumber(sectionDto.getSectionNumber());
+        section.setSectionTitle(sectionDto.getSectionTitle());
+        section.setLecture(lecture);
+        return section;
+    }
+
+    private List<Video> saveVideos(List<VideoDto> videoDtoList, Lecture lecture ) {
+        List<Video> videos = new ArrayList<>();
+        for (VideoDto videoDto : videoDtoList) {
+            Video video = convertToVideoEntity(videoDto, lecture);
 
             Long lectureSectionId = videoDto.getLectureSectionId();
             if (lectureSectionId != null) {
                 LectureSection section = sectionRepository.findById(lectureSectionId).orElse(null);
-                video.setLectureSection(section);
+                if (section != null) {
+                    video.setLectureSection(section);
+                }
             }
 
-            video.setLecture(lecture); // Lecture와 연결
-            videoRepository.save(video); // Video 저장
+            videos.add(video);
         }
-
-        return lecture;
+        return videoRepository.saveAll(videos);
     }
 
+    private Video convertToVideoEntity(VideoDto videoDto, Lecture lecture ) {
+        Video video = new Video();
+        video.setUploadDate(videoDto.getUploadDate());
+        video.setFileName(videoDto.getFileName());
+        video.setVideoId(videoDto.getVideoId());
+        video.setTotalPlayTime(videoDto.getTotalPlayTime());
+        video.setVideoLink(videoDto.getVideoLink());
+        video.setVideoTitle(videoDto.getVideoTitle());
+
+        
+        video.setLecture(lecture);
+        return video;
+    }
+    
     
     private Lecture convertToLectureEntity(CreateLectureRequestDto requestDto, LectureCategory lectureCategory ) {
         Lecture lecture = new Lecture();
@@ -104,25 +133,25 @@ public class LectureService {
 
 
         // 비디오 설정
-        List<Video> videos = new ArrayList<>();
-        for (VideoDto videoDto : requestDto.getVideoList()) {
-            Video video = new Video();
-            video.setUploadDate(videoDto.getUploadDate());
-            video.setFileName(videoDto.getFileName());
-            video.setVideoId(videoDto.getVideoId());
-            video.setTotalPlayTime(videoDto.getTotalPlayTime());
-            video.setVideoLink(videoDto.getVideoLink());
-            video.setVideoTitle(videoDto.getVideoTitle());
-
-            // lectureSectionId를 VideoDto에서 가져와서 Video 엔티티에 설정합니다.
-            Long lectureSectionId = videoDto.getLectureSectionId();
-            if (lectureSectionId != null) {
-                LectureSection section = sectionRepository.findById(lectureSectionId).orElse(null);
-                video.setLectureSection(section);
-            }
-            videos.add(video);
-        }
-        lecture.setVideos(videos);
+//        List<Video> videos = new ArrayList<>();
+//        for (VideoDto videoDto : requestDto.getVideoList()) {
+//            Video video = new Video();
+//            video.setUploadDate(videoDto.getUploadDate());
+//            video.setFileName(videoDto.getFileName());
+//            video.setVideoId(videoDto.getVideoId());
+//            video.setTotalPlayTime(videoDto.getTotalPlayTime());
+//            video.setVideoLink(videoDto.getVideoLink());
+//            video.setVideoTitle(videoDto.getVideoTitle());
+//
+//            // lectureSectionId를 VideoDto에서 가져와서 Video 엔티티에 설정합니다.
+//            Long lectureSectionId = videoDto.getLectureSectionId();
+//            if (lectureSectionId != null) {
+//                LectureSection section = sectionRepository.findById(lectureSectionId).orElse(null);
+//                video.setLectureSection(section);
+//            }
+//            videos.add(video);
+//        }
+//        lecture.setVideos(videos);
 
         // Lecture 엔티티를 데이터베이스에 저장합니다.
         lecture = lectureRepository.save(lecture);
@@ -133,17 +162,20 @@ public class LectureService {
     
     public void saveVideoInfo(List<VideoInfo> videoInfoList, Lecture lecture) {
         for (VideoInfo videoInfo : videoInfoList) {
-            // Check if a video with the same videoId exists in the database
             Video existingVideo = videoRepository.findByVideoId(videoInfo.getVideoId());
-
+            if (existingVideo != null) {
                 existingVideo.setUploadDate(videoInfo.getUploadDate());
                 existingVideo.setFileName(videoInfo.getFileName());
                 existingVideo.setTotalPlayTime(videoInfo.getTotalPlayTime());
-                existingVideo.setVideoLink(videoInfo.getVideoLink());
-                existingVideo.setUrl(videoInfo.getUrl()); // Set the URL property
+                existingVideo.setUrl(videoInfo.getUrl()); 
 
-            
+                // 비디오 테이블에 저장된 정보를 업데이트합니다.
+                videoRepository.save(existingVideo);
+            }
         }
     }
+
+    
+    
 }
 
