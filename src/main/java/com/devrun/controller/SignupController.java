@@ -248,7 +248,7 @@ public class SignupController {
 				return sendEmail(toEmail, id);
 			} catch (Exception e) {
 				e.printStackTrace();
-				return ResponseEntity.status(500).body("Decryption failed" + e.getMessage());
+				return ResponseEntity.status(500).body(e.getMessage());
 			}
 		} else if (data == null && email != null && id != null) {
 			return sendEmail(email, id);

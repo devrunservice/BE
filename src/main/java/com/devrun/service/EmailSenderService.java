@@ -247,7 +247,6 @@ public class EmailSenderService {
         HashMap<String, String> map = new HashMap<>();
         map.put("id", id);
         map.put("email", email);
-        map.put("key", tempkey);
 
         String jsonFormatData = gson.toJson(map);
         System.out.println("jsonFormatData : " + jsonFormatData);

@@ -56,7 +56,8 @@ public class CommentController {
 
     // 댓글 수정
     @PutMapping("/comment/edit/{commentNo}")
-    public ResponseEntity<?> editComment(@PathVariable int commentNo, @RequestBody String newContent) {
+    public ResponseEntity<?> editComment(@PathVariable int commentNo, @RequestBody CommentDTO commentDTO) {
+        String newContent = commentDTO.getContent();
         Comment updatedComment = commentService.updateComment(commentNo, newContent);
         if (updatedComment != null) {
             return ResponseEntity.ok(updatedComment.toDTO());

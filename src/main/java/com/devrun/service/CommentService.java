@@ -38,6 +38,7 @@ public class CommentService {
         Comment comment = commentRepository.findByCommentNo(commentNo);
         if (comment != null) {
             comment.setContent(newContent);
+            System.out.println("comment : " + comment);
             return commentRepository.save(comment);
         }
         return null;
