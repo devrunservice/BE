@@ -1,5 +1,6 @@
 package com.devrun.util;
 
+import java.util.Arrays;
 import java.util.Base64;
 
 import javax.crypto.Cipher;
@@ -22,18 +23,20 @@ public class AESUtil {
     																// ㄴ input length must be multiple of 16 when decrypting with padded cipher 문제 해결
 
     public static String encrypt(String data) throws Exception {
-        SecretKeySpec skeySpec = new SecretKeySpec(SECRET_KEY.getBytes(), ALGORITHM);
+    	byte[] keyBytes = Arrays.copyOf(SECRET_KEY.getBytes("UTF-8"), 16);
+        SecretKeySpec skeySpec = new SecretKeySpec(keyBytes, ALGORITHM);
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
-        byte[] encrypted = cipher.doFinal(data.getBytes());
+        byte[] encrypted = cipher.doFinal(data.getBytes("UTF-8"));
         return Base64.getUrlEncoder().encodeToString(encrypted);
     }
 
     public static String decrypt(String encryptedData) throws Exception {
-        SecretKeySpec skeySpec = new SecretKeySpec(SECRET_KEY.getBytes(), ALGORITHM);
+    	byte[] keyBytes = Arrays.copyOf(SECRET_KEY.getBytes("UTF-8"), 16);
+        SecretKeySpec skeySpec = new SecretKeySpec(keyBytes, ALGORITHM);
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, skeySpec);
         byte[] original = cipher.doFinal(Base64.getUrlDecoder().decode(encryptedData));
-        return new String(original);
+        return new String(original, "UTF-8");
     }
 }
