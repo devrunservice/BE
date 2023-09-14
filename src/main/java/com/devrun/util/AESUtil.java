@@ -18,7 +18,8 @@ public class AESUtil {
     	AESUtil.SECRET_KEY = SECRET_KEY;
     }
     
-    private static final String ALGORITHM = "AES";
+    private static final String ALGORITHM = "AES/ECB/PKCS5Padding";	// PKCS5Padding은 블록 크기가 16이 아닐 때 패딩을 자동으로 추가 
+    																// ㄴ input length must be multiple of 16 when decrypting with padded cipher 문제 해결
 
     public static String encrypt(String data) throws Exception {
         SecretKeySpec skeySpec = new SecretKeySpec(SECRET_KEY.getBytes(), ALGORITHM);
