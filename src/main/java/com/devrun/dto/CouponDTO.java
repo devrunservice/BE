@@ -1,31 +1,17 @@
 package com.devrun.dto;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-
+@Data
 @ToString
 @NoArgsConstructor
 public class CouponDTO {
 	
 
-    private String CouponCode;
-    private int Amount;
+    private String couponCode;
+    private int amount;
     
-    public String getCouponCode() {
-        return CouponCode;
-    }
-
-    public void setCouponCode(String couponCode) {
-    	CouponCode = couponCode;
-    }
-    
-    public int getamount() {
-        return Amount;
-    }
-
-    public void setAmount(int amount) {
-    	Amount = amount;
-    }
     
  
 }
