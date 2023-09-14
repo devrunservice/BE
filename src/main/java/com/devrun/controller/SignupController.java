@@ -227,10 +227,37 @@ public class SignupController {
 	// 회원가입 인증 이메일 재발송
 	@ResponseBody
 	@PostMapping("/signup/resend/confirm-email")
-	public ResponseEntity<?> signupEmail(@RequestParam("email") String toEmail
-										, @RequestParam("id") String id) {
-		return sendEmail(toEmail, id);
+	public ResponseEntity<?> signupEmail(@RequestParam(required = false) String data
+										, @RequestParam(required = false) String email
+										, @RequestParam(required = false) String id
+										) {
+		if (data != null && email == null && id == null) {
+			try {
+				System.out.println("encryptedData :" + data);
+				// 암호화된 데이터를 복호화
+				String decryptedData = AESUtil.decrypt(data);
+				System.out.println("decryptedData : " + decryptedData);
+				// 복호화된 데이터를 JSON 형식으로 파싱
+				Type type = new TypeToken<HashMap<String, String>>() {}.getType();
+				HashMap<String, String> map = new Gson().fromJson(decryptedData, type);
+				
+				// id, email, key 값 추출
+				id = map.get("id");
+				String toEmail = map.get("email");
+				
+				return sendEmail(toEmail, id);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return ResponseEntity.status(500).body("Decryption failed");
+			}
+		} else if (data == null && email != null && id != null) {
+			return sendEmail(email, id);
+		} else {
+			// 잘못된 파라미터
+		    return ResponseEntity.status(400).body("Bad Request");
+		}
 	}
+	
 	private ResponseEntity<?> sendEmail(String toEmail, String id) {
         try {
         	emailSenderService.sendSignupByEmail(toEmail, id);
