@@ -94,7 +94,7 @@ public class EmailSenderService {
     public void sendSignupByEmail(String toEmail, String id) {
     	MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper;
-    	
+    	System.out.println("eamil : " + toEmail + "\nid : " + id);
         try {
             imgTag = createImgTagWithBase64("/img/logo.png");
         } catch (IOException e) {

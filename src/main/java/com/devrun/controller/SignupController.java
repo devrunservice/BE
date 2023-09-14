@@ -250,9 +250,10 @@ public class SignupController {
 	public ResponseEntity<?> signupOk(@RequestParam("data") String encryptedData){
 		HttpHeaders headers = new HttpHeaders();
 		try {
+			System.out.println("encryptedData :" + encryptedData);
 	        // 암호화된 데이터를 복호화
 	        String decryptedData = AESUtil.decrypt(encryptedData);
-
+	        System.out.println("decryptedData : " + decryptedData);
 	        // 복호화된 데이터를 JSON 형식으로 파싱
 	        Type type = new TypeToken<HashMap<String, String>>() {}.getType();
 	        HashMap<String, String> map = new Gson().fromJson(decryptedData, type);
@@ -276,7 +277,7 @@ public class SignupController {
 		    return verifyKeyAndActivateAccount(id, key, member, encryptedData);
 		} catch (Exception e) {
 			// 암호화 실패
-			return new ResponseEntity<>("Decryption failed", HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>("Decryption failed" + "\nencryptedData :" + encryptedData + "\ne : " + e, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
