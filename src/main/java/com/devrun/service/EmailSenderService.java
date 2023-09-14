@@ -110,7 +110,8 @@ public class EmailSenderService {
         String encryptedData;
         try {
         	encryptedData = createEncryptedData(id, toEmail, tempkey);
-        String body = bodyTop +
+        	System.out.println("encryptedData : " + encryptedData);
+        	String body = bodyTop +
         		
          		"<div style=\"background: #5F4B8B; font-size: 0; padding: 0 30px; height: 144px; line-height:144px; \">" + imgTag + "</div>" +
          		"<div style=\"padding:40px 40px 60px\">" +
@@ -127,7 +128,7 @@ public class EmailSenderService {
 				
 				bodyBottom;
         
-        System.out.println("EmailSenderService 이메일주소 : " + toEmail);
+        	System.out.println("EmailSenderService 이메일주소 : " + toEmail);
         
             helper = new MimeMessageHelper(message, true);
             helper.setFrom("devrun66@gmail.com");
@@ -243,15 +244,13 @@ public class EmailSenderService {
         Gson gson = new Gson();  // Gson 객체 생성
 
         // id, email, key를 JSON 형식으로 만들기
-        String jsonFormatData = gson.toJson(new HashMap<String, String>() {
-            private static final long serialVersionUID = 1L;
-            {
-                put("id", id);
-                put("email", email);
-                put("key", tempkey);
-            }
-        });
+        HashMap<String, String> map = new HashMap<>();
+        map.put("id", id);
+        map.put("email", email);
+        map.put("key", tempkey);
 
+        String jsonFormatData = gson.toJson(map);
+        System.out.println("jsonFormatData : " + jsonFormatData);
         // JSON 형식의 데이터를 암호화
         return AESUtil.encrypt(jsonFormatData);
     }
