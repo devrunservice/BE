@@ -39,6 +39,11 @@ import com.devrun.service.MemberService;
 import com.devrun.util.CaffeineCache;
 import com.devrun.util.JWTUtil;
 
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import reactor.core.publisher.Mono;
 
 @Controller
@@ -74,6 +79,17 @@ public class LoginController {
         
     @ResponseBody
     @PostMapping("/login")
+    @ApiOperation(value = "사용자 로그인", notes = "사용자 ID와 비밀번호를 사용하여 로그인합니다.")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "id", value = "사용자 ID", required = true, paramType = "body", dataType = "string"),
+        @ApiImplicitParam(name = "password", value = "비밀번호", required = true, paramType = "body", dataType = "string")
+    })
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "로그인 성공"),
+        @ApiResponse(code = 401, message = "인증 실패"),
+        @ApiResponse(code = 403, message = "접근 금지"),
+        @ApiResponse(code = 500, message = "서버 오류")
+    })
     public ResponseEntity<?> login(HttpServletRequest request, HttpServletResponse response, @RequestBody MemberEntity memberEntity) {
         logRequestInformation(request);
 
@@ -220,6 +236,13 @@ public class LoginController {
 
     @ResponseBody
     @PostMapping("/authz/token/refresh")
+    @ApiOperation(value = "토큰 리프레시", notes = "리프레시 토큰을 사용하여 새로운 액세스 토큰을 생성합니다. 리프레시 토큰은 HttpOnly 쿠키에 저장되어 있습니다.")
+    @ApiImplicitParam(name = "Refresh_token", value = "리프레시 토큰", required = true, paramType = "header", dataType = "string")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "토큰 리프레시 성공"),
+        @ApiResponse(code = 400, message = "잘못된 요청"),
+        @ApiResponse(code = 401, message = "인증 실패"),
+        @ApiResponse(code = 500, message = "서버 오류")})
     public ResponseEntity<?> refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
         // 요청에서 리프레시 토큰 가져오기
         String refreshToken = getRefreshTokenFromRequest(request);
@@ -291,6 +314,13 @@ public class LoginController {
     
     @ResponseBody
     @PostMapping("/authz/logout")
+    @ApiOperation(value = "로그아웃", notes = "현재 로그인된 사용자를 로그아웃합니다. 리프레시 토큰은 HttpOnly 쿠키에 저장되어 있습니다.")
+    @ApiImplicitParam(name = "Refresh_token", value = "리프레시 토큰", required = true, paramType = "header", dataType = "string")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "로그아웃 성공"),
+        @ApiResponse(code = 400, message = "잘못된 요청"),
+        @ApiResponse(code = 500, message = "서버 오류")
+    })
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         // 요청에서 리프레시 토큰 추출
         String refreshToken = getRefreshTokenFromCookies(request);
@@ -338,6 +368,14 @@ public class LoginController {
     }
     @ResponseBody
     @GetMapping("/auth/kakao/callback")
+    @ApiOperation(value = "카카오 로그인 콜백", notes = "카카오 로그인 후 콜백 URL입니다.")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "code", value = "인증 코드", required = false, paramType = "query", dataType = "string"),
+        @ApiImplicitParam(name = "error", value = "에러 메시지", required = false, paramType = "query", dataType = "string")})
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "카카오 로그인 성공"),
+        @ApiResponse(code = 400, message = "잘못된 요청"),
+        @ApiResponse(code = 500, message = "서버 오류")})
     public ResponseEntity<?> kakaoCallback(@RequestParam(required = false) String code,
                                            @RequestParam(required = false) String error,
                                            HttpServletResponse response) {
@@ -426,6 +464,13 @@ public class LoginController {
 
     @ResponseBody
     @PostMapping("/sns/logout/kakao")
+    @ApiOperation(value = "카카오 로그아웃", notes = "카카오 로그아웃을 수행합니다.")
+    @ApiImplicitParam(name = "Access_token_easy", value = "액세스 토큰", required = true, paramType = "header", dataType = "string")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "카카오 로그아웃 성공"),
+        @ApiResponse(code = 400, message = "잘못된 요청"),
+        @ApiResponse(code = 403, message = "로그아웃 실패"),
+        @ApiResponse(code = 500, message = "내부 서버 오류")})
     public ResponseEntity<?> kakaoLogout(HttpServletRequest request) {
         // Access_token_easy 헤더를 가져옵니다.
         String token = request.getHeader("Access_token_easy");
@@ -457,6 +502,15 @@ public class LoginController {
 	// 회원의 핸드폰 번호가 맞는지 확인
 	@ResponseBody
 	@PostMapping("/users/{userId}/verify/phone")
+	@ApiOperation(value = "핸드폰 번호 검증", notes = "회원의 핸드폰 번호가 맞는지 검증합니다.")
+	@ApiImplicitParams({
+	    @ApiImplicitParam(name = "userId", value = "사용자 아이디", required = true, paramType = "path", dataType = "string"),
+	    @ApiImplicitParam(name = "phonenumber", value = "핸드폰 번호", required = true, paramType = "body", dataType = "string")})
+	@ApiResponses(value = {
+	    @ApiResponse(code = 200, message = "핸드폰 번호 검증 성공"),
+	    @ApiResponse(code = 400, message = "잘못된 요청"),
+	    @ApiResponse(code = 403, message = "검증 실패"),
+	    @ApiResponse(code = 500, message = "내부 서버 오류")})
 	public boolean verifyPhone(@PathVariable String userId, @RequestBody LoginDTO loginDTO){
 		
 		boolean isPhoneVerified = loginService.verifyPhone(userId, loginDTO.getPhonenumber());
@@ -467,6 +521,15 @@ public class LoginController {
 	// 찾은 아이디를 핸드폰 번호로 전송
 	@ResponseBody
 	@PostMapping("/find-id/send-phone")
+	@ApiOperation(value = "아이디 핸드폰 번호로 전송", notes = "찾은 아이디를 핸드폰 번호로 전송합니다.")
+	@ApiImplicitParams({
+	    @ApiImplicitParam(name = "phonenumber", value = "핸드폰 번호", required = true, paramType = "body", dataType = "string"),
+	    @ApiImplicitParam(name = "code", value = "인증 코드", required = true, paramType = "body", dataType = "string")})
+	@ApiResponses(value = {
+	    @ApiResponse(code = 200, message = "아이디 전송 성공"),
+	    @ApiResponse(code = 400, message = "잘못된 요청"),
+	    @ApiResponse(code = 403, message = "전송 실패"),
+	    @ApiResponse(code = 500, message = "내부 서버 오류")})
 	public Mono<ResponseEntity<?>>sendIdBySms(@RequestBody SignupDTO signupDTO){
 		
         String id = loginRepository.findByPhonenumber(signupDTO.getPhonenumber());
@@ -494,6 +557,18 @@ public class LoginController {
 	// 인증 완료 후 비밀번호 변경
 	@ResponseBody
 	@PostMapping("/users/{userId}/edit-password")
+	@ApiOperation(value = "비밀번호 변경", notes = "인증 완료 후 비밀번호를 변경합니다.")
+	@ApiImplicitParams({
+	    @ApiImplicitParam(name = "userId", value = "사용자 아이디", required = true, paramType = "path", dataType = "string"),
+	    @ApiImplicitParam(name = "password", value = "새 비밀번호", required = true, paramType = "body", dataType = "string"),
+	    @ApiImplicitParam(name = "phonenumber", value = "핸드폰 번호", required = false, paramType = "body", dataType = "string"),
+	    @ApiImplicitParam(name = "email", value = "이메일", required = false, paramType = "body", dataType = "string"),
+	    @ApiImplicitParam(name = "code", value = "인증 코드", required = true, paramType = "body", dataType = "string")})
+	@ApiResponses(value = {
+	    @ApiResponse(code = 200, message = "비밀번호 변경 성공"),
+	    @ApiResponse(code = 400, message = "잘못된 요청"),
+	    @ApiResponse(code = 403, message = "변경 실패"),
+	    @ApiResponse(code = 500, message = "내부 서버 오류")})
 	public ResponseEntity<?> editPassword(@PathVariable String userId, @RequestBody SignupDTO signupDTO) {
 		
         MemberEntity memberEntity = loginRepository.findById(userId);
@@ -548,6 +623,15 @@ public class LoginController {
 	// 회원의 이메일이 맞는지 확인
 	@ResponseBody
 	@PostMapping("/users/{userId}/verify/email")
+	@ApiOperation(value = "이메일 검증", notes = "회원의 이메일이 맞는지 검증합니다.")
+	@ApiImplicitParams({
+	    @ApiImplicitParam(name = "userId", value = "사용자 아이디", required = true, paramType = "path", dataType = "string"),
+	    @ApiImplicitParam(name = "email", value = "이메일 주소", required = true, paramType = "body", dataType = "string")})
+	@ApiResponses(value = {
+	    @ApiResponse(code = 200, message = "이메일 검증 성공"),
+	    @ApiResponse(code = 400, message = "잘못된 요청"),
+	    @ApiResponse(code = 403, message = "검증 실패"),
+	    @ApiResponse(code = 500, message = "내부 서버 오류")})
 	public boolean verifyEmail(@PathVariable String userId, @RequestBody LoginDTO loginDTO){
 		
 		boolean isEmailVerified = loginService.verifyEmail(userId, loginDTO.getEmail());
@@ -558,6 +642,15 @@ public class LoginController {
 	// 비밀번호 찾기 인증번호 이메일로 전송
 	@ResponseBody
 	@PostMapping("/auth/email")
+	@ApiOperation(value = "인증번호 이메일로 전송", notes = "비밀번호 찾기를 위한 인증번호를 이메일로 전송합니다.")
+	@ApiImplicitParams({
+	    @ApiImplicitParam(name = "email", value = "이메일 주소", required = true, paramType = "body", dataType = "string"),
+	    @ApiImplicitParam(name = "id", value = "사용자 아이디", required = true, paramType = "body", dataType = "string")})
+	@ApiResponses(value = {
+	    @ApiResponse(code = 200, message = "이메일 전송 성공"),
+	    @ApiResponse(code = 400, message = "잘못된 요청"),
+	    @ApiResponse(code = 403, message = "이메일 전송 실패"),
+	    @ApiResponse(code = 500, message = "내부 서버 오류")})
 	public ResponseEntity<?> signupEmail(@RequestBody MemberDTO memberDTO) {
 		System.out.println("email : " + memberDTO.getEmail());
 		System.out.println("id : " + memberDTO.getId());
@@ -575,6 +668,15 @@ public class LoginController {
 	// 이메일로 전송된 인증코드 맞는지 검증
 	@ResponseBody
 	@PostMapping("/verify/email")
+	@ApiOperation(value = "이메일 인증코드 검증", notes = "이메일로 전송된 인증코드가 맞는지 검증합니다.")
+	@ApiImplicitParams({
+	    @ApiImplicitParam(name = "email", value = "이메일 주소", required = true, paramType = "body", dataType = "string"),
+	    @ApiImplicitParam(name = "code", value = "인증 코드", required = true, paramType = "body", dataType = "string")})
+	@ApiResponses(value = {
+	    @ApiResponse(code = 200, message = "인증 성공"),
+	    @ApiResponse(code = 400, message = "잘못된 요청"),
+	    @ApiResponse(code = 403, message = "인증 실패"),
+	    @ApiResponse(code = 500, message = "내부 서버 오류")})
 	public ResponseEntity<?> verify(@RequestBody SignupDTO signupDTO) {
         if (memberService.verifyCode(signupDTO.getEmail(), signupDTO.getCode())) {
         	// 200 인증성공
@@ -588,6 +690,15 @@ public class LoginController {
 	// 이메일로 아이디 전송
 	@ResponseBody
 	@PostMapping("/find-id/send-email")
+	@ApiOperation(value = "이메일로 아이디 전송", notes = "이메일로 사용자 아이디를 전송합니다.")
+	@ApiImplicitParams({
+	    @ApiImplicitParam(name = "email", value = "이메일 주소", required = true, paramType = "body", dataType = "string"),
+	    @ApiImplicitParam(name = "code", value = "인증 코드", required = true, paramType = "body", dataType = "string")})
+	@ApiResponses(value = {
+	    @ApiResponse(code = 200, message = "아이디 찾기 성공"),
+	    @ApiResponse(code = 400, message = "잘못된 요청"),
+	    @ApiResponse(code = 403, message = "인증 실패"),
+	    @ApiResponse(code = 500, message = "내부 서버 오류")})
 	public ResponseEntity<?> findIdEmail(@RequestBody SignupDTO signupDTO){
 		
         String id = loginRepository.findByEmail(signupDTO.getEmail());
@@ -606,8 +717,17 @@ public class LoginController {
         }
     }
 	
+	// 사용자 로그인 정보 조회
 	@ResponseBody
 	@GetMapping("/users/login-info")
+	@ApiOperation(value = "사용자 로그인 정보 조회", notes = "사용자의 로그인 정보를 조회합니다.")
+	@ApiImplicitParams({
+	    @ApiImplicitParam(name = "Access_token", value = "Access Token", required = true, paramType = "header", dataType = "string")})
+	@ApiResponses(value = {
+	    @ApiResponse(code = 200, message = "정보 조회 성공"),
+	    @ApiResponse(code = 400, message = "잘못된 요청"),
+	    @ApiResponse(code = 403, message = "인증 실패"),
+	    @ApiResponse(code = 500, message = "내부 서버 오류")})
 	public ResponseEntity<?> infoRole(HttpServletRequest request){
 		// AccessToken이 헤더에 있는지 확인
 		String accessToken = request.getHeader("Access_token");

@@ -42,6 +42,11 @@ import com.devrun.util.CaffeineCache;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -65,6 +70,8 @@ public class SignupController {
 	// ID 중복확인
 	@ResponseBody
 	@PostMapping("/checkID")
+	@ApiOperation(value = "ID 중복 확인", notes = "입력한 ID가 중복되는지 확인합니다.")
+	@ApiImplicitParam(name = "id", value = "확인할 아이디", required = true, paramType = "body", dataType = "string")
     public String checkID(@RequestBody SignupDTO signupDTO) {
 		String id = signupDTO.getId();
         int result = memberService.checkID(id);
@@ -74,6 +81,8 @@ public class SignupController {
 	// Email 중복확인
 	@ResponseBody
 	@PostMapping("/checkEmail")
+	@ApiOperation(value = "이메일 중복 확인", notes = "입력한 이메일이 중복되는지 확인합니다.")
+	@ApiImplicitParam(name = "email", value = "확인할 이메일", required = true, paramType = "body", dataType = "string")
     public String checkEmail(@RequestBody SignupDTO signupDTO) {
 		String email = signupDTO.getEmail();
 		int result = memberService.checkEmail(email);
@@ -83,6 +92,8 @@ public class SignupController {
 	// Phone 중복확인
 	@ResponseBody
 	@PostMapping("/checkPhone")
+	@ApiOperation(value = "핸드폰 번호 중복 확인", notes = "입력한 핸드폰 번호가 중복되는지 확인합니다.")
+	@ApiImplicitParam(name = "phonenumber", value = "확인할 핸드폰 번호", required = true, paramType = "body", dataType = "string")
 	public String checkPhone(@RequestBody SignupDTO signupDTO) {
 		String phonenumber = signupDTO.getPhonenumber();
 		int result = memberService.checkphone(phonenumber);
@@ -92,6 +103,8 @@ public class SignupController {
 	// 핸드폰 인증번호 전송
 	@ResponseBody
 	@PostMapping("/auth/phone")
+	@ApiOperation(value = "핸드폰 인증번호 전송", notes = "핸드폰으로 인증번호를 전송합니다.")
+	@ApiImplicitParam(name = "phonenumber", value = "전송할 핸드폰 번호", required = true, paramType = "body", dataType = "string")
 	public Mono<String> authPhonenumber(@RequestBody SignupDTO signupDTO) {
 		String phonenumber = signupDTO.getPhonenumber();
 		System.out.println("폰" + phonenumber);
@@ -101,6 +114,16 @@ public class SignupController {
 	// 핸드폰 인증번호 확인
 	@ResponseBody
 	@PostMapping("/verify/phone")
+	@ApiOperation(value = "핸드폰 인증번호 확인", notes = "입력한 인증번호가 맞는지 확인합니다.")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "phonenumber", value = "확인할 핸드폰 번호", required = true, paramType = "body", dataType = "string"),
+		@ApiImplicitParam(name = "code", value = "확인할 인증코드", required = true, paramType = "body", dataType = "string"),
+		
+		})
+	@ApiResponses(value = {
+	    @ApiResponse(code = 200, message = "인증 성공"),
+	    @ApiResponse(code = 403, message = "인증 실패")
+	})
 	public ResponseEntity<?> verify(@RequestBody SignupDTO signupDTO) {
 		String phonenumber = signupDTO.getPhonenumber();
 		String code = signupDTO.getCode();
@@ -116,6 +139,26 @@ public class SignupController {
 	@ResponseBody
 	@PostMapping("/signup/okay")
 	@Transactional
+	@ApiOperation(value = "회원가입 처리", notes = "입력한 정보로 회원가입을 진행합니다.")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "id", value = "아이디", required = true, paramType = "body", dataType = "string"),
+		@ApiImplicitParam(name = "password", value = "비밀번호", required = true, paramType = "body", dataType = "string"),
+		@ApiImplicitParam(name = "birthday", value = "생일", required = true, paramType = "body", dataType = "string"),
+		@ApiImplicitParam(name = "name", value = "이름", required = true, paramType = "body", dataType = "string"),
+		@ApiImplicitParam(name = "email", value = "이메일", required = true, paramType = "body", dataType = "string"),
+		@ApiImplicitParam(name = "phonenumber", value = "핸드폰 번호", required = true, paramType = "body", dataType = "string"),
+		@ApiImplicitParam(name = "code", value = "핸드폰 인증코드", required = true, paramType = "body", dataType = "string"),
+		@ApiImplicitParam(name = "ageConsent", value = "나이 약관동의", required = true, paramType = "body", dataType = "string"),
+		@ApiImplicitParam(name = "termsOfService", value = "서비스 약관동의", required = true, paramType = "body", dataType = "string"),
+		@ApiImplicitParam(name = "privacyConsent", value = "개인정보 수집 약관동의", required = true, paramType = "body", dataType = "string"),
+		@ApiImplicitParam(name = "marketConsent", value = "마케팅 활용 약관동의", required = true, paramType = "body", dataType = "string"),
+	})
+	@ApiResponses(value = {
+	    @ApiResponse(code = 200, message = "회원가입 성공"),
+	    @ApiResponse(code = 400, message = "잘못된 입력값"),
+	    @ApiResponse(code = 409, message = "중복된 데이터"),
+	    @ApiResponse(code = 500, message = "내부 서버 오류")
+	})
 	public ResponseEntity<?> okay(@RequestBody @Valid SignupWrapper signupWrapper) {
 		
 	    MemberEntity memberEntity = signupWrapper.getMemberEntity();
@@ -226,6 +269,18 @@ public class SignupController {
 	// 회원가입 인증 이메일 재발송
 	@ResponseBody
 	@PostMapping("/signup/resend/confirm-email")
+	@ApiOperation(value = "이메일 재전송", notes = "회원가입 인증 이메일을 재전송합니다.")
+	@ApiImplicitParams({
+	    @ApiImplicitParam(name = "data", value = "암호화된 데이터", required = false, paramType = "query", dataType = "string"),
+	    @ApiImplicitParam(name = "email", value = "이메일 주소", required = false, paramType = "query", dataType = "string"),
+	    @ApiImplicitParam(name = "id", value = "사용자 아이디", required = false, paramType = "query", dataType = "string")
+	})
+	@ApiResponses(value = {
+	    @ApiResponse(code = 200, message = "이메일 성공적으로 전송"),
+	    @ApiResponse(code = 400, message = "잘못된 요청"),
+	    @ApiResponse(code = 403, message = "이메일 전송 실패"),
+	    @ApiResponse(code = 500, message = "내부 서버 오류")
+	})
 	public ResponseEntity<?> signupEmail(@RequestParam(required = false) String data
 										, @RequestParam(required = false) String email
 										, @RequestParam(required = false) String id
@@ -273,6 +328,12 @@ public class SignupController {
 	@ResponseBody
 	@CrossOrigin(origins = {"https://mail.naver.com", "https://mail.daum.net", "https://mail.google.com","https://mail.nate.com"})
 	@PostMapping("/verify/signupEmail")
+	@ApiOperation(value = "이메일 인증 확인", notes = "이메일로부터 인증을 확인합니다.")
+	@ApiImplicitParam(name = "data", value = "암호화된 데이터", required = true, paramType = "query", dataType = "string")
+	@ApiResponses(value = {
+	    @ApiResponse(code = 302, message = "다른 위치로 리다이렉션"),
+	    @ApiResponse(code = 500, message = "내부 서버 오류")
+	})
 	public ResponseEntity<?> signupOk(@RequestParam("data") String encryptedData){
 		HttpHeaders headers = new HttpHeaders();
 		try {
@@ -293,6 +354,10 @@ public class SignupController {
 				// 302 : 회원을 찾을 수 없음
 				headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=notfound&data=" + encryptedData));
 		        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
+		    } else if(member.getStatus() == Status.ACTIVE) {
+		    	// 이미 활성화된 유저
+		    	headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=activated"));
+		    	return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 		    }
 			
 			if (isVerificationExpired(member.getSignupDate())) {
@@ -303,7 +368,7 @@ public class SignupController {
 		    return verifyKeyAndActivateAccount(id, key, member, encryptedData);
 		} catch (Exception e) {
 			// 암호화 실패
-			return new ResponseEntity<>("Decryption failed" + "\nencryptedData :" + encryptedData + "\ne : " + e, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>("Decryption failed" + "\nencryptedData :" + encryptedData + "\nerror : " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 

@@ -53,7 +53,7 @@ public class NoticeController {
 		    String title = noticeDTO.getTitle();
 		    String content = noticeDTO.getContent();
 		    
-		 // 항상 새로운 Notice 객체를 생성
+		    // 항상 새로운 Notice 객체를 생성
 	        Notice notice = new Notice();
 	        
 	        // 관련된 MemberEntity 찾기
