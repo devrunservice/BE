@@ -106,10 +106,10 @@ public class EmailSenderService {
 //        String url = "https://devrun.net/signupcompletion";
         String url = "https://devrun.site/verify/signupEmail";
         RandomString rs = new RandomString(35);
-        String tempkey = rs.nextString();
+        String key = rs.nextString();
         String encryptedData;
         try {
-        	encryptedData = createEncryptedData(id, toEmail, tempkey);
+        	encryptedData = createEncryptedData(id, toEmail, key);
         	System.out.println("encryptedData : " + encryptedData);
         	String body = bodyTop +
         		
@@ -136,7 +136,7 @@ public class EmailSenderService {
             helper.setSubject(subject);
             helper.setText(body, true); // Set the second parameter to 'true' to send HTML content
 
-            cacheService.saveCaffeine(id, tempkey);
+            cacheService.saveCaffeine(id, key);
             mailSender.send(message);
         } catch (Exception e) {
             e.printStackTrace();
