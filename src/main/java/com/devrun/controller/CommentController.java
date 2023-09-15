@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.devrun.dto.CommentDTO;
 import com.devrun.entity.Comment;
+import com.devrun.entity.MemberEntity;
 import com.devrun.entity.Notice;
 import com.devrun.service.CommentService;
+import com.devrun.service.MemberService;
 import com.devrun.service.NoticeService;
 
 @Controller
@@ -26,6 +28,9 @@ public class CommentController {
 
     @Autowired
     private NoticeService noticeService;
+    
+    @Autowired
+    private MemberService memberService;
 
     // 댓글 작성
 //     {
@@ -35,8 +40,10 @@ public class CommentController {
     @PostMapping("/comment/write")
     public ResponseEntity<?> writeComment(@RequestBody CommentDTO commentDTO) {
         Notice notice = noticeService.findByNoticeNo(commentDTO.getNoticeNo());
+        MemberEntity memberEntity = memberService.findById(commentDTO.getId());
+        System.out.println("memberEntity : " + commentDTO.getId());
         if (notice != null) {
-            Comment comment = commentService.insertComment(commentDTO, notice);
+            Comment comment = commentService.insertComment(commentDTO, notice, memberEntity);
             return ResponseEntity.ok(comment.toDTO());
         }
         return ResponseEntity.badRequest().body("Notice not found");

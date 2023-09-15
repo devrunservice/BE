@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.devrun.dto.CommentDTO;
 import com.devrun.entity.Comment;
+import com.devrun.entity.MemberEntity;
 import com.devrun.entity.Notice;
 import com.devrun.repository.CommentRepository;
 
@@ -17,9 +18,10 @@ public class CommentService {
     private CommentRepository commentRepository;
 
     // 댓글 작성
-    public Comment insertComment(CommentDTO commentDTO, Notice notice) {
+    public Comment insertComment(CommentDTO commentDTO, Notice notice, MemberEntity memberEntity) {
         Comment comment = new Comment();
         comment.setNotice(notice);
+        comment.setMemberEntity(memberEntity);
         comment.setContent(commentDTO.getContent());
         if (commentDTO.getParentCommentNo() != 0) {
             Comment parentComment = commentRepository.findByCommentNo(commentDTO.getParentCommentNo());

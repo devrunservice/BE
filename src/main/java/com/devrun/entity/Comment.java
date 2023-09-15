@@ -11,11 +11,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -52,7 +54,15 @@ public class Comment {
     @Column(name = "content", nullable = false , columnDefinition = "TEXT")
     @org.hibernate.annotations.Comment("댓글 내용")
     private String content;
-
+    
+    @ManyToOne
+    @JoinColumns({
+    	@JoinColumn(name = "userNo", referencedColumnName = "userNo", nullable = false),
+    	@JoinColumn(name = "id", referencedColumnName = "id", nullable = false),
+    	@JoinColumn(name = "profileimgsrc", referencedColumnName = "profileimgsrc", nullable = false)})
+	@NotNull(message = "information cannot be null or empty")
+	private MemberEntity memberEntity;
+    
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "createdDate")
@@ -73,7 +83,10 @@ public class Comment {
             this.commentNo,
             this.notice.getNoticeNo(),
             parentCommentNo,
+            this.memberEntity.getUserNo(),
             this.content,
+            this.memberEntity.getId(),
+            this.memberEntity.getProfileimgsrc(),
             this.createdDate,
             this.modifiedDate
         );
