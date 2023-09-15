@@ -30,6 +30,7 @@ import com.devrun.dto.member.SignupDTO;
 import com.devrun.dto.member.SignupWrapper;
 import com.devrun.entity.Consent;
 import com.devrun.entity.Contact;
+import com.devrun.entity.LoginInfo;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.PointEntity;
 import com.devrun.entity.PointHistoryEntity;
@@ -175,14 +176,12 @@ public class SignupController {
 	    MemberEntity memberEntity = signupWrapper.getMemberEntity();
 	    Contact contact = signupWrapper.getContact();
 	    Consent consent = signupWrapper.getConsent();
-	    // 처음 로그인 할 때 setLastLogin으로 LoginInfo를 생성하는 방법으로 수정
-	    // 이후 이 방법으로 확정되면 완전히 제거
-//	    LoginInfo loginInfo = signupWrapper.getLoginInfo();
+	    LoginInfo loginInfo = signupWrapper.getLoginInfo();
 
 	    // 연관된 엔터티 설정
 	    contact.setMemberEntity(memberEntity);
 	    consent.setMemberEntity(memberEntity);
-//	    loginInfo.setMemberEntity(memberEntity);
+	    loginInfo.setMemberEntity(memberEntity);
 
 	    String encodedPassword = passwordEncoder.encode(memberEntity.getPassword());
 	    memberEntity.setPassword(encodedPassword);
@@ -191,7 +190,7 @@ public class SignupController {
 	    if (savedMember != null
 	    	&& memberService.insert(contact) != null
 	    	&& memberService.insert(consent) != null
-//	    	&& memberService.insert(loginInfo) != null
+	    	&& memberService.insert(loginInfo) != null
 	        ) {
 	        return savedMember;
 	    }
