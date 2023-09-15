@@ -106,10 +106,10 @@ public class EmailSenderService {
 //        String url = "https://devrun.net/signupcompletion";
         String url = "https://devrun.site/verify/signupEmail";
         RandomString rs = new RandomString(35);
-        String key = rs.nextString();
+        String tempkey = rs.nextString();
         String encryptedData;
         try {
-        	encryptedData = createEncryptedData(id, toEmail, key);
+        	encryptedData = createEncryptedData(id, toEmail, tempkey);
         	System.out.println("encryptedData : " + encryptedData);
         	String body = bodyTop +
         		
@@ -136,7 +136,7 @@ public class EmailSenderService {
             helper.setSubject(subject);
             helper.setText(body, true); // Set the second parameter to 'true' to send HTML content
 
-            cacheService.saveCaffeine(id, key);
+            cacheService.saveCaffeine(id, tempkey);
             mailSender.send(message);
         } catch (Exception e) {
             e.printStackTrace();
@@ -247,6 +247,7 @@ public class EmailSenderService {
         HashMap<String, String> map = new HashMap<>();
         map.put("id", id);
         map.put("email", email);
+        map.put("key", tempkey);
 
         String jsonFormatData = gson.toJson(map);
         System.out.println("jsonFormatData : " + jsonFormatData);
