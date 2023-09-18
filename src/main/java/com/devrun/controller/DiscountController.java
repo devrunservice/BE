@@ -66,6 +66,7 @@ public class DiscountController {
                         int discountRate = coupon.getDiscountrate();
                         System.err.println(discountRate);
                         System.err.println(target);
+                        // 4. 쿠폰 타겟이 맞으면 할인 아니면 기본 가격 반환
                         if(target != null && target.equals(name)) {
 
                         // 할인된 결제 금액 계산
@@ -73,6 +74,8 @@ public class DiscountController {
 
                         // 할인된 결제 금액을 리스트에 추가
                         discountedPrices.add(discountedAmount);
+                        } else {
+                        	discountedPrices.add(amount);
                         }
                     } else if (couponstate.EXPIRY.equals(state)) {
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("쿠폰이 만료되었습니다.");
