@@ -64,10 +64,13 @@ public class CartService {
 		String userPhonumber = c.getPhonenumber();
 		String userEmail = c.getEmail();
 		String username = userEntity.getName();
+		int userNo = userEntity.getUserNo();
+
 
 		BuyerInfo.put("userName", username);
 		BuyerInfo.put("userEmail", userEmail);
 		BuyerInfo.put("userPhonumber", userPhonumber);
+		BuyerInfo.put("userNo", userNo);
 
 		// point
 		PointEntity pointEntity = pointRepository.findByMemberEntity_userNo(userEntity.getUserNo());
