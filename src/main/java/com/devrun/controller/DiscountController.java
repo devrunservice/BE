@@ -36,14 +36,17 @@ public class DiscountController {
         int usrno = member.getUserNo(); // name 대신 usrno로 변경
 
         List<Integer> discountedPrices = new ArrayList<>();
+       
 
         for (CouponDTO couponDTO : couponDTOList) {
             String couponcode = couponDTO.getCouponCode();
             int amount = couponDTO.getLecture_price();
+            String name = couponDTO.getLecture_name();
 
             System.err.println(usrno);
             System.err.println(couponcode);
             System.err.println(amount);
+            System.err.println(name);
 
             // 쿠폰코드 조회 
             CouponViewEntity coupon = couponViewRepository.findByCouponcode(couponcode);
@@ -59,14 +62,18 @@ public class DiscountController {
                     // couponstate를 viewentity에다 만들어서 직접 호출
                     // 3. 쿠폰 상태 검증
                     if (couponstate.ACTIVE.equals(state)) {
+                    	String target = coupon.getTarget();
                         int discountRate = coupon.getDiscountrate();
                         System.err.println(discountRate);
+                        System.err.println(target);
+                        if(target != null && target.equals(name)) {
 
                         // 할인된 결제 금액 계산
                         int discountedAmount = (int) (amount * (1 - (discountRate / 100.0)));
 
                         // 할인된 결제 금액을 리스트에 추가
                         discountedPrices.add(discountedAmount);
+                        }
                     } else if (couponstate.EXPIRY.equals(state)) {
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("쿠폰이 만료되었습니다.");
                     } else if (couponstate.REMOVED.equals(state)) {
@@ -85,5 +92,6 @@ public class DiscountController {
         // 할인된 가격 목록을 응답으로 반환
         return ResponseEntity.ok(discountedPrices);
     }
+    
 }
 
