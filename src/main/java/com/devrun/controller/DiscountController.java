@@ -1,6 +1,5 @@
 package com.devrun.controller;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +39,7 @@ public class DiscountController {
 
         for (CouponDTO couponDTO : couponDTOList) {
             String couponcode = couponDTO.getCouponCode();
-            int amount = couponDTO.getAmount();
+            int amount = couponDTO.getLecture_price();
 
             System.err.println(usrno);
             System.err.println(couponcode);
