@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.devrun.dto.CouponDTO;
+import com.devrun.dto.CouponResponseDTO;
 import com.devrun.entity.CouponViewEntity;
 import com.devrun.entity.CouponViewEntity.couponstate;
 import com.devrun.entity.MemberEntity;
@@ -35,8 +36,8 @@ public class DiscountController {
         MemberEntity member = memberService.findById(userid);
         int usrno = member.getUserNo(); // name 대신 usrno로 변경
 
-        List<Integer> discountedPrices = new ArrayList<>();
-       
+        List<Integer> newprice = new ArrayList<>();
+        List<Integer> discountprice = new ArrayList<>();
 
         for (CouponDTO couponDTO : couponDTOList) {
             String couponcode = couponDTO.getCouponCode();
@@ -71,12 +72,15 @@ public class DiscountController {
 
                         // 할인된 결제 금액 계산
                         int discountedAmount = (int) (amount * (1 - (discountRate / 100.0)));
-
+                        int discountpriceinfo = (amount - discountedAmount); 
                         // 할인된 결제 금액을 리스트에 추가
-                        discountedPrices.add(discountedAmount);
+                         newprice.add(discountedAmount);
+                         discountprice.add(discountpriceinfo);
                         } else {
-                        	discountedPrices.add(amount);
-                        }
+                        // 쿠폰이 없으면 기본값 추가	
+                        	newprice.add(amount);
+                        		
+                        }	
                     } else if (couponstate.EXPIRY.equals(state)) {
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("쿠폰이 만료되었습니다.");
                     } else if (couponstate.REMOVED.equals(state)) {
@@ -91,9 +95,13 @@ public class DiscountController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("쿠폰을 찾을 수 없습니다");
             }
         }
+        CouponResponseDTO couponResponseDTO = new CouponResponseDTO();
+        couponResponseDTO.setPrices(newprice);
+        couponResponseDTO.setDiscountprice(discountprice);
+        
 
         // 할인된 가격 목록을 응답으로 반환
-        return ResponseEntity.ok(discountedPrices);
+        return ResponseEntity.ok(couponResponseDTO);
     }
     
 }
