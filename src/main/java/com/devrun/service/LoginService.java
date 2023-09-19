@@ -114,8 +114,11 @@ public class LoginService {
 //			.domain("devrun.site")
 			.path("/authz")
 			.sameSite("none")
-			.secure(true)
-			.httpOnly(true)
+			// 로컬 테스트를 위해 false
+//			.secure(true)
+//			.httpOnly(true)
+			.secure(false)
+			.httpOnly(false)
 			.build();
 		
 		System.out.println("리프레시 토큰 생성 : " + refresh_token);

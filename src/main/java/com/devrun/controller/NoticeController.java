@@ -41,8 +41,7 @@ public class NoticeController {
 	@ApiOperation(value = "공지사항 작성/수정", notes = "공지사항을 작성하거나 수정합니다.")
 	@ApiImplicitParams({
 		@ApiImplicitParam(name = "title", value = "공지사항 제목", required = true, paramType = "body", dataTypeClass = String.class),
-		@ApiImplicitParam(name = "content", value = "공지사항 내용", required = true, paramType = "body", dataTypeClass = String.class)
-	})
+		@ApiImplicitParam(name = "content", value = "공지사항 내용", required = true, paramType = "body", dataTypeClass = String.class)})
 	@ApiResponses(value = {
 	    @ApiResponse(code = 200, message = "공지사항 작성/수정 성공"),
 	    @ApiResponse(code = 400, message = "잘못된 입력값 또는 MemberEntity를 찾을 수 없음"),
@@ -95,8 +94,7 @@ public class NoticeController {
 	@ApiImplicitParam(name = "pageNumber", value = "페이지 번호", required = true, paramType = "path", dataTypeClass = Integer.class)
 	@ApiResponses(value = {
 	    @ApiResponse(code = 200, message = "공지사항 목록을 성공적으로 반환했습니다."),
-	    @ApiResponse(code = 404, message = "공지사항이 없습니다.")
-	})
+	    @ApiResponse(code = 404, message = "공지사항이 없습니다.")})
 	public ResponseEntity<Page<NoticeDTO>> getAllNotices(@PathVariable int pageNumber) {
 	    // 'createdDate'를 기준으로 내림차순 정렬
 	    Pageable pageable = PageRequest.of(pageNumber - 1, 10, Sort.by(
@@ -147,13 +145,11 @@ public class NoticeController {
 	@ApiImplicitParams({
 	    @ApiImplicitParam(name = "noticeNo", value = "수정할 공지사항 번호", required = true, paramType = "path", dataTypeClass = Integer.class),
 	    @ApiImplicitParam(name = "title", value = "수정할 공지사항 제목", required = true, paramType = "body", dataTypeClass = String.class),
-	    @ApiImplicitParam(name = "content", value = "수정할 공지사항 내용", required = true, paramType = "body", dataTypeClass = String.class)
-	})
+	    @ApiImplicitParam(name = "content", value = "수정할 공지사항 내용", required = true, paramType = "body", dataTypeClass = String.class)})
 	@ApiResponses(value = {
 	    @ApiResponse(code = 200, message = "공지사항을 성공적으로 수정했습니다."),
 	    @ApiResponse(code = 400, message = "잘못된 인수입니다."),
-	    @ApiResponse(code = 500, message = "내부 서버 오류")
-	})
+	    @ApiResponse(code = 500, message = "내부 서버 오류")})
 	public ResponseEntity<?> updateNotice(@PathVariable int noticeNo, @RequestBody NoticeDTO noticeDTO) {
 	    try {
 	        String newTitle = noticeDTO.getTitle();

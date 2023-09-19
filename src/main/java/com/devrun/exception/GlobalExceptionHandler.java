@@ -63,7 +63,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = ConstraintViolationException.class) // 유효성 검사 실패 시 발생하는 예외를 처리
     protected ResponseEntity handleException(ConstraintViolationException exception) {
-        System.out.println();
         return ResponseEntity.badRequest().body("Failed validation\n" + getResultMessage(exception.getConstraintViolations().iterator()));
     }
 

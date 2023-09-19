@@ -46,9 +46,9 @@ public class CommentController {
     @PostMapping("/comment/write")
     @ApiOperation(value = "댓글 작성", notes = "공지사항에 댓글을 작성합니다.")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "noticeNo", value = "공지사항 번호", required = true, paramType = "body", dataTypeClass = Integer.class),
-        @ApiImplicitParam(name = "content", value = "댓글 내용", required = true, paramType = "body", dataTypeClass = String.class),
-        @ApiImplicitParam(name = "id", value = "작성자 아이디", required = true, paramType = "body", dataTypeClass = String.class)
+        @ApiImplicitParam(name = "noticeNo", value = "공지사항 번호", required = true, paramType = "body", dataType = "Integer"),
+        @ApiImplicitParam(name = "content", value = "댓글 내용", required = true, paramType = "body", dataType = "String"),
+        @ApiImplicitParam(name = "id", value = "작성자 아이디", required = true, paramType = "body", dataType = "String")
     })
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "댓글이 성공적으로 작성되었습니다."),
@@ -68,7 +68,7 @@ public class CommentController {
     // 댓글 목록 출력
     @GetMapping("/comments/{noticeNo}")
     @ApiOperation(value = "댓글 목록 출력", notes = "공지사항 번호에 따른 댓글 목록을 반환합니다.")
-    @ApiImplicitParam(name = "noticeNo", value = "공지사항 번호", required = true, paramType = "path", dataTypeClass = Integer.class)
+    @ApiImplicitParam(name = "noticeNo", value = "공지사항 번호", required = true, paramType = "path", dataType = "Integer")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "댓글 목록을 성공적으로 반환했습니다."),
         @ApiResponse(code = 400, message = "잘못된 공지사항 번호입니다.")
@@ -87,8 +87,8 @@ public class CommentController {
     @PutMapping("/comment/edit/{commentNo}")
     @ApiOperation(value = "댓글 수정", notes = "특정 댓글을 수정합니다.")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "commentNo", value = "수정할 댓글 번호", required = true, paramType = "path", dataTypeClass = Integer.class),
-        @ApiImplicitParam(name = "content", value = "수정할 댓글 내용", required = true, paramType = "body", dataTypeClass = String.class)
+        @ApiImplicitParam(name = "commentNo", value = "수정할 댓글 번호", required = true, paramType = "path", dataType = "Integer"),
+        @ApiImplicitParam(name = "content", value = "수정할 댓글 내용", required = true, paramType = "body", dataType = "String")
     })
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "댓글이 성공적으로 수정되었습니다."),

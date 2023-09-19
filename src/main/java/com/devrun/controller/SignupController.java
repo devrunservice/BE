@@ -389,7 +389,7 @@ public class SignupController {
 	        memberService.insert(member);
 	        caffeineCache.removeCaffeine(id);
 	        // 이메일 인증 성공 회원 활성화
-	        headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=success&data=" + encryptedData));
+	        headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=success"));
 	        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	    }
 	    // 유효하지 않은 키

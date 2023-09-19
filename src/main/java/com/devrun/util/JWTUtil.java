@@ -128,7 +128,7 @@ public class JWTUtil {
         return SIGNATURE_ALGORITHM.getValue().equals(algorithmUsed);
     }
 
-    // 주어진 token으로부터 jti 추철
+    // 주어진 token으로부터 jti 추출
     public static String getJtiFromToken(String token) {
     	String subToken = token.substring(7);
         Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(subToken).getBody();
