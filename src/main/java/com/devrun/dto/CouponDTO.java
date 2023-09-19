@@ -10,8 +10,8 @@ public class CouponDTO {
 	
 
     private String couponCode;
-    private int amount;
-    
+    private int lecture_price;
+    private String lecture_name;
     
  
 }
