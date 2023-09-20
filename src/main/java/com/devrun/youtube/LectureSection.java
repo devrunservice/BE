@@ -9,6 +9,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import org.springframework.data.jpa.repository.Query;
+
 import lombok.Data;
 
 @Data
@@ -29,5 +31,13 @@ public class LectureSection {
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "lectureid")
     private Lecture lecture;
+    
+    
+ // findLastSectionId 메서드 정의
+    @Query(value = "SELECT MAX(sectionid) FROM LectureSection")
+    Long findLastSectionId() {
+		return sectionid;
+	
+}
   
 }

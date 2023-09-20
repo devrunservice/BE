@@ -123,10 +123,11 @@ public class YouTubeUploader {
    * 사용자의 YouTube 계정으로 비디오를 업로드합니다.
    *
    * @param videoFile 업로드할 비디오 파일
+ * @param accessToken 
    * @return 업로드된 비디오의 ID
  * @throws Exception 
    */
-  public VideoInfo uploadVideo(MultipartFile videoFile, HttpServletResponse httpServletResponse) throws Exception {
+  public VideoInfo uploadVideo(MultipartFile videoFile, HttpServletResponse httpServletResponse, String accessToken) throws Exception {
 	    // YouTube 업로드에 필요한 스코프.
 	    List<String> scopes = Collections.singletonList("https://www.googleapis.com/auth/youtube.upload");
 
@@ -245,6 +246,8 @@ public class YouTubeUploader {
 	        throw new IOException("비디오 업로드 중 오류가 발생했습니다.", e);
 	    }
 	}
+
+
 
   
 }
