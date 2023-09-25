@@ -175,7 +175,10 @@ public class LectureService {
         }
     }
 
-    
+    // 마지막 섹션 ID를 가져오는 메서드 추가
+    public Long getLastSectionId() {
+        return sectionRepository.findLastSectionId();
+    }
     
 }
 
