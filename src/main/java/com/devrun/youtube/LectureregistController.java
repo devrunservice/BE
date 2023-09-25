@@ -70,7 +70,7 @@ public class LectureregistController {
             categoryDto.setCategoryNo(categoryNo);
             
             // 이미지 업로드 후 URL 가져오기
-            String imageUrls = awsS3UploadService.putS3(imageFiles, "public.lecture.images");
+            String imageUrls = awsS3UploadService.putS3(imageFiles, "public.lecture.images" , requestDto.getLectureName());
 
             
             // 강의 및 비디오 정보를 데이터베이스에 저장하고, 강의 썸네일 이미지를 S3에 업로드한 URL을 가져옴
