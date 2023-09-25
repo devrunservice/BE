@@ -7,4 +7,7 @@ import org.springframework.stereotype.Repository;
 public interface LecturecategoryRepository extends JpaRepository<LectureCategory, Long> {
     @Override
     <S extends LectureCategory> S save(S entity);
+
+	LectureCategory findByCategoryNoAndLectureBigCategoryAndLectureMidCategory(Long categoryNo,
+			String lectureBigCategory, String lectureMidCategory);
 }

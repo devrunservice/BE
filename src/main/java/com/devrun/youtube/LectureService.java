@@ -21,12 +21,17 @@ public class LectureService {
         this.categoryRepository = categoryRepository; 
         this.videoRepository = videoRepository;
     }
+    
+    
 
-    public Lecture saveLecture(CreateLectureRequestDto requestDto, String thumbnailUrl) {
-        LectureCategory lectureCategory = convertToLectureCategoryEntity(requestDto.getLectureCategory());
-        lectureCategory = categoryRepository.save(lectureCategory);
+    public Lecture saveLecture(CreateLectureRequestDto requestDto, String thumbnailUrl, LecturecategoryDto categoryDto) {
+    	
+    	
+    	
+    	// 앞단에서 선택한 옵션값인 categoryDto를 사용하여 검증 및 매핑된 Lecture Category 객체를 가져옵니다.
+        LectureCategory lectureCategory = convertToLectureCategoryEntity(categoryDto);
 
-        Lecture lecture = convertToLectureEntity(requestDto, lectureCategory);
+        Lecture lecture = convertToLectureEntity(requestDto, lectureCategory, categoryDto);
         lecture.setLectureThumbnail(thumbnailUrl);
 
         List<LectureSection> sections = saveLectureSections(requestDto.getLectureSectionList(), lecture);
@@ -48,9 +53,17 @@ public class LectureService {
     }
 
     private LectureCategory convertToLectureCategoryEntity(LecturecategoryDto categoryDto) {
-        LectureCategory lectureCategory = new LectureCategory();
-        lectureCategory.setLectureBigCategory(categoryDto.getLectureBigCategory());
-        lectureCategory.setLectureMidCategory(categoryDto.getLectureMidCategory());
+    	  // 앞단에서 선택한 옵션값인 categoryDto를 사용하여 DB에서 해당 카테고리를 조회합니다.
+        LectureCategory lectureCategory = categoryRepository.findByCategoryNoAndLectureBigCategoryAndLectureMidCategory(
+            categoryDto.getCategoryNo(), categoryDto.getLectureBigCategory(), categoryDto.getLectureMidCategory()
+        );
+
+        if (lectureCategory == null) {
+            // 선택한 카테고리가 존재하지 않는 경우에 대한 예외 처리를 수행합니다.
+        	System.err.println(categoryDto);
+            throw new IllegalArgumentException("선택한 카테고리가 유효하지 않습니다.");
+        }
+
         return lectureCategory;
     }
 
@@ -104,7 +117,10 @@ public class LectureService {
     }
     
     
-    private Lecture convertToLectureEntity(CreateLectureRequestDto requestDto, LectureCategory lectureCategory ) {
+    private Lecture convertToLectureEntity(CreateLectureRequestDto requestDto, LectureCategory lectureCategory,LecturecategoryDto categoryDto ) {
+    	 // 앞단에서 선택한 옵션값인 categoryDto를 사용하여 검증 및 매핑된 Lecture Category 객체를 가져옵니다.
+        LectureCategory lecturecategory = convertToLectureCategoryEntity(categoryDto);
+        
         Lecture lecture = new Lecture();
 
         // CreateLectureRequestDto에서 필요한 데이터를 가져와서 Lecture 엔티티에 설정합니다.
@@ -113,8 +129,8 @@ public class LectureService {
         lecture.setLecturePrice(requestDto.getLecturePrice());
         lecture.setLectureTag(requestDto.getLectureTag());
 
-        // LectureCategory 객체를 Lecture 엔티티의 속성으로 설정합니다.
-        lecture.setLectureCategory(lectureCategory);
+     // 매핑된 Category 객체를 Lecture 엔티티의 속성으로 설정합니다.
+        lecture.setLectureCategory(lecturecategory);
 
      // LectureSection 설정
      // CreateLectureRequestDto에 있는 섹션 정보 리스트를 가져와서 LectureSection 엔티티 객체들을 생성하고 Lecture 엔티티와 연결합니다.
@@ -131,27 +147,6 @@ public class LectureService {
      }
      lecture.setLectureSection(sections);
 
-
-        // 비디오 설정
-//        List<Video> videos = new ArrayList<>();
-//        for (VideoDto videoDto : requestDto.getVideoList()) {
-//            Video video = new Video();
-//            video.setUploadDate(videoDto.getUploadDate());
-//            video.setFileName(videoDto.getFileName());
-//            video.setVideoId(videoDto.getVideoId());
-//            video.setTotalPlayTime(videoDto.getTotalPlayTime());
-//            video.setVideoLink(videoDto.getVideoLink());
-//            video.setVideoTitle(videoDto.getVideoTitle());
-//
-//            // lectureSectionId를 VideoDto에서 가져와서 Video 엔티티에 설정합니다.
-//            Long lectureSectionId = videoDto.getLectureSectionId();
-//            if (lectureSectionId != null) {
-//                LectureSection section = sectionRepository.findById(lectureSectionId).orElse(null);
-//                video.setLectureSection(section);
-//            }
-//            videos.add(video);
-//        }
-//        lecture.setVideos(videos);
 
         // Lecture 엔티티를 데이터베이스에 저장합니다.
         lecture = lectureRepository.save(lecture);
@@ -175,7 +170,10 @@ public class LectureService {
         }
     }
 
-    
+    // 마지막 섹션 ID를 가져오는 메서드 추가
+    public Long getLastSectionId() {
+        return sectionRepository.findLastSectionId();
+    }
     
 }
 

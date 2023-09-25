@@ -80,10 +80,7 @@ public class LoginController {
     @ResponseBody
     @PostMapping("/login")
     @ApiOperation(value = "사용자 로그인", notes = "사용자 ID와 비밀번호를 사용하여 로그인합니다.")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "id", value = "사용자 ID", required = true, paramType = "body", dataType = "string"),
-        @ApiImplicitParam(name = "password", value = "비밀번호", required = true, paramType = "body", dataType = "string")
-    })
+    @ApiImplicitParam(name = "MemberEntity", value = "id, password 전송", required = true, paramType = "body", dataType = "string")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "로그인 성공"),
         @ApiResponse(code = 401, message = "인증 실패"),
@@ -652,14 +649,11 @@ public class LoginController {
 	    @ApiResponse(code = 403, message = "이메일 전송 실패"),
 	    @ApiResponse(code = 500, message = "내부 서버 오류")})
 	public ResponseEntity<?> signupEmail(@RequestBody MemberDTO memberDTO) {
-		System.out.println("email : " + memberDTO.getEmail());
-		System.out.println("id : " + memberDTO.getId());
         try {
         	emailSenderService.sendFindByEmail(memberDTO.getEmail(), memberDTO.getId());
         	// 200 성공
         	return ResponseEntity.status(200).body("Email sent successfully");
         } catch (Exception e) {
-        	System.out.println("이메일 에러 : " + e);
         	// 403 이메일 전송 실패
         	return ResponseEntity.status(403).body("Failed to send email");
         }

@@ -38,12 +38,13 @@ public class CommentService {
     // 댓글 수정
     public Comment updateComment(int commentNo, String newContent) {
         Comment comment = commentRepository.findByCommentNo(commentNo);
-        if (comment != null) {
-            comment.setContent(newContent);
-            System.out.println("comment : " + comment);
-            return commentRepository.save(comment);
+        if (comment == null) {
+        	// RuntimeException은 제어할 수 없거나, 더 자세한 정보를 제공하지 않아도 되는 경우에 사용
+            throw new RuntimeException("Comment not found");
         }
-        return null;
+        comment.setContent(newContent);
+        return commentRepository.save(comment);
     }
+
 
 }
