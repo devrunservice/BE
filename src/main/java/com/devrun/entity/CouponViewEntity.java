@@ -42,7 +42,7 @@ public class CouponViewEntity {
         ACTIVE, // 사용 가능 (생성 시 기본값)
         REMOVED, // 사용 정지 처리로 인한 사용 불가
         EXPIRY, // 기간 만료로 인한 사용 불가
-
+        USED,
   
     }
 }
