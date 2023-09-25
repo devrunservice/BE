@@ -30,7 +30,7 @@ public class LectureregistController {
         this.lectureService = lectureService;
         this.awsS3UploadService = awsS3UploadService;
         this.youTubeUploader = youTubeUploader;
-
+        
     }
     
     // GET 요청을 통해 카테고리 목록을 가져오는 엔드포인트
@@ -53,22 +53,28 @@ public class LectureregistController {
             @ModelAttribute CreateLectureRequestDto requestDto,
             @RequestParam("image") List<MultipartFile> imageFiles,
             @RequestParam("videoFileList") List<MultipartFile> videoFiles,
-            @RequestParam("selectedCategories") List<Long> selectedCategoryIds,
-            @RequestParam("accessToken") String accessToken) {
+            @RequestParam("categoryNo") Long categoryNo,
+            @RequestParam("lectureBigCategory") String lectureBigCategory,
+            @RequestParam("lectureMidCategory") String lectureMidCategory,
+            @RequestParam("accessToken") String accessToken
+            ) {
         try {
             if (videoFiles.isEmpty()) {
                 return ResponseEntity.badRequest().body("동영상 파일을 선택해주세요.");
             }
+            
 
+            LecturecategoryDto categoryDto = new LecturecategoryDto();
+            categoryDto.setLectureBigCategory(lectureBigCategory);
+            categoryDto.setLectureMidCategory(lectureMidCategory);
+            categoryDto.setCategoryNo(categoryNo);
+            
             // 이미지 업로드 후 URL 가져오기
             String imageUrls = awsS3UploadService.putS3(imageFiles, "public.lecture.images");
 
-            // 선택된 카테고리 정보를 가져와서 설정
-            List<LectureCategory> selectedCategories = categoryService.getCategoriesByIds(selectedCategoryIds);
-            requestDto.setCategories(selectedCategories);
-
+            
             // 강의 및 비디오 정보를 데이터베이스에 저장하고, 강의 썸네일 이미지를 S3에 업로드한 URL을 가져옴
-            Lecture savedLecture = lectureService.saveLecture(requestDto, imageUrls);
+            Lecture savedLecture = lectureService.saveLecture(requestDto, imageUrls, categoryDto);
 
             System.out.println("Number of video files to upload: " + videoFiles.size());
 
@@ -79,7 +85,9 @@ public class LectureregistController {
                 System.out.println("아이디???? " + savedLecture.getId());
                 videoInfoList.add(videoInfo);
             }
-
+            
+            
+            
             // 동영상 정보를 데이터베이스에 저장
             lectureService.saveVideoInfo(videoInfoList, savedLecture);
 
