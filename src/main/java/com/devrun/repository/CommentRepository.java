@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.devrun.dto.CommentDTO.Status;
 import com.devrun.entity.Comment;
 import com.devrun.entity.Notice;
 
@@ -16,5 +17,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 	Comment findByParentComment(int parentCommentNo);
 
 	Comment findByCommentNo(int commentNo);
+
+	List<Comment> findByNoticeAndStatus(Notice notice, Status active);
 
 }

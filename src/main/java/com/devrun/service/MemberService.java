@@ -109,9 +109,6 @@ public class MemberService {
         Random r = new Random();
         String smsCode = Integer.toString(r.nextInt(900000) + 100000);
 
-//        // Save the code for verification later
-//        phoneCodeMap.put(recipientPhoneNumber, smsCode);
-        
         // Save the code for verification later
         cacheService.saveCaffeine(recipientPhoneNumber, smsCode); // Caffeine 캐시에 코드 저장
 

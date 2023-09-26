@@ -32,15 +32,15 @@ public class LectureService {
         List<LectureSection> sections = saveLectureSections(requestDto.getLectureSectionList(), lecture);
         lecture.setLectureSection(sections);
 
-        List<Video> videos = saveVideos(requestDto.getVideoList(), lecture );
+        List<Video> videos = saveVideos(requestDto.getVideoList(), lecture);
         lecture.setVideos(videos);
 
-     // Set Lecture Tags
+        // Set Lecture Tags
         if (requestDto.getLectureTag() != null) {
             lecture.setLectureTag(requestDto.getLectureTag());
         }
         
-     // 동영상 정보를 업데이트합니다.
+        // 동영상 정보를 업데이트합니다.
         List<VideoInfo> videoInfoList = new ArrayList<>();
         saveVideoInfo(videoInfoList, lecture);
         
@@ -98,7 +98,6 @@ public class LectureService {
         video.setVideoLink(videoDto.getVideoLink());
         video.setVideoTitle(videoDto.getVideoTitle());
 
-        
         video.setLecture(lecture);
         return video;
     }

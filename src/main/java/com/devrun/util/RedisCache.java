@@ -20,7 +20,7 @@ public class RedisCache {
     	// Redis의 opsForValue() 메소드를 사용하여 토큰을 키로, "blacklisted"를 값으로 저장
         redisTemplate.opsForValue().set(token, "blacklisted");
         
-        // 토큰의 만료 시간을 24시간으로 설정
+        // Redis의 만료 시간을 24시간으로 설정
         redisTemplate.expire(token, 24, TimeUnit.HOURS);
     }
 

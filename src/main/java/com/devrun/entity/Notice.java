@@ -21,7 +21,6 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import com.devrun.dto.NoticeDTO;
 import com.devrun.dto.NoticeDTO.Status;
@@ -79,16 +78,18 @@ public class Notice implements Serializable {
 
     // NoticeDTO로 변환하는 메소드
     public NoticeDTO toDTO() {
-        return new NoticeDTO(
-            this.noticeNo,
-            this.viewCount,
-            this.memberEntity.getUserNo(),
-            this.title,
-            this.content,
-            this.memberEntity.getId(),
-            this.createdDate,
-            this.modifiedDate,
-            this.status
-        );
+    	NoticeDTO dto = new NoticeDTO();
+        // 순서 정보(order)는 여기에서는 설정하지 않습니다.
+        // 이 부분은 Service 레이어에서 설정합니다.
+        dto.setNoticeNo(this.noticeNo);
+        dto.setViewCount(this.viewCount);
+        dto.setUserNo(this.memberEntity.getUserNo());
+        dto.setTitle(this.title);
+        dto.setContent(this.content);
+        dto.setId(this.memberEntity.getId());
+        dto.setCreatedDate(this.createdDate);
+        dto.setModifiedDate(this.modifiedDate);
+        dto.setStatus(this.status);
+        return dto;
     }
 }

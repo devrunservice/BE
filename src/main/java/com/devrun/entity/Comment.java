@@ -7,6 +7,8 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -23,6 +25,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.devrun.dto.CommentDTO;
+import com.devrun.dto.CommentDTO.Status;
 
 import lombok.Data;
 
@@ -75,6 +78,11 @@ public class Comment {
     @org.hibernate.annotations.Comment("댓글 수정일")
     private Date modifiedDate;
     
+    @Column(name = "status", nullable = false, length = 9)
+    @Enumerated(EnumType.STRING)
+    @org.hibernate.annotations.Comment("댓글의 상태")
+    private Status status = Status.ACTIVE;
+    
     public CommentDTO toDTO(){
     	// parentComment가 null인 경우, parentCommentNo를 0으로 설정
         int parentCommentNo = (this.parentComment != null) ? this.parentComment.getCommentNo() : 0;
@@ -88,7 +96,8 @@ public class Comment {
             this.memberEntity.getId(),
             this.memberEntity.getProfileimgsrc(),
             this.createdDate,
-            this.modifiedDate
+            this.modifiedDate,
+            this.status
         );
     }
 }

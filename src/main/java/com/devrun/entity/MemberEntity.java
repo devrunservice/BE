@@ -88,20 +88,6 @@ public class MemberEntity implements Serializable {
     @Comment("유저 프로필 이미지 주소")
     private String profileimgsrc = "profile.png";
 
-
-    // OneToOne 어노테이션을 사용하여 1:1 관계 설정
-//    @OneToOne(mappedBy = "memberEntity")
-//    private PointEntity pointEntity;
-//    
-//    @OneToOne(mappedBy = "memberEntity")
-//    private ContactEntity contactEntity;
-//
-//    @OneToOne(mappedBy = "memberEntity")
-//    private ConsentEntity consentEntity;
-//
-//    @OneToOne(mappedBy = "memberEntity")
-//    private LoginInfoEntity loginInfoEntity;
-    
 //	데이터베이스에 Enum 값을 저장할 때, 일반적으로 두 가지 전략을 사용할 수 있습니다:
 //
 //	ORDINAL: Enum 값의 순서(0부터 시작)를 데이터베이스에 저장합니다. 
