@@ -47,20 +47,28 @@ public class CommentService {
         return commentRepository.save(comment);
     }
     
-    // 댓글 삭제 (Status를 INACTIVE로 변경)
-    public Comment deleteComment(int commentNo, String memberId) {
-        Comment comment = commentRepository.findByCommentNo(commentNo);
-        if (comment == null) {
+    // 원댓글과 모든 대댓글을 삭제 (Status를 INACTIVE로 변경)
+    public Comment deleteCommentAndReplies(int commentNo, String memberId) {
+        Comment parentComment = commentRepository.findByCommentNo(commentNo);
+        if (parentComment == null) {
             throw new RuntimeException("Comment not found");
         }
-
+        
         // 회원 검증
-        if (!comment.getMemberEntity().getId().equals(memberId)) {
+        if (!parentComment.getMemberEntity().getId().equals(memberId)) {
             throw new RuntimeException("Unauthorized member");
         }
 
-        comment.setStatus(Status.INACTIVE);
-        return commentRepository.save(comment);
+        // 원댓글 상태 변경
+        parentComment.setStatus(Status.INACTIVE);
+
+        // 대댓글들 상태 변경
+        List<Comment> childComments = parentComment.getChildComments();
+        for (Comment childComment : childComments) {
+            childComment.setStatus(Status.INACTIVE);
+        }
+
+        return commentRepository.save(parentComment);
     }
 
 }

@@ -101,8 +101,8 @@ public class CommentController {
     @ApiImplicitParams({
         @ApiImplicitParam(name = "commentNo", value = "삭제할 댓글 번호", required = true, paramType = "path", dataType = "Integer"),
         @ApiImplicitParam(name = "memberId", value = "회원 ID", required = true, paramType = "query", dataType = "String")})
-    public ResponseEntity<?> deleteComment(@PathVariable int commentNo, @RequestBody CommentDTO commentDTO) {
-        Comment deletedComment = commentService.deleteComment(commentNo, commentDTO.getId());
+    public ResponseEntity<?> deleteCommentAndReplies(@PathVariable int commentNo, @RequestBody CommentDTO commentDTO) {
+        Comment deletedComment = commentService.deleteCommentAndReplies(commentNo, commentDTO.getId());
         if (deletedComment != null) {
             return ResponseEntity.ok(deletedComment.toDTO());
         }
