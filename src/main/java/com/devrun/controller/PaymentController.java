@@ -25,6 +25,7 @@ import com.devrun.entity.MemberEntity;
 import com.devrun.entity.PaymentEntity;
 import com.devrun.entity.PointEntity;
 import com.devrun.entity.PointHistoryEntity;
+import com.devrun.repository.CouponregicodeRepository;
 import com.devrun.repository.MemberEntityRepository;
 import com.devrun.repository.PaymentInfo;
 import com.devrun.repository.PaymentRepository;
@@ -57,6 +58,9 @@ public class PaymentController {
 	private MemberService memberService;
 	
 	@Autowired
+	private CouponregicodeRepository couponregicodeRepository;
+	
+	@Autowired
 	private PointHistoryRepository pointHistoryRepository;
 
 	// 결제 정보 db에 저장
@@ -67,6 +71,10 @@ public class PaymentController {
 				LocalDateTime dateTime = LocalDateTime.now();
 				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd a hh:mm:ss", new Locale("ko"));
 				String paymentDate = dateTime.format(formatter);
+				
+				String couponCode =paymentDTOList.get(0).getCouponCode();
+				
+				couponregicodeRepository.couponCodeUsed(couponCode);
 				
 				System.err.println(paymentDTOList);
 				
@@ -130,10 +138,8 @@ public class PaymentController {
 			        
 				        System.err.println(paymentList);
 						paymentService.savePaymentInfo(paymentList);
-						System.err.println(pointEntity);
-						
+						System.err.println(pointEntity);				
 					   
-					    
 					  
 					    //포인트 사용했으면 실행
 					    if(userPoint > 0) {
@@ -176,7 +182,7 @@ public class PaymentController {
 			            historyEntityGain.setProductname(gainname);
 			            String gainExplanation = "결제시 얻은 포인트"; 
 			            historyEntityGain.setExplanation(gainExplanation);
-			            pointHistoryRepository.save(historyEntityGain);  
+			            pointHistoryRepository.save(historyEntityGain); 
 			            
 					   }
 					

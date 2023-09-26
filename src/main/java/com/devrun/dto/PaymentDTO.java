@@ -15,9 +15,10 @@ public class PaymentDTO {
 	public String buyer_tel;
 	public String merchant_uid;
 	public String imp_uid;
+	public String couponCode;
 	public int paid_amount;
 	public String receipt_url;
 	public int userno;
-	private int mypoint;
+	public int mypoint;	
 	
 }

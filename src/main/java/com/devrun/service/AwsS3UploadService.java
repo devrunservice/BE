@@ -1,42 +1,64 @@
 package com.devrun.service;
 
-import com.devrun.entity.MemberEntity;
-import lombok.Builder;
-import lombok.RequiredArgsConstructor;
-import net.bytebuddy.agent.builder.AgentBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectResponse;
-
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import lombok.RequiredArgsConstructor;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 @Service
 @RequiredArgsConstructor
-public class AwsS3UploadService extends AWSS3Service{
+public class AwsS3UploadService extends AWSS3Service {	
 
-    @Autowired
-    private MemberService memberService;
+	private String generateUniqueFileName(String originalFilename) throws StringIndexOutOfBoundsException {
+		return UUID.randomUUID().toString() + originalFilename;
+	}
+	
+	 private PutObjectRequest getPutObjectRequest(String key , String contentType){
 
+	        return PutObjectRequest.builder()
+	                .bucket(bucketName)
+	                .key(key)
+	                .contentType(contentType)
+	                .build();
+	    }
 
-    //파일 업로드를 위한 요청서를 만듭니다.
-    private PutObjectRequest getPutObjectRequest(String key , String contentType){
+	public String getPresignUrl(String path, Map<String, String> fileinfo) throws Exception{
+			String fileName = generateUniqueFileName(fileinfo.get("fileName"));
+			String fileExt = fileinfo.get("fileExt");
+			if(!fileExt.equals("jpg") && !fileExt.equals("png")) {
+				throw new Exception("This Extension is not allow");
+			}
+			PutObjectRequest objectRequest = PutObjectRequest.builder()
+					.bucket(bucketName)
+					.key(path + "/" + fileName)
+					.contentType("image/" + fileExt)
+					.build();
 
-        return PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(key)
-                .contentType(contentType)
-                .build();
-    }
+			PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+					.signatureDuration(Duration.ofMinutes(10))
+					.putObjectRequest(objectRequest)
+					.build();
 
+			PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
+			String myURL = presignedRequest.url().toString();
+			System.out.println("Presigned URL to upload a file to: " + myURL);
+			System.out.println("Which HTTP method needs to be used when uploading a file: "
+					+ presignedRequest.httpRequest().method());			
+			return myURL;
+	}
 
-    //작성된 요청서와 S3Client 계정 정보를 통해 S3 버킷에 접근하고 지정된 파일을 업로드합니다.
-    public String putS3(List<MultipartFile> multipartFiles , String uploadpath) throws IOException , StringIndexOutOfBoundsException , NullPointerException{
+	public String putS3(List<MultipartFile> multipartFiles , String uploadpath , String uniqueName) throws IOException , StringIndexOutOfBoundsException , NullPointerException{
 
         for (MultipartFile multipartFile : multipartFiles) {
             String originalFilename = multipartFile.getOriginalFilename();
@@ -56,22 +78,14 @@ public class AwsS3UploadService extends AWSS3Service{
             InputStream file = multipartFile.getInputStream();
 
             long contentlength = multipartFile.getSize();
-            RequestBody uploadfile = RequestBody.fromInputStream(file, contentlength);
-
-            String uniqueFileName = generateUniqueFileName(originalFilename); // Generate a unique filename using UUID.
-            uploadpath += "/" + uniqueFileName;
+            RequestBody uploadfile = RequestBody.fromInputStream(file, contentlength);            
+            uploadpath = "https://devrun-dev-bucket.s3.ap-northeast-2.amazonaws.com/"+ uploadpath + "/" + uniqueName + "/" + multipartFile.getOriginalFilename();
             PutObjectRequest uploadRequest = getPutObjectRequest(uploadpath, contentType);
             s3Client.putObject(uploadRequest, uploadfile);
-             
-            
+
         }
-        String fileURL = "https://devrun-dev-bucket.s3.ap-northeast-2.amazonaws.com/" + uploadpath;
-        return fileURL; //저장한 파일 URL Key Name으로 사용 가능
+        
+        
+        return uploadpath;
     }
-
-    private String generateUniqueFileName(String originalFilename) throws StringIndexOutOfBoundsException{
-        String extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
-        return UUID.randomUUID().toString() + extension;
-    }
-
 }
