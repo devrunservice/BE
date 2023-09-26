@@ -12,6 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CommentDTO {
+	
     private int commentNo, noticeNo, parentCommentNo, userNo;
     private String content, id, profileimgsrc;
     private Date createdDate, modifiedDate;

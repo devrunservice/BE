@@ -53,7 +53,6 @@ public class CommentController {
     public ResponseEntity<?> writeComment(@RequestBody CommentDTO commentDTO) {
         Notice notice = noticeService.findByNoticeNo(commentDTO.getNoticeNo());
         MemberEntity memberEntity = memberService.findById(commentDTO.getId());
-        System.out.println("memberEntity : " + commentDTO.getId());
         if (notice != null) {
             Comment comment = commentService.insertComment(commentDTO, notice, memberEntity);
             return ResponseEntity.ok(comment.toDTO());

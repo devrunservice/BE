@@ -50,7 +50,6 @@ public class NoticeController {
 	    @ApiResponse(code = 500, message = "내부 서버 오류")})
 	public ResponseEntity<?> notice(@RequestBody NoticeDTO noticeDTO) {
 		try {
-		    System.out.println("noticeDTO : " + noticeDTO);
 		    String title = noticeDTO.getTitle();
 		    String content = noticeDTO.getContent();
 		    
@@ -81,17 +80,9 @@ public class NoticeController {
 	    }
 	}
 
-//	// 공지사항 단순 리스트
-//	@ResponseBody
-//    @GetMapping("/notice/list")
-//    public List<NoticeDTO> noticeList() {
-//        List<Notice> notices = noticeService.getNoticeList();
-//        return notices.stream().map(Notice::toDTO).collect(Collectors.toList());
-//    }
-	
 	// 공지사항 페이징
 	@ResponseBody
-	@GetMapping("/notice/{pageNumber}")
+	@GetMapping("/notices/{pageNumber}")
 	@ApiOperation(value = "공지사항 페이징", notes = "페이지 번호에 따른 공지사항 목록을 반환합니다.")
 	@ApiImplicitParam(name = "pageNumber", value = "페이지 번호", required = true, paramType = "path", dataTypeClass = Integer.class)
 	@ApiResponses(value = {
@@ -115,14 +106,13 @@ public class NoticeController {
 	
 	// 공지사항 읽기
 	@ResponseBody
-	@GetMapping("/notice/detail/{noticeNo}")
+	@GetMapping("/notices/detail/{noticeNo}")
 	@ApiOperation(value = "공지사항 읽기", notes = "공지사항 번호에 따른 상세 정보를 반환합니다.")
 	@ApiImplicitParam(name = "noticeNo", value = "공지사항 번호", required = true, paramType = "path", dataTypeClass = Integer.class)
 	@ApiResponses(value = {
 	    @ApiResponse(code = 200, message = "공지사항 상세 정보를 성공적으로 반환했습니다."),
 	    @ApiResponse(code = 404, message = "공지사항을 찾을 수 없습니다."),
-	    @ApiResponse(code = 500, message = "내부 서버 오류")
-	})
+	    @ApiResponse(code = 500, message = "내부 서버 오류")})
 	public ResponseEntity<?> getNotice(@PathVariable int noticeNo) {
 	    try {
 	        Notice notice = noticeService.getNoticeByNoticeNo(noticeNo);
