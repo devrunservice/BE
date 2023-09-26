@@ -82,7 +82,7 @@ public class NoticeController {
 
 	// 공지사항 페이징
 	@ResponseBody
-	@GetMapping("/notices/{pageNumber}")
+	@GetMapping("/notice/{pageNumber}")
 	@ApiOperation(value = "공지사항 페이징", notes = "페이지 번호에 따른 공지사항 목록을 반환합니다.")
 	@ApiImplicitParam(name = "pageNumber", value = "페이지 번호", required = true, paramType = "path", dataTypeClass = Integer.class)
 	@ApiResponses(value = {
@@ -106,7 +106,7 @@ public class NoticeController {
 	
 	// 공지사항 읽기
 	@ResponseBody
-	@GetMapping("/notices/detail/{noticeNo}")
+	@GetMapping("/notice/detail/{noticeNo}")
 	@ApiOperation(value = "공지사항 읽기", notes = "공지사항 번호에 따른 상세 정보를 반환합니다.")
 	@ApiImplicitParam(name = "noticeNo", value = "공지사항 번호", required = true, paramType = "path", dataTypeClass = Integer.class)
 	@ApiResponses(value = {
