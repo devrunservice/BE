@@ -2,6 +2,8 @@ package com.devrun.youtube;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,7 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -98,5 +102,17 @@ public class LectureregistController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("오류가 발생했습니다.");
         }
     }
+    
+    @PostMapping("lectureregitest")
+    public ResponseEntity<?> lecturetest(@RequestBody Map<String , Object> map){
+    	
+    	Set<String> df = map.keySet();   	
+    	for (String string : df) {
+			System.out.println("키값 :" + string);
+		}
+    	
+    	return ResponseEntity.status(200).body("수신");
+    }
+    
 
 }
