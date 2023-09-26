@@ -37,7 +37,7 @@ public class SecurityConfig {
             .csrf().disable()
             .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS, "/**/*").permitAll()
-//                .antMatchers("/notice").hasAnyAuthority("ADMIN")
+                .antMatchers("/notice").hasAnyAuthority("ADMIN")
                 .antMatchers("/users/login-info").authenticated()
                 .antMatchers("/authz/token/refresh").authenticated()
                 .antMatchers("/authz/logout").permitAll()
