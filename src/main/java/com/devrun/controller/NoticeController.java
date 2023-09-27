@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.devrun.dto.NoticeDTO;
+import com.devrun.dto.NoticeDTO.Status;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.Notice;
 import com.devrun.service.NoticeService;
@@ -48,7 +50,6 @@ public class NoticeController {
 	    @ApiResponse(code = 500, message = "내부 서버 오류")})
 	public ResponseEntity<?> notice(@RequestBody NoticeDTO noticeDTO) {
 		try {
-		    System.out.println("noticeDTO : " + noticeDTO);
 		    String title = noticeDTO.getTitle();
 		    String content = noticeDTO.getContent();
 		    
@@ -79,17 +80,9 @@ public class NoticeController {
 	    }
 	}
 
-//	// 공지사항 단순 리스트
-//	@ResponseBody
-//    @GetMapping("/notice/list")
-//    public List<NoticeDTO> noticeList() {
-//        List<Notice> notices = noticeService.getNoticeList();
-//        return notices.stream().map(Notice::toDTO).collect(Collectors.toList());
-//    }
-	
 	// 공지사항 페이징
 	@ResponseBody
-	@GetMapping("/notice/{pageNumber}")
+	@GetMapping("/notices/{pageNumber}")
 	@ApiOperation(value = "공지사항 페이징", notes = "페이지 번호에 따른 공지사항 목록을 반환합니다.")
 	@ApiImplicitParam(name = "pageNumber", value = "페이지 번호", required = true, paramType = "path", dataTypeClass = Integer.class)
 	@ApiResponses(value = {
@@ -102,7 +95,8 @@ public class NoticeController {
 	    		"createdDate").descending()											// 체인형 - 단일 속성에 여러 조건을 설정하기 좋음
 	    		);
 	    
-	    Page<NoticeDTO> noticeDTOs = noticeService.getAllNotices(pageable);
+	    // status가 'ACTIVE'인 공지사항만 가져옵니다.
+	    Page<NoticeDTO> noticeDTOs = noticeService.getAllActiveNotices(pageable);
 	    if (noticeDTOs == null) {
 	        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	    }
@@ -112,14 +106,13 @@ public class NoticeController {
 	
 	// 공지사항 읽기
 	@ResponseBody
-	@GetMapping("/notice/detail/{noticeNo}")
+	@GetMapping("/notices/detail/{noticeNo}")
 	@ApiOperation(value = "공지사항 읽기", notes = "공지사항 번호에 따른 상세 정보를 반환합니다.")
 	@ApiImplicitParam(name = "noticeNo", value = "공지사항 번호", required = true, paramType = "path", dataTypeClass = Integer.class)
 	@ApiResponses(value = {
 	    @ApiResponse(code = 200, message = "공지사항 상세 정보를 성공적으로 반환했습니다."),
 	    @ApiResponse(code = 404, message = "공지사항을 찾을 수 없습니다."),
-	    @ApiResponse(code = 500, message = "내부 서버 오류")
-	})
+	    @ApiResponse(code = 500, message = "내부 서버 오류")})
 	public ResponseEntity<?> getNotice(@PathVariable int noticeNo) {
 	    try {
 	        Notice notice = noticeService.getNoticeByNoticeNo(noticeNo);
@@ -166,4 +159,23 @@ public class NoticeController {
 	    }
 	}
 
+	// 공지사항 삭제 (실제로는 Status를 INACTIVE로 변경)
+	@ResponseBody
+	@DeleteMapping("/notice/delete/{noticeNo}")
+	@ApiOperation(value = "공지사항 삭제", notes = "공지사항의 상태를 INACTIVE로 변경합니다.")
+	@ApiImplicitParam(name = "noticeNo", value = "삭제할 공지사항 번호", required = true, paramType = "path", dataTypeClass = Integer.class)
+	@ApiResponses(value = {
+	    @ApiResponse(code = 200, message = "공지사항을 성공적으로 삭제했습니다."),
+	    @ApiResponse(code = 400, message = "잘못된 인수입니다."),
+	    @ApiResponse(code = 500, message = "내부 서버 오류")})
+	public ResponseEntity<?> deleteNotice(@PathVariable int noticeNo) {
+	    try {
+	        noticeService.setStatus(noticeNo, Status.INACTIVE);
+	        return ResponseEntity.status(200).body("Successfully deleted notice with ID: " + noticeNo);
+	    } catch (IllegalArgumentException e) {
+	        return ResponseEntity.status(400).body("Invalid arguments");
+	    } catch (Exception e) {
+	        return ResponseEntity.status(500).body("Internal Server Error");
+	    }
+	}
 }

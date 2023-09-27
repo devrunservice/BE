@@ -38,6 +38,7 @@ import com.devrun.service.LoginService;
 import com.devrun.service.MemberService;
 import com.devrun.util.CaffeineCache;
 import com.devrun.util.JWTUtil;
+import com.devrun.util.RedisCache;
 
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -65,8 +66,8 @@ public class LoginController {
 	private EmailSenderService emailSenderService;
     
     @Autowired
-    private CaffeineCache redisCache;
-//    private RedisCache redisCache;
+//    private CaffeineCache redisCache;
+    private RedisCache redisCache;
     
     @Autowired
     private LoginRepository loginRepository;
@@ -231,6 +232,7 @@ public class LoginController {
         return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    // 엑세스토큰 재발급
     @ResponseBody
     @PostMapping("/authz/token/refresh")
     @ApiOperation(value = "토큰 리프레시", notes = "리프레시 토큰을 사용하여 새로운 액세스 토큰을 생성합니다. 리프레시 토큰은 HttpOnly 쿠키에 저장되어 있습니다.")
@@ -309,6 +311,7 @@ public class LoginController {
         return headers;
     }
     
+    // 블랙리스트에 리프래시 토큰을 등록해 엑세스 토큰을 재발급 받지 못하도록 합니다.
     @ResponseBody
     @PostMapping("/authz/logout")
     @ApiOperation(value = "로그아웃", notes = "현재 로그인된 사용자를 로그아웃합니다. 리프레시 토큰은 HttpOnly 쿠키에 저장되어 있습니다.")
@@ -316,8 +319,7 @@ public class LoginController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "로그아웃 성공"),
         @ApiResponse(code = 400, message = "잘못된 요청"),
-        @ApiResponse(code = 500, message = "서버 오류")
-    })
+        @ApiResponse(code = 500, message = "서버 오류")})
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         // 요청에서 리프레시 토큰 추출
         String refreshToken = getRefreshTokenFromCookies(request);
@@ -363,6 +365,7 @@ public class LoginController {
         // 토큰을 블랙리스트에 등록
         redisCache.blacklistToken(refreshToken);
     }
+    
     @ResponseBody
     @GetMapping("/auth/kakao/callback")
     @ApiOperation(value = "카카오 로그인 콜백", notes = "카카오 로그인 후 콜백 URL입니다.")
@@ -596,9 +599,7 @@ public class LoginController {
 			) {
         	// 비밀번호 변경 및 저장
 			memberEntity.setPassword(encodedPassword);
-			System.out.println("저장직전");
 			loginRepository.save(memberEntity);
-			System.out.println("저장되나?");
 			// 인증 코드 제거
 			memberService.removeVerifyCode(key);
 			// 200 : 비밀번호 변경 성공
@@ -714,7 +715,7 @@ public class LoginController {
 	// 사용자 로그인 정보 조회
 	@ResponseBody
 	@GetMapping("/users/login-info")
-	@ApiOperation(value = "사용자 로그인 정보 조회", notes = "사용자의 로그인 정보를 조회합니다.")
+	@ApiOperation(value = "사용자 로그인 정보 조회", notes = "사용자의 로그인 정보를 조회하고 로그인 상태를 유지하기 위해 사용합니다.")
 	@ApiImplicitParams({
 	    @ApiImplicitParam(name = "Access_token", value = "Access Token", required = true, paramType = "header", dataType = "string")})
 	@ApiResponses(value = {

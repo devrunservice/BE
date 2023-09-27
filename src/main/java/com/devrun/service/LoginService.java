@@ -111,14 +111,10 @@ public class LoginService {
 		String encodedValue = Base64.getEncoder().encodeToString(value.getBytes());
 		ResponseCookie refresh_token = ResponseCookie
 			.from("Refresh_token", encodedValue)
-//			.domain("devrun.site")
 			.path("/authz")
 			.sameSite("none")
-			// 로컬 테스트를 위해 false
-//			.secure(true)
-//			.httpOnly(true)
-			.secure(false)
-			.httpOnly(false)
+			.secure(true)
+			.httpOnly(true)
 			.build();
 		
 		System.out.println("리프레시 토큰 생성 : " + refresh_token);

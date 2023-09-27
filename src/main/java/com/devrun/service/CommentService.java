@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.devrun.dto.CommentDTO;
+import com.devrun.dto.CommentDTO.Status;
 import com.devrun.entity.Comment;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.Notice;
@@ -30,9 +31,9 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    // 댓글 목록 가져오기
-    public List<Comment> getCommentsByNotice(Notice notice) {
-        return commentRepository.findByNotice(notice);
+    // 댓글 목록 가져오기 (Status가 ACTIVE인 것만)
+    public List<Comment> getActiveCommentsByNotice(Notice notice) {
+        return commentRepository.findByNoticeAndStatus(notice, Status.ACTIVE);
     }
 
     // 댓글 수정
@@ -45,6 +46,29 @@ public class CommentService {
         comment.setContent(newContent);
         return commentRepository.save(comment);
     }
+    
+    // 원댓글과 모든 대댓글을 삭제 (Status를 INACTIVE로 변경)
+    public Comment deleteCommentAndReplies(int commentNo, String memberId) {
+        Comment parentComment = commentRepository.findByCommentNo(commentNo);
+        if (parentComment == null) {
+            throw new RuntimeException("Comment not found");
+        }
+        
+        // 회원 검증
+        if (!parentComment.getMemberEntity().getId().equals(memberId)) {
+            throw new RuntimeException("Unauthorized member");
+        }
 
+        // 원댓글 상태 변경
+        parentComment.setStatus(Status.INACTIVE);
+
+        // 대댓글들 상태 변경
+        List<Comment> childComments = parentComment.getChildComments();
+        for (Comment childComment : childComments) {
+            childComment.setStatus(Status.INACTIVE);
+        }
+
+        return commentRepository.save(parentComment);
+    }
 
 }

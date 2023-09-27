@@ -49,15 +49,15 @@ public class JWTUtil {
     private CustomUserDetailsService userDetailsService;
     
     @Autowired
-    private CaffeineCache redisCache;
-//    private RedisCache redisCache;
+//    private CaffeineCache redisCache;
+    private RedisCache redisCache;
     
     // 시그니쳐 알고리즘 설정
     private static final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
     
 	// 토큰 만료시간 설정
-    private static final long EASYLOGIN_TOKEN_EXPIRATION_TIME = 15 * 60 * 1000;		// 5분
-    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 15 * 60 * 1000;		// 15분				테스트는 1초로 할 것
+    private static final long EASYLOGIN_TOKEN_EXPIRATION_TIME = 15 * 60 * 1000;		// 15분
+    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 15 * 60 * 1000;		// 15분
     private static final long REFRESH_TOKEN_EXPIRATION_TIME = 24 * 60 * 60 * 1000;	// 24시간, 24시간/일 * 60분/시간 * 60초/분 * 1000밀리초/초
     
     // jti 생성
@@ -198,9 +198,7 @@ public class JWTUtil {
  	        String requestJti = getJtiFromToken(token);
  	        String storedJti = redisCache.getJti(userId);
  	        
- 	        if ( !isValidAlgorithm(jwt, response) 
- 	        		|| isBlacklistedRefreshToken(tokenType, token, response)
- 	        		) return true;
+ 	        if ( !isValidAlgorithm(jwt, response) || isBlacklistedRefreshToken(tokenType, token, response) ) return true;
  	        if (isValidateJti(requestJti, storedJti, userId)) {
 				if (validateAndProcessToken(token, request)) {
 					// 토큰 검증 및 처리 성공
@@ -327,5 +325,4 @@ public class JWTUtil {
         }
         return refreshToken; // 쿠키에서 "Refresh_token"을 찾지 못한 경우 null 반환
     }
-
 }

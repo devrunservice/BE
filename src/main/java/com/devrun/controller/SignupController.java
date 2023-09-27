@@ -328,12 +328,6 @@ public class SignupController {
 	@ResponseBody
 	@CrossOrigin(origins = {"https://mail.naver.com", "https://mail.daum.net", "https://mail.google.com","https://mail.nate.com"})
 	@PostMapping("/verify/signupEmail")
-	@ApiOperation(value = "이메일 인증 확인", notes = "이메일로부터 인증을 확인합니다.")
-	@ApiImplicitParam(name = "data", value = "암호화된 데이터", required = true, paramType = "query", dataType = "string")
-	@ApiResponses(value = {
-	    @ApiResponse(code = 302, message = "다른 위치로 리다이렉션"),
-	    @ApiResponse(code = 500, message = "내부 서버 오류")
-	})
 	public ResponseEntity<?> signupOk(@RequestParam("data") String encryptedData){
 		HttpHeaders headers = new HttpHeaders();
 		try {
@@ -362,7 +356,7 @@ public class SignupController {
 			
 			if (isVerificationExpired(member.getSignupDate())) {
 				// 회원가입 1시간 경과
-				headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=expired&data=" + encryptedData));
+				headers.setLocation(URI.create("https://devrun.net/signupcompletion?status=expired"));
 		        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 		    }
 		    return verifyKeyAndActivateAccount(id, key, member, encryptedData);

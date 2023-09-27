@@ -15,7 +15,7 @@ public class CaffeineCache {
     public CaffeineCache() {
         smsCodeCache = Caffeine.newBuilder()
                 .expireAfterWrite(5, TimeUnit.MINUTES) // 5분 후에 만료 지금은 핸드폰 인증에만 사용 중
-                .maximumSize(100) // 최대 100개의 항목 저장
+                .maximumSize(1000) // 최대 1000개의 항목 저장
                 .build(key -> null); // 만약 키가 존재하지 않으면 null 반환
     }
 
@@ -42,12 +42,12 @@ public class CaffeineCache {
     
     
     
-    // 로컬 테스트 버전
-    // 로컬 테스트 버전
-    // 로컬 테스트 버전
-    // 로컬 테스트 버전
-    // 로컬 테스트 버전
-    // 로컬 테스트 버전
+    
+    // 로컬 테스트 버전 로컬에서 캐시를 사용할 수 있도록 임시로 Redis를 Caffeine으로 변경
+    // 로컬 테스트 버전 로컬에서 캐시를 사용할 수 있도록 임시로 Redis를 Caffeine으로 변경
+    // 로컬 테스트 버전 로컬에서 캐시를 사용할 수 있도록 임시로 Redis를 Caffeine으로 변경
+    // 로컬 테스트 버전 로컬에서 캐시를 사용할 수 있도록 임시로 Redis를 Caffeine으로 변경
+    // 로컬 테스트 버전 로컬에서 캐시를 사용할 수 있도록 임시로 Redis를 Caffeine으로 변경
     
     // 토큰을 blacklist에 추가
  	public void blacklistToken(String token) {

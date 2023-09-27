@@ -27,12 +27,10 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 // 모든 출처에서 오는 요청을 허용
 				.allowedOrigins("https://devrun.net", "http://localhost:3000")
-//				.allowedOrigins("*")
                 // 모든 HTTP 메소드(GET, POST, PUT, DELETE 등)를 허용
         		.allowedMethods("*")
         		// 쿠키 전송 허용
         		.allowCredentials(true)
-//        		.exposedHeaders("Cookie", "Cookies", "Refresh_token")
         		// 모든 헤더 허용
         		.allowedHeaders("*");
     }
