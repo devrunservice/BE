@@ -1,5 +1,7 @@
 package com.devrun.youtube;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -103,16 +105,24 @@ public class LectureregistController {
         }
     }
     
-    @PostMapping("lectureregitest")
-    public ResponseEntity<?> lecturetest(@RequestBody Map<String , Object> map){
-    	
-    	Set<String> df = map.keySet();   	
-    	for (String string : df) {
-			System.out.println("키값 :" + string);
-		}
-    	
-    	return ResponseEntity.status(200).body("수신");
-    }
+    @PostMapping("/lectureregitest")
+    public String lecturetest( @ModelAttribute CreateLectureRequestDto requestDto,
+    		@RequestParam("lectureBigCategory") String lectureBigCategory,
+    		@RequestParam("lectureMidCategory") String lectureMidCategory,
+    		@RequestParam("image") MultipartFile image,
+    		@RequestParam("sectionid") int sectionid,
+    		@RequestParam("accessToken") String accessToken    		
+            ){
+    	System.out.println("--------------------------------lectureregitest Controller --------------------------------");
+    	System.out.println(requestDto.getLectureName());
+    	System.out.println("lectureBigCategory :" + lectureBigCategory);
+    	System.out.println("lectureMidCategory :" + lectureMidCategory);
+    	System.out.println("image :" + image);
+    	System.out.println("sectionid :" + sectionid);
+    	System.out.println("accessToken :" + accessToken);   	
+
+            return "수신완료"; // Redirect to a success page
+        }
     
 
 }
