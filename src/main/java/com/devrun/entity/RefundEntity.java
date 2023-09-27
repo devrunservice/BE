@@ -16,23 +16,23 @@ public class RefundEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "user_no", length = 5)
-	@Comment("유저 구분 번호")
-	private int user_no;	
+	@Column(name = "refundNo", length = 11)
+	@Comment("환불 번호")
+	private int refundNo;	
 
-	@Column(name = "merchantUid", nullable = true, length = 100)
-	@Comment("주문번호")
+	@Column(name = "merchantUid", nullable = true, length = 30)
+	@Comment("아임포트 고유번호")
 	private String merchant_uid;
 	
-	@Column(name = "name", nullable = true, length = 100)
-	@Comment("상품이름")
+	@Column(name = "name", nullable = true, length = 20)
+	@Comment("강의 이름")
 	private String name;
 
-	@Column(name = "amount", nullable = true, length = 100)
+	@Column(name = "amount", nullable = true, length = 20)
 	@Comment("환불 금액")
 	private int amount;
 	
-	@Column(name = "payment_Date", nullable = true, length = 100)
+	@Column(name = "payment_Date", nullable = true, length = 30)
 	@Comment("환불 일자")
 	private String refunddate;
 	
