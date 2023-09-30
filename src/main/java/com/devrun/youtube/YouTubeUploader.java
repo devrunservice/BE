@@ -127,11 +127,11 @@ public class YouTubeUploader {
    * @return 업로드된 비디오의 ID
  * @throws Exception 
    */
-  public VideoInfo uploadVideo(MultipartFile videoFile, HttpServletResponse httpServletResponse, String accessToken) throws Exception {
+  public VideoDto uploadVideo(VideoDto videoDto , HttpServletResponse httpServletResponse, String accessToken) throws Exception {
 	    // YouTube 업로드에 필요한 스코프.
 	    List<String> scopes = Collections.singletonList("https://www.googleapis.com/auth/youtube.upload");
-
 	    try {
+	    	MultipartFile videoFile = videoDto.getVideofile();
 	        // 권한 부여.
 	        Credential credential = authorize(scopes);
 	        
@@ -237,10 +237,10 @@ public class YouTubeUploader {
 	        // 업로드된 비디오의 정보를 VideoInfo 객체로 생성하여 반환
 	        String videoId = returnedVideo.getId();
 	        String videoUrl = "https://www.youtube.com/watch?v="+videoId;
-	        
+	        videoDto.setVideoLink(videoUrl);
 	        
 
-	        return new VideoInfo(videoId,videoUrl);
+	        return videoDto;
 
 	    } catch (IOException e) {
 	        throw new IOException("비디오 업로드 중 오류가 발생했습니다.", e);

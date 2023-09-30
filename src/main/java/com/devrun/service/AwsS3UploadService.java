@@ -58,9 +58,9 @@ public class AwsS3UploadService extends AWSS3Service {
 			return myURL;
 	}
 
-	public String putS3(List<MultipartFile> multipartFiles , String uploadpath , String uniqueName) throws IOException , StringIndexOutOfBoundsException , NullPointerException{
+	public String putS3(MultipartFile multipartFile , String uploadpath , String uniqueName) throws IOException , StringIndexOutOfBoundsException , NullPointerException{
 
-        for (MultipartFile multipartFile : multipartFiles) {
+
             String originalFilename = multipartFile.getOriginalFilename();
             String fieldName = multipartFile.getName();
             String contentType = multipartFile.getContentType();
@@ -78,12 +78,13 @@ public class AwsS3UploadService extends AWSS3Service {
             InputStream file = multipartFile.getInputStream();
 
             long contentlength = multipartFile.getSize();
-            RequestBody uploadfile = RequestBody.fromInputStream(file, contentlength);            
-            uploadpath = "https://devrun-dev-bucket.s3.ap-northeast-2.amazonaws.com/"+ uploadpath + "/" + uniqueName + "/" + multipartFile.getOriginalFilename();
+            RequestBody uploadfile = RequestBody.fromInputStream(file, contentlength);
+            uploadpath += "/" + uniqueName;
             PutObjectRequest uploadRequest = getPutObjectRequest(uploadpath, contentType);
             s3Client.putObject(uploadRequest, uploadfile);
+            uploadpath = "https://devrun-dev-bucket.s3.ap-northeast-2.amazonaws.com/"+ uploadpath;
 
-        }
+
         
         
         return uploadpath;

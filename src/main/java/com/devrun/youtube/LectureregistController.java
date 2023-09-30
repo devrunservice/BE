@@ -2,10 +2,13 @@ package com.devrun.youtube;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -76,26 +79,26 @@ public class LectureregistController {
             categoryDto.setCategoryNo(categoryNo);
             
             // 이미지 업로드 후 URL 가져오기
-            String imageUrls = awsS3UploadService.putS3(imageFiles, "public.lecture.images" , requestDto.getLectureName());
+            String imageUrls = awsS3UploadService.putS3(imageFiles.get(0), "public.lecture.images" , requestDto.getLectureName());
 
             
             // 강의 및 비디오 정보를 데이터베이스에 저장하고, 강의 썸네일 이미지를 S3에 업로드한 URL을 가져옴
-            Lecture savedLecture = lectureService.saveLecture(requestDto, imageUrls, categoryDto);
+            //Lecture savedLecture = lectureService.saveLecture(requestDto, imageUrls, categoryDto);
 
             System.out.println("Number of video files to upload: " + videoFiles.size());
 
             // 동영상 업로드 및 정보 저장
-            List<VideoInfo> videoInfoList = new ArrayList<>();
-            for (MultipartFile videoFile : videoFiles) {
-                VideoInfo videoInfo = youTubeUploader.uploadVideo(videoFile, savedLecture.getId(), accessToken); // savedLecture의 ID와 엑세스 토큰 사용
-                System.out.println("아이디???? " + savedLecture.getId());
-                videoInfoList.add(videoInfo);
-            }
+//            List<VideoInfo> videoInfoList = new ArrayList<>();
+//            for (MultipartFile videoFile : videoFiles) {
+//                VideoInfo videoInfo = youTubeUploader.uploadVideo(videoFile, savedLecture.getId(), accessToken); // savedLecture의 ID와 엑세스 토큰 사용
+//                System.out.println("아이디???? " + savedLecture.getId());
+//                videoInfoList.add(videoInfo);
+//            }
             
             
             
             // 동영상 정보를 데이터베이스에 저장
-            lectureService.saveVideoInfo(videoInfoList, savedLecture);
+            //lectureService.saveVideoInfo(videoInfoList, savedLecture);
 
             // 동영상 업로드를 시작하기 위해 업로드 페이지로 리다이렉션
             return ResponseEntity.ok("강의 및 비디오 정보가 저장되었습니다.");
@@ -106,20 +109,55 @@ public class LectureregistController {
     }
     
     @PostMapping("/lectureregitest")
-    public String lecturetest( @ModelAttribute CreateLectureRequestDto requestDto,
-    		@RequestParam("lectureBigCategory") String lectureBigCategory,
-    		@RequestParam("lectureMidCategory") String lectureMidCategory,
-    		@RequestParam("image") MultipartFile image,
-    		@RequestParam("sectionid") int sectionid,
-    		@RequestParam("accessToken") String accessToken    		
-            ){
+    public String lecturetest( @ModelAttribute CreateLectureRequestDto requestDto, @RequestParam("accessToken") String googleAccessToken,    		
+    		HttpServletResponse httpServletResponse){
     	System.out.println("--------------------------------lectureregitest Controller --------------------------------");
     	System.out.println(requestDto.getLectureName());
-    	System.out.println("lectureBigCategory :" + lectureBigCategory);
-    	System.out.println("lectureMidCategory :" + lectureMidCategory);
-    	System.out.println("image :" + image);
-    	System.out.println("sectionid :" + sectionid);
-    	System.out.println("accessToken :" + accessToken);   	
+    	System.out.println("accessToken :" + googleAccessToken);
+    	
+    	//VideoDto로 동영상 파일을 유저의 채널에 업로드하고, 비디오 정보를 받아오기
+    	//S3에가서 이미지를 업로드하고, 썸네일 URL 받아오기    	
+    	//Lecture save
+    	//LectureSection save
+    	//VideoDto + Lecuture, LectureSection = Video
+    	//List<Video> saveAll
+    	//List<VideoDto> videolist = requestDto.getVideoList();
+    	VideoDto videolist = requestDto.getVideoList();
+//    			for (VideoDto videoDto : videolist) {
+//    				VideoDto uploadcomplete = youTubeUploader.uploadVideo(videoDto, httpServletResponse, googleAccessToken);
+//				if(uploadcomplete.getVideoLink().isEmpty()) {
+//					return "업로드 실패";
+//				}				
+//    			uploadcomplete.setVideofile(null);
+//				videolist.set(videolist.indexOf(videoDto) , uploadcomplete);
+//					
+//				}
+//				requestDto.setVideoList(videolist);
+    	
+		String videoUrl = "https://www.youtube.com/watch?v="+"mHNCM-YALSA";
+		videolist.setVideoLink(videoUrl);
+    	requestDto.setVideoList(videolist);
+    	
+    	try {
+			String lectureThumnailUrl = awsS3UploadService.putS3(requestDto.getLectureThumbnailFile(), "public.lecture.images" , requestDto.getLectureName());
+			
+			Lecture savedlecture = lectureService.saveLecture2(requestDto , lectureThumnailUrl);
+			
+			List<LectureSection> savedlectureSeciton = lectureService.saveLectureSection(savedlecture , requestDto.getLectureSectionList());
+			
+			lectureService.saveVideo(savedlecture , savedlectureSeciton , videolist);
+		} catch (StringIndexOutOfBoundsException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NullPointerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+    	
 
             return "수신완료"; // Redirect to a success page
         }

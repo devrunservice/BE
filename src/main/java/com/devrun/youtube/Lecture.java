@@ -52,7 +52,7 @@ public class Lecture {
     private String lectureDiscountend;
     
     @Column(nullable = true)
-    private String lectureStatus;
+    private String lectureStatus = "ACTIVE";
     
     @Column(nullable = true)
     private String lectureThumbnail;
@@ -60,7 +60,7 @@ public class Lecture {
     @ElementCollection
     private List<String> lectureTag;
 
-    @ManyToOne(cascade = CascadeType.PERSIST) 
+    @ManyToOne
     @JoinColumn(name = "categoryNo")
     private LectureCategory lectureCategory;
     

@@ -214,7 +214,7 @@ public class MyPageController {
                 return ResponseEntity.status(409).body(result);
             } else {
             	
-                String uploadpath = awsS3UploadService.putS3(editimg, "profile" , v);
+                String uploadpath = awsS3UploadService.putS3(editimg.get(0), "profile" , v);
                 MemberEntity m = memberService.findById(v);
                 m.setProfileimgsrc(uploadpath);
                 memberService.insert(m);

@@ -31,13 +31,5 @@ public class LectureSection {
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "lectureid")
     private Lecture lecture;
-    
-    
- // findLastSectionId 메서드 정의
-    @Query(value = "SELECT MAX(sectionid) FROM LectureSection")
-    Long findLastSectionId() {
-		return sectionid;
-	
-}
   
 }
