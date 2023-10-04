@@ -110,11 +110,12 @@ public class LectureregistController {
     
     @PostMapping("/lectureregitest")
     public String lecturetest( @ModelAttribute CreateLectureRequestDto requestDto, @RequestParam("accessToken") String googleAccessToken,    		
-    		HttpServletResponse httpServletResponse){
+    		HttpServletResponse httpServletResponse) throws Exception{
     	System.out.println("--------------------------------lectureregitest Controller --------------------------------");
     	System.out.println(requestDto.getLectureName());
     	System.out.println("accessToken :" + googleAccessToken);
-    	
+    	System.err.println(requestDto);
+
     	//VideoDto로 동영상 파일을 유저의 채널에 업로드하고, 비디오 정보를 받아오기
     	//S3에가서 이미지를 업로드하고, 썸네일 URL 받아오기    	
     	//Lecture save
@@ -122,23 +123,25 @@ public class LectureregistController {
     	//VideoDto + Lecuture, LectureSection = Video
     	//List<Video> saveAll
     	//List<VideoDto> videolist = requestDto.getVideoList();
-    	VideoDto videolist = requestDto.getVideoList();
-//    			for (VideoDto videoDto : videolist) {
-//    				VideoDto uploadcomplete = youTubeUploader.uploadVideo(videoDto, httpServletResponse, googleAccessToken);
-//				if(uploadcomplete.getVideoLink().isEmpty()) {
-//					return "업로드 실패";
-//				}				
-//    			uploadcomplete.setVideofile(null);
-//				videolist.set(videolist.indexOf(videoDto) , uploadcomplete);
-//					
-//				}
-//				requestDto.setVideoList(videolist);
+//    	VideoDto videolist = requestDto.getVideoList();
+    	 List<VideoDto> videolist = requestDto.getVideoList();
+    	 System.err.println(videolist);
     	
-		String videoUrl = "https://www.youtube.com/watch?v="+"mHNCM-YALSA";
-		videolist.setVideoLink(videoUrl);
+    	 
+
+    	// 업로드된 비디오 정보를 저장할 리스트를 생성합니다.
+    	List<VideoDto> uploadedVideos = new ArrayList<>();
+
     	requestDto.setVideoList(videolist);
     	
     	try {
+    		
+    		 // 리스트의 각 비디오에 대해 업로드 작업을 수행합니다.
+    	    for (VideoDto video : videolist) {
+    	        VideoDto uploadedVideo = youTubeUploader.uploadVideo(video, httpServletResponse, googleAccessToken);
+    	        uploadedVideos.add(uploadedVideo);
+    	    }
+    		
 			String lectureThumnailUrl = awsS3UploadService.putS3(requestDto.getLectureThumbnailFile(), "public.lecture.images" , requestDto.getLectureName());
 			
 			Lecture savedlecture = lectureService.saveLecture2(requestDto , lectureThumnailUrl);

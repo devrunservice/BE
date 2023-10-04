@@ -216,25 +216,17 @@ public class LectureService {
 
 
 
-	public void saveVideo(Lecture savedlecture, List<LectureSection> savedlectureSeciton, VideoDto videolist) {
-//		for (VideoDto videoDto : videolist) {
-//			Video savevideo = new Video();
-//			savevideo.setLecture(savedlecture);
-//			savevideo.setLectureSection(savedlectureSeciton.get(0));
-//			savevideo.setVideoTitle(videolist.getVideoTitle());
-//			savevideo.setVideoLink(videolist.getVideoLink());
-//			videoRepository.save(savevideo);
-//		}
-		
+	public void saveVideo(Lecture savedlecture, List<LectureSection> savedlectureSeciton, List<VideoDto> videolist) {
+
+		for (VideoDto videoDto : videolist) {
 		Video savevideo = new Video();
 		savevideo.setLecture(savedlecture);
 		savevideo.setLectureSection(savedlectureSeciton.get(0));
-		savevideo.setVideoTitle(videolist.getVideoTitle());
-		savevideo.setVideoLink(videolist.getVideoLink());
+		savevideo.setVideoTitle(videoDto.getVideoTitle());
+	    savevideo.setVideoLink(videoDto.getVideoLink());
 		videoRepository.save(savevideo);
+		}
 		
-		
-		// TODO Auto-generated method stub
 		
 	}
     
