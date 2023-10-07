@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.googleapis.media.MediaHttpUploader;
@@ -58,7 +59,7 @@ public class YouTubeUploader {
             MultipartFile videoFile = videoDto.getVideofile();
 
             // YouTube 객체 초기화
-            YouTube youtube = new YouTube.Builder(httpTransport, JSON_FACTORY, authorize(accessToken))
+            YouTube youtube = new YouTube.Builder(httpTransport, JSON_FACTORY, createCredential(accessToken))
                     .setApplicationName(APPLICATION_NAME)
                     .build();
 
@@ -159,23 +160,28 @@ public class YouTubeUploader {
         }
     }
 
-    private Credential authorize(String accessToken) throws IOException {
-        GoogleClientSecrets clientSecrets = loadClientSecrets();
-        
-        // GoogleTokenResponse를 사용하여 엑세스 토큰을 교환합니다.
-        GoogleTokenResponse tokenResponse = new GoogleTokenResponse();
-        tokenResponse.setAccessToken(accessToken);
-        
-        // 토큰 응답을 사용하여 Credential을 만듭니다.
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                httpTransport, JSON_FACTORY, clientSecrets,
-                Collections.singleton(YouTubeScopes.YOUTUBE_UPLOAD))
-                .setAccessType("offline")
-                .build();
-        
-        return flow.createAndStoreCredential(tokenResponse, null);
-    }
+//    private Credential authorize(String accessToken) throws IOException {
+//        GoogleClientSecrets clientSecrets = loadClientSecrets();
+//        
+//        // GoogleTokenResponse를 사용하여 엑세스 토큰을 교환합니다.
+//        GoogleTokenResponse tokenResponse = new GoogleTokenResponse();
+//        tokenResponse.setAccessToken(accessToken);
+//        
+//        // 토큰 응답을 사용하여 Credential을 만듭니다.
+//        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
+//                httpTransport, JSON_FACTORY, clientSecrets,
+//                Collections.singleton(YouTubeScopes.YOUTUBE_UPLOAD))
+//                .setAccessType("offline")
+//                .build();
+//        
+//        return flow.createAndStoreCredential(tokenResponse, null);
+//    }
 
+    // 엑세스 토큰을 사용하여 GoogleCredential을 생성합니다.
+    private GoogleCredential createCredential(String accessToken) {
+        return new GoogleCredential().setAccessToken(accessToken);
+    }
+    
     private GoogleClientSecrets loadClientSecrets() throws IOException {
         InputStream clientSecretsStream = getClass().getClassLoader().getResourceAsStream(CLIENT_SECRETS_FILE);
         if (clientSecretsStream == null) {
