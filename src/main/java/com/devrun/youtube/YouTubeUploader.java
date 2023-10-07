@@ -54,12 +54,12 @@ public class YouTubeUploader {
         httpTransport = GoogleNetHttpTransport.newTrustedTransport();
     }
 
-    public VideoDto uploadVideo(VideoDto videoDto, HttpServletResponse httpServletResponse, String accessToken) throws IOException {
+    public VideoDto uploadVideo(VideoDto videoDto, HttpServletResponse httpServletResponse) throws IOException {
         try {
             MultipartFile videoFile = videoDto.getVideofile();
 
             // YouTube 객체 초기화
-            YouTube youtube = new YouTube.Builder(httpTransport, JSON_FACTORY, createCredential(accessToken))
+            YouTube youtube = new YouTube.Builder(httpTransport, JSON_FACTORY, null)
                     .setApplicationName(APPLICATION_NAME)
                     .build();
 
@@ -178,19 +178,19 @@ public class YouTubeUploader {
 //    }
 
     // 엑세스 토큰을 사용하여 GoogleCredential을 생성합니다.
-    private GoogleCredential createCredential(String accessToken) {
-        return new GoogleCredential().setAccessToken(accessToken);
-    }
-    
-    private GoogleClientSecrets loadClientSecrets() throws IOException {
-        InputStream clientSecretsStream = getClass().getClassLoader().getResourceAsStream(CLIENT_SECRETS_FILE);
-        if (clientSecretsStream == null) {
-            throw new IOException("클라이언트 비밀 파일을 찾을 수 없습니다.");
-        }
-
-        Charset charset = StandardCharsets.UTF_8; // 사용할 문자 집합을 지정
-        JsonObjectParser parser = new JsonObjectParser(JSON_FACTORY);
-        return parser.parseAndClose(clientSecretsStream, charset, GoogleClientSecrets.class);
-    }
+//    private GoogleCredential createCredential(String accessToken) {
+//        return new GoogleCredential().setAccessToken(accessToken);
+//    }
+//    
+//    private GoogleClientSecrets loadClientSecrets() throws IOException {
+//        InputStream clientSecretsStream = getClass().getClassLoader().getResourceAsStream(CLIENT_SECRETS_FILE);
+//        if (clientSecretsStream == null) {
+//            throw new IOException("클라이언트 비밀 파일을 찾을 수 없습니다.");
+//        }
+//
+//        Charset charset = StandardCharsets.UTF_8; // 사용할 문자 집합을 지정
+//        JsonObjectParser parser = new JsonObjectParser(JSON_FACTORY);
+//        return parser.parseAndClose(clientSecretsStream, charset, GoogleClientSecrets.class);
+//    }
 
 }
