@@ -34,9 +34,9 @@ public class AwsS3UploadService extends AWSS3Service {
 	    }
 
 	public String getPresignUrl(String path, Map<String, String> fileinfo) throws Exception{
-			String fileName = generateUniqueFileName(fileinfo.get("fileName"));
+			String fileName = fileinfo.get("fileName");
 			String fileExt = fileinfo.get("fileExt");
-			if(!fileExt.equals("jpg") && !fileExt.equals("png")) {
+			if(!fileExt.equals("jpg") && !fileExt.equals("png") && !fileExt.equals("webp") && !fileExt.equals("jpeg")) {
 				throw new Exception("This Extension is not allow");
 			}
 			PutObjectRequest objectRequest = PutObjectRequest.builder()
