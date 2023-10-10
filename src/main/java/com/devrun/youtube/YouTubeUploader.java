@@ -54,12 +54,14 @@ public class YouTubeUploader {
         httpTransport = GoogleNetHttpTransport.newTrustedTransport();
     }
 
-    public VideoDto uploadVideo(VideoDto videoDto, HttpServletResponse httpServletResponse) throws IOException {
+    public VideoDto uploadVideo(VideoDto videoDto, HttpServletResponse httpServletResponse , String accessToken) throws IOException {
         try {
             MultipartFile videoFile = videoDto.getVideofile();
+            
+            Credential credential = new GoogleCredential().setAccessToken(accessToken);
 
             // YouTube 객체 초기화
-            YouTube youtube = new YouTube.Builder(httpTransport, JSON_FACTORY, null)
+            YouTube youtube = new YouTube.Builder(httpTransport, JSON_FACTORY, credential)
                     .setApplicationName(APPLICATION_NAME)
                     .build();
 

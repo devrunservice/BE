@@ -23,12 +23,15 @@ import org.springframework.web.multipart.MultipartFile;
 import com.devrun.service.AwsS3UploadService;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTubeScopes;
+
 
 @RestController
 public class LectureregistController {
@@ -38,8 +41,10 @@ public class LectureregistController {
     private final YouTubeUploader youTubeUploader;
     private final LecutureCategoryService categoryService;
 
-    HttpTransport httpTransport = new NetHttpTransport();
-    JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    public static final HttpTransport httpTransport = new NetHttpTransport();
+    public static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private static final String CREDENTIALS_DIRECTORY = ".oauth-credentials";
+    
     GoogleClientSecrets clientSecrets = loadClientSecretsFromFile();  // 파일로부터 클라이언트 비밀 정보 로드하는 예시 메서드
     private static final String redirectUri = "http://localhost:3000/auth/google/callback"; 
 
@@ -166,8 +171,6 @@ public class LectureregistController {
     	System.out.println(requestDto.getLectureName());
     	System.out.println("accessToken :" + googleAccessToken);
     	System.err.println(requestDto);
-
-    	//VideoDto로 동영상 파일을 유저의 채널에 업로드하고, 비디오 정보를 받아오기
     	//S3에가서 이미지를 업로드하고, 썸네일 URL 받아오기    	
     	//Lecture save
     	//LectureSection save
@@ -189,7 +192,7 @@ public class LectureregistController {
     		
     		 // 리스트의 각 비디오에 대해 업로드 작업을 수행합니다.
     	    for (VideoDto video : videolist) {
-    	        VideoDto uploadedVideo = youTubeUploader.uploadVideo(video, httpServletResponse);
+    	        VideoDto uploadedVideo = youTubeUploader.uploadVideo(video, httpServletResponse, googleAccessToken);
     	        uploadedVideos.add(uploadedVideo);
     	    }
     		
@@ -215,6 +218,7 @@ public class LectureregistController {
 
             return "수신완료"; // Redirect to a success page
         }
+    
     
 
 }
