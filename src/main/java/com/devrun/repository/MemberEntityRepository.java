@@ -1,5 +1,7 @@
 package com.devrun.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -18,5 +20,7 @@ public interface MemberEntityRepository extends JpaRepository<MemberEntity, Long
 	PointEntity save(PointEntity point);
 
 	MemberEntity findByUserNo(int usrno);
+
+	List<MemberEntity> findByIdContains(String keyword);
 
 }

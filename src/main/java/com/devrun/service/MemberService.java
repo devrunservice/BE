@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -224,6 +225,11 @@ public class MemberService {
         Matcher matcher = pattern.matcher(password);
         return matcher.matches();
     }
+
+	public List<MemberEntity> findByIdContains(String keyword) {
+		// TODO Auto-generated method stub
+		return memberEntityRepository.findByIdContains(keyword);
+	}
 
 //    public boolean isUserIdEquals(String id) {
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

@@ -1,5 +1,6 @@
 package com.devrun.youtube;
 
+import java.sql.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -13,6 +14,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.servlet.http.HttpServletResponse;
+
+import com.devrun.entity.MemberEntity;
 
 import lombok.Data;
 
@@ -34,7 +37,7 @@ public class Lecture {
     private int lecturePrice;
     
     @Column(nullable = true)
-    private int lectureStart;
+    private Date lectureStart;
     
     @Column(nullable = true)
     private int lectureEdit;
@@ -64,6 +67,10 @@ public class Lecture {
     @JoinColumn(name = "categoryNo")
     private LectureCategory lectureCategory;
     
+    @ManyToOne
+    @JoinColumn(name = "userNo")
+    private MemberEntity mentoId;
+    
     @OneToMany(mappedBy = "lecture", cascade = CascadeType.ALL)
     private List<Video> videos;
 
@@ -73,7 +80,5 @@ public class Lecture {
 	public HttpServletResponse getId() {
 		return null;
 	}
-
-	
 }
 
