@@ -250,5 +250,13 @@ public class LectureregistController {
 		}
 
 	}
+	
+	@PostMapping("/lectureregitest2")
+	public String lecturetest23(@ModelAttribute CreateLectureRequestDto requestDto) {
+		
+		Lecture savedlecture = lectureService.saveLecture2(requestDto, "URL");
+		return null;
+		
+	}
 
 }

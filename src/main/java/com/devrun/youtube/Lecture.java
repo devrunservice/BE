@@ -8,6 +8,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -18,12 +19,17 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import com.devrun.entity.MemberEntity;
 
 import lombok.Data;
 
 @Data
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class Lecture {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,11 +46,14 @@ public class Lecture {
     private int lecturePrice;
     
     @Column(nullable = true)
+    @CreatedDate
     @Temporal(TemporalType.DATE)
     private Date lectureStart;
     
     @Column(nullable = true)
-    private int lectureEdit;
+    @LastModifiedDate
+    @Temporal(TemporalType.DATE)
+    private Date lectureEdit;
     
     @Column(nullable = true)
     private String lectureDiscount;
