@@ -74,7 +74,7 @@ public class YouTubeUploader {
             // 비디오를 공개로 설정하여 모든 사람이 볼 수 있도록합니다(대부분의 사람들이 원하는 것).
             // 이것이 실제로 기본값이지만 "비공개" 또는 "비공개"로 설정해야하는 경우를 위해 API를 통해 설정하는 방법을 보여주기 위해 사용했습니다.
             VideoStatus status = new VideoStatus();
-            status.setPrivacyStatus("private");
+            status.setPrivacyStatus("unlisted");
             videoObjectDefiningMetadata.setStatus(status);
 
             // 비디오 스니펫 객체를 사용하여 대부분의 메타데이터를 설정합니다.
