@@ -1,6 +1,7 @@
 package com.devrun.youtube;
 
-import java.sql.Date;
+
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -13,6 +14,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.servlet.http.HttpServletResponse;
 
 import com.devrun.entity.MemberEntity;
@@ -37,6 +40,7 @@ public class Lecture {
     private int lecturePrice;
     
     @Column(nullable = true)
+    @Temporal(TemporalType.DATE)
     private Date lectureStart;
     
     @Column(nullable = true)

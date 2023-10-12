@@ -1,6 +1,8 @@
 package com.devrun.entity;
 
-import java.sql.Date;
+
+
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,8 +12,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-
-import org.hibernate.annotations.CreationTimestamp;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import lombok.Data;
 
@@ -31,7 +33,7 @@ public class LectureQa {
 	private String lequestionBody;
 
 	@Column(name = "lequestionDate", nullable = false)
-	@CreationTimestamp
+    @Temporal(TemporalType.DATE)
 	private Date lequestionDate;
 
 	@Column(name = "lequestionTitle", nullable = false)

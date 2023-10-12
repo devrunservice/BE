@@ -1,6 +1,7 @@
 package com.devrun.entity;
 
-import java.sql.Date;
+
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,8 +13,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
-import org.hibernate.annotations.CreationTimestamp;
 
 import lombok.Data;
 
@@ -29,7 +28,7 @@ public class LectureReview {
 	private String reviewBody;
 
 	@Column(name = "ReviewDay", nullable = false)
-	@CreationTimestamp
+    @Temporal(TemporalType.DATE)
 	private Date reviewDay;
 
 	@Column(name = "ReviewEditday", nullable = false)
