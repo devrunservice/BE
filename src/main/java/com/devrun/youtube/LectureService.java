@@ -2,6 +2,7 @@ package com.devrun.youtube;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -233,14 +234,9 @@ public class LectureService {
 
 	// 유저가 없는 경우
 	public List<QueryLectureByKeywordDTO> QueryLectureByKeyword(String keyword, PageRequest pageable) {
-		List<QueryLectureByKeywordDTO> list = new ArrayList<QueryLectureByKeywordDTO>();
 		Page<Lecture> l1 = lectureRepository.findByLectureNameContainsOrLectureIntroContains(keyword, keyword,
 				pageable);
-		System.out.println("l1.getSize()" + l1.getSize());
-		for (Lecture lecture : l1) {
-			QueryLectureByKeywordDTO t1 = new QueryLectureByKeywordDTO(lecture);
-			list.add(t1);
-		}
+		List<QueryLectureByKeywordDTO> list = convertLectureToDTO(l1);
 		return list;
 	};
 
@@ -248,15 +244,15 @@ public class LectureService {
 	public List<QueryLectureByKeywordDTO> QueryLectureByKeyword(String keyword, List<MemberEntity> m1,
 			Pageable pageable) {
 
-		List<QueryLectureByKeywordDTO> list = new ArrayList<QueryLectureByKeywordDTO>();
 		Page<Lecture> l1 = lectureRepository.findByLectureNameContainsOrLectureIntroContainsOrMentoIdIn(keyword,
 				keyword, m1, pageable);
-		System.out.println("l1.getSize()" + l1.getSize());
-		for (Lecture lecture : l1) {
-			QueryLectureByKeywordDTO t1 = new QueryLectureByKeywordDTO(lecture);
-			list.add(t1);
-		}
+		List<QueryLectureByKeywordDTO> list = convertLectureToDTO(l1);
+
 		return list;
+	}
+
+	public List<QueryLectureByKeywordDTO> convertLectureToDTO(Page<Lecture> lectureList) {
+		return lectureList.stream().map(QueryLectureByKeywordDTO::new).collect(Collectors.toList());
 	}
 
 }

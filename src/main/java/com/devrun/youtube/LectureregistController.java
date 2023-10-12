@@ -220,9 +220,9 @@ public class LectureregistController {
 	@GetMapping("/q/lecture")
 	@ApiOperation(value = "강의 조회 API", notes = "파라미터로 키워드를 입력하면 강의를 반환합니다. 각 파라미터로 키워드, 정렬 옵션, 페이지 를 요청할 수 있고, 각 페이지 당 10개의 항목이 반환됩니다. 정렬 옵션은 lectureStart (등록날짜순) 또는 lecturePrice (가격순) 이며 추후 제약 조건들을 추가하고, 평점 기능이 도입되면 평점순도 추가할 예정입니다. 정렬 옵션을 입력하지 않으면 기본적으론 등록순이며 모든 정렬은 내림차순입니다.")
 	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "q", value = "검색 키워드", required = false , paramType = "QueryString", dataTypeClass = String.class , example = "sky") ,
-				@ApiImplicitParam(name = "order", value = "정렬 옵션", required = false , paramType = "QueryString", dataTypeClass = String.class , example = "lectureStart") ,
-				@ApiImplicitParam(name = "page", value = "요청 페이지", required = false , paramType = "QueryString", dataTypeClass = Integer.class , example = "1")})
+			{@ApiImplicitParam(name = "q", value = "검색 키워드", required = false , paramType = "query", dataTypeClass = String.class , example = "sky") ,
+				@ApiImplicitParam(name = "order", value = "정렬 옵션", required = false , paramType = "query", dataTypeClass = String.class , example = "lectureStart") ,
+				@ApiImplicitParam(name = "page", value = "요청 페이지", required = false , paramType = "query", dataTypeClass = Integer.class , example = "1")})
 	public List<QueryLectureByKeywordDTO> testmethod1(@RequestParam(value = "q" , defaultValue = "" , required = false) String keyword,
 			@RequestParam(value = "order" , defaultValue = "lectureStart" , required = false) String order, @RequestParam(value = "page" , defaultValue = "0" , required = false) Integer page) {
 		// 상황 1 : 검색어가 비어 있는 경우 - 모든 강의 리스트 조회
