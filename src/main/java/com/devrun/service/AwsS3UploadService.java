@@ -79,7 +79,8 @@ public class AwsS3UploadService extends AWSS3Service {
 
             long contentlength = multipartFile.getSize();
             RequestBody uploadfile = RequestBody.fromInputStream(file, contentlength);
-            uploadpath += "/" + uniqueName;
+            String fileName = generateUniqueFileName(uniqueName);
+            uploadpath += "/" + fileName;
             PutObjectRequest uploadRequest = getPutObjectRequest(uploadpath, contentType);
             s3Client.putObject(uploadRequest, uploadfile);
             uploadpath = "https://devrun-dev-bucket.s3.ap-northeast-2.amazonaws.com/"+ uploadpath;
