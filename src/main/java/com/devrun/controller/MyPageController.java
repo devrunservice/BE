@@ -75,7 +75,7 @@ public class MyPageController {
         mypageDTO.setName(m.getName());
         mypageDTO.setPhonenumber(c.getPhonenumber());
         mypageDTO.setEmail(c.getEmail());
-        String profileimgurl = awsS3ReadService.findUploadKeyUrl(m.getProfileimgsrc());
+        String profileimgurl = m.getProfileimgsrc();
         mypageDTO.setProfileimgsrc(profileimgurl);
 
 
