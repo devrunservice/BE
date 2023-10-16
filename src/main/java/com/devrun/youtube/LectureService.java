@@ -113,7 +113,7 @@ public class LectureService {
 		video.setUploadDate(videoDto.getUploadDate());
 		video.setFileName(videoDto.getFileName());
 		video.setVideoId(videoDto.getVideoId());
-		video.setTotalPlayTime(videoDto.getTotalPlayTime());
+		//video.setTotalPlayTime(videoDto.getTotalPlayTime());
 		video.setVideoLink(videoDto.getVideoLink());
 		video.setVideoTitle(videoDto.getVideoTitle());
 

@@ -7,7 +7,9 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,7 @@ import com.devrun.dto.QueryLectureByKeywordDTO;
 import com.devrun.entity.MemberEntity;
 import com.devrun.service.AwsS3UploadService;
 import com.devrun.service.MemberService;
+import com.devrun.service.MyLectureProgressService;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
@@ -47,6 +50,7 @@ public class LectureregistController {
 	private final YouTubeUploader youTubeUploader;
 	private final LecutureCategoryService categoryService;
 	private final MemberService memberService;
+	private final MyLectureProgressService myLectureProgressService;
 
 	public static final HttpTransport httpTransport = new NetHttpTransport();
 	public static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
@@ -58,13 +62,13 @@ public class LectureregistController {
 	@Autowired
 	public LectureregistController(MemberService memberService, LectureService lectureService,
 			AwsS3UploadService awsS3UploadService, YouTubeUploader youTubeUploader,
-			LecutureCategoryService categoryService) {
+			LecutureCategoryService categoryService , MyLectureProgressService myLectureProgressService) {
 		this.categoryService = categoryService;
 		this.lectureService = lectureService;
 		this.awsS3UploadService = awsS3UploadService;
 		this.youTubeUploader = youTubeUploader;
 		this.memberService = memberService;
-
+		this.myLectureProgressService = myLectureProgressService;
 	}
 
 	// GET 요청을 통해 카테고리 목록을 가져오는 엔드포인트
@@ -258,5 +262,11 @@ public class LectureregistController {
 		return null;
 		
 	}
-
+	
+	@PostMapping("/lecture/progress")
+	public Map<String , Object> lectureprogress(HttpServletRequest httpServletRequest , @RequestParam("videoid") String videoid ,@RequestParam("currenttime") int currenttime){
+		String accessToken = httpServletRequest.getHeader("Access_token");
+		return myLectureProgressService.progress(accessToken, videoid, currenttime);
+		
+	}
 }

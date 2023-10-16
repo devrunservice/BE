@@ -18,7 +18,7 @@ public class VideoService {
             //videoDto.setUploadDate(video.getUploadDate());
             videoDto.setFileName(video.getFileName());
             videoDto.setVideoId(video.getVideoId());
-            videoDto.setTotalPlayTime(video.getTotalPlayTime());
+            //videoDto.setTotalPlayTime(video.getTotalPlayTime());
             videoDto.setVideoLink(video.getVideoLink());
             videoDto.setVideoTitle(video.getVideoTitle());
             // 필요한 다른 속성을 설정합니다.

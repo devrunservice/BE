@@ -34,7 +34,7 @@ public class Video {
 	private String videoId;
 
 	@Column(nullable = true)
-	private String totalPlayTime;
+	private int totalPlayTime;
 
 	@Column(nullable = true)
 	private String videoLink;
