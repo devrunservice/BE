@@ -16,6 +16,6 @@ public class CreateLectureRequestDto {
     private MultipartFile lectureThumbnailFile;
     private List<String> lectureTag;
     private LectureCategory lectureCategory; // 카테고리 정보
-    private LectureSectionDto lectureSectionList; // 섹션 정보 리스트 List
+    private List<LectureSectionDto> lectureSectionList; // 섹션 정보 리스트 List
     private List<VideoDto> videoList; // 비디오 정보 리스트 List
 }

@@ -193,25 +193,19 @@ public class LectureService {
 		return savedlecture;
 	}
 
-	public List<LectureSection> saveLectureSection(Lecture savedlecture, LectureSectionDto list) {
+	public List<LectureSection> saveLectureSection(Lecture savedlecture, List<LectureSectionDto> sectionlist) {
 
-		List<LectureSection> savedsectionlist = new ArrayList<LectureSection>();
-//		for (LectureSectionDto lectureSectionDto : list) {
-//			LectureSection lectureSection = new LectureSection();
-//			lectureSection.setLecture(savedlecture);
-//			lectureSection.setSectionNumber(list.getSectionNumber());
-//			lectureSection.setSectionTitle(list.getSectionTitle());
-//			LectureSection savedlectureSection = sectionRepository.save(lectureSection);
-//			savedsectionlist.add(savedlectureSection);
-//			
-//		}
-		LectureSection lectureSection = new LectureSection();
-		lectureSection.setLecture(savedlecture);
-		lectureSection.setSectionNumber(list.getSectionNumber());
-		lectureSection.setSectionTitle(list.getSectionTitle());
-		LectureSection savedlectureSection = sectionRepository.save(lectureSection);
-		savedsectionlist.add(savedlectureSection);
-
+				List<LectureSection> savedsectionlist = new ArrayList<LectureSection>();
+		for (LectureSectionDto lectureSectionDto : sectionlist) {
+			LectureSection lectureSection = new LectureSection();
+			lectureSection.setLecture(savedlecture);
+			lectureSection.setSectionNumber(lectureSectionDto.getSectionNumber());
+			lectureSection.setSectionTitle(lectureSectionDto.getSectionTitle());
+			LectureSection savedlectureSection = sectionRepository.save(lectureSection);
+			savedsectionlist.add(savedlectureSection);
+			
+		}
+		
 		return savedsectionlist;
 	}
 
