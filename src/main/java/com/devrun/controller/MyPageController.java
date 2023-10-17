@@ -22,6 +22,7 @@ import com.devrun.dto.MypageDTO;
 import com.devrun.entity.Contact;
 import com.devrun.entity.MemberEntity;
 import com.devrun.repository.ContactRepository;
+import com.devrun.service.AwsS3DeleteService;
 import com.devrun.service.AwsS3ReadService;
 import com.devrun.service.AwsS3UploadService;
 import com.devrun.service.MemberService;
@@ -45,6 +46,9 @@ public class MyPageController {
 
     @Autowired
     private AwsS3UploadService awsS3UploadService;
+    
+    @Autowired
+    private AwsS3DeleteService awsS3DeleteService;
 
     @GetMapping("/mypage/{userid}")
     @ApiOperation(value = "프로필 불러오기", notes = "헤더에 삽입된 액세스 토큰으로부터 id를 조회하여, 해당 유저의 프로필을 불러옵니다.")
@@ -216,6 +220,8 @@ public class MyPageController {
             	
                 String uploadpath = awsS3UploadService.putS3(editimg.get(0), "profile" , v);
                 MemberEntity m = memberService.findById(v);
+                String keyname = m.getProfileimgsrc().substring(57);
+                awsS3DeleteService.DeleteObject(keyname);
                 m.setProfileimgsrc(uploadpath);
                 memberService.insert(m);
                 
