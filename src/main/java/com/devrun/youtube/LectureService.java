@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -113,7 +114,7 @@ public class LectureService {
 		video.setUploadDate(videoDto.getUploadDate());
 		video.setFileName(videoDto.getFileName());
 		video.setVideoId(videoDto.getVideoId());
-		//video.setTotalPlayTime(videoDto.getTotalPlayTime());
+		// video.setTotalPlayTime(videoDto.getTotalPlayTime());
 		video.setVideoLink(videoDto.getVideoLink());
 		video.setVideoTitle(videoDto.getVideoTitle());
 
@@ -234,8 +235,7 @@ public class LectureService {
 
 	// 유저가 없는 경우
 	public List<QueryLectureByKeywordDTO> QueryLectureByKeyword(String keyword, PageRequest pageable) {
-		Page<Lecture> l1 = lectureRepository.findByLectureNameContainsOrLectureIntroContains(keyword, keyword,
-				pageable);
+		Page<Lecture> l1 = lectureRepository.findByLectureNameContainsOrLectureIntroContains(keyword, pageable);
 		List<QueryLectureByKeywordDTO> list = convertLectureToDTO(l1);
 		return list;
 	};
@@ -244,8 +244,8 @@ public class LectureService {
 	public List<QueryLectureByKeywordDTO> QueryLectureByKeyword(String keyword, List<MemberEntity> m1,
 			Pageable pageable) {
 
-		Page<Lecture> l1 = lectureRepository.findByLectureNameContainsOrLectureIntroContainsOrMentoIdIn(keyword,
-				keyword, m1, pageable);
+		Page<Lecture> l1 = lectureRepository.findByLectureNameContainsOrLectureIntroContainsOrMentoIdIn(keyword, m1,
+				pageable);
 		List<QueryLectureByKeywordDTO> list = convertLectureToDTO(l1);
 
 		return list;
@@ -253,6 +253,27 @@ public class LectureService {
 
 	public List<QueryLectureByKeywordDTO> convertLectureToDTO(Page<Lecture> lectureList) {
 		return lectureList.stream().map(QueryLectureByKeywordDTO::new).collect(Collectors.toList());
+	}
+
+	public List<QueryLectureByKeywordDTO> findLecturesWithCategroys(List<LectureCategory> categorys, String keyword,
+			PageRequest pageRequest) {
+		System.out.println(keyword);
+		Page<Lecture> l1 = lectureRepository.findLecturesWithCategroy(categorys, keyword, pageRequest);
+		for (Lecture lecture : l1) {
+			System.out.println(lecture.getLectureName());
+
+		}
+		List<QueryLectureByKeywordDTO> list = convertLectureToDTO(l1);
+
+		return list;
+	}
+
+	public List<QueryLectureByKeywordDTO> findLecturesWithCategroy(LectureCategory category, String keyword,
+			PageRequest pageRequest) {
+		Page<Lecture> l1 = lectureRepository.findLecturesWithCategroy(category, keyword, pageRequest);
+		List<QueryLectureByKeywordDTO> list = convertLectureToDTO(l1);
+
+		return list;
 	}
 
 }

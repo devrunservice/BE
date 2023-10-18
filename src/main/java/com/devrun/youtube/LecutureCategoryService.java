@@ -22,4 +22,12 @@ public class LecutureCategoryService {
     public List<LectureCategory> getCategoriesByIds(List<Long> categoryIds) {
         return categoryRepository.findAllById(categoryIds);
     }
+
+	public LectureCategory findcategory(String bigcategory, String midcategory) {
+		return categoryRepository.findByLectureBigCategoryAndLectureMidCategory(bigcategory,midcategory);
+	}
+	
+	public List<LectureCategory> findcategory(String bigcategory) {
+		return categoryRepository.findByLectureBigCategoryOrLectureMidCategory(bigcategory , bigcategory);
+	}
 }

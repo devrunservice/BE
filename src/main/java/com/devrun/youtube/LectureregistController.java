@@ -13,10 +13,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,10 +28,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.devrun.dto.QueryLectureByKeywordDTO;
+import com.devrun.dto.TotalProgress;
 import com.devrun.entity.MemberEntity;
 import com.devrun.service.AwsS3UploadService;
 import com.devrun.service.MemberService;
 import com.devrun.service.MyLectureProgressService;
+import com.devrun.util.JWTUtil;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
@@ -62,7 +67,7 @@ public class LectureregistController {
 	@Autowired
 	public LectureregistController(MemberService memberService, LectureService lectureService,
 			AwsS3UploadService awsS3UploadService, YouTubeUploader youTubeUploader,
-			LecutureCategoryService categoryService , MyLectureProgressService myLectureProgressService) {
+			LecutureCategoryService categoryService, MyLectureProgressService myLectureProgressService) {
 		this.categoryService = categoryService;
 		this.lectureService = lectureService;
 		this.awsS3UploadService = awsS3UploadService;
@@ -221,24 +226,59 @@ public class LectureregistController {
 	}
 
 	// 필요 기능 : 페이지네이션 , 정렬 기능 , 통합 검색(강의명,강의소개,강사명)
-	@GetMapping("/q/lecture")
+	@GetMapping({ "/q/lecture" })
 	@ApiOperation(value = "강의 조회 API", notes = "파라미터로 키워드를 입력하면 강의를 반환합니다. 각 파라미터로 키워드, 정렬 옵션, 페이지 를 요청할 수 있고, 각 페이지 당 10개의 항목이 반환됩니다. 정렬 옵션은 lectureStart (등록날짜순) 또는 lecturePrice (가격순) 이며 추후 제약 조건들을 추가하고, 평점 기능이 도입되면 평점순도 추가할 예정입니다. 정렬 옵션을 입력하지 않으면 기본적으론 등록순이며 모든 정렬은 내림차순입니다.")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "q", value = "검색 키워드", required = false , paramType = "query", dataTypeClass = String.class , example = "sky") ,
-				@ApiImplicitParam(name = "order", value = "정렬 옵션", required = false , paramType = "query", dataTypeClass = String.class , example = "lectureStart") ,
-				@ApiImplicitParam(name = "page", value = "요청 페이지", required = false , paramType = "query", dataTypeClass = Integer.class , example = "1")})
-	public List<QueryLectureByKeywordDTO> testmethod1(@RequestParam(value = "q" , defaultValue = "" , required = false) String keyword,
-			@RequestParam(value = "order" , defaultValue = "lectureStart" , required = false) String order, @RequestParam(value = "page" , defaultValue = "0" , required = false) Integer page) {
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "bigcategory", value = "대분류 카테고리", required = false, paramType = "form", dataTypeClass = String.class, example = "프로그래밍"),
+			@ApiImplicitParam(name = "midcategory", value = "중분류 카테고리", required = false, paramType = "form", dataTypeClass = String.class, example = "자바"),
+			@ApiImplicitParam(name = "q", value = "검색 키워드", required = false, paramType = "form", dataTypeClass = String.class, example = "자바"),
+			@ApiImplicitParam(name = "order", value = "정렬 옵션", required = false, paramType = "form", dataTypeClass = String.class, example = "lectureStart"),
+			@ApiImplicitParam(name = "page", value = "요청 페이지", required = false, paramType = "form", dataTypeClass = Integer.class, example = "1") })
+	public List<QueryLectureByKeywordDTO> testmethod1(
+			@RequestParam(value = "bigcategory", defaultValue = "", required = false) String bigcategory,
+			@RequestParam(value = "midcategory", defaultValue = "", required = false) String midcategory,
+			@RequestParam(value = "q", defaultValue = "", required = false) String keyword,
+			@RequestParam(value = "order", defaultValue = "lecture_start", required = false) String order,
+			@RequestParam(value = "page", defaultValue = "0", required = false) Integer page) {
 		// 상황 1 : 검색어가 비어 있는 경우 - 모든 강의 리스트 조회
 		// 상황 2 : 검색어가 존재하는 경우 - 통합 검색
 		// 상황 3 : 카테고리 검색
 		// 전처리 : 페이지네이션 -> 정렬(최신순,평점순,
+
 		if (page == null || page <= 0) {
 			page = 1;
 		}
 		Direction direction = Direction.DESC;
 		PageRequest pageRequest = PageRequest.of(page - 1, 10, direction, order);
 
+		Specification<Lecture> spec = (root, query, criteriaBuilder) -> null;
+
+		// 카테고리 검색
+		if (bigcategory.isEmpty() && midcategory.isEmpty()) { // 키워드 검색으로 이동
+			System.out.println("bigcategory.isEmpty() && midcategory.isEmpty()");
+
+		} else if (!bigcategory.isEmpty() && midcategory.isEmpty()) {// 대분류+(키워드) 검색
+
+			List<LectureCategory> categorys = categoryService.findcategory(bigcategory);
+			for (LectureCategory lectureCategory : categorys) {
+				System.out.println(
+						"----------------------------------------------" + lectureCategory.getLectureMidCategory());
+			}
+			List<QueryLectureByKeywordDTO> p1 = lectureService.findLecturesWithCategroys(categorys, keyword,
+					pageRequest);
+			return p1;
+		} else if (!bigcategory.isEmpty() && !midcategory.isEmpty()) { // 대분류+중분류+(키워드) 검색
+			LectureCategory category = categoryService.findcategory(bigcategory, midcategory);
+			List<QueryLectureByKeywordDTO> p1 = lectureService.findLecturesWithCategroy(category, keyword, pageRequest);
+			return p1;
+		} else {
+			List<LectureCategory> categorys = categoryService.findcategory(midcategory);
+			List<QueryLectureByKeywordDTO> p1 = lectureService.findLecturesWithCategroys(categorys, keyword,
+					pageRequest);
+			return p1;
+		} // 키워드 검색
+
+		// 키워드 검색
 		if (keyword.isEmpty()) {
 			List<QueryLectureByKeywordDTO> p1 = lectureService.QueryLectureByKeyword(keyword, pageRequest);
 			return p1;
@@ -254,19 +294,37 @@ public class LectureregistController {
 		}
 
 	}
-	
+
 	@PostMapping("/lectureregitest2")
 	public String lecturetest23(@ModelAttribute CreateLectureRequestDto requestDto) {
-		
+
 		Lecture savedlecture = lectureService.saveLecture2(requestDto, "URL");
+		List<LectureSection> savedlectureSeciton = lectureService.saveLectureSection(savedlecture,
+				requestDto.getLectureSectionList());
+		List<VideoDto> videolist = requestDto.getVideoList();
+		lectureService.saveVideo(savedlecture, savedlectureSeciton, videolist);
 		return null;
-		
+
 	}
-	
+
 	@PostMapping("/lecture/progress")
-	public Map<String , Object> lectureprogress(HttpServletRequest httpServletRequest , @RequestParam("videoid") String videoid ,@RequestParam("currenttime") int currenttime){
+	public Map<String, Object> lectureprogress(HttpServletRequest httpServletRequest,
+			@RequestParam("videoid") String videoid, @RequestParam("currenttime") int currenttime) {
 		String accessToken = httpServletRequest.getHeader("Access_token");
+		// String userid =
+		// SecurityContextHolder.getContext().getAuthentication().getName();
+
 		return myLectureProgressService.progress(accessToken, videoid, currenttime);
+
+	}
+
+	@GetMapping("/mylecturelist")
+	public List<Map<String, Object>> mylecturelist(HttpServletRequest httpServletRequest , @RequestParam(name = "status" , required = false) String status, @RequestParam(name = "page" , required = false) String page) {
+		String accessToken = httpServletRequest.getHeader("Access_token");
+		System.out.println("/mylecturelist Access_token" + accessToken);
 		
+		
+		return myLectureProgressService.mylecturelist(accessToken);
+
 	}
 }
