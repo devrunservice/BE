@@ -24,4 +24,8 @@ public class QueryLectureByKeywordDTO {
 		this.mentoId = leture.getMentoId().getId();
 	}
 
+	public QueryLectureByKeywordDTO() {
+		// TODO Auto-generated constructor stub
+	}
+
 }

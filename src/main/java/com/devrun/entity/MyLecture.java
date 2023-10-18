@@ -49,7 +49,7 @@ public class MyLecture {
 	
 	@Column(name = "progress")
 	@Comment("영상 진행률")
-	private String progress;
+	private int progress = 0;
 	
 	@Column(name = "timecheck" , nullable = true)
 	@Comment("영상 누적 시청 시간")
