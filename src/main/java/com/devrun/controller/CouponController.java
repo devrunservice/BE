@@ -69,7 +69,7 @@ public class CouponController {
 
 	@PostMapping("/coupon/publish")
 	@ApiOperation(value = "쿠폰 생성기", notes = "쿠폰을 생성하여 DB에 저장합니다.")
-	@ApiImplicitParam(name = "couponBlueprint", value = "생성할 쿠폰 디테일", required = true, paramType = "body", dataTypeClass = CouponIssued.class)
+	@ApiImplicitParam(name = "couponBlueprint", value = "생성할 쿠폰 디테일")
 	public ResponseEntity<?> couponGeneration(@RequestBody @Valid CouponIssued couponBlueprint) {
 //    	String userid = SecurityContextHolder.getContext().getAuthentication().getName();
 //    	MemberEntity userEntity = memberService.findById(userid);
@@ -82,7 +82,7 @@ public class CouponController {
 
 	@PostMapping("/coupon/registration")
 	@ApiOperation(value = "쿠폰 등록기", notes = "유저가 쿠폰 코드를 입력하면 쿠폰을 검증하고, 쿠폰을 등록합니다.")
-	@ApiImplicitParam(name = "map", value = "등록할 쿠폰코드", required = true , paramType = "body", dataTypeClass = Map.class , example = "{\"couponcode\" : \"31267-ydi2OLCKFOaz\"}")
+	@ApiImplicitParam(name = "map", value = "등록할 쿠폰코드", example = "{\"couponcode\" : \"31267-ydi2OLCKFOaz\"}")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "성공적으로 처리되었습니다"),
 			@ApiResponse(code = 400, message = "옳지 않은 키 값입니다. 키 값 : couponcode") })
 	public ResponseEntity<?> userGetCoupon(@RequestBody Map<String, String> map) {
@@ -99,9 +99,7 @@ public class CouponController {
 
 	@PostMapping("/coupon/shrewder")
 	@ApiOperation(value = "쿠폰 파쇄기", notes = "특정 쿠폰을 사용 정지 처리하거나 복구합니다. 단건별로 처리합니다.")
-	@ApiImplicitParam(name = "codelist", value = "사용 정지할 쿠폰 코드 / {\r\n"
-			+ "  \"code\":  \"76705-QrfC7KEzfezV\"\r\n"
-			+ "}", required = true , paramType = "body", dataTypeClass = Map.class , example = "{\"code\" : \"31267-ydi2OLCKFOaz\"}")
+	@ApiImplicitParam(name = "codelist", value = "사용 정지할 쿠폰 코드", example = "{\"code\" : \"31267-ydi2OLCKFOaz\"}")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "성공적으로 처리되었습니다"),
 			@ApiResponse(code = 400, message = "옳지 않은 키 값입니다. 키 값 : code") })
 	public ResponseEntity<?> couponremove(@RequestBody Map<String, String> codelist) {
@@ -118,7 +116,7 @@ public class CouponController {
 
 	@GetMapping({"/coupon/mento/couponmanaging" , "/coupon/mento/couponmanaging/{pageno}"})
 	@ApiOperation(value = "멘토가 발행한 쿠폰 조회", notes = "멘토가 발행한 쿠폰을 개별적으로 조회합니다.", response = CouponListForMento.class)
-	@ApiImplicitParam(name = "pageno", value = "조회할 페이지" , paramType = "path", dataTypeClass = Integer.class , example = "1")
+	@ApiImplicitParam(name = "pageno", value = "조회할 페이지" , example = "1")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "성공적으로 처리되었습니다") })
 	public ResponseEntity<?> couponmanagingByMento(@PathVariable(required = false) Integer pageno) {
 		if (pageno == null || pageno <= 0) {

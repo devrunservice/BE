@@ -71,11 +71,11 @@ public class MyLectureProgressService {
 		return testmodels;
 	}
 	
-	public List<Object> mylecturelistReal(String accessToken) {
+	public List<TotalProgress> mylecturelistReal(String accessToken) {
 		
-		String userid = JWTUtil.getUserIdFromToken(accessToken);
-		MemberEntity memberentity = memberService.findById(userid);
-		List<Object> tp=mylectureRepository.gettotalprogress(memberentity);
+		//String userid = JWTUtil.getUserIdFromToken(accessToken);
+		MemberEntity memberentity = memberService.findById("seokhwan2");
+		List<TotalProgress> tp=mylectureRepository.gettotalprogress(memberentity);
 		
 		return tp;
 	}

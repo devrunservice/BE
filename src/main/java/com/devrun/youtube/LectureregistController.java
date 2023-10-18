@@ -13,13 +13,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,7 +31,6 @@ import com.devrun.entity.MemberEntity;
 import com.devrun.service.AwsS3UploadService;
 import com.devrun.service.MemberService;
 import com.devrun.service.MyLectureProgressService;
-import com.devrun.util.JWTUtil;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
@@ -227,13 +224,14 @@ public class LectureregistController {
 
 	// 필요 기능 : 페이지네이션 , 정렬 기능 , 통합 검색(강의명,강의소개,강사명)
 	@GetMapping({ "/q/lecture" })
-	@ApiOperation(value = "강의 조회 API", notes = "파라미터로 키워드를 입력하면 강의를 반환합니다. 각 파라미터로 키워드, 정렬 옵션, 페이지 를 요청할 수 있고, 각 페이지 당 10개의 항목이 반환됩니다. 정렬 옵션은 lectureStart (등록날짜순) 또는 lecturePrice (가격순) 이며 추후 제약 조건들을 추가하고, 평점 기능이 도입되면 평점순도 추가할 예정입니다. 정렬 옵션을 입력하지 않으면 기본적으론 등록순이며 모든 정렬은 내림차순입니다.")
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "bigcategory", value = "대분류 카테고리", required = false, paramType = "form", dataTypeClass = String.class, example = "프로그래밍"),
-			@ApiImplicitParam(name = "midcategory", value = "중분류 카테고리", required = false, paramType = "form", dataTypeClass = String.class, example = "자바"),
-			@ApiImplicitParam(name = "q", value = "검색 키워드", required = false, paramType = "form", dataTypeClass = String.class, example = "자바"),
-			@ApiImplicitParam(name = "order", value = "정렬 옵션", required = false, paramType = "form", dataTypeClass = String.class, example = "lectureStart"),
-			@ApiImplicitParam(name = "page", value = "요청 페이지", required = false, paramType = "form", dataTypeClass = Integer.class, example = "1") })
+		@ApiImplicitParam(example = "요리", value = "대분류 카테고리", name = "bigcategory"),
+		@ApiImplicitParam(example = "라면", value = "중분류 카테고리", name = "midcategory"),
+		@ApiImplicitParam(example = "sky", value = "검색 키워드", name = "q"),
+		@ApiImplicitParam(example = "lecture_start", value = "정렬 옵션", name = "order"),
+		@ApiImplicitParam(example = "1", value = "요청 페이지", name = "page")
+	})
+	@ApiOperation(value = "강의 조회 API", notes = "파라미터로 키워드를 입력하면 강의를 반환합니다. 각 파라미터로 키워드, 정렬 옵션, 페이지 를 요청할 수 있고, 각 페이지 당 10개의 항목이 반환됩니다. 정렬 옵션은 lectureStart (등록날짜순) 또는 lecturePrice (가격순) 이며 추후 제약 조건들을 추가하고, 평점 기능이 도입되면 평점순도 추가할 예정입니다. 정렬 옵션을 입력하지 않으면 기본적으론 등록순이며 모든 정렬은 내림차순입니다.")
 	public List<QueryLectureByKeywordDTO> testmethod1(
 			@RequestParam(value = "bigcategory", defaultValue = "", required = false) String bigcategory,
 			@RequestParam(value = "midcategory", defaultValue = "", required = false) String midcategory,
@@ -308,6 +306,11 @@ public class LectureregistController {
 	}
 
 	@PostMapping("/lecture/progress")
+	@ApiOperation(value = "영상 진행률 저장하기", notes = "파라미터로 액세스 토큰과 현재 시청중인 videoid(videoid)와, 현재 재생 누적 시간(currenttime)를 요청하면, 데이터베이스에 저장하고, 결과값을 반환합니다.")
+	@ApiImplicitParams({
+		@ApiImplicitParam(example = "w8-X2DED94A",value = "비디오 아이디",name = "videoid"),
+		@ApiImplicitParam(example = "120" ,value = "영상 재생 누적 시간(초 단위)",name = "currenttime")				
+			})
 	public Map<String, Object> lectureprogress(HttpServletRequest httpServletRequest,
 			@RequestParam("videoid") String videoid, @RequestParam("currenttime") int currenttime) {
 		String accessToken = httpServletRequest.getHeader("Access_token");
@@ -319,6 +322,11 @@ public class LectureregistController {
 	}
 
 	@GetMapping("/mylecturelist")
+	@ApiOperation(value = "내 학습 불러오기", notes = "파라미터로 액세스 토큰과 강의 완강 여부(status), 페이지(page)를 요청할 수 있고, 각 페이지 당 10개의 항목이 반환됩니다.")
+	@ApiImplicitParams({
+		@ApiImplicitParam(example = "Inprogress",value = "강의 완강 여부",name = "status"),
+		@ApiImplicitParam(example = "1",value = "요청 페이지",name = "page")				
+			})
 	public List<Map<String, Object>> mylecturelist(HttpServletRequest httpServletRequest , @RequestParam(name = "status" , required = false) String status, @RequestParam(name = "page" , required = false) String page) {
 		String accessToken = httpServletRequest.getHeader("Access_token");
 		System.out.println("/mylecturelist Access_token" + accessToken);
@@ -326,5 +334,14 @@ public class LectureregistController {
 		
 		return myLectureProgressService.mylecturelist(accessToken);
 
+	}
+	
+	@GetMapping("/mylecturelisttest")
+	public void mytest() {
+		List<TotalProgress> fd = myLectureProgressService.mylecturelistReal(null);
+		for (TotalProgress totalProgress : fd) {
+			System.out.println(totalProgress.getlectureno());
+			System.out.println(totalProgress.getuserno());			
+		}
 	}
 }

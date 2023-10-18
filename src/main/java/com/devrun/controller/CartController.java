@@ -29,27 +29,27 @@ import io.swagger.annotations.ApiOperation;
 public class CartController {
 	@Autowired
 	private CartService cartService;
-	
+
 	@Autowired
 	private MemberService memberService;
 
 	@PostMapping("/cart/insert")
 	@ApiOperation("장바구니에 강의를 추가합니다.")
-	@ApiImplicitParam(name = "lecturename", value = "강의 제목" , paramType = "body" , dataTypeClass = String.class)
+	@ApiImplicitParam(name = "lecturename", value = "강의 제목", example = "자바가너무쉬웠어요")
 	public ResponseEntity<?> putCart(@RequestBody(required = true) String lecturename) {
 		String userid = SecurityContextHolder.getContext().getAuthentication().getName();
 		MemberEntity userEntity = memberService.findById(userid);
-		String msg = cartService.putInCart(userEntity,lecturename);
+		String msg = cartService.putInCart(userEntity, lecturename);
 		return ResponseEntity.ok(msg);
 	}
 
 	@PostMapping("/cart/delete")
 	@ApiOperation("장바구니에서 강의를 삭제합니다.")
-	@ApiImplicitParam(name = "lecturename", value = "강의 제목" , paramType = "body" , dataTypeClass = String.class)
+	@ApiImplicitParam(name = "lecturename", value = "강의 제목", example = "자바가너무쉬웠어요")
 	public String deleteInCart(@RequestBody(required = true) String lecturename) {
 		String userid = SecurityContextHolder.getContext().getAuthentication().getName();
 		MemberEntity userEntity = memberService.findById(userid);
-		String msg = cartService.deleteInCart(userEntity,lecturename);
+		String msg = cartService.deleteInCart(userEntity, lecturename);
 		return msg;
 	}
 
@@ -65,10 +65,10 @@ public class CartController {
 		jsonObject.put("lectureInfoList", lectureInfoList);
 		jsonObject.put("buyerInfo", buyerInfo);
 		jsonObject.put("couponListInCart", couponListInCart);
-		
+
 		return ResponseEntity.ok().body(jsonObject);
 	}
-	
+
 	@GetMapping("/cart/list")
 	@ApiOperation("장바구니 화면에 출력할 강의리스트와 쿠폰데이터를 전달합니다.")
 	public ResponseEntity<?> cartlistopen() {
@@ -79,7 +79,7 @@ public class CartController {
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("lectureInfoList", lectureInfoList);
 		jsonObject.put("couponListInCart", couponListInCart);
-		
+
 		return ResponseEntity.ok().body(jsonObject);
 	}
 

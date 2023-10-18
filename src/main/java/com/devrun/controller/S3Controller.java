@@ -24,6 +24,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.Example;
 
 @RestController
 @Api(tags = "S3Upload Controller", description = "API endpoints for uploading to S3 Storage")
@@ -37,6 +38,8 @@ public class S3Controller {
 
 	// S3에 저장된 파일명을 입력하면, 파일이 저장된 URL을 반환합니다.
 	@GetMapping("/read")
+	@ApiOperation("S3 서버에서 파일을 검색합니다.")
+	@ApiImplicitParam(name = "filename", value = "파일 전체 경로" , example = "/profile/0f04abaa-1cfa-44d9-95cc-0bcfea45206eabc123")
 	public ResponseEntity<?> fileRead(@RequestParam(name = "filename") String filename) {
 		String fileURL = awsS3ReadService.findUploadKeyUrl(filename);
 		return ResponseEntity.ok(fileURL);
@@ -45,8 +48,9 @@ public class S3Controller {
 	@PostMapping(value = "/{path}/presignurl" , headers = {"Content-Type=application/json"})
 	@ApiOperation("파일을 업로드할 pre-signUrl을 반환합니다.")
 	@ApiImplicitParams({
-		@ApiImplicitParam(name = "path", value = "첨부파일 경로", paramType = "path"),
-		@ApiImplicitParam(name = "fileinfo", value = "첨부할 파일의 정보입니다. 키값은 fileName , fileExt 로 각각 첨부 파일의 파일명과, 파일의 확장자를 의미합니다.", paramType = "body", dataTypeClass = JSONObject.class) })
+		@ApiImplicitParam(name = "path", value = "첨부파일 경로" , example = "profile"),
+		@ApiImplicitParam(name = "fileinfo", value = "첨부할 파일의 정보입니다. 키값은 fileName , fileExt 로 각각 첨부 파일의 파일명과, 파일의 확장자를 의미합니다.")
+		})
 	@ApiResponse(message = "파일을 업로드할 url을 담은 JSON 객체입니다. 키값은 presignUrl 입니다.", code = 200 , response = JSONObject.class)
 	public ResponseEntity<?> getPresignUrlForUploadImage(@PathVariable String path , @RequestBody Map<String , String> fileinfo) throws IOException {
 		try {
