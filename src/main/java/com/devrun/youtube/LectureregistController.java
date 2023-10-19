@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.devrun.dto.QueryLectureByKeywordDTO;
 import com.devrun.dto.TotalProgress;
 import com.devrun.entity.MemberEntity;
+import com.devrun.repository.MemberEntityRepository;
 import com.devrun.service.AwsS3UploadService;
 import com.devrun.service.MemberService;
 import com.devrun.service.MyLectureProgressService;
@@ -60,7 +61,10 @@ public class LectureregistController {
 
 	GoogleClientSecrets clientSecrets = loadClientSecretsFromFile(); // 파일로부터 클라이언트 비밀 정보 로드하는 예시 메서드
 	private static final String redirectUri = "http://localhost:3000/auth/google/callback";
-
+	
+	@Autowired
+	private MemberEntityRepository memberEntityRepository;
+	
 	@Autowired
 	public LectureregistController(MemberService memberService, LectureService lectureService,
 			AwsS3UploadService awsS3UploadService, YouTubeUploader youTubeUploader,
@@ -169,7 +173,7 @@ public class LectureregistController {
 
 	@PostMapping("/lectureregitest")
 	public String lecturetest(@ModelAttribute CreateLectureRequestDto requestDto,
-			@RequestParam("accessToken") String googleAccessToken, HttpServletResponse httpServletResponse)
+			@RequestParam("accessToken") String googleAccessToken, HttpServletResponse httpServletResponse , @RequestParam("jwtToken") String jwtToken)
 			throws Exception {
 		System.out
 				.println("--------------------------------lectureregitest Controller --------------------------------");
@@ -190,7 +194,21 @@ public class LectureregistController {
 		List<VideoDto> uploadedVideos = new ArrayList<>();
 
 		requestDto.setVideoList(videolist);
-
+		
+		
+		  // JWT 토큰에서 사용자 아이디 추출
+	    String userId = JWTUtil.getUserIdFromToken(jwtToken);
+	    
+	    // 멘토(사용자) 정보 조회
+	    MemberEntity mento = memberEntityRepository.findById(userId);
+	    
+	    
+	    // 강의 엔터리 객체 생성 및 매핑
+	    Lecture lecture = new Lecture();
+	    lecture.setMentoId(mento);
+	    
+	    
+	    
 		try {
 
 			// 리스트의 각 비디오에 대해 업로드 작업을 수행합니다.
