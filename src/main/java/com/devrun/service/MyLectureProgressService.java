@@ -60,6 +60,7 @@ public class MyLectureProgressService {
 		for (int i = 1; i < 10; i++) {
 			Map<String, Object> testmodel = new HashMap<String, Object>();
 			testmodel.put("title", "강의 제목 " + i);
+			testmodel.put("mentoName", "강사이름 " + i);
 			testmodel.put("thumbnail",
 					"https://devrun-dev-bucket.s3.ap-northeast-2.amazonaws.com/public.lecture.images/20231001");
 			testmodel.put("progressRate", (int) (Math.random() * 101));
