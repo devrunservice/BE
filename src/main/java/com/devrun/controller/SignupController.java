@@ -71,7 +71,7 @@ public class SignupController {
 	@ResponseBody
 	@PostMapping("/checkID")
 	@ApiOperation(value = "ID 중복 확인", notes = "입력한 ID가 중복되는지 확인합니다.")
-	@ApiImplicitParam(name = "id", value = "확인할 아이디", required = true, paramType = "body", dataType = "string")
+	@ApiImplicitParam(name = "id", value = "확인할 아이디", required = true, paramType = "body", dataTypeClass = String.class)
     public String checkID(@RequestBody SignupDTO signupDTO) {
 		String id = signupDTO.getId();
         int result = memberService.checkID(id);
@@ -82,7 +82,7 @@ public class SignupController {
 	@ResponseBody
 	@PostMapping("/checkEmail")
 	@ApiOperation(value = "이메일 중복 확인", notes = "입력한 이메일이 중복되는지 확인합니다.")
-	@ApiImplicitParam(name = "email", value = "확인할 이메일", required = true, paramType = "body", dataType = "string")
+	@ApiImplicitParam(name = "email", value = "확인할 이메일", required = true, paramType = "body", dataTypeClass = String.class)
     public String checkEmail(@RequestBody SignupDTO signupDTO) {
 		String email = signupDTO.getEmail();
 		int result = memberService.checkEmail(email);
@@ -93,7 +93,7 @@ public class SignupController {
 	@ResponseBody
 	@PostMapping("/checkPhone")
 	@ApiOperation(value = "핸드폰 번호 중복 확인", notes = "입력한 핸드폰 번호가 중복되는지 확인합니다.")
-	@ApiImplicitParam(name = "phonenumber", value = "확인할 핸드폰 번호", required = true, paramType = "body", dataType = "string")
+	@ApiImplicitParam(name = "phonenumber", value = "확인할 핸드폰 번호", required = true, paramType = "body", dataTypeClass = String.class)
 	public String checkPhone(@RequestBody SignupDTO signupDTO) {
 		String phonenumber = signupDTO.getPhonenumber();
 		int result = memberService.checkphone(phonenumber);
@@ -104,7 +104,7 @@ public class SignupController {
 	@ResponseBody
 	@PostMapping("/auth/phone")
 	@ApiOperation(value = "핸드폰 인증번호 전송", notes = "핸드폰으로 인증번호를 전송합니다.")
-	@ApiImplicitParam(name = "phonenumber", value = "전송할 핸드폰 번호", required = true, paramType = "body", dataType = "string")
+	@ApiImplicitParam(name = "phonenumber", value = "전송할 핸드폰 번호", required = true, paramType = "body", dataTypeClass = String.class)
 	public Mono<String> authPhonenumber(@RequestBody SignupDTO signupDTO) {
 		String phonenumber = signupDTO.getPhonenumber();
 		System.out.println("폰" + phonenumber);
@@ -116,8 +116,8 @@ public class SignupController {
 	@PostMapping("/verify/phone")
 	@ApiOperation(value = "핸드폰 인증번호 확인", notes = "입력한 인증번호가 맞는지 확인합니다.")
 	@ApiImplicitParams({
-		@ApiImplicitParam(name = "phonenumber", value = "확인할 핸드폰 번호", required = true, paramType = "body", dataType = "string"),
-		@ApiImplicitParam(name = "code", value = "확인할 인증코드", required = true, paramType = "body", dataType = "string"),
+		@ApiImplicitParam(name = "phonenumber", value = "확인할 핸드폰 번호", required = true, paramType = "body", dataTypeClass = String.class),
+		@ApiImplicitParam(name = "code", value = "확인할 인증코드", required = true, paramType = "body", dataTypeClass = String.class),
 		
 		})
 	@ApiResponses(value = {
@@ -141,17 +141,17 @@ public class SignupController {
 	@Transactional
 	@ApiOperation(value = "회원가입 처리", notes = "입력한 정보로 회원가입을 진행합니다.")
 	@ApiImplicitParams({
-		@ApiImplicitParam(name = "id", value = "아이디", required = true, paramType = "body", dataType = "string"),
-		@ApiImplicitParam(name = "password", value = "비밀번호", required = true, paramType = "body", dataType = "string"),
-		@ApiImplicitParam(name = "birthday", value = "생일", required = true, paramType = "body", dataType = "string"),
-		@ApiImplicitParam(name = "name", value = "이름", required = true, paramType = "body", dataType = "string"),
-		@ApiImplicitParam(name = "email", value = "이메일", required = true, paramType = "body", dataType = "string"),
-		@ApiImplicitParam(name = "phonenumber", value = "핸드폰 번호", required = true, paramType = "body", dataType = "string"),
-		@ApiImplicitParam(name = "code", value = "핸드폰 인증코드", required = true, paramType = "body", dataType = "string"),
-		@ApiImplicitParam(name = "ageConsent", value = "나이 약관동의", required = true, paramType = "body", dataType = "string"),
-		@ApiImplicitParam(name = "termsOfService", value = "서비스 약관동의", required = true, paramType = "body", dataType = "string"),
-		@ApiImplicitParam(name = "privacyConsent", value = "개인정보 수집 약관동의", required = true, paramType = "body", dataType = "string"),
-		@ApiImplicitParam(name = "marketConsent", value = "마케팅 활용 약관동의", required = true, paramType = "body", dataType = "string"),
+		@ApiImplicitParam(name = "id", value = "아이디", required = true, paramType = "body", dataTypeClass = String.class),
+		@ApiImplicitParam(name = "password", value = "비밀번호", required = true, paramType = "body", dataTypeClass = String.class),
+		@ApiImplicitParam(name = "birthday", value = "생일", required = true, paramType = "body", dataTypeClass = String.class),
+		@ApiImplicitParam(name = "name", value = "이름", required = true, paramType = "body", dataTypeClass = String.class),
+		@ApiImplicitParam(name = "email", value = "이메일", required = true, paramType = "body", dataTypeClass = String.class),
+		@ApiImplicitParam(name = "phonenumber", value = "핸드폰 번호", required = true, paramType = "body", dataTypeClass = String.class),
+		@ApiImplicitParam(name = "code", value = "핸드폰 인증코드", required = true, paramType = "body", dataTypeClass = String.class),
+		@ApiImplicitParam(name = "ageConsent", value = "나이 약관동의", required = true, paramType = "body", dataTypeClass = String.class),
+		@ApiImplicitParam(name = "termsOfService", value = "서비스 약관동의", required = true, paramType = "body", dataTypeClass = String.class),
+		@ApiImplicitParam(name = "privacyConsent", value = "개인정보 수집 약관동의", required = true, paramType = "body", dataTypeClass = String.class),
+		@ApiImplicitParam(name = "marketConsent", value = "마케팅 활용 약관동의", required = true, paramType = "body", dataTypeClass = String.class),
 	})
 	@ApiResponses(value = {
 	    @ApiResponse(code = 200, message = "회원가입 성공"),
@@ -271,9 +271,9 @@ public class SignupController {
 	@PostMapping("/signup/resend/confirm-email")
 	@ApiOperation(value = "이메일 재전송", notes = "회원가입 인증 이메일을 재전송합니다.")
 	@ApiImplicitParams({
-	    @ApiImplicitParam(name = "data", value = "암호화된 데이터", required = false, paramType = "query", dataType = "string"),
-	    @ApiImplicitParam(name = "email", value = "이메일 주소", required = false, paramType = "query", dataType = "string"),
-	    @ApiImplicitParam(name = "id", value = "사용자 아이디", required = false, paramType = "query", dataType = "string")
+	    @ApiImplicitParam(name = "data", value = "암호화된 데이터", required = false, paramType = "query", dataTypeClass = String.class),
+	    @ApiImplicitParam(name = "email", value = "이메일 주소", required = false, paramType = "query", dataTypeClass = String.class),
+	    @ApiImplicitParam(name = "id", value = "사용자 아이디", required = false, paramType = "query", dataTypeClass = String.class)
 	})
 	@ApiResponses(value = {
 	    @ApiResponse(code = 200, message = "이메일 성공적으로 전송"),

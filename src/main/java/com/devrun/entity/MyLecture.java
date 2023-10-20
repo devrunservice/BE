@@ -10,10 +10,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Comment;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.devrun.youtube.Lecture;
@@ -23,6 +26,7 @@ import lombok.Data;
 
 @Entity
 @Data
+@Table(name = "mylecture")
 @EntityListeners(AuditingEntityListener.class)
 public class MyLecture {
 
@@ -57,6 +61,7 @@ public class MyLecture {
 	
 	@Column(name = "lastviewdate" , nullable = true)
 	@Comment("마지막 영상 시청 시간")
+    @LastModifiedDate
     @Temporal(TemporalType.DATE)
 	private Date lastviewdate;	
 	

@@ -35,7 +35,7 @@ public class CartController {
 
 	@PostMapping("/cart/insert")
 	@ApiOperation("장바구니에 강의를 추가합니다.")
-	@ApiImplicitParam(name = "lecturename", value = "강의 제목", example = "자바가너무쉬웠어요")
+	@ApiImplicitParam(name = "lecturename", value = "강의 제목", example = "자바가너무쉬웠어요" , dataTypeClass = String.class)
 	public ResponseEntity<?> putCart(@RequestBody(required = true) String lecturename) {
 		String userid = SecurityContextHolder.getContext().getAuthentication().getName();
 		MemberEntity userEntity = memberService.findById(userid);
@@ -45,7 +45,7 @@ public class CartController {
 
 	@PostMapping("/cart/delete")
 	@ApiOperation("장바구니에서 강의를 삭제합니다.")
-	@ApiImplicitParam(name = "lecturename", value = "강의 제목", example = "자바가너무쉬웠어요")
+	@ApiImplicitParam(name = "lecturename", value = "강의 제목", example = "자바가너무쉬웠어요" , dataTypeClass = String.class)
 	public String deleteInCart(@RequestBody(required = true) String lecturename) {
 		String userid = SecurityContextHolder.getContext().getAuthentication().getName();
 		MemberEntity userEntity = memberService.findById(userid);

@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.devrun.dto.CommentDTO;
 import com.devrun.entity.Comment;
@@ -44,9 +43,9 @@ public class CommentController {
     @PostMapping("/comment/write")
     @ApiOperation(value = "댓글 작성", notes = "공지사항에 댓글을 작성합니다.")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "noticeNo", value = "공지사항 번호", required = true, paramType = "body", dataType = "Integer"),
-        @ApiImplicitParam(name = "content", value = "댓글 내용", required = true, paramType = "body", dataType = "String"),
-        @ApiImplicitParam(name = "id", value = "작성자 아이디", required = true, paramType = "body", dataType = "String")})
+        @ApiImplicitParam(name = "noticeNo", value = "공지사항 번호", required = true, paramType = "body", dataTypeClass = Integer.class , example = "0"),
+        @ApiImplicitParam(name = "content", value = "댓글 내용", required = true, paramType = "body", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "id", value = "작성자 아이디", required = true, paramType = "body", dataTypeClass = String.class)})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "댓글이 성공적으로 작성되었습니다."),
         @ApiResponse(code = 400, message = "잘못된 공지사항 번호입니다.")})
@@ -63,7 +62,7 @@ public class CommentController {
     // 댓글 목록 출력
     @GetMapping("/comments/{noticeNo}")
     @ApiOperation(value = "댓글 목록 출력", notes = "공지사항 번호에 따른 댓글 목록을 반환합니다.")
-    @ApiImplicitParam(name = "noticeNo", value = "공지사항 번호", required = true, paramType = "path", dataType = "Integer")
+    @ApiImplicitParam(name = "noticeNo", value = "공지사항 번호", required = true, paramType = "path", dataTypeClass = Integer.class , example = "0")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "댓글 목록을 성공적으로 반환했습니다."),
         @ApiResponse(code = 400, message = "잘못된 공지사항 번호입니다.")})
@@ -81,8 +80,8 @@ public class CommentController {
     @PutMapping("/comment/edit/{commentNo}")
     @ApiOperation(value = "댓글 수정", notes = "특정 댓글을 수정합니다.")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "commentNo", value = "수정할 댓글 번호", required = true, paramType = "path", dataType = "Integer"),
-        @ApiImplicitParam(name = "content", value = "수정할 댓글 내용", required = true, paramType = "body", dataType = "String")})
+        @ApiImplicitParam(name = "commentNo", value = "수정할 댓글 번호", required = true, paramType = "path", dataTypeClass = Integer.class , example = "0"),
+        @ApiImplicitParam(name = "content", value = "수정할 댓글 내용", required = true, paramType = "body", dataTypeClass = String.class)})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "댓글이 성공적으로 수정되었습니다."),
         @ApiResponse(code = 400, message = "잘못된 댓글 번호입니다.")})
@@ -99,8 +98,8 @@ public class CommentController {
     @DeleteMapping("/comment/delete/{commentNo}")
     @ApiOperation(value = "댓글 삭제", notes = "댓글의 상태를 INACTIVE로 변경합니다.")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "commentNo", value = "삭제할 댓글 번호", required = true, paramType = "path", dataType = "Integer"),
-        @ApiImplicitParam(name = "memberId", value = "회원 ID", required = true, paramType = "query", dataType = "String")})
+        @ApiImplicitParam(name = "commentNo", value = "삭제할 댓글 번호", required = true, paramType = "path", dataTypeClass = Integer.class , example = "0"),
+        @ApiImplicitParam(name = "memberId", value = "회원 ID", required = true, paramType = "query", dataTypeClass = String.class)})
     public ResponseEntity<?> deleteCommentAndReplies(@PathVariable int commentNo, @RequestBody CommentDTO commentDTO) {
         Comment deletedComment = commentService.deleteCommentAndReplies(commentNo, commentDTO.getId());
         if (deletedComment != null) {

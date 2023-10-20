@@ -81,7 +81,7 @@ public class LoginController {
     @ResponseBody
     @PostMapping("/login")
     @ApiOperation(value = "사용자 로그인", notes = "사용자 ID와 비밀번호를 사용하여 로그인합니다.")
-    @ApiImplicitParam(name = "MemberEntity", value = "id, password 전송", required = true, paramType = "body", dataType = "string")
+    @ApiImplicitParam(name = "MemberEntity", value = "id, password 전송", required = true, paramType = "body", dataTypeClass = String.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "로그인 성공"),
         @ApiResponse(code = 401, message = "인증 실패"),
@@ -236,7 +236,7 @@ public class LoginController {
     @ResponseBody
     @PostMapping("/authz/token/refresh")
     @ApiOperation(value = "토큰 리프레시", notes = "리프레시 토큰을 사용하여 새로운 액세스 토큰을 생성합니다. 리프레시 토큰은 HttpOnly 쿠키에 저장되어 있습니다.")
-    @ApiImplicitParam(name = "Refresh_token", value = "리프레시 토큰", required = true, paramType = "header", dataType = "string")
+    @ApiImplicitParam(name = "Refresh_token", value = "리프레시 토큰", required = true, paramType = "header", dataTypeClass = String.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "토큰 리프레시 성공"),
         @ApiResponse(code = 400, message = "잘못된 요청"),
@@ -315,7 +315,7 @@ public class LoginController {
     @ResponseBody
     @PostMapping("/authz/logout")
     @ApiOperation(value = "로그아웃", notes = "현재 로그인된 사용자를 로그아웃합니다. 리프레시 토큰은 HttpOnly 쿠키에 저장되어 있습니다.")
-    @ApiImplicitParam(name = "Refresh_token", value = "리프레시 토큰", required = true, paramType = "header", dataType = "string")
+    @ApiImplicitParam(name = "Refresh_token", value = "리프레시 토큰", required = true, paramType = "header", dataTypeClass = String.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "로그아웃 성공"),
         @ApiResponse(code = 400, message = "잘못된 요청"),
@@ -370,8 +370,8 @@ public class LoginController {
     @GetMapping("/auth/kakao/callback")
     @ApiOperation(value = "카카오 로그인 콜백", notes = "카카오 로그인 후 콜백 URL입니다.")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "code", value = "인증 코드", required = false, paramType = "query", dataType = "string"),
-        @ApiImplicitParam(name = "error", value = "에러 메시지", required = false, paramType = "query", dataType = "string")})
+        @ApiImplicitParam(name = "code", value = "인증 코드", required = false, paramType = "query", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "error", value = "에러 메시지", required = false, paramType = "query", dataTypeClass = String.class)})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "카카오 로그인 성공"),
         @ApiResponse(code = 400, message = "잘못된 요청"),
@@ -465,7 +465,7 @@ public class LoginController {
     @ResponseBody
     @PostMapping("/sns/logout/kakao")
     @ApiOperation(value = "카카오 로그아웃", notes = "카카오 로그아웃을 수행합니다.")
-    @ApiImplicitParam(name = "Access_token_easy", value = "액세스 토큰", required = true, paramType = "header", dataType = "string")
+    @ApiImplicitParam(name = "Access_token_easy", value = "액세스 토큰", required = true, paramType = "header", dataTypeClass = String.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "카카오 로그아웃 성공"),
         @ApiResponse(code = 400, message = "잘못된 요청"),
@@ -504,8 +504,8 @@ public class LoginController {
 	@PostMapping("/users/{userId}/verify/phone")
 	@ApiOperation(value = "핸드폰 번호 검증", notes = "회원의 핸드폰 번호가 맞는지 검증합니다.")
 	@ApiImplicitParams({
-	    @ApiImplicitParam(name = "userId", value = "사용자 아이디", required = true, paramType = "path", dataType = "string"),
-	    @ApiImplicitParam(name = "phonenumber", value = "핸드폰 번호", required = true, paramType = "body", dataType = "string")})
+	    @ApiImplicitParam(name = "userId", value = "사용자 아이디", required = true, paramType = "path", dataTypeClass = String.class),
+	    @ApiImplicitParam(name = "phonenumber", value = "핸드폰 번호", required = true, paramType = "body", dataTypeClass = String.class)})
 	@ApiResponses(value = {
 	    @ApiResponse(code = 200, message = "핸드폰 번호 검증 성공"),
 	    @ApiResponse(code = 400, message = "잘못된 요청"),
@@ -523,8 +523,8 @@ public class LoginController {
 	@PostMapping("/find-id/send-phone")
 	@ApiOperation(value = "아이디 핸드폰 번호로 전송", notes = "찾은 아이디를 핸드폰 번호로 전송합니다.")
 	@ApiImplicitParams({
-	    @ApiImplicitParam(name = "phonenumber", value = "핸드폰 번호", required = true, paramType = "body", dataType = "string"),
-	    @ApiImplicitParam(name = "code", value = "인증 코드", required = true, paramType = "body", dataType = "string")})
+	    @ApiImplicitParam(name = "phonenumber", value = "핸드폰 번호", required = true, paramType = "body", dataTypeClass = String.class),
+	    @ApiImplicitParam(name = "code", value = "인증 코드", required = true, paramType = "body", dataTypeClass = String.class)})
 	@ApiResponses(value = {
 	    @ApiResponse(code = 200, message = "아이디 전송 성공"),
 	    @ApiResponse(code = 400, message = "잘못된 요청"),
@@ -559,11 +559,11 @@ public class LoginController {
 	@PostMapping("/users/{userId}/edit-password")
 	@ApiOperation(value = "비밀번호 변경", notes = "인증 완료 후 비밀번호를 변경합니다.")
 	@ApiImplicitParams({
-	    @ApiImplicitParam(name = "userId", value = "사용자 아이디", required = true, paramType = "path", dataType = "string"),
-	    @ApiImplicitParam(name = "password", value = "새 비밀번호", required = true, paramType = "body", dataType = "string"),
-	    @ApiImplicitParam(name = "phonenumber", value = "핸드폰 번호", required = false, paramType = "body", dataType = "string"),
-	    @ApiImplicitParam(name = "email", value = "이메일", required = false, paramType = "body", dataType = "string"),
-	    @ApiImplicitParam(name = "code", value = "인증 코드", required = true, paramType = "body", dataType = "string")})
+	    @ApiImplicitParam(name = "userId", value = "사용자 아이디", required = true, paramType = "path", dataTypeClass = String.class),
+	    @ApiImplicitParam(name = "password", value = "새 비밀번호", required = true, paramType = "body", dataTypeClass = String.class),
+	    @ApiImplicitParam(name = "phonenumber", value = "핸드폰 번호", required = false, paramType = "body", dataTypeClass = String.class),
+	    @ApiImplicitParam(name = "email", value = "이메일", required = false, paramType = "body", dataTypeClass = String.class),
+	    @ApiImplicitParam(name = "code", value = "인증 코드", required = true, paramType = "body", dataTypeClass = String.class)})
 	@ApiResponses(value = {
 	    @ApiResponse(code = 200, message = "비밀번호 변경 성공"),
 	    @ApiResponse(code = 400, message = "잘못된 요청"),
@@ -623,8 +623,8 @@ public class LoginController {
 	@PostMapping("/users/{userId}/verify/email")
 	@ApiOperation(value = "이메일 검증", notes = "회원의 이메일이 맞는지 검증합니다.")
 	@ApiImplicitParams({
-	    @ApiImplicitParam(name = "userId", value = "사용자 아이디", required = true, paramType = "path", dataType = "string"),
-	    @ApiImplicitParam(name = "email", value = "이메일 주소", required = true, paramType = "body", dataType = "string")})
+	    @ApiImplicitParam(name = "userId", value = "사용자 아이디", required = true, paramType = "path", dataTypeClass = String.class),
+	    @ApiImplicitParam(name = "email", value = "이메일 주소", required = true, paramType = "body", dataTypeClass = String.class)})
 	@ApiResponses(value = {
 	    @ApiResponse(code = 200, message = "이메일 검증 성공"),
 	    @ApiResponse(code = 400, message = "잘못된 요청"),
@@ -642,8 +642,8 @@ public class LoginController {
 	@PostMapping("/auth/email")
 	@ApiOperation(value = "인증번호 이메일로 전송", notes = "비밀번호 찾기를 위한 인증번호를 이메일로 전송합니다.")
 	@ApiImplicitParams({
-	    @ApiImplicitParam(name = "email", value = "이메일 주소", required = true, paramType = "body", dataType = "string"),
-	    @ApiImplicitParam(name = "id", value = "사용자 아이디", required = true, paramType = "body", dataType = "string")})
+	    @ApiImplicitParam(name = "email", value = "이메일 주소", required = true, paramType = "body", dataTypeClass = String.class),
+	    @ApiImplicitParam(name = "id", value = "사용자 아이디", required = true, paramType = "body", dataTypeClass = String.class)})
 	@ApiResponses(value = {
 	    @ApiResponse(code = 200, message = "이메일 전송 성공"),
 	    @ApiResponse(code = 400, message = "잘못된 요청"),
@@ -665,8 +665,8 @@ public class LoginController {
 	@PostMapping("/verify/email")
 	@ApiOperation(value = "이메일 인증코드 검증", notes = "이메일로 전송된 인증코드가 맞는지 검증합니다.")
 	@ApiImplicitParams({
-	    @ApiImplicitParam(name = "email", value = "이메일 주소", required = true, paramType = "body", dataType = "string"),
-	    @ApiImplicitParam(name = "code", value = "인증 코드", required = true, paramType = "body", dataType = "string")})
+	    @ApiImplicitParam(name = "email", value = "이메일 주소", required = true, paramType = "body", dataTypeClass = String.class),
+	    @ApiImplicitParam(name = "code", value = "인증 코드", required = true, paramType = "body", dataTypeClass = String.class)})
 	@ApiResponses(value = {
 	    @ApiResponse(code = 200, message = "인증 성공"),
 	    @ApiResponse(code = 400, message = "잘못된 요청"),
@@ -687,8 +687,8 @@ public class LoginController {
 	@PostMapping("/find-id/send-email")
 	@ApiOperation(value = "이메일로 아이디 전송", notes = "이메일로 사용자 아이디를 전송합니다.")
 	@ApiImplicitParams({
-	    @ApiImplicitParam(name = "email", value = "이메일 주소", required = true, paramType = "body", dataType = "string"),
-	    @ApiImplicitParam(name = "code", value = "인증 코드", required = true, paramType = "body", dataType = "string")})
+	    @ApiImplicitParam(name = "email", value = "이메일 주소", required = true, paramType = "body", dataTypeClass = String.class),
+	    @ApiImplicitParam(name = "code", value = "인증 코드", required = true, paramType = "body", dataTypeClass = String.class)})
 	@ApiResponses(value = {
 	    @ApiResponse(code = 200, message = "아이디 찾기 성공"),
 	    @ApiResponse(code = 400, message = "잘못된 요청"),
@@ -717,7 +717,7 @@ public class LoginController {
 	@GetMapping("/users/login-info")
 	@ApiOperation(value = "사용자 로그인 정보 조회", notes = "사용자의 로그인 정보를 조회하고 로그인 상태를 유지하기 위해 사용합니다.")
 	@ApiImplicitParams({
-	    @ApiImplicitParam(name = "Access_token", value = "Access Token", required = true, paramType = "header", dataType = "string")})
+	    @ApiImplicitParam(name = "Access_token", value = "Access Token", required = true, paramType = "header", dataTypeClass = String.class)})
 	@ApiResponses(value = {
 	    @ApiResponse(code = 200, message = "정보 조회 성공"),
 	    @ApiResponse(code = 400, message = "잘못된 요청"),

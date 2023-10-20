@@ -84,7 +84,7 @@ public class NoticeController {
 	@ResponseBody
 	@GetMapping("/notices/{pageNumber}")
 	@ApiOperation(value = "공지사항 페이징", notes = "페이지 번호에 따른 공지사항 목록을 반환합니다.")
-	@ApiImplicitParam(name = "pageNumber", value = "페이지 번호", required = true, paramType = "path", dataTypeClass = Integer.class)
+	@ApiImplicitParam(name = "pageNumber", value = "페이지 번호", required = true, paramType = "path", dataTypeClass = Integer.class , example = "0")
 	@ApiResponses(value = {
 	    @ApiResponse(code = 200, message = "공지사항 목록을 성공적으로 반환했습니다."),
 	    @ApiResponse(code = 404, message = "공지사항이 없습니다.")})
@@ -108,7 +108,7 @@ public class NoticeController {
 	@ResponseBody
 	@GetMapping("/notices/detail/{noticeNo}")
 	@ApiOperation(value = "공지사항 읽기", notes = "공지사항 번호에 따른 상세 정보를 반환합니다.")
-	@ApiImplicitParam(name = "noticeNo", value = "공지사항 번호", required = true, paramType = "path", dataTypeClass = Integer.class)
+	@ApiImplicitParam(name = "noticeNo", value = "공지사항 번호", required = true, paramType = "path", dataTypeClass = Integer.class , example = "0")
 	@ApiResponses(value = {
 	    @ApiResponse(code = 200, message = "공지사항 상세 정보를 성공적으로 반환했습니다."),
 	    @ApiResponse(code = 404, message = "공지사항을 찾을 수 없습니다."),
@@ -136,7 +136,7 @@ public class NoticeController {
 	@PutMapping("/notice/edit/{noticeNo}")
 	@ApiOperation(value = "공지사항 수정", notes = "공지사항의 제목과 내용을 수정합니다.")
 	@ApiImplicitParams({
-	    @ApiImplicitParam(name = "noticeNo", value = "수정할 공지사항 번호", required = true, paramType = "path", dataTypeClass = Integer.class),
+	    @ApiImplicitParam(name = "noticeNo", value = "수정할 공지사항 번호", required = true, paramType = "path", dataTypeClass = Integer.class , example = "0"),
 	    @ApiImplicitParam(name = "title", value = "수정할 공지사항 제목", required = true, paramType = "body", dataTypeClass = String.class),
 	    @ApiImplicitParam(name = "content", value = "수정할 공지사항 내용", required = true, paramType = "body", dataTypeClass = String.class)})
 	@ApiResponses(value = {
@@ -163,7 +163,7 @@ public class NoticeController {
 	@ResponseBody
 	@DeleteMapping("/notice/delete/{noticeNo}")
 	@ApiOperation(value = "공지사항 삭제", notes = "공지사항의 상태를 INACTIVE로 변경합니다.")
-	@ApiImplicitParam(name = "noticeNo", value = "삭제할 공지사항 번호", required = true, paramType = "path", dataTypeClass = Integer.class)
+	@ApiImplicitParam(name = "noticeNo", value = "삭제할 공지사항 번호", required = true, paramType = "path", dataTypeClass = Integer.class , example = "0")
 	@ApiResponses(value = {
 	    @ApiResponse(code = 200, message = "공지사항을 성공적으로 삭제했습니다."),
 	    @ApiResponse(code = 400, message = "잘못된 인수입니다."),
