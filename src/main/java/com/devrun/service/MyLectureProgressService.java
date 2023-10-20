@@ -64,8 +64,8 @@ public class MyLectureProgressService {
 			testmodel.put("thumbnail",
 					"https://devrun-dev-bucket.s3.ap-northeast-2.amazonaws.com/public.lecture.images/20231001");
 			testmodel.put("progressRate", (int) (Math.random() * 101));
-			testmodel.put("Rating", String.format("%.1f", (int) (Math.random() * 11) *0.5));
-			testmodel.put("ExpiryDate",
+			testmodel.put("rating", String.format("%.1f", (int) (Math.random() * 11) *0.5));
+			testmodel.put("expiryDate",
 					"2023-" + String.format("%02d" ,(int) ((Math.random() * 12) + 1)) + "-" + String.format("%02d" ,(int) ((Math.random() * 31) + 1)));
 			testmodels.add(testmodel);
 		}
