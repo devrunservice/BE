@@ -1,7 +1,5 @@
 package com.devrun.service;
 
-import java.sql.Date;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -12,16 +10,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.devrun.dto.CouponIssuanceRequestDTO;
 import com.devrun.dto.CouponListForMento;
 import com.devrun.dto.CouponListForStudent;
 import com.devrun.entity.CouponIssued;
 import com.devrun.entity.Couponregicode;
-import com.devrun.entity.Couponregicode.couponstate;
 import com.devrun.entity.MemberEntity;
 import com.devrun.repository.CouponIssuedRepository;
 import com.devrun.repository.CouponViewRepository;
 import com.devrun.repository.CouponregicodeRepository;
 import com.devrun.util.CouponCodeGenerator;
+import com.devrun.youtube.Lecture;
+import com.devrun.youtube.LectureRepository;
 
 @Service
 public class CouponSerivce {
@@ -35,13 +35,29 @@ public class CouponSerivce {
 	@Autowired
 	private CouponViewRepository couponviewRepositroy;
 
-	public CouponIssued saveCouponDetail(CouponIssued couponBlueprint) {
-		CouponIssued result = couponIssuedRepository.save(couponBlueprint);
-		int quantity = couponBlueprint.getQuantity();
+	@Autowired
+	private LectureRepository lectureRepository;
 
-		saveCouponCode(quantity, couponBlueprint);
+	public CouponIssuanceRequestDTO saveCouponDetail(CouponIssuanceRequestDTO couponIssuanceRequestDTO,
+			MemberEntity mentoEntity) {
+		Lecture lectureEntity = lectureRepository.findByLectureNameAndMentoId(couponIssuanceRequestDTO.getLectureName(),
+				mentoEntity);
+		if (lectureEntity == null) {
+			throw new NullPointerException("Lecture not found");
+		}
+		;
 
-		return result;
+		CouponIssued couponeIssued = new CouponIssued();
+		couponeIssued.setIssueduser(mentoEntity);
+		couponeIssued.setLectureid(lectureEntity);
+		couponeIssued.setCoupontype(couponIssuanceRequestDTO.getCoupontype());
+		couponeIssued.setDiscountrate(couponIssuanceRequestDTO.getDiscountrate());
+		couponeIssued.setExpirydate(couponIssuanceRequestDTO.getExpirydate());
+		couponeIssued.setQuantity(couponIssuanceRequestDTO.getQuantity());
+
+		couponIssuedRepository.save(couponeIssued);
+
+		return couponIssuanceRequestDTO;
 	}
 
 	public void saveCouponCode(int q, CouponIssued couponBlueprint) {
@@ -90,11 +106,17 @@ public class CouponSerivce {
 
 		String rsl = "해당 멘토가 발행한 쿠폰이 아닙니다.";
 		for (Couponregicode couponregicode : couponcodes) {
-				if (couponregicode.getCouponcode().equals(TargetCouponCode)) {
-					System.out.println("해당 멘토가 발행한 쿠폰으로 확인 되었음");
-					if(couponregicode.getState().toString().equals("REMOVED")) {couponregicodeRepository.removecode(TargetCouponCode, "ACTIVE"); rsl = "복구 처리 되었습니다.";}
-					if(couponregicode.getState().toString().equals("ACTIVE")) {couponregicodeRepository.removecode(TargetCouponCode, "REMOVED"); rsl = "정지 처리 되었습니다.";}
+			if (couponregicode.getCouponcode().equals(TargetCouponCode)) {
+				System.out.println("해당 멘토가 발행한 쿠폰으로 확인 되었음");
+				if (couponregicode.getState().toString().equals("REMOVED")) {
+					couponregicodeRepository.removecode(TargetCouponCode, "ACTIVE");
+					rsl = "복구 처리 되었습니다.";
 				}
+				if (couponregicode.getState().toString().equals("ACTIVE")) {
+					couponregicodeRepository.removecode(TargetCouponCode, "REMOVED");
+					rsl = "정지 처리 되었습니다.";
+				}
+			}
 		}
 		return rsl;
 	}

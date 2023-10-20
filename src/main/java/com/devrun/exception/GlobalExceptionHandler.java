@@ -58,9 +58,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> nullex(final NullPointerException e) {
         Map<String, String> responeMap = new HashMap<>();
         e.printStackTrace();
-        responeMap.put("message", "Can't Find Data, Check Your Request. -By DevRun");
-        responeMap.put("message2", e.getStackTrace()[0].getClassName() + ":"+e.getStackTrace()[0].getLineNumber());
-        responeMap.put("error" , e.getMessage());
+        responeMap.put("Common Message", "Can't Find Data, Check Your Request. -By DevRun");
+        responeMap.put("Error_Locate", e.getStackTrace()[0].getClassName() + ":"+e.getStackTrace()[0].getLineNumber());
+        responeMap.put("Detail Error" , e.getMessage());
         
         return ResponseEntity.badRequest().body(responeMap);
     }

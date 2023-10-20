@@ -3,6 +3,7 @@ package com.devrun.controller;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.json.simple.JSONObject;
@@ -19,14 +20,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.devrun.dto.CouponIssuanceRequestDTO;
 import com.devrun.dto.CouponListForMento;
 import com.devrun.dto.CouponListForStudent;
-import com.devrun.entity.CouponIssued;
-import com.devrun.entity.CouponViewEntity;
 import com.devrun.entity.MemberEntity;
 import com.devrun.repository.CouponViewRepository;
 import com.devrun.service.CouponSerivce;
 import com.devrun.service.MemberService;
+import com.devrun.util.JWTUtil;
 
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -45,44 +46,42 @@ public class CouponController {
 	@Autowired
 	private CouponViewRepository couponViewRepository;
 
-	@GetMapping({"/coupon/readmycoupon"})
+	@GetMapping({ "/coupon/readmycoupon" })
 	@ApiOperation(value = "쿠폰 조회하기", notes = "로그인 한 회원이 가진 쿠폰을 조회합니다.")
 	public ResponseEntity<?> readmycoupon() {
 		System.out.println(
 				"---------------------------------CouponController readmycoupon method start---------------------------------");
 
-
 		String userid = SecurityContextHolder.getContext().getAuthentication().getName();
 		MemberEntity userEntity = memberService.findById(userid);
-		
+
 		List<CouponListForStudent> couponlist = couponSerivce.readmycoupon(userEntity);
 		if (couponlist.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("보유한 쿠폰이 없습니다.");
 		}
-		
+
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("content", couponlist);
-		
+
 		return ResponseEntity.ok(jsonObject);
 
 	}
 
 	@PostMapping("/coupon/publish")
 	@ApiOperation(value = "쿠폰 생성기", notes = "쿠폰을 생성하여 DB에 저장합니다.")
-	@ApiImplicitParam(name = "couponBlueprint", value = "생성할 쿠폰 디테일")
-	public ResponseEntity<?> couponGeneration(@RequestBody @Valid CouponIssued couponBlueprint) {
-//    	String userid = SecurityContextHolder.getContext().getAuthentication().getName();
-//    	MemberEntity userEntity = memberService.findById(userid);
-//    	강의 도메인 완성되면 멘토가 개설한 강의에 대한 쿠폰만 만들 수 있어도록 검증 과정 필요함
-
-		couponSerivce.saveCouponDetail(couponBlueprint);
-		return ResponseEntity.ok().body("저장 완료");
+	@ApiImplicitParam(name = "couponIssuanceRequestDTO", value = "생성할 쿠폰 디테일" , required = true)
+	public ResponseEntity<?> couponGeneration(@RequestBody @Valid CouponIssuanceRequestDTO couponIssuanceRequestDTO,
+			HttpServletRequest request) {
+		String userid = JWTUtil.getUserIdFromToken(request.getHeader("Access_token"));
+		MemberEntity mentoEntity = memberService.findById(userid);
+		CouponIssuanceRequestDTO issuedCoupone = couponSerivce.saveCouponDetail(couponIssuanceRequestDTO, mentoEntity);
+		return ResponseEntity.ok().body(issuedCoupone);
 
 	}
 
 	@PostMapping("/coupon/registration")
 	@ApiOperation(value = "쿠폰 등록기", notes = "유저가 쿠폰 코드를 입력하면 쿠폰을 검증하고, 쿠폰을 등록합니다.")
-	@ApiImplicitParam(name = "map", value = "등록할 쿠폰코드", example = "{\"couponcode\" : \"31267-ydi2OLCKFOaz\"}")
+	@ApiImplicitParam(name = "map", value = "등록할 쿠폰코드", example = "{\"couponcode\" : \"31267-ydi2OLCKFOaz\"}", required = true)
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "성공적으로 처리되었습니다"),
 			@ApiResponse(code = 400, message = "옳지 않은 키 값입니다. 키 값 : couponcode") })
 	public ResponseEntity<?> userGetCoupon(@RequestBody Map<String, String> map) {
@@ -99,14 +98,14 @@ public class CouponController {
 
 	@PostMapping("/coupon/shrewder")
 	@ApiOperation(value = "쿠폰 파쇄기", notes = "특정 쿠폰을 사용 정지 처리하거나 복구합니다. 단건별로 처리합니다.")
-	@ApiImplicitParam(name = "codelist", value = "사용 정지할 쿠폰 코드", example = "{\"code\" : \"31267-ydi2OLCKFOaz\"}")
+	@ApiImplicitParam(name = "codelist", value = "사용 정지할 쿠폰 코드", example = "{\"code\" : \"31267-ydi2OLCKFOaz\"}", required = true)
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "성공적으로 처리되었습니다"),
 			@ApiResponse(code = 400, message = "옳지 않은 키 값입니다. 키 값 : code") })
 	public ResponseEntity<?> couponremove(@RequestBody Map<String, String> codelist) {
 		String userid = SecurityContextHolder.getContext().getAuthentication().getName();
 		MemberEntity userEntity = memberService.findById(userid);
 
-		 String targetcode = codelist.get("code");
+		String targetcode = codelist.get("code");
 		if (targetcode.isEmpty()) {
 			return ResponseEntity.ok("쿠폰코드가 입력되지 않았습니다.");
 		}
@@ -114,9 +113,9 @@ public class CouponController {
 		return ResponseEntity.ok(rsl);
 	}
 
-	@GetMapping({"/coupon/mento/couponmanaging" , "/coupon/mento/couponmanaging/{pageno}"})
+	@GetMapping({ "/coupon/mento/couponmanaging", "/coupon/mento/couponmanaging/{pageno}" })
 	@ApiOperation(value = "멘토가 발행한 쿠폰 조회", notes = "멘토가 발행한 쿠폰을 개별적으로 조회합니다.", response = CouponListForMento.class)
-	@ApiImplicitParam(name = "pageno", value = "조회할 페이지" , example = "1")
+	@ApiImplicitParam(name = "pageno", value = "조회할 페이지", example = "1", required = false)
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "성공적으로 처리되었습니다") })
 	public ResponseEntity<?> couponmanagingByMento(@PathVariable(required = false) Integer pageno) {
 		if (pageno == null || pageno <= 0) {
@@ -131,7 +130,7 @@ public class CouponController {
 		jsonObject.put("totalElements", couponlist.getTotalElements());
 		jsonObject.put("totalPages", couponlist.getTotalPages());
 		jsonObject.put("content", couponlist.getContent());
-		
+
 		return ResponseEntity.ok(jsonObject);
 	}
 

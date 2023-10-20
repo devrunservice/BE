@@ -36,4 +36,6 @@ public interface LectureRepository extends JpaRepository<Lecture, Long>, JpaSpec
 	Page<Lecture> findLecturesWithCategroy(@Param("categoryNumber") LectureCategory category,
 			@Param("keyword") String keyword, PageRequest pageRequest);
 
+	Lecture findByLectureNameAndMentoId(String lectureName, MemberEntity mentoEntity);
+
 }
