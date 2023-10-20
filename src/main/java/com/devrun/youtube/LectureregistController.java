@@ -32,6 +32,7 @@ import com.devrun.repository.MemberEntityRepository;
 import com.devrun.service.AwsS3UploadService;
 import com.devrun.service.MemberService;
 import com.devrun.service.MyLectureProgressService;
+import com.devrun.util.JWTUtil;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
