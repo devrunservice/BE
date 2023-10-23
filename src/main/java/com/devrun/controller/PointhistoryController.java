@@ -42,13 +42,11 @@ public class PointhistoryController {
 		String userid = SecurityContextHolder.getContext().getAuthentication().getName();
 		MemberEntity member = memberService.findById(userid);
 		
-		int usrno = member.getUserNo(); // name 대신 usrno로 변경
-		System.err.println(usrno);
+		int usrno = member.getUserNo(); 
 		
 		PageRequest pageRequest = PageRequest.of(page -1, size);        
 
         Page<PointHis> PointhistoryPage = pointHistoryRepository.findAllbyPointHistoryEntity(usrno,pageRequest);
-        System.err.println(PointhistoryPage);                
 
         if (PointhistoryPage.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("결제 정보가 없습니다.");
