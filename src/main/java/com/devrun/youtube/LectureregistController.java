@@ -381,7 +381,7 @@ public class LectureregistController {
 			lectrueNoteDTO.put("chapter", "강의의 섹션 이름 : " + i);
 			lectrueNoteDTO.put("subHeading", "소제목 : " + i);
 			lectrueNoteDTO.put("noteTitle", "노트의 제목 : " + i);
-			lectrueNoteDTO.put("count", "5 : " + i);
+			lectrueNoteDTO.put("count", "5");
 			lectrueNoteDTO.put("date", "2023-" + String.format("%02d" ,(int) ((Math.random() * 12) + 1)) + "-" + String.format("%02d" ,(int) ((Math.random() * 31) + 1)));
 			lectrueNoteDTO.put("content", "<h1>This is a Heading 1</h1>"
 					+ "    <h2>This is a Heading 2</h2>"
