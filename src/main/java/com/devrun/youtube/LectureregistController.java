@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -362,5 +363,12 @@ public class LectureregistController {
 			System.out.println(totalProgress.getlectureno());
 			System.out.println(totalProgress.getuserno());			
 		}
+	}
+	
+	@GetMapping("/lectrueVideoOpen")
+	public ResponseEntity<?> thisIsTestForVideoOpen(){
+		Map<String , String> videoDTO = new HashMap<String, String>();
+		videoDTO.put("videoId", "nNA-sbOzHl4");
+		return ResponseEntity.ok(videoDTO);
 	}
 }
