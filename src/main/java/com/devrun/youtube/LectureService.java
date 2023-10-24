@@ -5,12 +5,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.devrun.dto.QueryLectureByKeywordDTO;
 import com.devrun.entity.MemberEntity;
@@ -270,4 +269,70 @@ public class LectureService {
 		return list;
 	}
 
+	
+	public CreateLectureRequestDto getLectureDetails(Long lectureId) throws NotFoundException {
+	    Lecture lecture = lectureRepository.findById(lectureId)
+	        .orElseThrow(() -> new NotFoundException());
+
+	    CreateLectureRequestDto lectureDto = new CreateLectureRequestDto();
+	    lectureDto.setLectureName(lecture.getLectureName());
+	    lectureDto.setLectureIntro(lecture.getLectureIntro());
+	    lectureDto.setLecturePrice(lecture.getLecturePrice());
+	    lectureDto.setLectureStart(lecture.getLectureStart());
+	    lectureDto.setLectureEdit(lecture.getLectureEdit());
+	    
+	    return lectureDto;
+	}
+
+	
+	 public CreateLectureRequestDto getLectureDetailsMapping(Long lectureId) {
+	        Lecture lecture = lectureRepository.findById(lectureId)
+	                .orElseThrow(() -> new NotFoundException());
+
+	        CreateLectureRequestDto detailsDto = new CreateLectureRequestDto();
+	        detailsDto.setLectureName(lecture.getLectureName());
+	        detailsDto.setLectureIntro(lecture.getLectureIntro());
+	        detailsDto.setLecturePrice(lecture.getLecturePrice());
+	        detailsDto.setLectureStart(lecture.getLectureStart());
+	        detailsDto.setLectureEdit(lecture.getLectureEdit());
+	        detailsDto.setLectureThumbnail(lecture.getLectureThumbnail());
+
+	        // 강의 카테고리 정보 매핑
+	        LectureCategory lectureCategory = lecture.getLectureCategory();
+	        LecturecategoryDto categoryDto = new LecturecategoryDto();
+	        categoryDto.setCategoryNo(lectureCategory.getCategoryNo());
+	        categoryDto.setLectureBigCategory(lectureCategory.getLectureBigCategory());
+	        categoryDto.setLectureMidCategory(lectureCategory.getLectureMidCategory());
+	        detailsDto.setLectureCategory(categoryDto);
+
+	        // 강의 섹션 정보 매핑
+	        List<LectureSection> lectureSections = lectureSectionRepository.findByLecture(lecture);
+	        List<LectureSectionDto> sectionDtos = new ArrayList<>();
+	        for (LectureSection lectureSection : lectureSections) {
+	            LectureSectionDto sectionDto = new LectureSectionDto();
+	            sectionDto.setSectionNumber(lectureSection.getSectionNumber());
+	            sectionDto.setSectionTitle(lectureSection.getSectionTitle());
+
+	            // 섹션에 속한 비디오 정보 매핑
+	            List<Video> videos = videoRepository.findByLectureSection(lectureSection);
+	            List<VideoDto> videoDtos = new ArrayList<>();
+	            for (Video video : videos) {
+	                VideoDto videoDto = new VideoDto();
+	                videoDto.setUploadDate(video.getUploadDate());
+	                videoDto.setFileName(video.getFileName());
+	                videoDto.setVideoId(video.getVideoId());
+	                videoDto.setTotalPlayTime(video.getTotalPlayTime());
+	                videoDto.setVideoLink(video.getVideoLink());
+	                videoDto.setVideoTitle(video.getVideoTitle());
+	                videoDtos.add(videoDto);
+	            }
+	            sectionDto.setVideoDtos(videoDtos);
+	            sectionDtos.add(sectionDto);
+	        }
+	        detailsDto.setLectureSectionDtos(sectionDtos);
+
+	        return detailsDto;
+	    }
+
+	
 }

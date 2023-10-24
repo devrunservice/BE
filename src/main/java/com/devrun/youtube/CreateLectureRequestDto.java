@@ -1,5 +1,6 @@
 package com.devrun.youtube;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -11,8 +12,8 @@ public class CreateLectureRequestDto {
     private String lectureName;
     private String lectureIntro;
     private int lecturePrice;
-    private int lectureStart;
-    private int lectureEdit;
+    private Date lectureStart;
+    private Date lectureEdit;
     private MultipartFile lectureThumbnailFile;
     private List<String> lectureTag;
     private LectureCategory lectureCategory; // 카테고리 정보
