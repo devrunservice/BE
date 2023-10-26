@@ -86,22 +86,23 @@ public class TestController {
 	}
 	
 	@GetMapping("/lectureNoteOpen")
-	public ResponseEntity<?> thisIsTestForlectrueNoteOpen(@RequestParam(name = "page" , required = false , defaultValue = "0") String page){
-		List<Map<String , Object>> lectrueNoteDTOlist = new ArrayList<Map<String , Object>>();
+	public ResponseEntity<?> thisIsTestForlectureNoteOpen(@RequestParam(name = "page" , required = false , defaultValue = "0") String page){
+		List<Map<String , Object>> lectureNoteDTOlist = new ArrayList<Map<String , Object>>();
 		for(int i = 1 ; i < 4 ; i++) {
-			Map<String , Object> lectrueNoteDTO = new HashMap<String, Object>();
-			lectrueNoteDTO.put("lectureTitle", "노트를 작성한 강의 이름 : " + i);
-			lectrueNoteDTO.put("chapter", "강의의 섹션 이름 : " + i);
-			lectrueNoteDTO.put("subHeading", "소제목 : " + i);
-			lectrueNoteDTO.put("count", String.valueOf(i));
+			Map<String , Object> lectureNoteDTO = new HashMap<String, Object>();
+			lectureNoteDTO.put("lectureTitle", "노트를 작성한 강의 이름 : " + i);
+			lectureNoteDTO.put("chapter", "강의의 섹션 이름 : " + i);
+			lectureNoteDTO.put("subHeading", "소제목 : " + i);
+			lectureNoteDTO.put("count", String.valueOf(i));
 			
-			List<Map<String , String>> lectrueNoteDetailDTOList = new ArrayList<Map<String,String>>();
+			List<Map<String , String>> lectureNoteDetailDTOList = new ArrayList<Map<String,String>>();
 			for(int j = 1 ; j <= i ; j++) {
-			Map<String , String> lectrueNoteDetailDTO = new HashMap<String , String>();
-			lectrueNoteDetailDTO.put("noteId", "노트의 Id : " + i);
-			lectrueNoteDetailDTO.put("noteTitle", "노트의 제목 : " + i + "번 제목");
-			lectrueNoteDetailDTO.put("date", "2023-" + String.format("%02d" ,(int) ((Math.random() * 12) + 1)) + "-" + String.format("%02d" ,(int) ((Math.random() * 31) + 1)));
-			lectrueNoteDetailDTO.put("content", "<h1>This is a Heading 1</h1>"
+			Map<String , String> lectureNoteDetailDTO = new HashMap<String , String>();
+			lectureNoteDetailDTO.put("noteId", "노트의 Id : " + i);
+			lectureNoteDetailDTO.put("noteTitle", "노트의 제목 : " + i + "번 제목");
+			lectureNoteDetailDTO.put("date", "2023-" + String.format("%02d" ,(int) ((Math.random() * 12) + 1)) + "-" + String.format("%02d" ,(int) ((Math.random() * 31) + 1)));
+			lectureNoteDetailDTO.put(" lastModifiedDate" , "2023-" + String.format("%02d" ,(int) ((Math.random() * 12) + 1)) + "-" + String.format("%02d" ,(int) ((Math.random() * 31) + 1)));
+			lectureNoteDetailDTO.put("content", "<h1>This is a Heading 1</h1>"
 					+ "    <h2>This is a Heading 2</h2>"
 					+ "    <h3>This is a Heading 3</h3>"
 					+ ""
@@ -131,25 +132,26 @@ public class TestController {
 					+ "        This is preformatted text."
 					+ "        It maintains the formatting and spacing."
 					+ "    </pre>");
-			lectrueNoteDetailDTOList.add(lectrueNoteDetailDTO);
+			lectureNoteDetailDTOList.add(lectureNoteDetailDTO);
 			}
-			lectrueNoteDTO.put("detail" , lectrueNoteDetailDTOList);
-			lectrueNoteDTOlist.add(lectrueNoteDTO);
+			lectureNoteDTO.put("detail" , lectureNoteDetailDTOList);
+			lectureNoteDTOlist.add(lectureNoteDTO);
 		}
-		return ResponseEntity.ok(lectrueNoteDTOlist);
+		return ResponseEntity.ok(lectureNoteDTOlist);
 	}
 	
 	@GetMapping("/lectureQnAOpen")
-	public ResponseEntity<?> thisIsTestForlectrueQnAOpen(){
-		List<Map<String , String>> lectrueQnADTOlist = new ArrayList<Map<String , String>>();
+	public ResponseEntity<?> thisIsTestForlectureQnAOpen(){
+		List<Map<String , String>> lectureQnADTOlist = new ArrayList<Map<String , String>>();
 		for(int i = 1 ; i < 11 ; i++) {			
-			Map<String , String> lectrueQnADTO = new HashMap<String, String>();
-			lectrueQnADTO.put("lectureTitle", "질문을 작성한 강의 이름 : " + i);
-			lectrueQnADTO.put("chapter", "강의의 섹션 이름 : " + i);
-			lectrueQnADTO.put("subHeading", "소제목 : " + i);
-			lectrueQnADTO.put("questionTitle", "질문의 제목 : " + i);
-			lectrueQnADTO.put("date", "2023-" + String.format("%02d" ,(int) ((Math.random() * 12) + 1)) + "-" + String.format("%02d" ,(int) ((Math.random() * 31) + 1)));
-			lectrueQnADTO.put("content", "<h1>This is a Heading 1</h1>"
+			Map<String , String> lectureQnADTO = new HashMap<String, String>();
+			lectureQnADTO.put("lectureTitle", "질문을 작성한 강의 이름 : " + i);
+			lectureQnADTO.put("chapter", "강의의 섹션 이름 : " + i);
+			lectureQnADTO.put("subHeading", "소제목 : " + i);
+			lectureQnADTO.put("questionTitle", "질문의 제목 : " + i);
+			lectureQnADTO.put("date", "2023-" + String.format("%02d" ,(int) ((Math.random() * 12) + 1)) + "-" + String.format("%02d" ,(int) ((Math.random() * 31) + 1)));
+			lec
+			lectureQnADTO.put("content", "<h1>This is a Heading 1</h1>"
 					+ "    <h2>This is a Heading 2</h2>"
 					+ "    <h3>This is a Heading 3</h3>"
 					+ ""
@@ -179,9 +181,9 @@ public class TestController {
 					+ "        This is preformatted text."
 					+ "        It maintains the formatting and spacing."
 					+ "    </pre>");
-			lectrueQnADTOlist.add(lectrueQnADTO);
+			lectureQnADTOlist.add(lectureQnADTO);
 		}
-		return ResponseEntity.ok(lectrueQnADTOlist);
+		return ResponseEntity.ok(lectureQnADTOlist);
 	}
 
 	
