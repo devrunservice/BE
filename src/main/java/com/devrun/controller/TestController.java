@@ -150,7 +150,6 @@ public class TestController {
 			lectureQnADTO.put("subHeading", "소제목 : " + i);
 			lectureQnADTO.put("questionTitle", "질문의 제목 : " + i);
 			lectureQnADTO.put("date", "2023-" + String.format("%02d" ,(int) ((Math.random() * 12) + 1)) + "-" + String.format("%02d" ,(int) ((Math.random() * 31) + 1)));
-			lec
 			lectureQnADTO.put("content", "<h1>This is a Heading 1</h1>"
 					+ "    <h2>This is a Heading 2</h2>"
 					+ "    <h3>This is a Heading 3</h3>"
