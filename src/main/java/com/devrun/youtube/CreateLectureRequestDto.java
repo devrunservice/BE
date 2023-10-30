@@ -14,7 +14,7 @@ public class CreateLectureRequestDto {
     private int lecturePrice;
     private Date lectureStart;
     private Date lectureEdit;
-    private MultipartFile lectureThumbnailFile;
+    private MultipartFile lectureThumbnail;
     private List<String> lectureTag;
     private LectureCategory lectureCategory; // 카테고리 정보
     private List<LectureSectionDto> lectureSectionList; // 섹션 정보 리스트 List

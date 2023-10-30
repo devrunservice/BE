@@ -306,7 +306,7 @@ public class LectureService {
 	        detailsDto.setLectureCategory(categoryDto);
 
 	        // 강의 섹션 정보 매핑
-	        List<LectureSection> lectureSections = lectureSectionRepository.findByLecture(lecture);
+	        List<LectureSection> lectureSections = sectionRepository.findByLectureSection(lecture);
 	        List<LectureSectionDto> sectionDtos = new ArrayList<>();
 	        for (LectureSection lectureSection : lectureSections) {
 	            LectureSectionDto sectionDto = new LectureSectionDto();
@@ -318,10 +318,8 @@ public class LectureService {
 	            List<VideoDto> videoDtos = new ArrayList<>();
 	            for (Video video : videos) {
 	                VideoDto videoDto = new VideoDto();
-	                videoDto.setUploadDate(video.getUploadDate());
 	                videoDto.setFileName(video.getFileName());
 	                videoDto.setVideoId(video.getVideoId());
-	                videoDto.setTotalPlayTime(video.getTotalPlayTime());
 	                videoDto.setVideoLink(video.getVideoLink());
 	                videoDto.setVideoTitle(video.getVideoTitle());
 	                videoDtos.add(videoDto);
