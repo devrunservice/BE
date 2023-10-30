@@ -1,6 +1,10 @@
 package com.devrun.controller;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -72,6 +76,112 @@ public class TestController {
 		redisCache.removeCaffeine(id);
 		redisCache.removeJti(id);
 		return "Removed cache for " + id;
+	}
+	
+	@GetMapping("/lectureVideoOpen")
+	public ResponseEntity<?> thisIsTestForVideoOpen(){
+		Map<String , String> videoDTO = new HashMap<String, String>();
+		videoDTO.put("videoId", "nNA-sbOzHl4");
+		return ResponseEntity.ok(videoDTO);
+	}
+	
+	@GetMapping("/lectureNoteOpen")
+	public ResponseEntity<?> thisIsTestForlectrueNoteOpen(@RequestParam(name = "page" , required = false , defaultValue = "0") String page){
+		List<Map<String , Object>> lectrueNoteDTOlist = new ArrayList<Map<String , Object>>();
+		for(int i = 1 ; i < 4 ; i++) {
+			Map<String , Object> lectrueNoteDTO = new HashMap<String, Object>();
+			lectrueNoteDTO.put("lectureTitle", "노트를 작성한 강의 이름 : " + i);
+			lectrueNoteDTO.put("chapter", "강의의 섹션 이름 : " + i);
+			lectrueNoteDTO.put("subHeading", "소제목 : " + i);
+			lectrueNoteDTO.put("count", String.valueOf(i));
+			
+			List<Map<String , String>> lectrueNoteDetailDTOList = new ArrayList<Map<String,String>>();
+			for(int j = 1 ; j <= i ; j++) {
+			Map<String , String> lectrueNoteDetailDTO = new HashMap<String , String>();
+			lectrueNoteDetailDTO.put("noteId", "노트의 Id : " + i);
+			lectrueNoteDetailDTO.put("noteTitle", "노트의 제목 : " + i + "번 제목");
+			lectrueNoteDetailDTO.put("date", "2023-" + String.format("%02d" ,(int) ((Math.random() * 12) + 1)) + "-" + String.format("%02d" ,(int) ((Math.random() * 31) + 1)));
+			lectrueNoteDetailDTO.put("content", "<h1>This is a Heading 1</h1>"
+					+ "    <h2>This is a Heading 2</h2>"
+					+ "    <h3>This is a Heading 3</h3>"
+					+ ""
+					+ "    <p>This is a sample paragraph of text. It can contain multiple sentences.</p>"
+					+ ""
+					+ "    <p>This is <b>bold</b> text, and this is <i>italic</i> text.</p>"
+					+ ""
+					+ "    <p>This is <u>underlined</u> text.</p>"
+					+ ""
+					+ "    <p>This is <s>strikethrough</s> text.</p>"
+					+ ""
+					+ "    <p>This is <sup>superscript</sup> and this is <sub>subscript</sub> text.</p>"
+					+ ""
+					+ "    <hr>"
+					+ ""
+					+ "    <p>This is some text above the line.</p>"
+					+ "    <hr>"
+					+ "    <p>This is some text below the line.</p>"
+					+ ""
+					+ "    <blockquote>"
+					+ "        <p>This is a blockquote. It can be used to display quoted text.</p>"
+					+ "    </blockquote>"
+					+ ""
+					+ "    <p>This is some text.<br>Here's a line break.</p>"
+					+ ""
+					+ "    <pre>"
+					+ "        This is preformatted text."
+					+ "        It maintains the formatting and spacing."
+					+ "    </pre>");
+			lectrueNoteDetailDTOList.add(lectrueNoteDetailDTO);
+			}
+			lectrueNoteDTO.put("detail" , lectrueNoteDetailDTOList);
+			lectrueNoteDTOlist.add(lectrueNoteDTO);
+		}
+		return ResponseEntity.ok(lectrueNoteDTOlist);
+	}
+	
+	@GetMapping("/lectureQnAOpen")
+	public ResponseEntity<?> thisIsTestForlectrueQnAOpen(){
+		List<Map<String , String>> lectrueQnADTOlist = new ArrayList<Map<String , String>>();
+		for(int i = 1 ; i < 11 ; i++) {			
+			Map<String , String> lectrueQnADTO = new HashMap<String, String>();
+			lectrueQnADTO.put("lectureTitle", "질문을 작성한 강의 이름 : " + i);
+			lectrueQnADTO.put("chapter", "강의의 섹션 이름 : " + i);
+			lectrueQnADTO.put("subHeading", "소제목 : " + i);
+			lectrueQnADTO.put("questionTitle", "질문의 제목 : " + i);
+			lectrueQnADTO.put("date", "2023-" + String.format("%02d" ,(int) ((Math.random() * 12) + 1)) + "-" + String.format("%02d" ,(int) ((Math.random() * 31) + 1)));
+			lectrueQnADTO.put("content", "<h1>This is a Heading 1</h1>"
+					+ "    <h2>This is a Heading 2</h2>"
+					+ "    <h3>This is a Heading 3</h3>"
+					+ ""
+					+ "    <p>This is a sample paragraph of text. It can contain multiple sentences.</p>"
+					+ ""
+					+ "    <p>This is <b>bold</b> text, and this is <i>italic</i> text.</p>"
+					+ ""
+					+ "    <p>This is <u>underlined</u> text.</p>"
+					+ ""
+					+ "    <p>This is <s>strikethrough</s> text.</p>"
+					+ ""
+					+ "    <p>This is <sup>superscript</sup> and this is <sub>subscript</sub> text.</p>"
+					+ ""
+					+ "    <hr>"
+					+ ""
+					+ "    <p>This is some text above the line.</p>"
+					+ "    <hr>"
+					+ "    <p>This is some text below the line.</p>"
+					+ ""
+					+ "    <blockquote>"
+					+ "        <p>This is a blockquote. It can be used to display quoted text.</p>"
+					+ "    </blockquote>"
+					+ ""
+					+ "    <p>This is some text.<br>Here's a line break.</p>"
+					+ ""
+					+ "    <pre>"
+					+ "        This is preformatted text."
+					+ "        It maintains the formatting and spacing."
+					+ "    </pre>");
+			lectrueQnADTOlist.add(lectrueQnADTO);
+		}
+		return ResponseEntity.ok(lectrueQnADTOlist);
 	}
 
 	
