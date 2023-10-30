@@ -13,5 +13,12 @@ public interface LectureSectionRepository extends JpaRepository<LectureSection, 
 	  @Query(value = "SELECT MAX(sectionid) FROM lecture_section", nativeQuery = true)
 	    Long findLastSectionId();
 
+<<<<<<< HEAD
 	List<LectureSection> findByLecture(Lecture lectureNo);
+=======
+	List<LectureSection> findByLectureSection(Lecture lecture);
+
+
+
+>>>>>>> refs/heads/merge
 }
