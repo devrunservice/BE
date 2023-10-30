@@ -87,10 +87,9 @@ public class MyLectureService {
 				SectionInfo sectioninfo = new SectionInfo(section);
 				List<VideoInfo> videoInfolist = new ArrayList<VideoInfo>();
 				for (MyLectureProgress myprogress : myCouresList) {
-					if (myprogress.getMyLecture().equals(myLecture)) {
+					if (myprogress.getVideo().getLectureSection().equals(section)) {
 						VideoInfo videoinfo = new VideoInfo(myprogress);
 						videoInfolist.add(videoinfo);
-
 					}
 				}
 				sectioninfo.setVideoInfo(videoInfolist);

@@ -30,7 +30,7 @@ public class Video {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "videoNo")
+	@Column(name = "video_no")
 	private Long videoNo;
 
 	@Column(nullable = true)
