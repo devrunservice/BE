@@ -13,6 +13,8 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
     // 현재 영상의 이전 강의 영상을 검색
     Video findPreviousVideoByVideoIdLessThan(Long videoId);
     
+    List<Video> findByLectureSection(LectureSection lectureSection);
+    
     // 현재 영상의 다음 강의 영상을 검색
     Video findNextVideoByVideoIdGreaterThan(Long videoId);
 }

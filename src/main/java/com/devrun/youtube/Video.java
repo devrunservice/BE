@@ -17,6 +17,8 @@ import javax.persistence.TemporalType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -52,10 +54,12 @@ public class Video {
 	private String videoTitle;
 
 	@ManyToOne(cascade = CascadeType.PERSIST)
+	@JsonBackReference
 	@JoinColumn(name = "lecture_id")
 	private Lecture lecture;
 
 	@ManyToOne(cascade = CascadeType.PERSIST)
+	@JsonBackReference
 	@JoinColumn(name = "sectionid")
 	private LectureSection lectureSection;
 

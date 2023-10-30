@@ -26,46 +26,35 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "mylecture")
+@Table(name = "my_lecture_progress")
 @EntityListeners(AuditingEntityListener.class)
-public class MyLecture {
+public class MyLectureProgress {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "mylectureNo", length = 5)
-	@Comment("유저 강의 목록")
-	private Long mylectureno;
+	@Column(name = "my_lecture_progress_no", length = 5)
+	private Long myLectureProgressNo;
 
 	@ManyToOne
-	@JoinColumn(name = "userNo")
-	@Comment("수강생")
-	private MemberEntity memberentity;
-
-	@ManyToOne
-	@JoinColumn(name = "lectureNo")
-	@Comment("강의")
-	private Lecture lecture;
+	@JoinColumn(name = "mylectureno")
+	private MyLecture myLecture;
 	
 	@ManyToOne
-	@JoinColumn(name = "videoNo")
+	@JoinColumn(name = "video_id")
 	@Comment("영상")
 	private Video video;
 	
+	@Column(name = "progress")
+	@Comment("영상 진행률")
+	private int progress = 0;
 	
-	@Column(name="lecture_expiry_date")
-	private Date LectureExpiryDate;
+	@Column(name = "timecheck" , nullable = true)
+	@Comment("해당 영상 누적 시청 시간")
+	private int timecheck = 1;
 	
-	@Column(name="wholeprogress")
-	private float lectureProgress;
-	
-	
-
-//	@Column(name = "passorfail")
-//	@Comment("수강 완료 여부")
-//	private boolean passOrFail;
-//	
-//	@Column(name = "rating")
-//	@Comment("수강 평점")
-//	private int rating;
-
+	@Column(name = "lastviewdate" , nullable = true)
+	@Comment("마지막 영상 시청 시간")
+    @LastModifiedDate
+    @Temporal(TemporalType.DATE)
+	private Date lastviewdate;	
 }

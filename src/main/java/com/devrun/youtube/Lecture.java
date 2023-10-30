@@ -1,6 +1,5 @@
 package com.devrun.youtube;
 
-
 import java.util.Date;
 import java.util.List;
 
@@ -24,6 +23,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.devrun.entity.MemberEntity;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.Data;
 
@@ -31,61 +31,65 @@ import lombok.Data;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 public class Lecture {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "lectureid")
-    private Long lectureid;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "lectureid")
+	private Long lectureid;
 
-    @Column(nullable = true)
-    private String lectureName;
-    
-    @Column(nullable = true)
-    private String lectureIntro;
-    
-    @Column(nullable = true)
-    private int lecturePrice;
-    
-    @Column(nullable = true)
-    @CreatedDate
-    @Temporal(TemporalType.DATE)
-    private Date lectureStart;
-    
-    @Column(nullable = true)
-    @LastModifiedDate
-    @Temporal(TemporalType.DATE)
-    private Date lectureEdit;
-    
-    @Column(nullable = true)
-    private String lectureDiscount;
-    
-    @Column(nullable = true)
-    private String lectureDiscountrate;
-    
-    @Column(nullable = true)
-    private String lectureDiscountstart;
-    
-    @Column(nullable = true)
-    private String lectureDiscountend;
-    
-    @Column(nullable = true)
-    private String lectureStatus = "ACTIVE";
-    
-    @Column(nullable = true)
-    private String lectureThumbnail;
+	@Column(nullable = true)
+	private String lectureName;
 
-    @ElementCollection
-    private List<String> lectureTag;
+	@Column(nullable = true)
+	private String lectureIntro;
 
-    @ManyToOne
-    @JoinColumn(name = "categoryNo")
-    private LectureCategory lectureCategory;
-    
-    @ManyToOne
-    @JoinColumn(name = "userNo")
-    private MemberEntity mentoId;
-    
-    @OneToMany(mappedBy = "lecture", cascade = CascadeType.ALL)
-    private List<Video> videos;
+	@Column(nullable = true)
+	private int lecturePrice;
+
+	@Column(nullable = true)
+	@CreatedDate
+	@Temporal(TemporalType.DATE)
+	private Date lectureStart;
+
+	@Column(nullable = true)
+	@LastModifiedDate
+	@Temporal(TemporalType.DATE)
+	private Date lectureEdit;
+
+	@Column(nullable = true)
+	private String lectureDiscount;
+
+	@Column(nullable = true)
+	private String lectureDiscountrate;
+
+	@Column(nullable = true)
+	private String lectureDiscountstart;
+
+	@Column(nullable = true)
+	private String lectureDiscountend;
+
+	@Column(nullable = true)
+	private String lectureStatus = "ACTIVE";
+
+	@Column(nullable = true)
+	private String lectureThumbnail;
+
+	@Column(nullable = true)
+	private float lectureRating;
+
+	@ElementCollection
+	private List<String> lectureTag;
+
+	@ManyToOne
+	@JoinColumn(name = "categoryNo")
+	private LectureCategory lectureCategory;
+
+	@ManyToOne
+	@JoinColumn(name = "userNo")
+	private MemberEntity mentoId;
+
+	@OneToMany(mappedBy = "lecture", cascade = CascadeType.REMOVE)
+	@JsonManagedReference
+	private List<LectureSection> lectureSections;
 
 	public void setLectureSection(List<LectureSection> sections) {
 	}
@@ -94,4 +98,3 @@ public class Lecture {
 		return null;
 	}
 }
-
