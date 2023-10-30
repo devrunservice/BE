@@ -79,7 +79,6 @@ public class MyLectureController {
 	 */
 	@GetMapping("/getMycoures")
 	@ApiOperation(value = "학생 유저가 수강 중인 강의 커리큘럼 가져오기")//Api 설명
-	@ApiImplicitParam(name = "" , value = "" , example = "" , dataTypeClass = String.class)//Api 파라미터
 	public List<MycouresDTO> getMycoures(HttpServletRequest request , @RequestParam(name = "lectureId") Long lectureId) {
 		//String userAccessToken = request.getHeader("Access_token");
 		//String userId = JWTUtil.getUserIdFromToken(userAccessToken);
