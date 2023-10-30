@@ -23,20 +23,16 @@ import com.devrun.util.CouponCodeGenerator;
 import com.devrun.youtube.Lecture;
 import com.devrun.youtube.LectureRepository;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class CouponSerivce {
 
-	@Autowired
-	private CouponIssuedRepository couponIssuedRepository;
-
-	@Autowired
-	private CouponregicodeRepository couponregicodeRepository;
-
-	@Autowired
-	private CouponViewRepository couponviewRepositroy;
-
-	@Autowired
-	private LectureRepository lectureRepository;
+	private final CouponIssuedRepository couponIssuedRepository;
+	private final CouponregicodeRepository couponregicodeRepository;
+	private final CouponViewRepository couponviewRepositroy;
+	private final LectureRepository lectureRepository;
 
 	public CouponIssuanceRequestDTO saveCouponDetail(CouponIssuanceRequestDTO couponIssuanceRequestDTO,
 			MemberEntity mentoEntity) {

@@ -21,23 +21,17 @@ import com.devrun.repository.PointRepository;
 import com.devrun.youtube.Lecture;
 import com.devrun.youtube.LectureRepository;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class CartService {
 
-	@Autowired
-	private CartRepo cartRepo;
-
-	@Autowired
-	private ContactRepository contactRepository;
-
-	@Autowired
-	private LectureRepository lectureRepository;
-
-	@Autowired
-	private PointRepository pointRepository;
-
-	@Autowired
-	private CouponViewRepository couponViewRepository;
+	private final CartRepo cartRepo;
+	private final ContactRepository contactRepository;
+	private final LectureRepository lectureRepository;
+	private final PointRepository pointRepository;
+	private final CouponViewRepository couponViewRepository;
 
 	public List<LectureInfo> showlectureInfo(MemberEntity userEntity) {
 

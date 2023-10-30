@@ -37,10 +37,12 @@ public class Cart {
     
     
     public LectureInfo getLectureInfo() {
-		return new LectureInfo(this.lecture.getLectureThumbnail(),	
+		return new LectureInfo(
+				this.lecture.getLectureThumbnail(),	
 				this.lecture.getLectureName(),	
 				this.lecture.getLectureIntro(), 
-				this.lecture.getLecturePrice()
+				this.lecture.getLecturePrice(),
+				this.lecture.getLectureid()				
 				);
     	
     }
