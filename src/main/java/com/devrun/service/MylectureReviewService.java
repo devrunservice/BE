@@ -11,6 +11,7 @@ import com.devrun.entity.MemberEntity;
 import com.devrun.entity.MyLecture;
 import com.devrun.entity.MylectureReview;
 import com.devrun.repository.MyLectureReviewRepository;
+import com.devrun.repository.MylectureRepository;
 import com.devrun.youtube.Lecture;
 import com.devrun.youtube.LectureService;
 
@@ -21,11 +22,13 @@ import lombok.RequiredArgsConstructor;
 public class MylectureReviewService {
 	
 	private final MyLectureReviewRepository reviewRepository;
+	private final MylectureRepository mylectureRepository;
 	private final LectureService lectureService;
 	private final MyLectureService myLectureService;
 
 	public void saveReview(MemberEntity userEntity, ReviewRequest reviewRequest) {
 		Lecture lecture = lectureService.findByLectureID(reviewRequest.getLectureId());
+
 		List<MyLecture> myLectureList = myLectureService.verifyUserHasLecture(userEntity , lecture);
 		if(myLectureList.size() == 1) {
 			MylectureReview mylectureReview = new MylectureReview(
@@ -45,8 +48,8 @@ public class MylectureReviewService {
 	}
 	
 	public MylectureReview verifyUserHasReview(MemberEntity userEntity, Long mylectureReviewNo) {
-		
-		Optional<MylectureReview> optional = reviewRepository.findByMemberentityAndMylectureReviewNo(userEntity, mylectureReviewNo);
+		Optional<List<MyLecture>> mylecture = mylectureRepository.findByMemberentity(userEntity);
+		Optional<MylectureReview> optional = reviewRepository.findByMyLectureAndMylectureReviewNo(mylecture.get().get(0), mylectureReviewNo);
 		if (optional.isPresent()) {
 			return optional.get();
 		} else {

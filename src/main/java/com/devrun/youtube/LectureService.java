@@ -189,7 +189,6 @@ public class LectureService {
 	    return lectureDto;
 	}
 
-<<<<<<< HEAD
 	public Lecture findByLectureID(Long lectureId) {
 		Optional<Lecture> lecutre = lectureRepository.findById(lectureId);
 		
@@ -199,9 +198,8 @@ public class LectureService {
 			throw new NoSuchElementException("Lecture Not Found!"); 
 			}
 	}
-=======
 	
-	 public CreateLectureRequestDto getLectureDetailsMapping(Long lectureId) {
+	 public CreateLectureRequestDto getLectureDetailsMapping(Long lectureId) throws NotFoundException {
 	        Lecture lecture = lectureRepository.findById(lectureId)
 	                .orElseThrow(() -> new NotFoundException());
 
@@ -211,7 +209,7 @@ public class LectureService {
 	        detailsDto.setLecturePrice(lecture.getLecturePrice());
 	        detailsDto.setLectureStart(lecture.getLectureStart());
 	        detailsDto.setLectureEdit(lecture.getLectureEdit());
-	        detailsDto.setLectureThumbnail(lecture.getLectureThumbnail());
+	        //detailsDto.setLectureThumbnail(lecture.getLectureThumbnail());
 
 	        // 강의 카테고리 정보 매핑
 	        LectureCategory lectureCategory = lecture.getLectureCategory();
@@ -219,10 +217,10 @@ public class LectureService {
 	        categoryDto.setCategoryNo(lectureCategory.getCategoryNo());
 	        categoryDto.setLectureBigCategory(lectureCategory.getLectureBigCategory());
 	        categoryDto.setLectureMidCategory(lectureCategory.getLectureMidCategory());
-	        detailsDto.setLectureCategory(categoryDto);
+	        //detailsDto.setLectureCategory(categoryDto);
 
 	        // 강의 섹션 정보 매핑
-	        List<LectureSection> lectureSections = sectionRepository.findByLectureSection(lecture);
+	        List<LectureSection> lectureSections = sectionRepository.findByLecture(lecture);
 	        List<LectureSectionDto> sectionDtos = new ArrayList<>();
 	        for (LectureSection lectureSection : lectureSections) {
 	            LectureSectionDto sectionDto = new LectureSectionDto();
@@ -243,10 +241,12 @@ public class LectureService {
 	            sectionDto.setVideoDtos(videoDtos);
 	            sectionDtos.add(sectionDto);
 	        }
-	        detailsDto.setLectureSectionDtos(sectionDtos);
+	       detailsDto.setLectureSectionList(sectionDtos);
 
 	        return detailsDto;
 	    }
+	 
+	 
 //	 public CreateLectureRequestDto getLectureDetailsMapping(Long lectureId) {
 //	        Lecture lecture = lectureRepository.findById(lectureId)
 //	                .orElseThrow(() -> new NotFoundException());
@@ -294,8 +294,5 @@ public class LectureService {
 //	        detailsDto.setLectureSectionDtos(sectionDtos);
 //
 //	        return detailsDto;
-//	    }
-
->>>>>>> refs/heads/merge
-	
+//	    }	
 }

@@ -9,16 +9,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface LectureSectionRepository extends JpaRepository<LectureSection, Long> {
 
-	
-	  @Query(value = "SELECT MAX(sectionid) FROM lecture_section", nativeQuery = true)
-	    Long findLastSectionId();
+	@Query(value = "SELECT MAX(sectionid) FROM lecture_section", nativeQuery = true)
+	Long findLastSectionId();
 
-<<<<<<< HEAD
 	List<LectureSection> findByLecture(Lecture lectureNo);
-=======
-	List<LectureSection> findByLectureSection(Lecture lecture);
-
-
-
->>>>>>> refs/heads/merge
 }

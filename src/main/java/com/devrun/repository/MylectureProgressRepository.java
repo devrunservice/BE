@@ -20,7 +20,7 @@ public interface MylectureProgressRepository extends JpaRepository<MyLectureProg
 
 	List<MyLectureProgress> findByMyLectureIn(List<MyLecture> myLectureList);
 
-	MyLectureProgress findByMylectureAndVideo(MemberEntity memberentity, Video videoentity);
+	MyLectureProgress findByMyLectureAndVideo(MemberEntity memberentity, Video videoentity);
 
 
 }

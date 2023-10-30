@@ -32,12 +32,12 @@ public CreateLectureRequestDto getLectureDetails(@PathVariable Long lectureId) t
 	CreateLectureRequestDto lecture = lectureService.getLectureDetails(lectureId);
     return lecture;
 }
-//
-//@GetMapping("/lectures/{lectureId}/detail")
-//public CreateLectureRequestDto getLectureDetailsMapping(@PathVariable Long lectureId) {
-//	CreateLectureRequestDto lecturedetail = lectureService.getLectureDetailsMapping(lectureId);
-//    return lecturedetail;
-//}
+
+@GetMapping("/lectures/{lectureId}/detail")
+public CreateLectureRequestDto getLectureDetailsMapping(@PathVariable Long lectureId) throws NotFoundException {
+	CreateLectureRequestDto lecturedetail = lectureService.getLectureDetailsMapping(lectureId);
+    return lecturedetail;
+}
 
 
 @GetMapping("/videos/{videoId}")

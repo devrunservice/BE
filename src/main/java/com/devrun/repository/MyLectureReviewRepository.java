@@ -11,6 +11,7 @@ import com.devrun.entity.MylectureReview;
 
 public interface MyLectureReviewRepository extends JpaRepository<MylectureReview, Long> {
 
-	Optional<MylectureReview> findByMemberentityAndMylectureReviewNo(MemberEntity userEntity, Long mylectureReviewNo);
+	Optional<MylectureReview> findByMyLectureAndMylectureReviewNo(MyLecture userEntity, Long mylectureReviewNo);
+
 	
 }

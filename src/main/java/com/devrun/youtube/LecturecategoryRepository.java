@@ -7,15 +7,13 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LecturecategoryRepository extends JpaRepository<LectureCategory, Long> {
-    @Override
-    <S extends LectureCategory> S save(S entity);
-    
-    List<LectureSection> findByLectureSection(Lecture lecture);
+	@Override
+	<S extends LectureCategory> S save(S entity);
 
 	LectureCategory findByCategoryNoAndLectureBigCategoryAndLectureMidCategory(Long categoryNo,
 			String lectureBigCategory, String lectureMidCategory);
 
 	LectureCategory findByLectureBigCategoryAndLectureMidCategory(String bigcategory, String midcategory);
 
-	List<LectureCategory> findByLectureBigCategoryOrLectureMidCategory(String bigcategory , String midcategory);
+	List<LectureCategory> findByLectureBigCategoryOrLectureMidCategory(String bigcategory, String midcategory);
 }

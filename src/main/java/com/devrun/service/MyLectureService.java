@@ -49,8 +49,8 @@ public class MyLectureService {
 
 	public Map<String, Object> progress(MemberEntity userEntity, String videoid, int currenttime) {
 		Video videoentity = videoRepository.findByVideoId(videoid);
-		Optional<List<MyLecture>> mylecture = mylectureRepository.findByMemberentityAndLectureNo(userEntity, videoentity.getLecture());
-		MyLectureProgress mylectureProgressEntity = mylectureProgressRepository.findByMylectureAndVideo(userEntity, videoentity);
+		Optional<List<MyLecture>> mylecture = mylectureRepository.findByMemberentityAndLecture(userEntity, videoentity.getLecture());
+		MyLectureProgress mylectureProgressEntity = mylectureProgressRepository.findByMyLectureAndVideo(userEntity, videoentity);
 		int totalplaytime = mylectureProgressEntity.getVideo().getTotalPlayTime();
 		int progressInt = (int)((double)currenttime / (double)totalplaytime * 100);	
 		mylectureProgressEntity.setProgress(progressInt);
@@ -68,7 +68,7 @@ public class MyLectureService {
 	}
 	
 	public List<MyLecture> verifyUserHasLecture(MemberEntity userEntity, Lecture lecture) {
-		Optional<List<MyLecture>> optional = mylectureRepository.findByMemberentityAndLectureNo(userEntity, lecture);
+		Optional<List<MyLecture>> optional = mylectureRepository.findByMemberentityAndLecture(userEntity, lecture);
 		if (optional.isPresent()) {
 			return optional.get();
 		} else {

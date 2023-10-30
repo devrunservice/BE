@@ -11,6 +11,8 @@ import com.devrun.youtube.Lecture;
 
 public interface MylectureRepository extends JpaRepository<MyLecture, Long> {
 
-	Optional<List<MyLecture>> findByMemberentityAndLectureNo(MemberEntity userEntity, Lecture lecture);
+	Optional<List<MyLecture>> findByMemberentityAndLecture(MemberEntity userEntity, Lecture lecture);
+
+	Optional<List<MyLecture>> findByMemberentity(MemberEntity userEntity);
 
 }

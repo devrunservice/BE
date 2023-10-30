@@ -1,12 +1,14 @@
 package com.devrun.youtube;
 
+import java.util.List;
+
 import lombok.Data;
 
 @Data
 public class LectureSectionDto {
     private int SectionNumber; //1번
     private String SectionTitle; //1번 제목
-    //List<videoDto> videoDtos; //4
+    List<VideoDto> videoDtos; //4
 }
 
 
