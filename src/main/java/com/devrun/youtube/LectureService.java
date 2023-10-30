@@ -2,6 +2,8 @@ package com.devrun.youtube;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,33 +33,6 @@ public class LectureService {
 		this.videoRepository = videoRepository;
 	}
 
-//    public Lecture saveLecture(CreateLectureRequestDto requestDto, String thumbnailUrl, LecturecategoryDto categoryDto) {
-//    	
-//    	
-//    	
-//    	// 앞단에서 선택한 옵션값인 categoryDto를 사용하여 검증 및 매핑된 Lecture Category 객체를 가져옵니다.
-//        LectureCategory lectureCategory = convertToLectureCategoryEntity(categoryDto);
-//
-//        Lecture lecture = convertToLectureEntity(requestDto, lectureCategory, categoryDto);
-//        lecture.setLectureThumbnail(thumbnailUrl);
-//
-//        List<LectureSection> sections = saveLectureSections(requestDto.getLectureSectionList(), lecture);
-//        lecture.setLectureSection(sections);
-//
-//        List<Video> videos = saveVideos(requestDto.getVideoList(), lecture);
-//        lecture.setVideos(videos);
-//
-//        // Set Lecture Tags
-//        if (requestDto.getLectureTag() != null) {
-//            lecture.setLectureTag(requestDto.getLectureTag());
-//        }
-//        
-//        // 동영상 정보를 업데이트합니다.
-//        List<VideoInfo> videoInfoList = new ArrayList<>();
-//        saveVideoInfo(videoInfoList, lecture);
-//        
-//        return lecture;
-//    }
 
 	private LectureCategory convertToLectureCategoryEntity(LecturecategoryDto categoryDto) {
 		// 앞단에서 선택한 옵션값인 categoryDto를 사용하여 DB에서 해당 카테고리를 조회합니다.
@@ -90,24 +65,6 @@ public class LectureService {
 		return section;
 	}
 
-//    private List<Video> saveVideos(List<VideoDto> videoDtoList, Lecture lecture ) {
-//        List<Video> videos = new ArrayList<>();
-//        for (VideoDto videoDto : videoDtoList) {
-//            Video video = convertToVideoEntity(videoDto, lecture);
-//
-//            Long lectureSectionId = videoDto.getLectureSectionId();
-//            if (lectureSectionId != null) {
-//                LectureSection section = sectionRepository.findById(lectureSectionId).orElse(null);
-//                if (section != null) {
-//                    video.setLectureSection(section);
-//                }
-//            }
-//
-//            videos.add(video);
-//        }
-//        return videoRepository.saveAll(videos);
-//    }
-
 	private Video convertToVideoEntity(VideoDto videoDto, Lecture lecture) {
 		Video video = new Video();
 		video.setUploadDate(videoDto.getUploadDate());
@@ -121,58 +78,6 @@ public class LectureService {
 		return video;
 	}
 
-//    private Lecture convertToLectureEntity(CreateLectureRequestDto requestDto, LectureCategory lectureCategory,LecturecategoryDto categoryDto ) {
-//    	 // 앞단에서 선택한 옵션값인 categoryDto를 사용하여 검증 및 매핑된 Lecture Category 객체를 가져옵니다.
-//        LectureCategory lecturecategory = convertToLectureCategoryEntity(categoryDto);
-//        
-//        Lecture lecture = new Lecture();
-//
-//        // CreateLectureRequestDto에서 필요한 데이터를 가져와서 Lecture 엔티티에 설정합니다.
-//        lecture.setLectureName(requestDto.getLectureName());
-//        lecture.setLectureIntro(requestDto.getLectureIntro());
-//        lecture.setLecturePrice(requestDto.getLecturePrice());
-//        lecture.setLectureTag(requestDto.getLectureTag());
-//
-//     // 매핑된 Category 객체를 Lecture 엔티티의 속성으로 설정합니다.
-//        lecture.setLectureCategory(lecturecategory);
-//
-//     // LectureSection 설정
-//     // CreateLectureRequestDto에 있는 섹션 정보 리스트를 가져와서 LectureSection 엔티티 객체들을 생성하고 Lecture 엔티티와 연결합니다.
-//     List<LectureSection> sections = new ArrayList<>();
-//     for (LectureSectionDto sectionDto : requestDto.getLectureSectionList()) {
-//         LectureSection section = new LectureSection();
-//         section.setSectionNumber(sectionDto.getSectionNumber());
-//         section.setSectionTitle(sectionDto.getSectionTitle());
-//
-//         // Lecture 객체와 연결 (LectureSection 객체에 Lecture 객체 설정)
-//         section.setLecture(lecture);
-//
-//         sections.add(section);
-//     }
-//     lecture.setLectureSection(sections);
-//
-//
-//        // Lecture 엔티티를 데이터베이스에 저장합니다.
-//        lecture = lectureRepository.save(lecture);
-//
-//        // 저장된 Lecture 엔티티를 반환합니다.
-//        return lecture;
-//    }
-
-//    public void saveVideoInfo(List<VideoInfo> videoInfoList, Lecture lecture) {
-//        for (VideoInfo videoInfo : videoInfoList) {
-//            Video existingVideo = videoRepository.findByVideoId(videoInfo.getVideoId());
-//            if (existingVideo != null) {
-//                existingVideo.setUploadDate(videoInfo.getUploadDate());
-//                existingVideo.setFileName(videoInfo.getFileName());
-//                existingVideo.setTotalPlayTime(videoInfo.getTotalPlayTime());
-//                existingVideo.setUrl(videoInfo.getUrl()); 
-//
-//                // 비디오 테이블에 저장된 정보를 업데이트합니다.
-//                videoRepository.save(existingVideo);
-//            }
-//        }
-//    }
 
 	// 마지막 섹션 ID를 가져오는 메서드 추가
 	public Long getLastSectionId() {
@@ -284,55 +189,14 @@ public class LectureService {
 	    return lectureDto;
 	}
 
-	
-//	 public CreateLectureRequestDto getLectureDetailsMapping(Long lectureId) {
-//	        Lecture lecture = lectureRepository.findById(lectureId)
-//	                .orElseThrow(() -> new NotFoundException());
-//
-//	        CreateLectureRequestDto detailsDto = new CreateLectureRequestDto();
-//	        detailsDto.setLectureName(lecture.getLectureName());
-//	        detailsDto.setLectureIntro(lecture.getLectureIntro());
-//	        detailsDto.setLecturePrice(lecture.getLecturePrice());
-//	        detailsDto.setLectureStart(lecture.getLectureStart());
-//	        detailsDto.setLectureEdit(lecture.getLectureEdit());
-//	        detailsDto.setLectureThumbnail(lecture.getLectureThumbnail());
-//
-//	        // 강의 카테고리 정보 매핑
-//	        LectureCategory lectureCategory = lecture.getLectureCategory();
-//	        LecturecategoryDto categoryDto = new LecturecategoryDto();
-//	        categoryDto.setCategoryNo(lectureCategory.getCategoryNo());
-//	        categoryDto.setLectureBigCategory(lectureCategory.getLectureBigCategory());
-//	        categoryDto.setLectureMidCategory(lectureCategory.getLectureMidCategory());
-//	        detailsDto.setLectureCategory(categoryDto);
-//
-//	        // 강의 섹션 정보 매핑
-//	        List<LectureSection> lectureSections = lectureSectionRepository.findByLecture(lecture);
-//	        List<LectureSectionDto> sectionDtos = new ArrayList<>();
-//	        for (LectureSection lectureSection : lectureSections) {
-//	            LectureSectionDto sectionDto = new LectureSectionDto();
-//	            sectionDto.setSectionNumber(lectureSection.getSectionNumber());
-//	            sectionDto.setSectionTitle(lectureSection.getSectionTitle());
-//
-//	            // 섹션에 속한 비디오 정보 매핑
-//	            List<Video> videos = videoRepository.findByLectureSection(lectureSection);
-//	            List<VideoDto> videoDtos = new ArrayList<>();
-//	            for (Video video : videos) {
-//	                VideoDto videoDto = new VideoDto();
-//	                videoDto.setUploadDate(video.getUploadDate());
-//	                videoDto.setFileName(video.getFileName());
-//	                videoDto.setVideoId(video.getVideoId());
-//	                videoDto.setTotalPlayTime(video.getTotalPlayTime());
-//	                videoDto.setVideoLink(video.getVideoLink());
-//	                videoDto.setVideoTitle(video.getVideoTitle());
-//	                videoDtos.add(videoDto);
-//	            }
-//	            sectionDto.setVideoDtos(videoDtos);
-//	            sectionDtos.add(sectionDto);
-//	        }
-//	        detailsDto.setLectureSectionDtos(sectionDtos);
-//
-//	        return detailsDto;
-//	    }
-
+	public Lecture findByLectureID(Long lectureId) {
+		Optional<Lecture> lecutre = lectureRepository.findById(lectureId);
+		
+		if (lecutre.isPresent()) {
+			return lecutre.get();
+			} else {
+			throw new NoSuchElementException("Lecture Not Found!"); 
+			}
+	}
 	
 }

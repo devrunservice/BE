@@ -63,7 +63,9 @@ public class MyLecture {
 	@Comment("마지막 영상 시청 시간")
     @LastModifiedDate
     @Temporal(TemporalType.DATE)
-	private Date lastviewdate;	
+	private Date lastviewdate;
+	
+	
 	
 
 //	@Column(name = "passorfail")

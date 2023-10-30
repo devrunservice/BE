@@ -6,11 +6,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.devrun.dto.QueryLectureByKeywordDTO;
-import com.devrun.dto.TotalProgress;
 import com.devrun.entity.MemberEntity;
 import com.devrun.repository.MemberEntityRepository;
 import com.devrun.service.AwsS3UploadService;
@@ -63,10 +59,10 @@ public class LectureregistController {
 
 	GoogleClientSecrets clientSecrets = loadClientSecretsFromFile(); // 파일로부터 클라이언트 비밀 정보 로드하는 예시 메서드
 	private static final String redirectUri = "http://localhost:3000/auth/google/callback";
-	
+
 	@Autowired
 	private MemberEntityRepository memberEntityRepository;
-	
+
 	@Autowired
 	public LectureregistController(MemberService memberService, LectureService lectureService,
 			AwsS3UploadService awsS3UploadService, YouTubeUploader youTubeUploader,
@@ -175,8 +171,8 @@ public class LectureregistController {
 
 	@PostMapping("/lectureregitest")
 	public String lecturetest(@ModelAttribute CreateLectureRequestDto requestDto,
-			@RequestParam("accessToken") String googleAccessToken, HttpServletResponse httpServletResponse , @RequestParam("jwtToken") String jwtToken)
-			throws Exception {
+			@RequestParam("accessToken") String googleAccessToken, HttpServletResponse httpServletResponse,
+			@RequestParam("jwtToken") String jwtToken) throws Exception {
 		System.out
 				.println("--------------------------------lectureregitest Controller --------------------------------");
 		System.out.println(requestDto.getLectureName());
@@ -196,21 +192,17 @@ public class LectureregistController {
 		List<VideoDto> uploadedVideos = new ArrayList<>();
 
 		requestDto.setVideoList(videolist);
-		
-		
-		  // JWT 토큰에서 사용자 아이디 추출
-	    String userId = JWTUtil.getUserIdFromToken(jwtToken);
-	    
-	    // 멘토(사용자) 정보 조회
-	    MemberEntity mento = memberEntityRepository.findById(userId);
-	    
-	    
-	    // 강의 엔터리 객체 생성 및 매핑
-	    Lecture lecture = new Lecture();
-	    lecture.setMentoId(mento);
-	    
-	    
-	    
+
+		// JWT 토큰에서 사용자 아이디 추출
+		String userId = JWTUtil.getUserIdFromToken(jwtToken);
+
+		// 멘토(사용자) 정보 조회
+		MemberEntity mento = memberEntityRepository.findById(userId);
+
+		// 강의 엔터리 객체 생성 및 매핑
+		Lecture lecture = new Lecture();
+		lecture.setMentoId(mento);
+
 		try {
 
 			// 리스트의 각 비디오에 대해 업로드 작업을 수행합니다.
@@ -219,7 +211,7 @@ public class LectureregistController {
 				uploadedVideos.add(uploadedVideo);
 			}
 
-			String lectureThumnailUrl = awsS3UploadService.putS3(requestDto.getLectureThumbnailFile(),
+			String lectureThumnailUrl = awsS3UploadService.putS3(requestDto.getLectureThumbnail(),
 					"public.lecture.images", requestDto.getLectureName());
 
 			Lecture savedlecture = lectureService.saveLecture2(requestDto, lectureThumnailUrl);
@@ -245,12 +237,11 @@ public class LectureregistController {
 	// 필요 기능 : 페이지네이션 , 정렬 기능 , 통합 검색(강의명,강의소개,강사명)
 	@GetMapping({ "/q/lecture" })
 	@ApiImplicitParams({
-		@ApiImplicitParam(example = "요리", value = "대분류 카테고리", name = "bigcategory" , dataTypeClass = String.class),
-		@ApiImplicitParam(example = "라면", value = "중분류 카테고리", name = "midcategory" , dataTypeClass = String.class),
-		@ApiImplicitParam(example = "sky", value = "검색 키워드", name = "q" , dataTypeClass = String.class),
-		@ApiImplicitParam(example = "lecture_start", value = "정렬 옵션", name = "order" , dataTypeClass = String.class),
-		@ApiImplicitParam(example = "1", value = "요청 페이지", name = "page" , dataTypeClass = String.class)
-	})
+			@ApiImplicitParam(example = "요리", value = "대분류 카테고리", name = "bigcategory", dataTypeClass = String.class),
+			@ApiImplicitParam(example = "라면", value = "중분류 카테고리", name = "midcategory", dataTypeClass = String.class),
+			@ApiImplicitParam(example = "sky", value = "검색 키워드", name = "q", dataTypeClass = String.class),
+			@ApiImplicitParam(example = "lecture_start", value = "정렬 옵션", name = "order", dataTypeClass = String.class),
+			@ApiImplicitParam(example = "1", value = "요청 페이지", name = "page", dataTypeClass = String.class) })
 	@ApiOperation(value = "강의 조회 API", notes = "파라미터로 키워드를 입력하면 강의를 반환합니다. 각 파라미터로 키워드, 정렬 옵션, 페이지 를 요청할 수 있고, 각 페이지 당 10개의 항목이 반환됩니다. 정렬 옵션은 lectureStart (등록날짜순) 또는 lecturePrice (가격순) 이며 추후 제약 조건들을 추가하고, 평점 기능이 도입되면 평점순도 추가할 예정입니다. 정렬 옵션을 입력하지 않으면 기본적으론 등록순이며 모든 정렬은 내림차순입니다.")
 	public List<QueryLectureByKeywordDTO> testmethod1(
 			@RequestParam(value = "bigcategory", defaultValue = "", required = false) String bigcategory,
@@ -325,141 +316,4 @@ public class LectureregistController {
 
 	}
 
-	@PostMapping("/lecture/progress")
-	@ApiOperation(value = "영상 진행률 저장하기", notes = "파라미터로 액세스 토큰과 현재 시청중인 videoid(videoid)와, 현재 재생 누적 시간(currenttime)를 요청하면, 데이터베이스에 저장하고, 결과값을 반환합니다.")
-	@ApiImplicitParams({
-		@ApiImplicitParam(example = "w8-X2DED94A",value = "비디오 아이디",name = "videoid" , dataTypeClass = String.class),
-		@ApiImplicitParam(example = "120" ,value = "영상 재생 누적 시간(초 단위)",name = "currenttime" , dataTypeClass = Integer.class)				
-			})
-	public Map<String, Object> lectureprogress(HttpServletRequest httpServletRequest,
-			@RequestParam("videoid") String videoid, @RequestParam("currenttime") int currenttime) {
-		String accessToken = httpServletRequest.getHeader("Access_token");
-		// String userid =
-		// SecurityContextHolder.getContext().getAuthentication().getName();
-
-		return myLectureProgressService.progress(accessToken, videoid, currenttime);
-
-	}
-
-	@GetMapping("/mylecturelist")
-	@ApiOperation(value = "내 학습 불러오기", notes = "파라미터로 액세스 토큰과 강의 완강 여부(status), 페이지(page)를 요청할 수 있고, 각 페이지 당 10개의 항목이 반환됩니다.")
-	@ApiImplicitParams({
-		@ApiImplicitParam(example = "Inprogress",value = "강의 완강 여부",name = "status" , dataTypeClass = String.class),
-		@ApiImplicitParam(example = "1",value = "요청 페이지",name = "page" , dataTypeClass = String.class)				
-			})
-	public List<Map<String, Object>> mylecturelist(HttpServletRequest httpServletRequest , @RequestParam(name = "status" , required = false) String status, @RequestParam(name = "page" , required = false) String page) {
-		String accessToken = httpServletRequest.getHeader("Access_token");
-		System.out.println("/mylecturelist Access_token" + accessToken);
-		
-		
-		return myLectureProgressService.mylecturelist(accessToken);
-
-	}
-	
-	@GetMapping("/mylecturelisttest")
-	public void mytest() {
-		List<TotalProgress> fd = myLectureProgressService.mylecturelistReal(null);
-		for (TotalProgress totalProgress : fd) {
-			System.out.println(totalProgress.getlectureno());
-			System.out.println(totalProgress.getuserno());			
-		}
-	}
-	
-	@GetMapping("/lectrueVideoOpen")
-	public ResponseEntity<?> thisIsTestForVideoOpen(){
-		Map<String , String> videoDTO = new HashMap<String, String>();
-		videoDTO.put("videoId", "nNA-sbOzHl4");
-		return ResponseEntity.ok(videoDTO);
-	}
-	
-	@GetMapping("/lectrueNoteOpen")
-	public ResponseEntity<?> thisIsTestForlectrueNoteOpen(@RequestParam(name = "page" , required = false , defaultValue = "0") String page){
-		List<Map<String , String>> lectrueNoteDTOlist = new ArrayList<Map<String , String>>();
-		for(int i = 1 ; i < 11 ; i++) {			
-			Map<String , String> lectrueNoteDTO = new HashMap<String, String>();
-			lectrueNoteDTO.put("lectureTitle", "노트를 작성한 강의 이름 : " + i);
-			lectrueNoteDTO.put("chapter", "강의의 섹션 이름 : " + i);
-			lectrueNoteDTO.put("subHeading", "소제목 : " + i);
-			lectrueNoteDTO.put("noteTitle", "노트의 제목 : " + i);
-			lectrueNoteDTO.put("count", "5");
-			lectrueNoteDTO.put("date", "2023-" + String.format("%02d" ,(int) ((Math.random() * 12) + 1)) + "-" + String.format("%02d" ,(int) ((Math.random() * 31) + 1)));
-			lectrueNoteDTO.put("content", "<h1>This is a Heading 1</h1>"
-					+ "    <h2>This is a Heading 2</h2>"
-					+ "    <h3>This is a Heading 3</h3>"
-					+ ""
-					+ "    <p>This is a sample paragraph of text. It can contain multiple sentences.</p>"
-					+ ""
-					+ "    <p>This is <b>bold</b> text, and this is <i>italic</i> text.</p>"
-					+ ""
-					+ "    <p>This is <u>underlined</u> text.</p>"
-					+ ""
-					+ "    <p>This is <s>strikethrough</s> text.</p>"
-					+ ""
-					+ "    <p>This is <sup>superscript</sup> and this is <sub>subscript</sub> text.</p>"
-					+ ""
-					+ "    <hr>"
-					+ ""
-					+ "    <p>This is some text above the line.</p>"
-					+ "    <hr>"
-					+ "    <p>This is some text below the line.</p>"
-					+ ""
-					+ "    <blockquote>"
-					+ "        <p>This is a blockquote. It can be used to display quoted text.</p>"
-					+ "    </blockquote>"
-					+ ""
-					+ "    <p>This is some text.<br>Here's a line break.</p>"
-					+ ""
-					+ "    <pre>"
-					+ "        This is preformatted text."
-					+ "        It maintains the formatting and spacing."
-					+ "    </pre>");
-			lectrueNoteDTOlist.add(lectrueNoteDTO);
-		}
-		return ResponseEntity.ok(lectrueNoteDTOlist);
-	}
-	
-	@GetMapping("/lectrueQnAOpen")
-	public ResponseEntity<?> thisIsTestForlectrueQnAOpen(){
-		List<Map<String , String>> lectrueQnADTOlist = new ArrayList<Map<String , String>>();
-		for(int i = 1 ; i < 11 ; i++) {			
-			Map<String , String> lectrueQnADTO = new HashMap<String, String>();
-			lectrueQnADTO.put("lectureTitle", "질문을 작성한 강의 이름 : " + i);
-			lectrueQnADTO.put("chapter", "강의의 섹션 이름 : " + i);
-			lectrueQnADTO.put("subHeading", "소제목 : " + i);
-			lectrueQnADTO.put("questionTitle", "질문의 제목 : " + i);
-			lectrueQnADTO.put("date", "2023-" + String.format("%02d" ,(int) ((Math.random() * 12) + 1)) + "-" + String.format("%02d" ,(int) ((Math.random() * 31) + 1)));
-			lectrueQnADTO.put("content", "<h1>This is a Heading 1</h1>"
-					+ "    <h2>This is a Heading 2</h2>"
-					+ "    <h3>This is a Heading 3</h3>"
-					+ ""
-					+ "    <p>This is a sample paragraph of text. It can contain multiple sentences.</p>"
-					+ ""
-					+ "    <p>This is <b>bold</b> text, and this is <i>italic</i> text.</p>"
-					+ ""
-					+ "    <p>This is <u>underlined</u> text.</p>"
-					+ ""
-					+ "    <p>This is <s>strikethrough</s> text.</p>"
-					+ ""
-					+ "    <p>This is <sup>superscript</sup> and this is <sub>subscript</sub> text.</p>"
-					+ ""
-					+ "    <hr>"
-					+ ""
-					+ "    <p>This is some text above the line.</p>"
-					+ "    <hr>"
-					+ "    <p>This is some text below the line.</p>"
-					+ ""
-					+ "    <blockquote>"
-					+ "        <p>This is a blockquote. It can be used to display quoted text.</p>"
-					+ "    </blockquote>"
-					+ ""
-					+ "    <p>This is some text.<br>Here's a line break.</p>"
-					+ ""
-					+ "    <pre>"
-					+ "        This is preformatted text."
-					+ "        It maintains the formatting and spacing."
-					+ "    </pre>");
-			lectrueQnADTOlist.add(lectrueQnADTO);
-		}
-		return ResponseEntity.ok(lectrueQnADTOlist);
-	}
 }

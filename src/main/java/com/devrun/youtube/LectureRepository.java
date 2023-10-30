@@ -1,6 +1,7 @@
 package com.devrun.youtube;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,5 +38,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long>, JpaSpec
 			@Param("keyword") String keyword, PageRequest pageRequest);
 
 	Lecture findByLectureNameAndMentoId(String lectureName, MemberEntity mentoEntity);
+
+	Lecture findByLectureid(Long lectureid);
 
 }
