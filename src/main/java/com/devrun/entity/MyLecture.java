@@ -44,13 +44,7 @@ public class MyLecture {
 	@ManyToOne
 	@JoinColumn(name = "lectureNo")
 	@Comment("강의")
-	private Lecture lecture;
-	
-	@ManyToOne
-	@JoinColumn(name = "videoNo")
-	@Comment("영상")
-	private Video video;
-	
+	private Lecture lecture;	
 	
 	@Column(name="lecture_expiry_date")
 	private Date LectureExpiryDate;
