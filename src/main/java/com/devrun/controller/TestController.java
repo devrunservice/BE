@@ -101,7 +101,7 @@ public class TestController {
 			lectureNoteDetailDTO.put("noteId", "노트의 Id : " + i);
 			lectureNoteDetailDTO.put("noteTitle", "노트의 제목 : " + i + "번 제목");
 			lectureNoteDetailDTO.put("date", "2023-" + String.format("%02d" ,(int) ((Math.random() * 12) + 1)) + "-" + String.format("%02d" ,(int) ((Math.random() * 31) + 1)));
-			lectureNoteDetailDTO.put(" lastModifiedDate" , "2023-" + String.format("%02d" ,(int) ((Math.random() * 12) + 1)) + "-" + String.format("%02d" ,(int) ((Math.random() * 31) + 1)));
+			lectureNoteDetailDTO.put("lastModifiedDate" , "2023-" + String.format("%02d" ,(int) ((Math.random() * 12) + 1)) + "-" + String.format("%02d" ,(int) ((Math.random() * 31) + 1)));
 			lectureNoteDetailDTO.put("content", "<h1>This is a Heading 1</h1>"
 					+ "    <h2>This is a Heading 2</h2>"
 					+ "    <h3>This is a Heading 3</h3>"
