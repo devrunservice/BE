@@ -219,7 +219,7 @@ public class LectureregistController {
 				uploadedVideos.add(uploadedVideo);
 			}
 
-			String lectureThumnailUrl = awsS3UploadService.putS3(requestDto.getLectureThumbnailFile(),
+			String lectureThumnailUrl = awsS3UploadService.putS3(requestDto.getLectureThumbnail(),
 					"public.lecture.images", requestDto.getLectureName());
 
 			Lecture savedlecture = lectureService.saveLecture2(requestDto, lectureThumnailUrl);
