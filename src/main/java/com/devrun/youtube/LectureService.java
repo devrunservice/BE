@@ -190,7 +190,7 @@ public class LectureService {
 	}
 
 	public Lecture findByLectureID(Long lectureId) {
-		Optional<Lecture> lecutre = lectureRepository.findById(lectureId);
+		Optional<Lecture> lecutre = lectureRepository.findByLectureid(lectureId);
 		
 		if (lecutre.isPresent()) {
 			return lecutre.get();

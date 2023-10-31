@@ -28,7 +28,7 @@ public class MylectureReviewService {
 
 	public void saveReview(MemberEntity userEntity, ReviewRequest reviewRequest) {
 		Lecture lecture = lectureService.findByLectureID(reviewRequest.getLectureId());
-
+		myLectureService.verifyUserHasLecture(userEntity, lecture);
 		List<MyLecture> myLectureList = myLectureService.verifyUserHasLecture(userEntity , lecture);
 		if(myLectureList.size() == 1) {
 			MylectureReview mylectureReview = new MylectureReview(
@@ -56,6 +56,8 @@ public class MylectureReviewService {
 			throw new NoSuchElementException("This user did not write this review.");
 		}
 	}
+	
+	
 	
 	
 	

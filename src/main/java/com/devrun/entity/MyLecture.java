@@ -47,10 +47,17 @@ public class MyLecture {
 	private Lecture lecture;	
 	
 	@Column(name="lecture_expiry_date")
-	private Date LectureExpiryDate;
+    @Temporal(TemporalType.DATE)
+	private Date lectureExpiryDate;
 	
 	@Column(name="wholeprogress")
-	private float lectureProgress;
+	private int lectureProgress;
+	
+	@Column(name = "lastviewdate" , nullable = false)
+	@Comment("마지막으로 해당 강의를 학습한 날짜")
+    @LastModifiedDate
+    @Temporal(TemporalType.DATE)
+	private Date lastviewdate;	
 	
 	
 

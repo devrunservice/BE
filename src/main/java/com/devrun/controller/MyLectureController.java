@@ -11,14 +11,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.devrun.dto.MyLectureNoteDTO;
 import com.devrun.dto.MycouresDTO;
+import com.devrun.dto.MylectureDTO;
+import com.devrun.dto.NoteRequest;
 import com.devrun.dto.ReviewRequest;
 import com.devrun.entity.MemberEntity;
 import com.devrun.service.MemberService;
-import com.devrun.service.MyLectureProgressService;
 import com.devrun.service.MyLectureService;
 import com.devrun.service.MylectureReviewService;
-import com.devrun.util.JWTUtil;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -34,12 +35,10 @@ public class MyLectureController {
 	
 	private final MemberService memberService;	
 	private final MyLectureService mylectureService;	
-	private final MyLectureProgressService myLectureProgressService;
 	private final MylectureReviewService reviewService;
 
 	
-	/*	. 
-	 * 
+	/* 
 	 * 	. 학생 유저가 작성한 강의 노트 가져오기(READ)
 	 * 		강의 ID를 받아서 노트를 가져오기
 	 * 	. 학생 유저가 작성한 강의 노트 저장하기(CREATE)
@@ -66,25 +65,18 @@ public class MyLectureController {
 	 * 		수강 후기글을 작성하고 평점을 매기면 , Lecture의 rating property에 update 필요 
 	 */
 
-	
-//	@GetMapping("/")
-//	@ApiOperation(value = )//Api 설명
-//	@ApiImplicitParam(name = "" , value = "" , example = "" , dataTypeClass = String.class)//Api 파라미터
-//	public void method1() {}
-	
-	
 	/*
 	 * 학생 유저가 수강 중인 강의 가져오기(READ)
 	 * 	강의 정보 - 섹션 정보 - 비디오 정보
 	 */
 	@GetMapping("/getMycoures")
 	@ApiOperation(value = "학생 유저가 수강 중인 강의 커리큘럼 가져오기")//Api 설명
-	public List<MycouresDTO> getMycoures(HttpServletRequest request , @RequestParam(name = "lectureId") Long lectureId) {
+	public MycouresDTO getMycoures(HttpServletRequest request , @RequestParam(name = "lectureId" , required = true) Long lectureId) {
 		//String userAccessToken = request.getHeader("Access_token");
 		//String userId = JWTUtil.getUserIdFromToken(userAccessToken);
 		
 		MemberEntity userEntity = memberService.findById("seokhwan2");
-		List<MycouresDTO> myCoures = mylectureService.findMycoures(userEntity, lectureId);
+		MycouresDTO myCoures = mylectureService.findMycoures(userEntity, lectureId);
 		return myCoures;
 	}
 	
@@ -94,12 +86,14 @@ public class MyLectureController {
 		@ApiImplicitParam(example = "Inprogress",value = "강의 완강 여부",name = "status" , dataTypeClass = String.class),
 		@ApiImplicitParam(example = "1",value = "요청 페이지",name = "page" , dataTypeClass = String.class)				
 			})
-	public List<Map<String, Object>> mylecturelist(HttpServletRequest httpServletRequest , @RequestParam(name = "status" , required = false) String status, @RequestParam(name = "page" , required = false) String page) {
+	public List<MylectureDTO> mylecturelist(HttpServletRequest httpServletRequest , 
+			@RequestParam(name = "status" , required = false) String status, 
+			@RequestParam(name = "page" , required = false , defaultValue = "0") int page) {
 		String accessToken = httpServletRequest.getHeader("Access_token");
 		System.out.println("/mylecturelist Access_token" + accessToken);
+		MemberEntity userEntity = memberService.findById("seokhwan2");
 		
-		
-		return myLectureProgressService.mylecturelist(accessToken);
+		return mylectureService.mylecturelist(userEntity, page);
 
 	}
 	
@@ -127,5 +121,24 @@ public class MyLectureController {
 
 		return mylectureService.progress(userEntity, videoid, currenttime);
 
+	}
+	
+	@PostMapping("/lecturenote")
+	@ApiOperation(value = "강의 노트 저장하기" , notes = "강의 영상을 보던 중 작성한 강의 노트를 저장합니다.")
+	public void lectureNoteSave(HttpServletRequest httpServletRequest,
+			@RequestBody(required = true) NoteRequest noteRequest) {
+//		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));
+//		MemberEntity userEntity = memberService.findById(userId);
+		MemberEntity userEntity = memberService.findById("seokhwan2");
+		mylectureService.myNoteSave(userEntity , noteRequest);
+	}
+	
+	@GetMapping("/lectureNoteOpen")
+	@ApiOperation(value = "강의 노트 불러오기" , notes = "유저가 작성한 강의 노트를 불러옵니다.")
+	public List<MyLectureNoteDTO> lectureNoteOpen(HttpServletRequest httpServletRequest , @RequestParam(name = "page" , defaultValue = "0" , required = false) int page) {
+//		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));
+//		MemberEntity userEntity = memberService.findById(userId);
+		MemberEntity userEntity = memberService.findById("seokhwan2");
+		return mylectureService.myNotelist(userEntity , page);
 	}
 }

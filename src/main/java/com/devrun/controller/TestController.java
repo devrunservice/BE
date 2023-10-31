@@ -85,7 +85,7 @@ public class TestController {
 		return ResponseEntity.ok(videoDTO);
 	}
 	
-	@GetMapping("/lectureNoteOpen")
+	@GetMapping("/lectureNoteOpenTest")
 	public ResponseEntity<?> thisIsTestForlectureNoteOpen(@RequestParam(name = "page" , required = false , defaultValue = "0") String page){
 		List<Map<String , Object>> lectureNoteDTOlist = new ArrayList<Map<String , Object>>();
 		for(int i = 1 ; i < 4 ; i++) {

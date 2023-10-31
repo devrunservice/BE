@@ -39,6 +39,6 @@ public interface LectureRepository extends JpaRepository<Lecture, Long>, JpaSpec
 
 	Lecture findByLectureNameAndMentoId(String lectureName, MemberEntity mentoEntity);
 
-	Lecture findByLectureid(Long lectureid);
+	Optional<Lecture> findByLectureid(Long lectureid);
 
 }

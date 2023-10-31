@@ -28,7 +28,7 @@ public class MylectureNote {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "note_no")
-	private Integer noteNo;
+	private Long noteNo;
 
 	@ManyToOne
 	@JoinColumn(name = "mylecture_no")
@@ -40,6 +40,8 @@ public class MylectureNote {
 	
     @Temporal(TemporalType.DATE)
 	private Date modiDate;
+    
+	private String noteTitle;
 
 	@Column(columnDefinition = "TEXT", nullable = true)
 	private String noteContext;

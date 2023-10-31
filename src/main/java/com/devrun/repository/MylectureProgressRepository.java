@@ -19,8 +19,10 @@ public interface MylectureProgressRepository extends JpaRepository<MyLectureProg
 	List<TotalProgress> gettotalprogress(@Param(value = "userno") MemberEntity userno);
 
 	List<MyLectureProgress> findByMyLectureIn(List<MyLecture> myLectureList);
+	
+	List<MyLectureProgress> findByMyLecture(MyLecture myLectureList);
 
-	MyLectureProgress findByMyLectureAndVideo(MemberEntity memberentity, Video videoentity);
+	MyLectureProgress findByMyLectureInAndVideo(List<MyLecture> mylecture, Video videoentity);
 
 
 }
