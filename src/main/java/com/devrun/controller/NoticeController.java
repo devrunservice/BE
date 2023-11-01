@@ -170,7 +170,9 @@ public class NoticeController {
 
 		        cookie.setPath("/");
 		        cookie.setMaxAge((int) (secondsUntilMidnight - currentSecond));
-		        response.addCookie(cookie);
+		        cookie.setSecure(true);
+		        
+		        response.addCookie(cookie);	
 
 		        return ResponseEntity.status(200).body(notice.toDTO());
 		    } catch (Exception e) {
