@@ -172,6 +172,7 @@ public class NoticeController {
 		        cookie.setMaxAge((int) (secondsUntilMidnight - currentSecond));
 		        cookie.setSecure(true);  
 		        cookie.setHttpOnly(true);
+		        cookie.setDomain(".devrun.net");
 		        
 		        response.addCookie(cookie);	
 
