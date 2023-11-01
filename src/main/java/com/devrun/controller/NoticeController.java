@@ -112,33 +112,6 @@ public class NoticeController {
 	    return new ResponseEntity<>(noticeDTOs, HttpStatus.OK);
 	}
 	
-	// 공지사항 읽기
-	@ResponseBody
-	@GetMapping("/notices/detail/{noticeNo}")
-	@ApiOperation(value = "공지사항 읽기", notes = "공지사항 번호에 따른 상세 정보를 반환합니다.")
-	@ApiImplicitParam(name = "noticeNo", value = "공지사항 번호", required = true, paramType = "path", dataTypeClass = Integer.class , example = "0")
-	@ApiResponses(value = {
-	    @ApiResponse(code = 200, message = "공지사항 상세 정보를 성공적으로 반환했습니다."),
-	    @ApiResponse(code = 404, message = "공지사항을 찾을 수 없습니다."),
-	    @ApiResponse(code = 500, message = "내부 서버 오류")})
-	public ResponseEntity<?> getNotice(@PathVariable int noticeNo) {
-	    try {
-	        Notice notice = noticeService.getNoticeByNoticeNo(noticeNo);
-	        System.out.println(notice);
-	        if (notice == null) {
-	            return ResponseEntity.status(404).body("Notice not found");
-	        }
-	        
-	        // 조회수 증가
-	        notice.setViewCount(notice.getViewCount() + 1);
-	        noticeService.insert(notice);
-	        
-	        return ResponseEntity.status(200).body(notice.toDTO());
-	    } catch (Exception e) {
-	        return ResponseEntity.status(500).body("Internal Server Error");
-	    }
-	}
-
 	
 	// 공지사항 읽기
 		@ResponseBody
