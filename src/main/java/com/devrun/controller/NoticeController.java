@@ -1,5 +1,13 @@
 package com.devrun.controller;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,34 +138,72 @@ public class NoticeController {
 	        return ResponseEntity.status(500).body("Internal Server Error");
 	    }
 	}
+
 	
-	// 공지사항 수정
-	@ResponseBody
-	@PutMapping("/notice/edit/{noticeNo}")
-	@ApiOperation(value = "공지사항 수정", notes = "공지사항의 제목과 내용을 수정합니다.")
-	@ApiImplicitParams({
-	    @ApiImplicitParam(name = "noticeNo", value = "수정할 공지사항 번호", required = true, paramType = "path", dataTypeClass = Integer.class , example = "0"),
-	    @ApiImplicitParam(name = "title", value = "수정할 공지사항 제목", required = true, paramType = "body", dataTypeClass = String.class),
-	    @ApiImplicitParam(name = "content", value = "수정할 공지사항 내용", required = true, paramType = "body", dataTypeClass = String.class)})
-	@ApiResponses(value = {
-	    @ApiResponse(code = 200, message = "공지사항을 성공적으로 수정했습니다."),
-	    @ApiResponse(code = 400, message = "잘못된 인수입니다."),
-	    @ApiResponse(code = 500, message = "내부 서버 오류")})
-	public ResponseEntity<?> updateNotice(@PathVariable int noticeNo, @RequestBody NoticeDTO noticeDTO) {
-	    try {
-	        String newTitle = noticeDTO.getTitle();
-	        String newContent = noticeDTO.getContent();
-	        
-	        noticeService.updateNotice(noticeNo, newTitle, newContent);
-	        return ResponseEntity.status(200).body("Successfully updated notice with ID: " + noticeNo);
-	    } catch (IllegalArgumentException e) {
-	    	e.printStackTrace();
-	        return ResponseEntity.status(400).body("Invalid arguments");
-	    } catch (Exception e) {
-	    	e.printStackTrace();
-	        return ResponseEntity.status(500).body("Internal Server Error");
-	    }
-	}
+	// 공지사항 읽기
+		@ResponseBody
+		@GetMapping("/notices/detail/{noticeNo}")
+		@ApiOperation(value = "공지사항 읽기", notes = "공지사항 번호에 따른 상세 정보를 반환합니다.")
+		@ApiImplicitParam(name = "noticeNo", value = "공지사항 번호", required = true, paramType = "path", dataTypeClass = Integer.class , example = "0")
+		@ApiResponses(value = {
+		    @ApiResponse(code = 200, message = "공지사항 상세 정보를 성공적으로 반환했습니다."),
+		    @ApiResponse(code = 404, message = "공지사항을 찾을 수 없습니다."),
+		    @ApiResponse(code = 500, message = "내부 서버 오류")})
+		public ResponseEntity<?> getNotice(@PathVariable int noticeNo, HttpServletRequest request, HttpServletResponse response) {
+		    try {
+		        Notice notice = noticeService.getNoticeByNoticeNo(noticeNo);
+		        System.out.println(notice);
+		        if (notice == null) {
+		            return ResponseEntity.status(404).body("Notice not found");
+		        }
+		        Cookie[] cookies = request.getCookies();
+		        Cookie cookie = null;
+		        boolean isCookie = false;
+
+		        for (int i = 0; cookies != null && i < cookies.length; i++) {
+		            if (cookies[i].getName().equals("postView")) {
+		                cookie = cookies[i];
+
+		                // 쿠키 값을 파싱하여 이미 본 게시물인지 확인
+		                String cookieValue = cookie.getValue();
+		                if (!cookieValue.contains("[" + notice.getNoticeNo() + "]")) {
+		                    // 조회수 증가
+		                    notice.setViewCount(notice.getViewCount() + 1);
+		                    noticeService.insert(notice);
+
+		                    // 쿠키 값에 해당 게시글 번호를 추가
+		                    cookie.setValue(cookieValue + "[" + notice.getNoticeNo() + "]");
+		                }
+
+		                isCookie = true;
+		                break;
+		            }
+		        }
+
+		        // 쿠키가 없거나 새로 생성하는 경우
+		        if (!isCookie) {
+		            // 조회수 증가
+		            notice.setViewCount(notice.getViewCount() + 1);
+		            noticeService.insert(notice);
+
+		            cookie = new Cookie("postView", "[" + notice.getNoticeNo() + "]");
+		        }
+
+		        // 쿠키 유지시간을 오늘 하루 자정까지로 설정
+		        LocalDate tomorrow = LocalDate.now().plusDays(1);
+		        LocalDateTime midnight = tomorrow.atStartOfDay();
+		        long secondsUntilMidnight = midnight.toEpochSecond(ZoneOffset.UTC);
+		        long currentSecond = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+
+		        cookie.setPath("/");
+		        cookie.setMaxAge((int) (secondsUntilMidnight - currentSecond));
+		        response.addCookie(cookie);
+
+		        return ResponseEntity.status(200).body(notice.toDTO());
+		    } catch (Exception e) {
+		        return ResponseEntity.status(500).body("Internal Server Error");
+		    }
+		}
 
 	// 공지사항 삭제 (실제로는 Status를 INACTIVE로 변경)
 	@ResponseBody
