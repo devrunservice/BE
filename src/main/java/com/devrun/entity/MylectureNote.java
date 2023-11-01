@@ -42,6 +42,10 @@ public class MylectureNote {
 	private Date modiDate;
     
 	private String noteTitle;
+	
+	private String subheading;
+	
+	private int chapter;
 
 	@Column(columnDefinition = "TEXT", nullable = true)
 	private String noteContext;

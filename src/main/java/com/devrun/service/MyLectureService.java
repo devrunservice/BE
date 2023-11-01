@@ -165,6 +165,8 @@ public class MyLectureService {
 		List<MyLectureNoteDTO> lectureNoteDTOs = new ArrayList<MyLectureNoteDTO>();
 		for (MyLecture l : myLectureList.toList()) {
 			int count = 0;
+			int chapter = 0;
+			String subhead = null;
 			MyLectureNoteDTO myLectureNoteDto = new MyLectureNoteDTO();
 			List<lectureNoteDetailDTO> noteDetailDTOs = new ArrayList<lectureNoteDetailDTO>();
 			for (MylectureNote n : myNoteList.get()) {
@@ -177,11 +179,15 @@ public class MyLectureService {
 					lecturenoteDetailDTO.setNoteTitle(n.getNoteTitle());
 					noteDetailDTOs.add(lecturenoteDetailDTO);
 					count++;
+					chapter=n.getChapter();
+					subhead=n.getSubheading();
 				}
 			}
 			myLectureNoteDto.setLectureNoteDetailDTOList(noteDetailDTOs);
 			myLectureNoteDto.setLectureTitle(l.getLecture().getLectureName());
-			myLectureNoteDto.setCount(count);			
+			myLectureNoteDto.setCount(count);
+			myLectureNoteDto.setChapter(chapter);
+			myLectureNoteDto.setSubHeading(subhead);
 			lectureNoteDTOs.add(myLectureNoteDto);
 		}
 		return lectureNoteDTOs;
@@ -199,6 +205,8 @@ public class MyLectureService {
 			mylectureNote.setMyLecture(myLectureList.get(0));
 			mylectureNote.setNoteContext(noteRequest.getNoteContent());
 			mylectureNote.setNoteTitle(noteRequest.getNoteTitle());
+			mylectureNote.setChapter(noteRequest.getChapter());
+			mylectureNote.setSubheading(noteRequest.getSubheading());
 			mylectureNoteRepository.save(mylectureNote);
 		}
 

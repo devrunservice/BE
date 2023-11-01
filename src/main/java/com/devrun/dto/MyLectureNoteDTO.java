@@ -6,8 +6,8 @@ import lombok.Data;
 
 @Data
 public class MyLectureNoteDTO {	
-	private String lectureTitle,chapter,subHeading;
-	private int count;
+	private String lectureTitle,subHeading;
+	private int count,chapter;
 	private List<lectureNoteDetailDTO> lectureNoteDetailDTOList;
 
 }
