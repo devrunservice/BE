@@ -1,0 +1,14 @@
+package com.devrun.dto;
+
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+@Data
+public class QaRequest {
+	@ApiModelProperty(value = "강의 ID" , example = "1" , required = true)
+	private Long lectureId;
+	@ApiModelProperty(value = "질문 제목" , example = "너구리를 맛있게 먹으려면?" , required = true)
+	private String questionTitle;
+	@ApiModelProperty(value = "질문 내용" , example = "어떻게 하죠?" , required = true)
+	private String questionContent;
+}

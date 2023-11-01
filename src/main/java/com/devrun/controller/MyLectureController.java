@@ -15,8 +15,11 @@ import com.devrun.dto.MyLectureNoteDTO;
 import com.devrun.dto.MycouresDTO;
 import com.devrun.dto.MylectureDTO;
 import com.devrun.dto.NoteRequest;
+import com.devrun.dto.QaDTO;
+import com.devrun.dto.QaRequest;
 import com.devrun.dto.ReviewRequest;
 import com.devrun.entity.MemberEntity;
+import com.devrun.entity.MylectureQa;
 import com.devrun.service.MemberService;
 import com.devrun.service.MyLectureService;
 import com.devrun.service.MylectureReviewService;
@@ -140,5 +143,26 @@ public class MyLectureController {
 //		MemberEntity userEntity = memberService.findById(userId);
 		MemberEntity userEntity = memberService.findById("seokhwan2");
 		return mylectureService.myNotelist(userEntity , page);
+	}
+	
+	@PostMapping("/lectureQa")
+	@ApiOperation(value = "강의 질문 올리기" , notes = "유저가 강의에 대한 질문을 게시판에 게시")
+	public void lectureQaSave(HttpServletRequest httpServletRequest,
+			@RequestBody(required = true) QaRequest qaRequest) {
+//		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));
+//		MemberEntity userEntity = memberService.findById(userId);
+		MemberEntity userEntity = memberService.findById("seokhwan2");
+		mylectureService.QaSave(userEntity , qaRequest);
+		
+	}
+	
+	@GetMapping("/lectureQaOpen")
+	@ApiOperation(value = "강의 질문 가져오기" , notes = "유저가 올린 질문을 가져옵니다.")
+	public List<QaDTO> lectureQaList(HttpServletRequest httpServletRequest , @RequestParam(name = "page" , defaultValue = "0" , required = false) int page){
+//		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));
+//		MemberEntity userEntity = memberService.findById(userId);
+		MemberEntity userEntity = memberService.findById("seokhwan2");
+		return mylectureService.Qalist(userEntity, page);
+		
 	}
 }

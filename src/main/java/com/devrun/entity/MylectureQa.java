@@ -28,11 +28,15 @@ public class MylectureQa {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "lecture_qa_no")
-	private Integer lectureQaNo;
+	private Long lectureQaNo;
 
 	@ManyToOne
 	@JoinColumn(name = "mylecture_no")
 	private MyLecture myLecture;
+	
+	@ManyToOne
+	@JoinColumn(name = "mento_no")
+	private MemberEntity mento;
 
 	@Column(name = "question_content", columnDefinition = "TEXT", nullable = false)
 	private String questionContent;

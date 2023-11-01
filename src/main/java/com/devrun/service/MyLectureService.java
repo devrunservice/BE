@@ -17,6 +17,8 @@ import com.devrun.dto.MyLectureNoteDTO;
 import com.devrun.dto.MycouresDTO;
 import com.devrun.dto.MylectureDTO;
 import com.devrun.dto.NoteRequest;
+import com.devrun.dto.QaDTO;
+import com.devrun.dto.QaRequest;
 import com.devrun.dto.SectionInfo;
 import com.devrun.dto.VideoInfo;
 import com.devrun.dto.lectureNoteDetailDTO;
@@ -24,8 +26,10 @@ import com.devrun.entity.MemberEntity;
 import com.devrun.entity.MyLecture;
 import com.devrun.entity.MyLectureProgress;
 import com.devrun.entity.MylectureNote;
+import com.devrun.entity.MylectureQa;
 import com.devrun.repository.MylectureNoteRepository;
 import com.devrun.repository.MylectureProgressRepository;
+import com.devrun.repository.MylectureQaRepository;
 import com.devrun.repository.MylectureRepository;
 import com.devrun.youtube.Lecture;
 import com.devrun.youtube.LectureSection;
@@ -44,6 +48,7 @@ public class MyLectureService {
 	private final LectureService lectureService;
 	private final VideoRepository videoRepository;
 	private final MylectureNoteRepository mylectureNoteRepository;
+	private final MylectureQaRepository mylectureQaRepository;
 
 	public MycouresDTO findMycoures(MemberEntity userEntity, Long lectureId) {
 		Lecture lecture = lectureService.findByLectureID(lectureId);
@@ -210,5 +215,36 @@ public class MyLectureService {
 			mylectureNoteRepository.save(mylectureNote);
 		}
 
+	}
+
+	public void QaSave(MemberEntity userEntity, QaRequest qaRequest) {
+		Lecture lecture = lectureService.findByLectureID(qaRequest.getLectureId());
+		List<MyLecture> myLectureList = verifyUserHasLecture(userEntity, lecture);
+		MylectureQa mylectureQa = new MylectureQa();
+		mylectureQa.setMento(lecture.getMentoId());
+		mylectureQa.setMyLecture(myLectureList.get(0));
+		mylectureQa.setQuestionContent(qaRequest.getQuestionContent());
+		mylectureQa.setQuestionTitle(qaRequest.getQuestionTitle());
+		mylectureQaRepository.save(mylectureQa);
+	}
+	
+	public List<QaDTO> Qalist(MemberEntity userEntity , int page) {
+		page = page<=1 ? 0 : page; 
+		PageRequest pageRequest = PageRequest.of(page, 3, Sort.Direction.DESC , "lastviewdate");
+		Page<MyLecture> mylecture = mylectureRepository.findByMemberentity(userEntity, pageRequest);
+		List<MylectureQa> qaList = mylectureQaRepository.findByMyLectureIn(mylecture.toList());
+		List<QaDTO> qaDtos = new ArrayList<QaDTO>();
+		for (MylectureQa q : qaList) {
+			QaDTO qaDto = new QaDTO();
+			qaDto.setLectureQaNo(q.getLectureQaNo());
+			qaDto.setLectureTitle(q.getMyLecture().getLecture().getLectureName());
+			qaDto.setMentoId(q.getMento().getId());
+			qaDto.setQuestionTitle(q.getQuestionTitle());
+			qaDto.setQuestionContent(q.getQuestionContent());
+			qaDto.setQuestionDate(q.getQuestionDate());
+			qaDtos.add(qaDto);
+		}
+		return qaDtos;
+		
 	}
 }
