@@ -16,7 +16,7 @@ import com.google.common.net.HttpHeaders;
 			
 			HttpServletResponse httpServletResponse = (HttpServletResponse) response;
 			chain.doFilter(request, response);
-			addSameSite(httpServletResponse , "None"); 
+			addSameSite(httpServletResponse); 
 			
 		}
 		@Override
@@ -28,17 +28,10 @@ import com.google.common.net.HttpHeaders;
 			// TODO Auto-generated method stub	
 		}	
 		
-	        private void addSameSite(HttpServletResponse response, String sameSite) {
-	    	
+		private void addSameSite(HttpServletResponse response) {
 	        Collection<String> headers = response.getHeaders(HttpHeaders.SET_COOKIE);
-	        boolean firstHeader = true;
-	        for (String header : headers) { // there can be multiple Set-Cookie attributes
-	            if (firstHeader) {
-	                response.setHeader(HttpHeaders.SET_COOKIE, String.format("%s; Secure; %s", header, "SameSite=" + sameSite));
-	                firstHeader = false;
-	                continue;
-	            }
-	            response.addHeader(HttpHeaders.SET_COOKIE, String.format("%s; Secure; %s", header, "SameSite=" + sameSite));
+	        for (String header : headers) {
+	            response.setHeader(HttpHeaders.SET_COOKIE, String.format("%s; %s", header, "SameSite=None; Secure"));
 	        }
 	        
 	    }

@@ -170,7 +170,8 @@ public class NoticeController {
 
 		        cookie.setPath("/");
 		        cookie.setMaxAge((int) (secondsUntilMidnight - currentSecond));
-		        cookie.setSecure(true);
+		        cookie.setSecure(true);  
+		        cookie.setHttpOnly(true);
 		        
 		        response.addCookie(cookie);	
 
