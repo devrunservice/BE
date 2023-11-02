@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.util.Base64;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -130,45 +131,47 @@ public class NoticeController {
 		        System.out.println(notice);
 		        if (notice == null) {
 		            return ResponseEntity.status(404).body("Notice not found");
-		        }		        
+		        }
+
 		        Cookie[] cookies = request.getCookies();
 		        ResponseCookie resCookie = null;
-		        boolean isCookie = false;		        
-		        // 쿠키가 jwt 토큰에 있음 게시판 이름 		        
-		        
-		        for (int i = 0; cookies != null && i < cookies.length; i++) {
-		            if (cookies[i].getName().equals("postView")) {
-		                Cookie cookie = cookies[i];
+		        boolean isCookie = false;
 
-		                // 쿠키 값을 파싱하여 이미 본 게시물인지 확인
-		                String cookieValue = cookie.getValue();
-		                if (!cookieValue.contains("[" + notice.getNoticeNo() + "]")) {
-		                    // 조회수 증가
-		                    notice.setViewCount(notice.getViewCount() + 1);
-		                    noticeService.insert(notice);
+		        if (cookies != null) {
+		            for (Cookie cookie : cookies) {
+		                if ("postView".equals(cookie.getName())) {
+		                	
+		                    // 쿠키 값을 파싱하여 이미 본 게시물인지 확인
+		                    String cookieValue = cookie.getValue();
+		                    if (!cookieValue.contains("[" + notice.getNoticeNo() + "]")) {
+		                        // 조회수 증가
+		                        notice.setViewCount(notice.getViewCount() + 1);
+		                        noticeService.insert(notice);
 
-		                    // 쿠키 값에 해당 게시글 번호를 추가
-		                    cookieValue = cookieValue + "[" + notice.getNoticeNo() + "]";
-		                    resCookie = ResponseCookie
-		                    		.from("postView", cookieValue)
-		                            .path("/")
-		                            .sameSite("None")
-		                            .secure(true)
-		                            .httpOnly(true)
-		                            .maxAge(Duration.ofDays(1))
-		                            .build();
-		                }              
-		                
-		                isCookie = true;
-		                break;
+		                        // 쿠키 값에 해당 게시글 번호를 추가
+		                        cookieValue = cookieValue + "[" + notice.getNoticeNo() + "]";
+		                        resCookie = ResponseCookie
+		                                .from("postView", cookieValue)
+		                                .path("/")
+		                                .sameSite("None")
+		                                .secure(true)
+		                                .httpOnly(true)
+		                                .maxAge(Duration.ofDays(1))
+		                                .build();
+		                    }
+
+		                    isCookie = true;
+		                    break;
+		                }
 		            }
 		        }
+
 		        // 쿠키가 없거나 새로 생성하는 경우
 		        if (!isCookie) {
 		            // 조회수 증가
 		            notice.setViewCount(notice.getViewCount() + 1);
 		            noticeService.insert(notice);
-		            
+
 		            resCookie = ResponseCookie.from("postView", "[" + notice.getNoticeNo() + "]")
 		                    .path("/")
 		                    .sameSite("None")
@@ -182,8 +185,8 @@ public class NoticeController {
 		        response.addHeader("Set-Cookie", resCookie.toString());
 
 		        return ResponseEntity.status(200).body(notice.toDTO());
-		    } catch (Exception e) {	
-		    	System.out.println(e);
+		    } catch (Exception e) {
+		        e.printStackTrace(); 
 		        return ResponseEntity.status(500).body("Internal Server Error");
 		    }
 		}
