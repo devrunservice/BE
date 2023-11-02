@@ -17,6 +17,7 @@ import com.devrun.dto.MyLectureNoteDTO;
 import com.devrun.dto.MycouresDTO;
 import com.devrun.dto.MylectureDTO;
 import com.devrun.dto.NoteRequest;
+import com.devrun.dto.NoteUpdateRequest;
 import com.devrun.dto.QaDTO;
 import com.devrun.dto.QaRequest;
 import com.devrun.dto.SectionInfo;
@@ -158,62 +159,78 @@ public class MyLectureService {
 
 	}
 
-	public List<MyLectureNoteDTO> myNotelist(MemberEntity userEntity , int page) {
-		page = page<=1 ? 0 : page; 
-		PageRequest pageRequest = PageRequest.of(page, 3, Sort.Direction.DESC , "lastviewdate");
-		Page<MyLecture> myLectureList = mylectureRepository.findByMemberentity(userEntity , pageRequest);
-		Optional<List<MylectureNote>> myNoteList = mylectureNoteRepository.findByMyLectureInOrderByCreateDateDesc(myLectureList.toList());
-		if (myNoteList.isPresent()) {
-		} else {
-			throw new NoSuchElementException("This User isn't taking this note!");
-		}
+	public List<MyLectureNoteDTO> myNotelist(MemberEntity userEntity, int page) {
+		page = page <= 1 ? 0 : page;
+		int size = 10;
+		PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "lastviewdate");
+		Page<MyLecture> myLectureList = mylectureRepository.findByMemberentity(userEntity, pageRequest);
+		List<MylectureNote> myNoteList = mylectureNoteRepository
+				.findByMyLectureInOrderByDateDesc(myLectureList.toList());
+
 		List<MyLectureNoteDTO> lectureNoteDTOs = new ArrayList<MyLectureNoteDTO>();
-		for (MyLecture l : myLectureList.toList()) {
-			int count = 0;
-			int chapter = 0;
-			String subhead = null;
+
+		for (MyLecture mylecture : myLectureList.toList()) {
 			MyLectureNoteDTO myLectureNoteDto = new MyLectureNoteDTO();
-			List<lectureNoteDetailDTO> noteDetailDTOs = new ArrayList<lectureNoteDetailDTO>();
-			for (MylectureNote n : myNoteList.get()) {
-				if (n.getMyLecture().equals(l)) {
-					lectureNoteDetailDTO lecturenoteDetailDTO = new lectureNoteDetailDTO();
-					lecturenoteDetailDTO.setContent(n.getNoteContext());
-					lecturenoteDetailDTO.setDate(n.getCreateDate());
-					lecturenoteDetailDTO.setLastModifiedDate(n.getModiDate());
-					lecturenoteDetailDTO.setNoteId(n.getNoteNo());
-					lecturenoteDetailDTO.setNoteTitle(n.getNoteTitle());
-					noteDetailDTOs.add(lecturenoteDetailDTO);
-					count++;
-					chapter=n.getChapter();
-					subhead=n.getSubheading();
+			myLectureNoteDto.setLastStudyDate(mylecture.getLastviewdate());
+			myLectureNoteDto.setLectureId(mylecture.getLecture().getLectureid());
+			myLectureNoteDto.setLectureThumnail(mylecture.getLecture().getLectureThumbnail());
+			myLectureNoteDto.setLectureTitle(mylecture.getLecture().getLectureName());
+			for (MylectureNote ml : myNoteList) {
+				if (ml.getMyLecture().equals(mylecture)) {
+					myLectureNoteDto.setCount(myLectureNoteDto.getCount() + 1);
 				}
 			}
-			myLectureNoteDto.setLectureNoteDetailDTOList(noteDetailDTOs);
-			myLectureNoteDto.setLectureTitle(l.getLecture().getLectureName());
-			myLectureNoteDto.setCount(count);
-			myLectureNoteDto.setChapter(chapter);
-			myLectureNoteDto.setSubHeading(subhead);
 			lectureNoteDTOs.add(myLectureNoteDto);
 		}
 		return lectureNoteDTOs;
 	}
 
-	public void myNoteSave(MemberEntity userEntity, NoteRequest noteRequest) {
-		Lecture lecture = lectureService.findByLectureID(noteRequest.getLectureId());
-
+	public List<lectureNoteDetailDTO> noteDetaiList(MemberEntity userEntity, Long lectureId, int page) {
+		page = page <= 1 ? 0 : page;
+		int size = 10;
+		PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "date");
+		Lecture lecture = lectureService.findByLectureID(lectureId);
 		List<MyLecture> myLectureList = verifyUserHasLecture(userEntity, lecture);
-		Optional<List<MylectureNote>> sdf = mylectureNoteRepository.findByMyLectureIn(myLectureList);
-		if (sdf.get().size() >= 3) {
-			throw new NoSuchElementException("This User can not more create Note");
+		List<lectureNoteDetailDTO> noteDetilas = new ArrayList<lectureNoteDetailDTO>();
+		Optional<Page<MylectureNote>> myNoteList = mylectureNoteRepository.findByMyLecture(myLectureList.get(0),
+				pageRequest);
+		if (myNoteList.isPresent()) {
 		} else {
-			MylectureNote mylectureNote = new MylectureNote();
-			mylectureNote.setMyLecture(myLectureList.get(0));
-			mylectureNote.setNoteContext(noteRequest.getNoteContent());
-			mylectureNote.setNoteTitle(noteRequest.getNoteTitle());
-			mylectureNote.setChapter(noteRequest.getChapter());
-			mylectureNote.setSubheading(noteRequest.getSubheading());
-			mylectureNoteRepository.save(mylectureNote);
+			throw new NoSuchElementException("There are no note");
 		}
+		for (MylectureNote my : myNoteList.get()) {
+			lectureNoteDetailDTO noteDetail = new lectureNoteDetailDTO();
+			noteDetail.setChapter(my.getChapter());
+			noteDetail.setContent(my.getNoteContext());
+			noteDetail.setDate(my.getDate());
+			noteDetail.setNoteTitle(my.getNoteTitle());
+			noteDetail.setSubHeading(my.getSubheading());
+			noteDetail.setNoteId(my.getNoteNo());
+			noteDetilas.add(noteDetail);
+		}
+		return noteDetilas;
+	}
+
+	public void myNoteSave(MemberEntity userEntity, NoteRequest noteRequest) {
+		Video video = videoRepository.findByVideoId(noteRequest.getVideoId());
+
+		List<MyLecture> myLectureList = verifyUserHasLecture(userEntity, video.getLecture());
+		MylectureNote mylectureNote = new MylectureNote();
+		mylectureNote.setMyLecture(myLectureList.get(0));
+		mylectureNote.setNoteContext(noteRequest.getNoteContent());
+		mylectureNote.setNoteTitle(noteRequest.getNoteTitle());
+		mylectureNote.setChapter(video.getLectureSection().getSectionNumber());
+		mylectureNote.setSubheading(video.getLectureSection().getSectionTitle());
+		mylectureNoteRepository.save(mylectureNote);
+
+	}
+
+	public void myNoteUpdate(MemberEntity userEntity, NoteUpdateRequest noteUpdateRequest) {
+		MylectureNote mylectureNote = mylectureNoteRepository.findByNoteNo(noteUpdateRequest.getNoteNo());
+		verifyUserHasLecture(userEntity, mylectureNote.getMyLecture().getLecture());
+		mylectureNote.setNoteContext(noteUpdateRequest.getNoteContent());
+		mylectureNote.setNoteTitle(noteUpdateRequest.getNoteTitle());
+		mylectureNoteRepository.save(mylectureNote);
 
 	}
 
@@ -227,10 +244,10 @@ public class MyLectureService {
 		mylectureQa.setQuestionTitle(qaRequest.getQuestionTitle());
 		mylectureQaRepository.save(mylectureQa);
 	}
-	
-	public List<QaDTO> Qalist(MemberEntity userEntity , int page) {
-		page = page<=1 ? 0 : page; 
-		PageRequest pageRequest = PageRequest.of(page, 3, Sort.Direction.DESC , "lastviewdate");
+
+	public List<QaDTO> Qalist(MemberEntity userEntity, int page) {
+		page = page <= 1 ? 0 : page;
+		PageRequest pageRequest = PageRequest.of(page, 3, Sort.Direction.DESC, "lastviewdate");
 		Page<MyLecture> mylecture = mylectureRepository.findByMemberentity(userEntity, pageRequest);
 		List<MylectureQa> qaList = mylectureQaRepository.findByMyLectureIn(mylecture.toList());
 		List<QaDTO> qaDtos = new ArrayList<QaDTO>();
@@ -245,6 +262,6 @@ public class MyLectureService {
 			qaDtos.add(qaDto);
 		}
 		return qaDtos;
-		
+
 	}
 }

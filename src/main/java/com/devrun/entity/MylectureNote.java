@@ -34,12 +34,9 @@ public class MylectureNote {
 	@JoinColumn(name = "mylecture_no")
 	private MyLecture myLecture;
 
-	@CreatedDate
+	@LastModifiedDate
     @Temporal(TemporalType.DATE)
-	private Date createDate;
-	
-    @Temporal(TemporalType.DATE)
-	private Date modiDate;
+	private Date date;
     
 	private String noteTitle;
 	

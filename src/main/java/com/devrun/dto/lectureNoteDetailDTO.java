@@ -10,11 +10,9 @@ import lombok.Data;
 @Data
 public class lectureNoteDetailDTO {
 	private Long noteId;
-	private String noteTitle , content;
-
+	private String noteTitle , content , subHeading;
+	private int chapter;
 	@Temporal(TemporalType.DATE)
 	private Date date;
 
-	@Temporal(TemporalType.DATE)
-	private Date lastModifiedDate;
 }
