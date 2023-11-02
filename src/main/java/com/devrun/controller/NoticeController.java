@@ -1,5 +1,6 @@
 package com.devrun.controller;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -129,13 +131,14 @@ public class NoticeController {
 		        if (notice == null) {
 		            return ResponseEntity.status(404).body("Notice not found");
 		        }
+		        
 		        Cookie[] cookies = request.getCookies();
-		        Cookie cookie = null;
+		        ResponseCookie rescookie = null;
 		        boolean isCookie = false;
 
 		        for (int i = 0; cookies != null && i < cookies.length; i++) {
 		            if (cookies[i].getName().equals("postView")) {
-		                cookie = cookies[i];
+		                Cookie cookie = cookies[i];
 
 		                // 쿠키 값을 파싱하여 이미 본 게시물인지 확인
 		                String cookieValue = cookie.getValue();
@@ -145,9 +148,17 @@ public class NoticeController {
 		                    noticeService.insert(notice);
 
 		                    // 쿠키 값에 해당 게시글 번호를 추가
-		                    cookie.setValue(cookieValue + "[" + notice.getNoticeNo() + "]");
-		                }
-
+		                    cookieValue = cookieValue + "[" + notice.getNoticeNo() + "]";
+		                    rescookie = ResponseCookie
+		                    		.from("postView", cookieValue)
+		                            .path("/")
+		                            .sameSite("None")
+		                            .secure(true)
+		                            .httpOnly(true)
+		                            .maxAge(Duration.ofDays(1))
+		                            .build();
+		                }		              
+		                
 		                isCookie = true;
 		                break;
 		            }
@@ -158,26 +169,49 @@ public class NoticeController {
 		            // 조회수 증가
 		            notice.setViewCount(notice.getViewCount() + 1);
 		            noticeService.insert(notice);
-
-		            cookie = new Cookie("postView", "[" + notice.getNoticeNo() + "]");
+		            rescookie = ResponseCookie.from("postView", "[" + notice.getNoticeNo() + "]")
+		                    .path("/")
+		                    .sameSite("None")
+		                    .secure(true)
+		                    .httpOnly(true)
+		                    .maxAge(Duration.ofDays(1))
+		                    .build();
 		        }
 
-		        // 쿠키 유지시간을 오늘 하루 자정까지로 설정
-		        LocalDate tomorrow = LocalDate.now().plusDays(1);
-		        LocalDateTime midnight = tomorrow.atStartOfDay();
-		        long secondsUntilMidnight = midnight.toEpochSecond(ZoneOffset.UTC);
-		        long currentSecond = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
-
-		        cookie.setPath("/");
-		        cookie.setMaxAge((int) (secondsUntilMidnight - currentSecond));
-		        cookie.setSecure(true);  
-		        cookie.setHttpOnly(true);
-		        cookie.setDomain(".devrun.net");
-		        
-		        response.addCookie(cookie);	
+		        // ResponseCookie를 HTTP 응답 헤더에 추가
+		        response.addHeader("Set-Cookie", rescookie.toString());
 
 		        return ResponseEntity.status(200).body(notice.toDTO());
 		    } catch (Exception e) {
+		        return ResponseEntity.status(500).body("Internal Server Error");
+		    }
+		}
+		
+	
+		// 공지사항 수정
+		@ResponseBody
+		@PutMapping("/notice/edit/{noticeNo}")
+		@ApiOperation(value = "공지사항 수정", notes = "공지사항의 제목과 내용을 수정합니다.")
+		@ApiImplicitParams({
+		    @ApiImplicitParam(name = "noticeNo", value = "수정할 공지사항 번호", required = true, paramType = "path", dataTypeClass = Integer.class , example = "0"),
+		    @ApiImplicitParam(name = "title", value = "수정할 공지사항 제목", required = true, paramType = "body", dataTypeClass = String.class),
+		    @ApiImplicitParam(name = "content", value = "수정할 공지사항 내용", required = true, paramType = "body", dataTypeClass = String.class)})
+		@ApiResponses(value = {
+		    @ApiResponse(code = 200, message = "공지사항을 성공적으로 수정했습니다."),
+		    @ApiResponse(code = 400, message = "잘못된 인수입니다."),
+		    @ApiResponse(code = 500, message = "내부 서버 오류")})
+		public ResponseEntity<?> updateNotice(@PathVariable int noticeNo, @RequestBody NoticeDTO noticeDTO) {
+		    try {
+		        String newTitle = noticeDTO.getTitle();
+		        String newContent = noticeDTO.getContent();
+
+		        noticeService.updateNotice(noticeNo, newTitle, newContent);
+		        return ResponseEntity.status(200).body("Successfully updated notice with ID: " + noticeNo);
+		    } catch (IllegalArgumentException e) {
+		    	e.printStackTrace();
+		        return ResponseEntity.status(400).body("Invalid arguments");
+		    } catch (Exception e) {
+		    	e.printStackTrace();
 		        return ResponseEntity.status(500).body("Internal Server Error");
 		    }
 		}
