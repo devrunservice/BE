@@ -264,4 +264,15 @@ public class MyLectureService {
 		return qaDtos;
 
 	}
+	
+	public String checkLectureComplete(MemberEntity userEntity, Long lectureNo) {
+		Lecture lecture = lectureService.findByLectureID(lectureNo);
+		List<MyLecture> myLectureList = verifyUserHasLecture(userEntity , lecture);
+		if(myLectureList.get(0).getLectureProgress() == 100) {
+			return "수료자임";
+		} else {
+			throw new NoSuchElementException("This User isn't complete this Lecture!");
+		}
+		
+	}
 }

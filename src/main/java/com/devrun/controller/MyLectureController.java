@@ -178,4 +178,13 @@ public class MyLectureController {
 		return mylectureService.Qalist(userEntity, page);
 
 	}
+	
+	@GetMapping("Certificates")
+	@ApiOperation(value = "수료증 자격 확인" , notes = "수료증 자격을 확인합니다.")
+	public String lectureCertificates(HttpServletRequest httpServletRequest , @RequestParam(name = "lectureId", defaultValue = "22", required = false) Long lectureId) {
+//		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));
+//		MemberEntity userEntity = memberService.findById(userId);
+		MemberEntity userEntity = memberService.findById("seokhwan2");
+		return mylectureService.checkLectureComplete(userEntity, lectureId);
+	}
 }
