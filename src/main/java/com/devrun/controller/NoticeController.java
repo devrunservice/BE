@@ -127,7 +127,7 @@ public class NoticeController {
 		    @ApiResponse(code = 500, message = "내부 서버 오류")})
 		public ResponseEntity<?> getNotice(@PathVariable int noticeNo, HttpServletRequest request, HttpServletResponse response) {
 		        Notice notice = noticeService.getNoticeByNoticeNo(noticeNo);
-		        System.out.println(notice);
+		        
 		        if (notice == null) {
 		            return ResponseEntity.status(404).body("Notice not found");
 		        }
