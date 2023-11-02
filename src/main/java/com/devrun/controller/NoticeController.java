@@ -128,7 +128,7 @@ public class NoticeController {
 		public ResponseEntity<?> getNotice(@PathVariable int noticeNo, HttpServletRequest request, HttpServletResponse response) {
 		    try {
 		        Notice notice = noticeService.getNoticeByNoticeNo(noticeNo);
-		        System.out.println(notice);
+		        
 		        if (notice == null) {
 		            return ResponseEntity.status(404).body("Notice not found");
 		        }
