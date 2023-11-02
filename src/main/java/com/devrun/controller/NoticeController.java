@@ -126,13 +126,12 @@ public class NoticeController {
 		    @ApiResponse(code = 404, message = "공지사항을 찾을 수 없습니다."),
 		    @ApiResponse(code = 500, message = "내부 서버 오류")})
 		public ResponseEntity<?> getNotice(@PathVariable int noticeNo, HttpServletRequest request, HttpServletResponse response) {
-		    try {
 		        Notice notice = noticeService.getNoticeByNoticeNo(noticeNo);
 		        System.out.println(notice);
 		        if (notice == null) {
 		            return ResponseEntity.status(404).body("Notice not found");
 		        }
-
+		        
 		        Cookie[] cookies = request.getCookies();
 		        ResponseCookie resCookie = null;
 		        boolean isCookie = false;
@@ -158,6 +157,14 @@ public class NoticeController {
 		                                .httpOnly(true)
 		                                .maxAge(Duration.ofDays(1))
 		                                .build();
+		                    } else {
+		    		            resCookie = ResponseCookie.from("postView", cookieValue)
+		    		                    .path("/")
+		    		                    .sameSite("None")
+		    		                    .secure(true)
+		    		                    .httpOnly(true)
+		    		                    .maxAge(Duration.ofDays(1))
+		    		                    .build();
 		                    }
 
 		                    isCookie = true;
@@ -185,10 +192,6 @@ public class NoticeController {
 		        response.addHeader("Set-Cookie", resCookie.toString());
 
 		        return ResponseEntity.status(200).body(notice.toDTO());
-		    } catch (Exception e) {
-		        e.printStackTrace(); 
-		        return ResponseEntity.status(500).body("Internal Server Error");
-		    }
 		}
 		
 	
