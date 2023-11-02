@@ -130,12 +130,12 @@ public class NoticeController {
 		        System.out.println(notice);
 		        if (notice == null) {
 		            return ResponseEntity.status(404).body("Notice not found");
-		        }
-		        
+		        }		        
 		        Cookie[] cookies = request.getCookies();
-		        ResponseCookie rescookie = null;
-		        boolean isCookie = false;
-
+		        ResponseCookie resCookie = null;
+		        boolean isCookie = false;		        
+		        // 쿠키가 jwt 토큰에 있음 게시판 이름 		        
+		        
 		        for (int i = 0; cookies != null && i < cookies.length; i++) {
 		            if (cookies[i].getName().equals("postView")) {
 		                Cookie cookie = cookies[i];
@@ -149,7 +149,7 @@ public class NoticeController {
 
 		                    // 쿠키 값에 해당 게시글 번호를 추가
 		                    cookieValue = cookieValue + "[" + notice.getNoticeNo() + "]";
-		                    rescookie = ResponseCookie
+		                    resCookie = ResponseCookie
 		                    		.from("postView", cookieValue)
 		                            .path("/")
 		                            .sameSite("None")
@@ -157,19 +157,19 @@ public class NoticeController {
 		                            .httpOnly(true)
 		                            .maxAge(Duration.ofDays(1))
 		                            .build();
-		                }		              
+		                }              
 		                
 		                isCookie = true;
 		                break;
 		            }
 		        }
-
 		        // 쿠키가 없거나 새로 생성하는 경우
 		        if (!isCookie) {
 		            // 조회수 증가
 		            notice.setViewCount(notice.getViewCount() + 1);
 		            noticeService.insert(notice);
-		            rescookie = ResponseCookie.from("postView", "[" + notice.getNoticeNo() + "]")
+		            
+		            resCookie = ResponseCookie.from("postView", "[" + notice.getNoticeNo() + "]")
 		                    .path("/")
 		                    .sameSite("None")
 		                    .secure(true)
@@ -179,10 +179,11 @@ public class NoticeController {
 		        }
 
 		        // ResponseCookie를 HTTP 응답 헤더에 추가
-		        response.addHeader("Set-Cookie", rescookie.toString());
+		        response.addHeader("Set-Cookie", resCookie.toString());
 
 		        return ResponseEntity.status(200).body(notice.toDTO());
-		    } catch (Exception e) {
+		    } catch (Exception e) {	
+		    	System.out.println(e);
 		        return ResponseEntity.status(500).body("Internal Server Error");
 		    }
 		}
