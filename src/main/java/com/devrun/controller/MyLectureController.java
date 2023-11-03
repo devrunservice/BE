@@ -25,6 +25,7 @@ import com.devrun.entity.MylectureQa;
 import com.devrun.service.MemberService;
 import com.devrun.service.MyLectureService;
 import com.devrun.service.MylectureReviewService;
+import com.devrun.youtube.Lecture;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -179,7 +180,7 @@ public class MyLectureController {
 
 	}
 	
-	@GetMapping("Certificates")
+	@GetMapping("/certificates")
 	@ApiOperation(value = "수료증 자격 확인" , notes = "수료증 자격을 확인합니다.")
 	public String lectureCertificates(HttpServletRequest httpServletRequest , @RequestParam(name = "lectureId", defaultValue = "22", required = false) Long lectureId) {
 //		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));

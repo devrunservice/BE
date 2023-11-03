@@ -51,19 +51,33 @@ public class MyLectureService {
 	private final MylectureNoteRepository mylectureNoteRepository;
 	private final MylectureQaRepository mylectureQaRepository;
 
+	
+	public void registLecture(MemberEntity userEntity, Long lectureId) {
+		Lecture lecture = lectureService.findByLectureID(lectureId);
+		MyLecture myLecture = new MyLecture(userEntity, lecture);
+		mylectureRepository.save(myLecture);
+		
+	}
+	
+	public void refundLecture(MemberEntity userEntity, Long lectureId) {
+		Lecture lecture = lectureService.findByLectureID(lectureId);
+		MyLecture myLecture = verifyUserHasLecture(userEntity, lecture);
+		mylectureRepository.delete(myLecture);
+		
+	}
+	
 	public MycouresDTO findMycoures(MemberEntity userEntity, Long lectureId) {
 		Lecture lecture = lectureService.findByLectureID(lectureId);
-		List<MyLecture> myLectureList = verifyUserHasLecture(userEntity, lecture);
+		MyLecture myLecture = verifyUserHasLecture(userEntity, lecture);
 
-		return convertMyLectureToMycouresDTO(myLectureList);
+		return convertMyLectureToMycouresDTO(myLecture);
 	}
 
 	public Map<String, Object> progress(MemberEntity userEntity, String videoid, int currenttime) {
 		Video videoentity = videoRepository.findByVideoId(videoid);
-		List<MyLecture> mylecture = verifyUserHasLecture(userEntity, videoentity.getLecture());
-		if (mylecture.size() == 1) {
+		MyLecture mylecture = verifyUserHasLecture(userEntity, videoentity.getLecture());
 			List<MyLectureProgress> mylectureProgressEntity = mylectureProgressRepository
-					.findByMyLecture(mylecture.get(0));
+					.findByMyLecture(mylecture);
 			int wholePlayTime = 0;
 			int wholeVideoTime = 0;
 			for (MyLectureProgress myLectureProgress : mylectureProgressEntity) {
@@ -82,8 +96,8 @@ public class MyLectureService {
 
 			}
 			int lectureProgress = (int) ((double) wholePlayTime / (double) wholeVideoTime * 100);
-			mylecture.get(0).setLectureProgress(lectureProgress);
-			mylectureRepository.save(mylecture.get(0));
+			mylecture.setLectureProgress(lectureProgress);
+			mylectureRepository.save(mylecture);
 
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("user name", userEntity.getName());
@@ -92,23 +106,21 @@ public class MyLectureService {
 			map.put("status", "ok");
 
 			return map;
-		} else {
-			throw new NoSuchElementException("Detected Two or more Lecture!");
-		}
+		
 
 	}
 
-	public List<MyLecture> verifyUserHasLecture(MemberEntity userEntity, Lecture lecture) {
-		Optional<List<MyLecture>> optional = mylectureRepository.findByMemberentityAndLecture(userEntity, lecture);
-		if (optional.isPresent() && optional.get().size() >= 1) {
+	public MyLecture verifyUserHasLecture(MemberEntity userEntity, Lecture lecture) {
+		Optional<MyLecture> optional = mylectureRepository.findByMemberentityAndLecture(userEntity, lecture);
+		if (optional.isPresent()) {
 			return optional.get();
 		} else {
 			throw new NoSuchElementException("This User isn't taking this Lecture!");
 		}
 	}
 
-	public MycouresDTO convertMyLectureToMycouresDTO(List<MyLecture> myLectureList) {
-		List<MyLectureProgress> myCouresList = mylectureProgressRepository.findByMyLectureIn(myLectureList);
+	public MycouresDTO convertMyLectureToMycouresDTO(MyLecture myLecture) {
+		List<MyLectureProgress> myCouresList = mylectureProgressRepository.findByMyLecture(myLecture);
 		int wholeStudyTime = 0;
 		int wholeLectureTime = 0;
 		for (MyLectureProgress myprogress : myCouresList) {
@@ -118,7 +130,6 @@ public class MyLectureService {
 		}
 
 		List<MycouresDTO> mycouresList = new ArrayList<MycouresDTO>();
-		for (MyLecture myLecture : myLectureList) {
 			MycouresDTO mycouresDTO = new MycouresDTO(myLecture);
 
 			List<SectionInfo> sectionInfolist = new ArrayList<SectionInfo>();
@@ -138,7 +149,6 @@ public class MyLectureService {
 			mycouresDTO.setWholeStudyTime(wholeStudyTime);
 			mycouresDTO.setWholeRemainingTime(wholeLectureTime);
 			mycouresList.add(mycouresDTO);
-		}
 
 		return mycouresList.get(0);
 
@@ -190,9 +200,9 @@ public class MyLectureService {
 		int size = 10;
 		PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "date");
 		Lecture lecture = lectureService.findByLectureID(lectureId);
-		List<MyLecture> myLectureList = verifyUserHasLecture(userEntity, lecture);
+		MyLecture myLecture = verifyUserHasLecture(userEntity, lecture);
 		List<lectureNoteDetailDTO> noteDetilas = new ArrayList<lectureNoteDetailDTO>();
-		Optional<Page<MylectureNote>> myNoteList = mylectureNoteRepository.findByMyLecture(myLectureList.get(0),
+		Optional<Page<MylectureNote>> myNoteList = mylectureNoteRepository.findByMyLecture(myLecture,
 				pageRequest);
 		if (myNoteList.isPresent()) {
 		} else {
@@ -214,9 +224,9 @@ public class MyLectureService {
 	public void myNoteSave(MemberEntity userEntity, NoteRequest noteRequest) {
 		Video video = videoRepository.findByVideoId(noteRequest.getVideoId());
 
-		List<MyLecture> myLectureList = verifyUserHasLecture(userEntity, video.getLecture());
+		MyLecture myLecture = verifyUserHasLecture(userEntity, video.getLecture());
 		MylectureNote mylectureNote = new MylectureNote();
-		mylectureNote.setMyLecture(myLectureList.get(0));
+		mylectureNote.setMyLecture(myLecture);
 		mylectureNote.setNoteContext(noteRequest.getNoteContent());
 		mylectureNote.setNoteTitle(noteRequest.getNoteTitle());
 		mylectureNote.setChapter(video.getLectureSection().getSectionNumber());
@@ -236,10 +246,10 @@ public class MyLectureService {
 
 	public void QaSave(MemberEntity userEntity, QaRequest qaRequest) {
 		Lecture lecture = lectureService.findByLectureID(qaRequest.getLectureId());
-		List<MyLecture> myLectureList = verifyUserHasLecture(userEntity, lecture);
+		MyLecture myLecture = verifyUserHasLecture(userEntity, lecture);
 		MylectureQa mylectureQa = new MylectureQa();
 		mylectureQa.setMento(lecture.getMentoId());
-		mylectureQa.setMyLecture(myLectureList.get(0));
+		mylectureQa.setMyLecture(myLecture);
 		mylectureQa.setQuestionContent(qaRequest.getQuestionContent());
 		mylectureQa.setQuestionTitle(qaRequest.getQuestionTitle());
 		mylectureQaRepository.save(mylectureQa);
@@ -267,11 +277,11 @@ public class MyLectureService {
 	
 	public String checkLectureComplete(MemberEntity userEntity, Long lectureNo) {
 		Lecture lecture = lectureService.findByLectureID(lectureNo);
-		List<MyLecture> myLectureList = verifyUserHasLecture(userEntity , lecture);
-		if(myLectureList.get(0).getLectureProgress() == 100) {
-			return "수료자임";
+		MyLecture myLecture = verifyUserHasLecture(userEntity , lecture);
+		if(myLecture.getLectureProgress() == 100) {
+			return "This user has taken all the lectures.";
 		} else {
-			throw new NoSuchElementException("This User isn't complete this Lecture!");
+			return "This user has not taken all of the lectures.";
 		}
 		
 	}
