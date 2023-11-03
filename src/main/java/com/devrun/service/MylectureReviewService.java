@@ -28,10 +28,10 @@ public class MylectureReviewService {
 
 	public void saveReview(MemberEntity userEntity, ReviewRequest reviewRequest) {
 		Lecture lecture = lectureService.findByLectureID(reviewRequest.getLectureId());
-		List<MyLecture> myLectureList = myLectureService.verifyUserHasLecture(userEntity , lecture);
-		if(myLectureList.get(0).getLectureProgress() == 100) {
+		MyLecture myLectureList = myLectureService.verifyUserHasLecture(userEntity , lecture);
+		if(myLectureList.getLectureProgress() == 100) {
 			MylectureReview mylectureReview = new MylectureReview(
-					myLectureList.get(0),
+					myLectureList,
 					reviewRequest.getReviewContent(), 
 					reviewRequest.getReviewRating()
 					);
