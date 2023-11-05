@@ -188,4 +188,10 @@ public class MyLectureController {
 		MemberEntity userEntity = memberService.findById("seokhwan2");
 		return mylectureService.checkLectureComplete(userEntity, lectureId);
 	}
+	
+	@GetMapping("/save")
+	public void lectureSave() {
+		MemberEntity userEntity = memberService.findById("sunho1234");
+		mylectureService.registLecture(userEntity, 22L);
+	}
 }

@@ -54,9 +54,27 @@ public class MyLectureService {
 	
 	public void registLecture(MemberEntity userEntity, Long lectureId) {
 		Lecture lecture = lectureService.findByLectureID(lectureId);
-		MyLecture myLecture = new MyLecture(userEntity, lecture);
+		MyLecture myLecture = new MyLecture();
+		myLecture.setMemberentity(userEntity);
+		myLecture.setLecture(lecture);
+		myLecture.setLectureExpiryDate(null);
 		mylectureRepository.save(myLecture);
+		registVideo(myLecture);
 		
+	}
+	
+	public void registVideo(MyLecture mylecture) {
+		List<Video> videoList =videoRepository.findByLecture(mylecture.getLecture());
+		List<MyLectureProgress> saveList = new ArrayList<MyLectureProgress>();
+		
+		for(Video v : videoList) {
+			MyLectureProgress mylectureprogress = new MyLectureProgress();
+			mylectureprogress.setMyLecture(mylecture);
+			mylectureprogress.setLastviewdate(null);
+			mylectureprogress.setVideo(v);
+			saveList.add(mylectureprogress);
+		}
+		mylectureProgressRepository.saveAll(saveList);
 	}
 	
 	public void refundLecture(MemberEntity userEntity, Long lectureId) {

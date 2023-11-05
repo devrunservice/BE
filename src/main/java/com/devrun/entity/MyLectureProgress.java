@@ -50,7 +50,7 @@ public class MyLectureProgress {
 	
 	@Column(name = "timecheck" , nullable = true)
 	@Comment("해당 영상 누적 시청 시간")
-	private int timecheck = 1;
+	private int timecheck = 0;
 	
 	@Column(name = "lastviewdate" , nullable = true)
 	@Comment("마지막 영상 시청 시간")

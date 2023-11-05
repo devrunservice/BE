@@ -22,6 +22,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.devrun.youtube.Lecture;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 @Entity
@@ -35,12 +36,7 @@ import lombok.Data;
 	)
 @Data
 @EntityListeners(AuditingEntityListener.class)
-public class MyLecture {
-
-	public MyLecture(MemberEntity userEntity, Lecture lecture2) {
-		this.lecture = lecture2;
-		this.memberentity = userEntity;
-	}
+public class MyLecture {	
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
