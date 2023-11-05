@@ -123,6 +123,7 @@ public class MyLectureController {
 			@RequestBody(required = true) NoteRequest noteRequest) {
 //		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));
 //		MemberEntity userEntity = memberService.findById(userId);
+		System.out.println("------------------------------------강의 노트 저장하기------------------------------------");
 		MemberEntity userEntity = memberService.findById("seokhwan2");
 		mylectureService.myNoteSave(userEntity, noteRequest);
 	}
