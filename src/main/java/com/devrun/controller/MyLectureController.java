@@ -110,6 +110,7 @@ public class MyLectureController {
 			@RequestParam("videoid") String videoid, @RequestParam("currenttime") int currenttime) {
 //		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));
 //		MemberEntity userEntity = memberService.findById(userId);
+		System.out.println("------------------------------------영상 진행률 저장하기------------------------------------");
 		MemberEntity userEntity = memberService.findById("seokhwan2");
 
 		return mylectureService.progress(userEntity, videoid, currenttime);
