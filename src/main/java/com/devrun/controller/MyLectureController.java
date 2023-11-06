@@ -16,6 +16,7 @@ import com.devrun.dto.MycouresDTO;
 import com.devrun.dto.MylectureDTO;
 import com.devrun.dto.NoteRequest;
 import com.devrun.dto.NoteUpdateRequest;
+import com.devrun.dto.ProgressInfo;
 import com.devrun.dto.QaDTO;
 import com.devrun.dto.QaRequest;
 import com.devrun.dto.ReviewRequest;
@@ -103,17 +104,14 @@ public class MyLectureController {
 
 	@PostMapping("/lecture/progress")
 	@ApiOperation(value = "영상 진행률 저장하기", notes = "파라미터로 액세스 토큰과 현재 시청중인 videoid(videoid)와, 현재 재생 누적 시간(currenttime)를 요청하면, 데이터베이스에 저장하고, 결과값을 반환합니다.")
-	@ApiImplicitParams({
-			@ApiImplicitParam(example = "w8-X2DED94A", value = "비디오 아이디", name = "videoid", dataTypeClass = String.class),
-			@ApiImplicitParam(example = "120", value = "영상 재생 누적 시간(초 단위)", name = "currenttime", dataTypeClass = Integer.class) })
 	public Map<String, Object> lectureprogress(HttpServletRequest httpServletRequest,
-			@RequestParam("videoid") String videoid, @RequestParam("currenttime") int currenttime) {
+			@RequestBody(required = true) ProgressInfo prgressinfo) {
 //		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));
 //		MemberEntity userEntity = memberService.findById(userId);
 		System.out.println("------------------------------------영상 진행률 저장하기------------------------------------");
 		MemberEntity userEntity = memberService.findById("seokhwan2");
 
-		return mylectureService.progress(userEntity, videoid, currenttime);
+		return mylectureService.progress(userEntity, prgressinfo.getVideoid(), prgressinfo.getCurrenttime());
 
 	}
 
