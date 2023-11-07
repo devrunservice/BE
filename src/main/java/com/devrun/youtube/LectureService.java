@@ -199,52 +199,6 @@ public class LectureService {
 			}
 	}
 	
-	 public CreateLectureRequestDto getLectureDetailsMapping(Long lectureId) throws NotFoundException {
-	        Lecture lecture = lectureRepository.findById(lectureId)
-	                .orElseThrow(() -> new NotFoundException());
-
-	        CreateLectureRequestDto detailsDto = new CreateLectureRequestDto();
-	        detailsDto.setLectureName(lecture.getLectureName());
-	        detailsDto.setLectureIntro(lecture.getLectureIntro());
-	        detailsDto.setLecturePrice(lecture.getLecturePrice());
-	        detailsDto.setLectureStart(lecture.getLectureStart());
-	        detailsDto.setLectureEdit(lecture.getLectureEdit());
-	        //detailsDto.setLectureThumbnail(lecture.getLectureThumbnail());
-
-	        // 강의 카테고리 정보 매핑
-	        LectureCategory lectureCategory = lecture.getLectureCategory();
-	        LecturecategoryDto categoryDto = new LecturecategoryDto();
-	        categoryDto.setCategoryNo(lectureCategory.getCategoryNo());
-	        categoryDto.setLectureBigCategory(lectureCategory.getLectureBigCategory());
-	        categoryDto.setLectureMidCategory(lectureCategory.getLectureMidCategory());
-	        //detailsDto.setLectureCategory(categoryDto);
-
-	        // 강의 섹션 정보 매핑
-	        List<LectureSection> lectureSections = sectionRepository.findByLecture(lecture);
-	        List<LectureSectionDto> sectionDtos = new ArrayList<>();
-	        for (LectureSection lectureSection : lectureSections) {
-	            LectureSectionDto sectionDto = new LectureSectionDto();
-	            sectionDto.setSectionNumber(lectureSection.getSectionNumber());
-	            sectionDto.setSectionTitle(lectureSection.getSectionTitle());
-
-	            // 섹션에 속한 비디오 정보 매핑
-	            List<Video> videos = videoRepository.findByLectureSection(lectureSection);
-	            List<VideoDto> videoDtos = new ArrayList<>();
-	            for (Video video : videos) {
-	                VideoDto videoDto = new VideoDto();
-	                videoDto.setFileName(video.getFileName());
-	                videoDto.setVideoId(video.getVideoId());
-	                videoDto.setVideoLink(video.getVideoLink());
-	                videoDto.setVideoTitle(video.getVideoTitle());
-	                videoDtos.add(videoDto);
-	            }
-	            sectionDto.setVideoDtos(videoDtos);
-	            sectionDtos.add(sectionDto);
-	        }
-	       detailsDto.setLectureSectionList(sectionDtos);
-
-	        return detailsDto;
-	    }
 	 
 	 
 //	 public CreateLectureRequestDto getLectureDetailsMapping(Long lectureId) {

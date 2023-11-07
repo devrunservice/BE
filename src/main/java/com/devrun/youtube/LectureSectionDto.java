@@ -9,6 +9,7 @@ public class LectureSectionDto {
     private int SectionNumber; //1번
     private String SectionTitle; //1번 제목
     List<VideoDto> videoDtos; //4
+   
 }
 
 

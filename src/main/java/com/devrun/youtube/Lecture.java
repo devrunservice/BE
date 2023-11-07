@@ -91,9 +91,10 @@ public class Lecture {
 	@JsonManagedReference
 	private List<LectureSection> lectureSections;
 
-	public void setLectureSection(List<LectureSection> sections) {
+	
+	public void setLectureSections(List<LectureSection> sections) {
+	    this.lectureSections = sections;
 	}
-
 	public HttpServletResponse getId() {
 		return null;
 	}
