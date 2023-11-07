@@ -88,6 +88,8 @@ public class LecuturesearchService {
             sectionDtos.add(sectionDto);
         }
 
+        
+        
         Lecture detailsDto = new Lecture();
         detailsDto.setLectureName(lecture.getLectureName());
         detailsDto.setLectureIntro(lecture.getLectureIntro());
@@ -96,6 +98,9 @@ public class LecuturesearchService {
         detailsDto.setLectureEdit(lecture.getLectureEdit());
         detailsDto.setLectureThumbnail(lecture.getLectureThumbnail());
         detailsDto.setLectureCategory(lectureCategory);
+        // 강의 태그 정보 매핑
+        List<String> lectureTags = lecture.getLectureTag();
+        detailsDto.setLectureTag(lectureTags);
 //        detailsDto.setLectureSectionList(lectureSections);
 
         return detailsDto;

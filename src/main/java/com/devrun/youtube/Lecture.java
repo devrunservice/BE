@@ -92,6 +92,7 @@ public class Lecture {
 	private List<LectureSection> lectureSections;
 
 	
+	
 	public void setLectureSections(List<LectureSection> sections) {
 	    this.lectureSections = sections;
 	}
