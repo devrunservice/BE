@@ -33,7 +33,6 @@ public class LectureService {
 		this.videoRepository = videoRepository;
 	}
 
-
 	private LectureCategory convertToLectureCategoryEntity(LecturecategoryDto categoryDto) {
 		// 앞단에서 선택한 옵션값인 categoryDto를 사용하여 DB에서 해당 카테고리를 조회합니다.
 		LectureCategory lectureCategory = categoryRepository.findByCategoryNoAndLectureBigCategoryAndLectureMidCategory(
@@ -78,29 +77,30 @@ public class LectureService {
 		return video;
 	}
 
-
 	// 마지막 섹션 ID를 가져오는 메서드 추가
 	public Long getLastSectionId() {
 		return sectionRepository.findLastSectionId();
 	}
 
-	public Lecture saveLecture2(CreateLectureRequestDto requestDto, String lectureThumnailUrl) {
+	public Lecture saveLecture(MemberEntity mento, CreateLectureRequestDto requestDto, String lectureThumnailUrl) {
 
-		Lecture savelecture = new Lecture();
-		savelecture.setLectureName(requestDto.getLectureName());
-		savelecture.setLecturePrice(requestDto.getLecturePrice());
-		savelecture.setLectureIntro(requestDto.getLectureIntro());
-		// savelecture.setLectureStart(requestDto.getLectureStart());
-		savelecture.setLectureTag(requestDto.getLectureTag());
-		savelecture.setLectureThumbnail(lectureThumnailUrl);
-		savelecture.setLectureCategory(requestDto.getLectureCategory());
-		Lecture savedlecture = lectureRepository.save(savelecture);
+		Lecture lecture = new Lecture();
+		lecture.setMentoId(mento);
+		lecture.setLectureCategory(requestDto.getLectureCategory());
+		lecture.setLectureIntro(requestDto.getLectureIntro());
+		lecture.setLectureName(requestDto.getLectureName());
+		lecture.setLecturePrice(requestDto.getLecturePrice());
+		lecture.setLectureTag(requestDto.getLectureTag());
+		lecture.setLectureStatus("ACTIVE");
+		lecture.setLectureRating(0);
+		lecture.setLectureThumbnail(lectureThumnailUrl);
+		Lecture savedlecture = lectureRepository.save(lecture);
 		return savedlecture;
 	}
 
 	public List<LectureSection> saveLectureSection(Lecture savedlecture, List<LectureSectionDto> sectionlist) {
 
-				List<LectureSection> savedsectionlist = new ArrayList<LectureSection>();
+		List<LectureSection> savedsectionlist = new ArrayList<LectureSection>();
 		for (LectureSectionDto lectureSectionDto : sectionlist) {
 			LectureSection lectureSection = new LectureSection();
 			lectureSection.setLecture(savedlecture);
@@ -108,24 +108,21 @@ public class LectureService {
 			lectureSection.setSectionTitle(lectureSectionDto.getSectionTitle());
 			LectureSection savedlectureSection = sectionRepository.save(lectureSection);
 			savedsectionlist.add(savedlectureSection);
-			
 		}
-		
+
 		return savedsectionlist;
 	}
 
-	public void saveVideo(Lecture savedlecture, List<LectureSection> savedlectureSeciton, List<VideoDto> videolist) {
-
-		for (VideoDto videoDto : videolist) {
-			Video savevideo = new Video();
-			savevideo.setLecture(savedlecture);
-			savevideo.setLectureSection(savedlectureSeciton.get(0));
-			savevideo.setVideoTitle(videoDto.getVideoTitle());
-			savevideo.setVideoLink(videoDto.getVideoLink());
-			videoRepository.save(savevideo);
-		}
-
+	public void saveVideo(Lecture savedlecture, LectureSection savedlectureSeciton, VideoDto videoDto) {
+		Video savevideo = new Video();
+		savevideo.setLecture(savedlecture);
+		savevideo.setLectureSection(savedlectureSeciton);
+		savevideo.setVideoTitle(videoDto.getVideoTitle());
+		savevideo.setVideoLink(videoDto.getVideoLink());
+		savevideo.setTotalPlayTime(videoDto.getTotalPlayTime());
+		videoRepository.save(savevideo);
 	}
+
 	/*
 	 * 데이터베이스에 저장된 강의 entity 중 강의명, 강의 소갯글, 강사명 속성에 특정한 검색어를 포함하는 entity의 일부 속성(강의명
 	 * , 강의 소개글, 강사명, 강의 평점, 강의 가격, 썸네일 URI , 카테고리 분류 중-소 , 속성) 집합을 가져옴
@@ -134,6 +131,7 @@ public class LectureService {
 	// 유저가 없는 경우
 	public List<QueryLectureByKeywordDTO> QueryLectureByKeyword(String keyword, PageRequest pageable) {
 		Page<Lecture> l1 = lectureRepository.findByLectureNameContainsOrLectureIntroContains(keyword, pageable);
+		l1.getTotalPages();
 		List<QueryLectureByKeywordDTO> list = convertLectureToDTO(l1);
 		return list;
 	};
@@ -174,33 +172,29 @@ public class LectureService {
 		return list;
 	}
 
-	
 	public CreateLectureRequestDto getLectureDetails(Long lectureId) throws NotFoundException {
-	    Lecture lecture = lectureRepository.findById(lectureId)
-	        .orElseThrow(() -> new NotFoundException());
+		Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new NotFoundException());
 
-	    CreateLectureRequestDto lectureDto = new CreateLectureRequestDto();
-	    lectureDto.setLectureName(lecture.getLectureName());
-	    lectureDto.setLectureIntro(lecture.getLectureIntro());
-	    lectureDto.setLecturePrice(lecture.getLecturePrice());
-	    lectureDto.setLectureStart(lecture.getLectureStart());
-	    lectureDto.setLectureEdit(lecture.getLectureEdit());
-	    
-	    return lectureDto;
+		CreateLectureRequestDto lectureDto = new CreateLectureRequestDto();
+		lectureDto.setLectureName(lecture.getLectureName());
+		lectureDto.setLectureIntro(lecture.getLectureIntro());
+		lectureDto.setLecturePrice(lecture.getLecturePrice());
+		lectureDto.setLectureStart(lecture.getLectureStart());
+		lectureDto.setLectureEdit(lecture.getLectureEdit());
+
+		return lectureDto;
 	}
 
 	public Lecture findByLectureID(Long lectureId) {
 		Optional<Lecture> lecutre = lectureRepository.findByLectureid(lectureId);
-		
+
 		if (lecutre.isPresent()) {
 			return lecutre.get();
-			} else {
-			throw new NoSuchElementException("Lecture Not Found!"); 
-			}
+		} else {
+			throw new NoSuchElementException("Lecture Not Found!");
+		}
 	}
-	
-	 
-	 
+
 //	 public CreateLectureRequestDto getLectureDetailsMapping(Long lectureId) {
 //	        Lecture lecture = lectureRepository.findById(lectureId)
 //	                .orElseThrow(() -> new NotFoundException());

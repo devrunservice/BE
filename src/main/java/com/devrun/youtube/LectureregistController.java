@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.devrun.dto.QueryLectureByKeywordDTO;
 import com.devrun.entity.MemberEntity;
@@ -124,51 +123,6 @@ public class LectureregistController {
 		}
 	}
 
-	// POST 요청을 통해 강의 등록을 처리하는 엔드포인트
-	@PostMapping("/lectureregist")
-	public ResponseEntity<String> createLecture(@ModelAttribute CreateLectureRequestDto requestDto,
-			@RequestParam("image") List<MultipartFile> imageFiles,
-			@RequestParam("videoFileList") List<MultipartFile> videoFiles, @RequestParam("categoryNo") Long categoryNo,
-			@RequestParam("lectureBigCategory") String lectureBigCategory,
-			@RequestParam("lectureMidCategory") String lectureMidCategory,
-			@RequestParam("accessToken") String accessToken) {
-		try {
-			if (videoFiles.isEmpty()) {
-				return ResponseEntity.badRequest().body("동영상 파일을 선택해주세요.");
-			}
-
-			LecturecategoryDto categoryDto = new LecturecategoryDto();
-			categoryDto.setLectureBigCategory(lectureBigCategory);
-			categoryDto.setLectureMidCategory(lectureMidCategory);
-			categoryDto.setCategoryNo(categoryNo);
-
-			awsS3UploadService.putS3(imageFiles.get(0), "public.lecture.images", requestDto.getLectureName());
-
-			// 강의 및 비디오 정보를 데이터베이스에 저장하고, 강의 썸네일 이미지를 S3에 업로드한 URL을 가져옴
-			// Lecture savedLecture = lectureService.saveLecture(requestDto, imageUrls,
-			// categoryDto);
-
-			System.out.println("Number of video files to upload: " + videoFiles.size());
-
-			// 동영상 업로드 및 정보 저장
-//            List<VideoInfo> videoInfoList = new ArrayList<>();
-//            for (MultipartFile videoFile : videoFiles) {
-//                VideoInfo videoInfo = youTubeUploader.uploadVideo(videoFile, savedLecture.getId(), accessToken); // savedLecture의 ID와 엑세스 토큰 사용
-//                System.out.println("아이디???? " + savedLecture.getId());
-//                videoInfoList.add(videoInfo);
-//            }
-
-			// 동영상 정보를 데이터베이스에 저장
-			// lectureService.saveVideoInfo(videoInfoList, savedLecture);
-
-			// 동영상 업로드를 시작하기 위해 업로드 페이지로 리다이렉션
-			return ResponseEntity.ok("강의 및 비디오 정보가 저장되었습니다.");
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("오류가 발생했습니다.");
-		}
-	}
-
 	@PostMapping("/lectureregitest")
 	public String lecturetest(@ModelAttribute CreateLectureRequestDto requestDto,
 			@RequestParam("accessToken") String googleAccessToken, HttpServletResponse httpServletResponse,
@@ -184,14 +138,13 @@ public class LectureregistController {
 		// VideoDto + Lecuture, LectureSection = Video
 		// List<Video> saveAll
 		// List<VideoDto> videolist = requestDto.getVideoList();
-//    	VideoDto videolist = requestDto.getVideoList();
-		List<VideoDto> videolist = requestDto.getVideoList();
-		System.err.println(videolist);
 
-		// 업로드된 비디오 정보를 저장할 리스트를 생성합니다.
-		List<VideoDto> uploadedVideos = new ArrayList<>();
-
-		requestDto.setVideoList(videolist);
+		// 리스트의 각 비디오에 대해 업로드 작업을 수행합니다.
+		List<VideoDto> uploadedVideos = new ArrayList<>(); // 업로드된 비디오 정보를 저장할 리스트를 생성합니다.
+		for (VideoDto video : requestDto.getVideoList()) {
+			VideoDto uploadedVideo = youTubeUploader.uploadVideo(video, httpServletResponse, googleAccessToken);
+			uploadedVideos.add(uploadedVideo);
+		}
 
 		// JWT 토큰에서 사용자 아이디 추출
 		String userId = JWTUtil.getUserIdFromToken(jwtToken);
@@ -199,36 +152,24 @@ public class LectureregistController {
 		// 멘토(사용자) 정보 조회
 		MemberEntity mento = memberEntityRepository.findById(userId);
 
-		// 강의 엔터리 객체 생성 및 매핑
-		Lecture lecture = new Lecture();
-		lecture.setMentoId(mento);
+		// 썸네일 S3 저장
+		String lectureThumnailUrl = awsS3UploadService.putS3(requestDto.getLectureThumbnail(), "lectuer_thumbnail",
+				requestDto.getLectureName());
 
-		try {
+		// 강의 엔티티 객체 생성 및 매핑
+		Lecture savedlecture = lectureService.saveLecture(mento, requestDto, lectureThumnailUrl);
 
-			// 리스트의 각 비디오에 대해 업로드 작업을 수행합니다.
-			for (VideoDto video : videolist) {
-				VideoDto uploadedVideo = youTubeUploader.uploadVideo(video, httpServletResponse, googleAccessToken);
-				uploadedVideos.add(uploadedVideo);
+		// 섹션 엔티티 객체 생성 및 매핑
+		List<LectureSection> savedlectureSeciton = lectureService.saveLectureSection(savedlecture,
+				requestDto.getLectureSectionList());
+		// 비디오 엔티티 객체 생성 및 매핑
+		for (VideoDto videoDto : uploadedVideos) {
+			for (LectureSection section : savedlectureSeciton) {
+				if (videoDto.getSectionNumber() == section.getSectionNumber()
+						&& videoDto.getSectionTitle().equals(section.getSectionTitle())) {
+					lectureService.saveVideo(savedlecture, section, videoDto);
+				}
 			}
-
-			String lectureThumnailUrl = awsS3UploadService.putS3(requestDto.getLectureThumbnail(),
-					"public.lecture.images", requestDto.getLectureName());
-
-			Lecture savedlecture = lectureService.saveLecture2(requestDto, lectureThumnailUrl);
-
-			List<LectureSection> savedlectureSeciton = lectureService.saveLectureSection(savedlecture,
-					requestDto.getLectureSectionList());
-
-			lectureService.saveVideo(savedlecture, savedlectureSeciton, videolist);
-		} catch (StringIndexOutOfBoundsException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NullPointerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 
 		return "수신완료"; // Redirect to a success page
@@ -303,17 +244,4 @@ public class LectureregistController {
 		}
 
 	}
-
-	@PostMapping("/lectureregitest2")
-	public String lecturetest23(@ModelAttribute CreateLectureRequestDto requestDto) {
-
-		Lecture savedlecture = lectureService.saveLecture2(requestDto, "URL");
-		List<LectureSection> savedlectureSeciton = lectureService.saveLectureSection(savedlecture,
-				requestDto.getLectureSectionList());
-		List<VideoDto> videolist = requestDto.getVideoList();
-		lectureService.saveVideo(savedlecture, savedlectureSeciton, videolist);
-		return null;
-
-	}
-
 }
