@@ -198,7 +198,7 @@ public class MyLectureService {
 			MyLectureNoteDTO myLectureNoteDto = new MyLectureNoteDTO();
 			myLectureNoteDto.setLastStudyDate(mylecture.getLastviewdate());
 			myLectureNoteDto.setLectureId(mylecture.getLecture().getLectureid());
-			myLectureNoteDto.setLectureThumnail(mylecture.getLecture().getLectureThumbnail());
+			myLectureNoteDto.setLectureThumbnail(mylecture.getLecture().getLectureThumbnail());
 			myLectureNoteDto.setLectureTitle(mylecture.getLecture().getLectureName());
 			for (MylectureNote ml : myNoteList) {
 				if (ml.getMyLecture().equals(mylecture)) {
