@@ -76,7 +76,7 @@ public class MyLectureController {
 	}
 
 	@GetMapping("/mylecturelist")
-	@ApiOperation(value = "내 학습 불러오기", notes = "파라미터로 액세스 토큰과 강의 완강 여부(status), 페이지(page)를 요청할 수 있고, 각 페이지 당 10개의 항목이 반환됩니다.")
+	@ApiOperation(value = "내 학습 불러오기", notes = "파라미터로 액세스 토큰과 강의 완강 여부(status), 페이지(page)를 요청할 수 있고, 각 페이지 당 10개의 항목이 반환됩니다. 정렬순서는 최근 학습 순입니다.")
 	@ApiImplicitParams({
 			@ApiImplicitParam(example = "Inprogress", value = "강의 완강 여부", name = "status", dataTypeClass = String.class),
 			@ApiImplicitParam(example = "1", value = "요청 페이지", name = "page", dataTypeClass = String.class) })
@@ -179,7 +179,7 @@ public class MyLectureController {
 
 	}
 
-	@GetMapping("/lectureQaOpen")
+	@GetMapping("/lectureQaDetailOpen")
 	@ApiOperation(value = "강의 질문 가져오기", notes = "유저가 올린 질문을 가져옵니다.")
 	public List<QaDTO> lectureQaList(HttpServletRequest httpServletRequest,
 			@RequestParam(name = "page", defaultValue = "0", required = false) int page) {
