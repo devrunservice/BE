@@ -10,7 +10,7 @@ import lombok.Data;
 
 @Data
 public class MyLectureNoteDTO {	
-	private String lectureTitle , lectureThumnail;
+	private String lectureTitle , lectureThumbnail;
 	private Long lectureId;
 	private int count = 0;
 	@Temporal(TemporalType.DATE)
