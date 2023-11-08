@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.devrun.youtube.Lecture;
 import com.devrun.youtube.Video;
+import com.devrun.dto.VideoDetailsDto;
 import com.devrun.service.LecuturesearchService;
 import com.devrun.service.VideoSearchService;
 
@@ -48,9 +49,17 @@ public Video getVideoDetails(@PathVariable Long videoId) throws NotFoundExceptio
 
 
 @GetMapping("/videos/{videoId}/Playpage")
-public Video getVideoPageData(@PathVariable Long videoId) throws NotFoundException {
-	Video Playpage = videoSearchService.getVideoPageData(videoId);
-    return Playpage;
+public VideoDetailsDto getVideoPageData(@PathVariable Long videoId) throws NotFoundException {
+    Video currentVideo = videoSearchService.getVideoDetails(videoId);
+    Video previousVideo = videoSearchService.getPreviousVideo(videoId);
+    Video nextVideo = videoSearchService.getNextVideo(videoId);
+
+    VideoDetailsDto videoDetailsDto = new VideoDetailsDto();
+    videoDetailsDto.setCurrentVideo(currentVideo);
+    videoDetailsDto.setPreviousVideo(previousVideo);
+    videoDetailsDto.setNextVideo(nextVideo);
+
+    return videoDetailsDto;
 }
 
 
