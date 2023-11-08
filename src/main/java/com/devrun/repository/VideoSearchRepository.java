@@ -21,4 +21,5 @@ public interface VideoSearchRepository extends JpaRepository<Video, Long> {
 
 	List<Video> findByLectureSection(LectureSection lectureSection);
 
+
 }
