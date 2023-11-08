@@ -128,12 +128,22 @@ public class MyLectureController {
 	
 	@PostMapping("/lecturenoteUpdate")
 	@ApiOperation(value = "강의 노트 수정하기", notes = "작성한 강의 노트를 수정합니다.")
-	public void lectureNoteSave(HttpServletRequest httpServletRequest,
+	public lectureNoteDetailDTO lectureNoteUpdate(HttpServletRequest httpServletRequest,
 			@RequestBody(required = true) NoteUpdateRequest noteRequest) {
 //		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));
 //		MemberEntity userEntity = memberService.findById(userId);
 		MemberEntity userEntity = memberService.findById("seokhwan2");
-		mylectureService.myNoteUpdate(userEntity, noteRequest);
+		return mylectureService.myNoteUpdate(userEntity, noteRequest);
+	}
+	
+	@PostMapping("/lecturenoteDelete")
+	@ApiOperation(value = "강의 노트 삭제하기", notes = "작성한 강의 노트를 삭제합니다.")
+	public void lectureNoteDelte(HttpServletRequest httpServletRequest,
+			@RequestBody(required = true) Long noteNo) {
+//		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));
+//		MemberEntity userEntity = memberService.findById(userId);
+		MemberEntity userEntity = memberService.findById("seokhwan2");
+		mylectureService.myNoteDelete(userEntity, noteNo);
 	}
 
 	@GetMapping("/lectureNoteOpen")

@@ -12,7 +12,7 @@ import com.devrun.entity.MylectureNote;
 import com.devrun.youtube.Video;
 
 public interface MylectureNoteRepository extends JpaRepository<MylectureNote, Long> {
-
+		
 	Optional<Page<MylectureNote>> findByMyLecture(MyLecture myLecture, PageRequest pageRequest);
 
 	Optional<List<MylectureNote>> findByMyLectureIn(List<MyLecture> myLectureList);
@@ -20,5 +20,9 @@ public interface MylectureNoteRepository extends JpaRepository<MylectureNote, Lo
 	List<MylectureNote> findByMyLectureInOrderByDateDesc(List<MyLecture> list);
 
 	MylectureNote findByNoteNo(Long noteNo);
+
+	Optional<Page<MylectureNote>> findByMyLectureAndNoteDeleteFalse(MyLecture myLecture, PageRequest pageRequest);
+
+	List<MylectureNote> findByMyLectureInAndNoteDeleteFalseOrderByDateDesc(List<MyLecture> list);
 
 }
