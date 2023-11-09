@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.devrun.dto.QueryLectureByKeywordDTO;
+import com.devrun.dto.QueryLectureByKeywordDTO2;
 import com.devrun.entity.MemberEntity;
 
 @Service
@@ -66,8 +67,6 @@ public class LectureService {
 
 	private Video convertToVideoEntity(VideoDto videoDto, Lecture lecture) {
 		Video video = new Video();
-		video.setUploadDate(videoDto.getUploadDate());
-		video.setFileName(videoDto.getFileName());
 		video.setVideoId(videoDto.getVideoId());
 		// video.setTotalPlayTime(videoDto.getTotalPlayTime());
 		video.setVideoLink(videoDto.getVideoLink());
@@ -127,23 +126,41 @@ public class LectureService {
 	 * 데이터베이스에 저장된 강의 entity 중 강의명, 강의 소갯글, 강사명 속성에 특정한 검색어를 포함하는 entity의 일부 속성(강의명
 	 * , 강의 소개글, 강사명, 강의 평점, 강의 가격, 썸네일 URI , 카테고리 분류 중-소 , 속성) 집합을 가져옴
 	 */
-
+	
 	// 유저가 없는 경우
-	public List<QueryLectureByKeywordDTO> QueryLectureByKeyword(String keyword, PageRequest pageable) {
+	public QueryLectureByKeywordDTO2 QueryLectureByKeyword(String keyword, PageRequest pageable) {
 		Page<Lecture> l1 = lectureRepository.findByLectureNameContainsOrLectureIntroContains(keyword, pageable);
-		l1.getTotalPages();
-		List<QueryLectureByKeywordDTO> list = convertLectureToDTO(l1);
-		return list;
+		return packageingDto(l1);
 	};
 
 	// 유저가 있는 경우
-	public List<QueryLectureByKeywordDTO> QueryLectureByKeyword(String keyword, List<MemberEntity> m1,
+	public QueryLectureByKeywordDTO2 QueryLectureByKeyword(String keyword, List<MemberEntity> m1,
 			Pageable pageable) {
 
 		Page<Lecture> l1 = lectureRepository.findByLectureNameContainsOrLectureIntroContainsOrMentoIdIn(keyword, m1,
 				pageable);
-		List<QueryLectureByKeywordDTO> list = convertLectureToDTO(l1);
+		return packageingDto(l1);
+	}
 
+
+	public QueryLectureByKeywordDTO2 findLecturesWithCategroys(List<LectureCategory> categorys, String keyword,
+			PageRequest pageRequest) {
+		Page<Lecture> l1 = lectureRepository.findLecturesWithCategroy(categorys, keyword, pageRequest);
+		return packageingDto(l1);
+	}
+
+	public QueryLectureByKeywordDTO2 findLecturesWithCategroy(LectureCategory category, String keyword,
+			PageRequest pageRequest) {
+		Page<Lecture> l1 = lectureRepository.findLecturesWithCategroy(category, keyword, pageRequest);
+		return packageingDto(l1);
+	}
+	
+	public QueryLectureByKeywordDTO2 packageingDto(Page<Lecture> l1) {
+		List<QueryLectureByKeywordDTO> list0 = convertLectureToDTO(l1);
+		QueryLectureByKeywordDTO2 list = new QueryLectureByKeywordDTO2();
+		list.setDtolist(list0);
+		list.setTotalelements(l1.getTotalElements());
+		list.setTotalpages(l1.getTotalPages());
 		return list;
 	}
 
@@ -151,26 +168,6 @@ public class LectureService {
 		return lectureList.stream().map(QueryLectureByKeywordDTO::new).collect(Collectors.toList());
 	}
 
-	public List<QueryLectureByKeywordDTO> findLecturesWithCategroys(List<LectureCategory> categorys, String keyword,
-			PageRequest pageRequest) {
-		System.out.println(keyword);
-		Page<Lecture> l1 = lectureRepository.findLecturesWithCategroy(categorys, keyword, pageRequest);
-		for (Lecture lecture : l1) {
-			System.out.println(lecture.getLectureName());
-
-		}
-		List<QueryLectureByKeywordDTO> list = convertLectureToDTO(l1);
-
-		return list;
-	}
-
-	public List<QueryLectureByKeywordDTO> findLecturesWithCategroy(LectureCategory category, String keyword,
-			PageRequest pageRequest) {
-		Page<Lecture> l1 = lectureRepository.findLecturesWithCategroy(category, keyword, pageRequest);
-		List<QueryLectureByKeywordDTO> list = convertLectureToDTO(l1);
-
-		return list;
-	}
 
 	public CreateLectureRequestDto getLectureDetails(Long lectureId) throws NotFoundException {
 		Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new NotFoundException());

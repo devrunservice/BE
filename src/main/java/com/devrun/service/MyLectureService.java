@@ -306,6 +306,7 @@ public class MyLectureService {
 		Lecture lecture = lectureService.findByLectureID(lectureNo);
 		MyLecture myLecture = verifyUserHasLecture(userEntity, lecture);
 		if (myLecture.getLectureProgress() == 100) {
+			//유저 이름
 			return "This user has taken all the lectures.";
 		} else {
 			return "This user has not taken all of the lectures.";
