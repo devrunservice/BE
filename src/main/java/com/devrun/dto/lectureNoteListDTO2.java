@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-@ApiModel(value = "리스트 객체")
+@ApiModel(value = "/lectureNoteListOpen 리스트 객체")
 public class lectureNoteListDTO2 {
 	@ApiModelProperty(value = "특정 강의의 노트 데이터")
 	private List<lectureNoteListDTO> dtolist;
