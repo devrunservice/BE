@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.devrun.dto.MyLectureNoteDTO;
+import com.devrun.dto.MyLectureNoteDTO2;
 import com.devrun.dto.MycouresDTO;
 import com.devrun.dto.MylectureDTO;
 import com.devrun.dto.NoteRequest;
@@ -21,6 +22,8 @@ import com.devrun.dto.QaDTO;
 import com.devrun.dto.QaRequest;
 import com.devrun.dto.ReviewRequest;
 import com.devrun.dto.lectureNoteDetailDTO;
+import com.devrun.dto.lectureNoteListDTO;
+import com.devrun.dto.lectureNoteListDTO2;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.MylectureQa;
 import com.devrun.service.MemberService;
@@ -108,7 +111,6 @@ public class MyLectureController {
 			@RequestBody(required = true) ProgressInfo prgressinfo) {
 //		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));
 //		MemberEntity userEntity = memberService.findById(userId);
-		System.out.println("------------------------------------영상 진행률 저장하기------------------------------------");
 		MemberEntity userEntity = memberService.findById("seokhwan2");
 
 		return mylectureService.progress(userEntity, prgressinfo.getVideoid(), prgressinfo.getCurrenttime());
@@ -121,11 +123,10 @@ public class MyLectureController {
 			@RequestBody(required = true) NoteRequest noteRequest) {
 //		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));
 //		MemberEntity userEntity = memberService.findById(userId);
-		System.out.println("------------------------------------강의 노트 저장하기------------------------------------");
 		MemberEntity userEntity = memberService.findById("seokhwan2");
 		mylectureService.myNoteSave(userEntity, noteRequest);
 	}
-	
+
 	@PostMapping("/lecturenoteUpdate")
 	@ApiOperation(value = "강의 노트 수정하기", notes = "작성한 강의 노트를 수정합니다.")
 	public lectureNoteDetailDTO lectureNoteUpdate(HttpServletRequest httpServletRequest,
@@ -135,11 +136,10 @@ public class MyLectureController {
 		MemberEntity userEntity = memberService.findById("seokhwan2");
 		return mylectureService.myNoteUpdate(userEntity, noteRequest);
 	}
-	
+
 	@PostMapping("/lecturenoteDelete")
 	@ApiOperation(value = "강의 노트 삭제하기", notes = "작성한 강의 노트를 삭제합니다.")
-	public void lectureNoteDelte(HttpServletRequest httpServletRequest,
-			@RequestBody(required = true) Long noteNo) {
+	public void lectureNoteDelte(HttpServletRequest httpServletRequest, @RequestBody(required = true) Long noteNo) {
 //		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));
 //		MemberEntity userEntity = memberService.findById(userId);
 		MemberEntity userEntity = memberService.findById("seokhwan2");
@@ -147,8 +147,8 @@ public class MyLectureController {
 	}
 
 	@GetMapping("/lectureNoteOpen")
-	@ApiOperation(value = "강의별 노트 리스트 불러오기", notes = "유저가 작성한 강의 노트를 불러옵니다.")
-	public List<MyLectureNoteDTO> lectureNoteOpen(HttpServletRequest httpServletRequest,
+	@ApiOperation(value = "전체 강의 리스트와 노트 갯수 불러오기", notes = "유저가 수강 중인 전체 강의와 노트 수를 출력합니다.")
+	public MyLectureNoteDTO2 lectureNoteOpen(HttpServletRequest httpServletRequest,
 			@RequestParam(name = "page", defaultValue = "0", required = false) int page) {
 //		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));
 //		MemberEntity userEntity = memberService.findById(userId);
@@ -156,16 +156,25 @@ public class MyLectureController {
 		return mylectureService.myNotelist(userEntity, page);
 	}
 
-	@GetMapping("/lectureNoteDetailOpen")
-	@ApiOperation(value = "특정 강의의 노트 불러오기", notes = "유저가 선택한 강의에 대한 노트를 불러옵니다.")
-	public List<lectureNoteDetailDTO> lectureNoteDetailOpen(HttpServletRequest httpServletRequest ,
-	@RequestParam(name = "lectureId" , defaultValue = "1" , required = false) Long lectureId ,
-	@RequestParam(name = "page", defaultValue = "0", required = false)	int page)
-	{
+	@GetMapping("/lectureNoteListOpen")
+	@ApiOperation(value = "선택한 강의에서 작성한 노트 리스트 미리보기 불러오기", notes = "선택한 강의에서 작성한 노트 리스트 미리보기 불러오기")
+	public lectureNoteListDTO2 lectureNoteListOpen(HttpServletRequest httpServletRequest,
+			@RequestParam(name = "lectureId", defaultValue = "1", required = false) Long lectureId,
+			@RequestParam(name = "page", defaultValue = "0", required = false) int page) {
 //		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));
 //		MemberEntity userEntity = memberService.findById(userId);
 		MemberEntity userEntity = memberService.findById("seokhwan2");
 		return mylectureService.noteDetaiList(userEntity, lectureId, page);
+	}
+
+	@GetMapping("/lectureNoteDetailOpen")
+	@ApiOperation(value = "선택한 노트의 세부 내용 불러오기", notes = "유저가 선택한 노트 한개에 대한 세부 내용을 불러옵니다.")
+	public lectureNoteDetailDTO lectureNoteDetailOpen(HttpServletRequest httpServletRequest,
+			@RequestParam(name = "noteId", defaultValue = "1", required = true) Long noteNo) {
+//		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));
+//		MemberEntity userEntity = memberService.findById(userId);
+		MemberEntity userEntity = memberService.findById("seokhwan2");
+		return mylectureService.noteDetaiOpen(userEntity, noteNo);
 	}
 
 	@PostMapping("/lectureQa")
@@ -189,16 +198,17 @@ public class MyLectureController {
 		return mylectureService.Qalist(userEntity, page);
 
 	}
-	
+
 	@GetMapping("/certificates")
-	@ApiOperation(value = "수료증 자격 확인" , notes = "수료증 자격을 확인합니다.")
-	public String lectureCertificates(HttpServletRequest httpServletRequest , @RequestParam(name = "lectureId", defaultValue = "22", required = false) Long lectureId) {
+	@ApiOperation(value = "수료증 자격 확인", notes = "수료증 자격을 확인합니다.")
+	public String lectureCertificates(HttpServletRequest httpServletRequest,
+			@RequestParam(name = "lectureId", defaultValue = "22", required = false) Long lectureId) {
 //		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));
 //		MemberEntity userEntity = memberService.findById(userId);
 		MemberEntity userEntity = memberService.findById("seokhwan2");
 		return mylectureService.checkLectureComplete(userEntity, lectureId);
 	}
-	
+
 	@GetMapping("/save")
 	public void lectureSave() {
 		MemberEntity userEntity = memberService.findById("sunho1234");

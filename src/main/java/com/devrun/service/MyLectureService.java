@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import com.devrun.dto.MyLectureNoteDTO;
+import com.devrun.dto.MyLectureNoteDTO2;
 import com.devrun.dto.MycouresDTO;
 import com.devrun.dto.MylectureDTO;
 import com.devrun.dto.NoteRequest;
@@ -23,6 +24,8 @@ import com.devrun.dto.QaRequest;
 import com.devrun.dto.SectionInfo;
 import com.devrun.dto.VideoInfo;
 import com.devrun.dto.lectureNoteDetailDTO;
+import com.devrun.dto.lectureNoteListDTO;
+import com.devrun.dto.lectureNoteListDTO2;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.MyLecture;
 import com.devrun.entity.MyLectureProgress;
@@ -183,64 +186,99 @@ public class MyLectureService {
 		return mylectureDTOList;
 
 	}
-
-	public List<MyLectureNoteDTO> myNotelist(MemberEntity userEntity, int page) {
-		page = page <= 1 ? 0 : page;
-		int size = 10;
-		PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "lastviewdate");
-		Page<MyLecture> myLectureList = mylectureRepository.findByMemberentity(userEntity, pageRequest);
+	
+	public MyLectureNoteDTO2 packageDto(Page<MyLecture> myLectureList , int TotalPages) {
+		List<MyLectureProgress> myprogressList = mylectureProgressRepository.findByMyLectureIn(myLectureList.toList());
 		List<MylectureNote> myNoteList = mylectureNoteRepository
-				.findByMyLectureInAndNoteDeleteFalseOrderByDateDesc(myLectureList.toList());
+				.findByMyLectureProgressInAndNoteDeleteFalseOrderByDateDesc(myprogressList);
 
 		List<MyLectureNoteDTO> lectureNoteDTOs = new ArrayList<MyLectureNoteDTO>();
 
-		for (MyLecture mylecture : myLectureList.toList()) {
+		for (MyLecture my : myLectureList.toList()) {
 			MyLectureNoteDTO myLectureNoteDto = new MyLectureNoteDTO();
-			myLectureNoteDto.setLastStudyDate(mylecture.getLastviewdate());
-			myLectureNoteDto.setLectureId(mylecture.getLecture().getLectureid());
-			myLectureNoteDto.setLectureThumbnail(mylecture.getLecture().getLectureThumbnail());
-			myLectureNoteDto.setLectureTitle(mylecture.getLecture().getLectureName());
+			myLectureNoteDto.setLastStudyDate(my.getLastviewdate());
+			myLectureNoteDto.setLectureId(my.getLecture().getLectureid());
+			myLectureNoteDto.setLectureThumbnail(my.getLecture().getLectureThumbnail());
+			myLectureNoteDto.setLectureTitle(my.getLecture().getLectureName());
 			for (MylectureNote ml : myNoteList) {
-				if (ml.getMyLecture().equals(mylecture)) {
+				if (ml.getMyLectureProgress().getMyLecture().equals(my)) {
 					myLectureNoteDto.setCount(myLectureNoteDto.getCount() + 1);
 				}
 			}
 			lectureNoteDTOs.add(myLectureNoteDto);
 		}
-		return lectureNoteDTOs;
+		
+		MyLectureNoteDTO2 dtos = new MyLectureNoteDTO2();
+		dtos.setDtolist(lectureNoteDTOs);
+		dtos.setTotalpages(TotalPages);
+		return dtos;
+		
+	}
+	
+	public MyLectureNoteDTO2 myNotelist(MemberEntity userEntity, int page) {
+		page = page <= 1 ? 0 : page;
+		int size = 10;
+		PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "lastviewdate");
+		Page<MyLecture> myLectureList = mylectureRepository.findByMemberentity(userEntity, pageRequest);
+		
+		
+		return packageDto(myLectureList , myLectureList.getTotalPages());
 	}
 
-	public List<lectureNoteDetailDTO> noteDetaiList(MemberEntity userEntity, Long lectureId, int page) {
+	public lectureNoteListDTO2 noteDetaiList(MemberEntity userEntity, Long lectureId, int page) {
 		page = page <= 1 ? 0 : page;
 		int size = 10;
 		PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "date");
 		Lecture lecture = lectureService.findByLectureID(lectureId);
 		MyLecture myLecture = verifyUserHasLecture(userEntity, lecture);
-		List<lectureNoteDetailDTO> noteDetilas = new ArrayList<lectureNoteDetailDTO>();
-		Optional<Page<MylectureNote>> myNoteList = mylectureNoteRepository.findByMyLectureAndNoteDeleteFalse(myLecture, pageRequest);
+		List<MyLectureProgress> myprogressList = mylectureProgressRepository.findByMyLecture(myLecture);
+		List<lectureNoteListDTO> noteDetilas = new ArrayList<lectureNoteListDTO>();
+		Optional<Page<MylectureNote>> myNoteList = mylectureNoteRepository.findByMyLectureProgressInAndNoteDeleteFalse(myprogressList, pageRequest);
 		if (myNoteList.isPresent()) {
 		} else {
 			throw new NoSuchElementException("There are no note");
 		}
+		int cutsize = 100;
 		for (MylectureNote my : myNoteList.get()) {
-			lectureNoteDetailDTO noteDetail = new lectureNoteDetailDTO();
+			lectureNoteListDTO noteDetail = new lectureNoteListDTO();
 			noteDetail.setChapter(my.getChapter());
-			noteDetail.setContent(my.getNoteContext());
+			String ContentPreview = my.getNoteContext().replaceAll("<[^>]*>","");
+			if(cutsize < ContentPreview.length()) {
+				ContentPreview = ContentPreview.substring(0, cutsize);
+			}
+			noteDetail.setContentPreview(ContentPreview);
 			noteDetail.setDate(my.getDate());
 			noteDetail.setNoteTitle(my.getNoteTitle());
 			noteDetail.setSubHeading(my.getSubheading());
 			noteDetail.setNoteId(my.getNoteNo());
 			noteDetilas.add(noteDetail);
 		}
-		return noteDetilas;
+		lectureNoteListDTO2 list = new lectureNoteListDTO2();
+		list.setDtolist(noteDetilas);
+		list.setTotalpages(myNoteList.get().getTotalPages());
+		return list;
+	}
+	
+
+	public lectureNoteDetailDTO noteDetaiOpen(MemberEntity userEntity, Long noteNo) {
+		MylectureNote mylectureNote = mylectureNoteRepository.findByNoteNo(noteNo);
+		lectureNoteDetailDTO dto = new lectureNoteDetailDTO();
+		dto.setChapter(mylectureNote.getChapter());
+		dto.setContent(mylectureNote.getNoteContext());
+		dto.setDate(mylectureNote.getDate());
+		dto.setNoteId(mylectureNote.getNoteNo());
+		dto.setNoteTitle(mylectureNote.getNoteTitle());
+		dto.setSubHeading(mylectureNote.getSubheading());
+		dto.setVideoId(mylectureNote.getMyLectureProgress().getVideo().getVideoId());
+		return dto;
 	}
 
 	public void myNoteSave(MemberEntity userEntity, NoteRequest noteRequest) {
 		Video video = videoRepository.findByVideoId(noteRequest.getVideoId());
-
 		MyLecture myLecture = verifyUserHasLecture(userEntity, video.getLecture());
+		MyLectureProgress progress = mylectureProgressRepository.findByMyLectureAndVideo(myLecture, video);
 		MylectureNote mylectureNote = new MylectureNote();
-		mylectureNote.setMyLecture(myLecture);
+		mylectureNote.setMyLectureProgress(progress);
 		mylectureNote.setNoteContext(noteRequest.getNoteContent());
 		mylectureNote.setNoteTitle(noteRequest.getNoteTitle());
 		mylectureNote.setChapter(video.getLectureSection().getSectionNumber());
@@ -251,10 +289,11 @@ public class MyLectureService {
 
 	public lectureNoteDetailDTO myNoteUpdate(MemberEntity userEntity, NoteUpdateRequest noteUpdateRequest) {
 		MylectureNote mylectureNote = mylectureNoteRepository.findByNoteNo(noteUpdateRequest.getNoteNo());
-		verifyUserHasLecture(userEntity, mylectureNote.getMyLecture().getLecture());
+		verifyUserHasLecture(userEntity, mylectureNote.getMyLectureProgress().getMyLecture().getLecture());
 		mylectureNote.setNoteContext(noteUpdateRequest.getNoteContent());
 		mylectureNote.setNoteTitle(noteUpdateRequest.getNoteTitle());
 		mylectureNoteRepository.save(mylectureNote);
+		
 		lectureNoteDetailDTO noteDetail = new lectureNoteDetailDTO();
 		noteDetail.setChapter(mylectureNote.getChapter());
 		noteDetail.setContent(mylectureNote.getNoteContext());
@@ -313,4 +352,5 @@ public class MyLectureService {
 		}
 
 	}
+
 }

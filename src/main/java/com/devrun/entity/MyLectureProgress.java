@@ -21,6 +21,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.devrun.youtube.Lecture;
 import com.devrun.youtube.Video;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.Data;
 
@@ -37,11 +39,13 @@ public class MyLectureProgress {
 
 	@ManyToOne
 	@JoinColumn(name = "mylectureno")
+	@JsonBackReference
 	private MyLecture myLecture;
 	
 	@ManyToOne
 	@JoinColumn(name = "video_id")
 	@Comment("영상")
+	@JsonBackReference
 	private Video video;
 	
 	@Column(name = "progress")

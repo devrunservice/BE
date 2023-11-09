@@ -20,6 +20,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.devrun.youtube.Lecture;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -51,6 +52,7 @@ public class MyLecture {
 
 	@ManyToOne
 	@JoinColumn(name = "lectureNo")
+	@JsonBackReference
 	@Comment("강의")
 	private Lecture lecture;	
 	

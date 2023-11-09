@@ -10,16 +10,16 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-@ApiModel(value = "노트 세부 내용")
-public class lectureNoteDetailDTO {
+@ApiModel(value = "노트 상세 정보")
+public class lectureNoteListDTO {
 	@ApiModelProperty(value = "노트 식별 번호")
 	private Long noteId;
-	@ApiModelProperty(value = "노트를 작성했던 영상 ID")
+	@ApiModelProperty(value = "영상 id")
 	private String VideoId;
 	@ApiModelProperty(value = "노트 제목")
 	private String noteTitle;
-	@ApiModelProperty(value = "노트 내용")
-	private String content;
+	@ApiModelProperty(value = "노트 내용 미리보기")
+	private String contentPreview; 
 	@ApiModelProperty(value = "섹션 제목")
 	private String subHeading;
 	@ApiModelProperty(value = "섹션 번호")
