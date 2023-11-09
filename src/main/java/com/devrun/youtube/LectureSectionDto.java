@@ -2,13 +2,18 @@ package com.devrun.youtube;
 
 import java.util.List;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 import lombok.Data;
 
 @Data
 public class LectureSectionDto {
+	@NotNull(message = "섹션 번호를 작성하세요")
     private int SectionNumber; //1번
+	@NotBlank(message = "섹션 제목을 작성하세요")
     private String SectionTitle; //1번 제목
-    List<VideoDto> videoDtos; //4
+    //List<VideoDto> videoDtos; //4
    
 }
 

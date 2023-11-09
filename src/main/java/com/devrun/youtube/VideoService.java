@@ -17,7 +17,6 @@ public class VideoService {
             Video video = videoOptional.get();
             VideoDto videoDto = new VideoDto();
             //videoDto.setUploadDate(video.getUploadDate());
-            videoDto.setFileName(video.getFileName());
             videoDto.setVideoId(video.getVideoId());
             //videoDto.setTotalPlayTime(video.getTotalPlayTime());
             videoDto.setVideoLink(video.getVideoLink());

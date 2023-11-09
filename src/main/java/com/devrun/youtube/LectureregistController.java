@@ -9,11 +9,9 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +20,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.devrun.dto.QueryLectureByKeywordDTO;
 import com.devrun.entity.MemberEntity;
 import com.devrun.repository.MemberEntityRepository;
 import com.devrun.service.AwsS3UploadService;
@@ -38,10 +35,6 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTubeScopes;
 
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-
 @RestController
 public class LectureregistController {
 
@@ -49,9 +42,6 @@ public class LectureregistController {
 	private final AwsS3UploadService awsS3UploadService;
 	private final YouTubeUploader youTubeUploader;
 	private final LecutureCategoryService categoryService;
-	private final MemberService memberService;
-	private final MyLectureProgressService myLectureProgressService;
-
 	public static final HttpTransport httpTransport = new NetHttpTransport();
 	public static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 	private static final String CREDENTIALS_DIRECTORY = ".oauth-credentials";
@@ -70,8 +60,6 @@ public class LectureregistController {
 		this.lectureService = lectureService;
 		this.awsS3UploadService = awsS3UploadService;
 		this.youTubeUploader = youTubeUploader;
-		this.memberService = memberService;
-		this.myLectureProgressService = myLectureProgressService;
 	}
 
 	// GET 요청을 통해 카테고리 목록을 가져오는 엔드포인트
@@ -124,7 +112,7 @@ public class LectureregistController {
 	}
 
 	@PostMapping("/lectureregitest")
-	public String lecturetest(@ModelAttribute CreateLectureRequestDto requestDto,
+	public String lecturetest(@Valid @ModelAttribute CreateLectureRequestDto requestDto,
 			@RequestParam("accessToken") String googleAccessToken, HttpServletResponse httpServletResponse,
 			@RequestParam("jwtToken") String jwtToken) throws Exception {
 		System.out
@@ -132,13 +120,6 @@ public class LectureregistController {
 		System.out.println(requestDto.getLectureName());
 		System.out.println("accessToken :" + googleAccessToken);
 		System.err.println(requestDto);
-		// S3에가서 이미지를 업로드하고, 썸네일 URL 받아오기
-		// Lecture save
-		// LectureSection save
-		// VideoDto + Lecuture, LectureSection = Video
-		// List<Video> saveAll
-		// List<VideoDto> videolist = requestDto.getVideoList();
-
 		// 리스트의 각 비디오에 대해 업로드 작업을 수행합니다.
 		List<VideoDto> uploadedVideos = new ArrayList<>(); // 업로드된 비디오 정보를 저장할 리스트를 생성합니다.
 		for (VideoDto video : requestDto.getVideoList()) {
@@ -153,6 +134,7 @@ public class LectureregistController {
 		MemberEntity mento = memberEntityRepository.findById(userId);
 
 		// 썸네일 S3 저장
+		// S3에가서 이미지를 업로드하고, 썸네일 URL 받아오기
 		String lectureThumnailUrl = awsS3UploadService.putS3(requestDto.getLectureThumbnail(), "lectuer_thumbnail",
 				requestDto.getLectureName());
 
@@ -163,7 +145,7 @@ public class LectureregistController {
 		List<LectureSection> savedlectureSeciton = lectureService.saveLectureSection(savedlecture,
 				requestDto.getLectureSectionList());
 		// 비디오 엔티티 객체 생성 및 매핑
-		for (VideoDto videoDto : uploadedVideos) {
+		for (VideoDto videoDto : requestDto.getVideoList()) {
 			for (LectureSection section : savedlectureSeciton) {
 				if (videoDto.getSectionNumber() == section.getSectionNumber()
 						&& videoDto.getSectionTitle().equals(section.getSectionTitle())) {
@@ -173,75 +155,5 @@ public class LectureregistController {
 		}
 
 		return "수신완료"; // Redirect to a success page
-	}
-
-	// 필요 기능 : 페이지네이션 , 정렬 기능 , 통합 검색(강의명,강의소개,강사명)
-	@GetMapping({ "/q/lecture" })
-	@ApiImplicitParams({
-			@ApiImplicitParam(example = "요리", value = "대분류 카테고리", name = "bigcategory", dataTypeClass = String.class),
-			@ApiImplicitParam(example = "라면", value = "중분류 카테고리", name = "midcategory", dataTypeClass = String.class),
-			@ApiImplicitParam(example = "sky", value = "검색 키워드", name = "q", dataTypeClass = String.class),
-			@ApiImplicitParam(example = "lecture_start", value = "정렬 옵션", name = "order", dataTypeClass = String.class),
-			@ApiImplicitParam(example = "1", value = "요청 페이지", name = "page", dataTypeClass = String.class) })
-	@ApiOperation(value = "강의 조회 API", notes = "파라미터로 키워드를 입력하면 강의를 반환합니다. 각 파라미터로 키워드, 정렬 옵션, 페이지 를 요청할 수 있고, 각 페이지 당 10개의 항목이 반환됩니다. 정렬 옵션은 lectureStart (등록날짜순) 또는 lecturePrice (가격순) 이며 추후 제약 조건들을 추가하고, 평점 기능이 도입되면 평점순도 추가할 예정입니다. 정렬 옵션을 입력하지 않으면 기본적으론 등록순이며 모든 정렬은 내림차순입니다.")
-	public List<QueryLectureByKeywordDTO> testmethod1(
-			@RequestParam(value = "bigcategory", defaultValue = "", required = false) String bigcategory,
-			@RequestParam(value = "midcategory", defaultValue = "", required = false) String midcategory,
-			@RequestParam(value = "q", defaultValue = "", required = false) String keyword,
-			@RequestParam(value = "order", defaultValue = "lecture_start", required = false) String order,
-			@RequestParam(value = "page", defaultValue = "0", required = false) Integer page) {
-		// 상황 1 : 검색어가 비어 있는 경우 - 모든 강의 리스트 조회
-		// 상황 2 : 검색어가 존재하는 경우 - 통합 검색
-		// 상황 3 : 카테고리 검색
-		// 전처리 : 페이지네이션 -> 정렬(최신순,평점순,
-
-		if (page == null || page <= 0) {
-			page = 1;
-		}
-		Direction direction = Direction.DESC;
-		PageRequest pageRequest = PageRequest.of(page - 1, 10, direction, order);
-
-		Specification<Lecture> spec = (root, query, criteriaBuilder) -> null;
-
-		// 카테고리 검색
-		if (bigcategory.isEmpty() && midcategory.isEmpty()) { // 키워드 검색으로 이동
-			System.out.println("bigcategory.isEmpty() && midcategory.isEmpty()");
-
-		} else if (!bigcategory.isEmpty() && midcategory.isEmpty()) {// 대분류+(키워드) 검색
-
-			List<LectureCategory> categorys = categoryService.findcategory(bigcategory);
-			for (LectureCategory lectureCategory : categorys) {
-				System.out.println(
-						"----------------------------------------------" + lectureCategory.getLectureMidCategory());
-			}
-			List<QueryLectureByKeywordDTO> p1 = lectureService.findLecturesWithCategroys(categorys, keyword,
-					pageRequest);
-			return p1;
-		} else if (!bigcategory.isEmpty() && !midcategory.isEmpty()) { // 대분류+중분류+(키워드) 검색
-			LectureCategory category = categoryService.findcategory(bigcategory, midcategory);
-			List<QueryLectureByKeywordDTO> p1 = lectureService.findLecturesWithCategroy(category, keyword, pageRequest);
-			return p1;
-		} else {
-			List<LectureCategory> categorys = categoryService.findcategory(midcategory);
-			List<QueryLectureByKeywordDTO> p1 = lectureService.findLecturesWithCategroys(categorys, keyword,
-					pageRequest);
-			return p1;
-		} // 키워드 검색
-
-		// 키워드 검색
-		if (keyword.isEmpty()) {
-			List<QueryLectureByKeywordDTO> p1 = lectureService.QueryLectureByKeyword(keyword, pageRequest);
-			return p1;
-		} else {
-			List<MemberEntity> m1 = memberService.findByIdContains(keyword);
-			if (m1.size() == 0) {
-				List<QueryLectureByKeywordDTO> p1 = lectureService.QueryLectureByKeyword(keyword, pageRequest);
-				return p1;
-			} else {
-				List<QueryLectureByKeywordDTO> p1 = lectureService.QueryLectureByKeyword(keyword, m1, pageRequest);
-				return p1;
-			}
-		}
-
 	}
 }
