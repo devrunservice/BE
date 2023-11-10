@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
+import com.devrun.dto.CertificateDto;
 import com.devrun.dto.MyLectureNoteDTO;
 import com.devrun.dto.MyLectureNoteDTO2;
 import com.devrun.dto.MycouresDTO;
@@ -355,16 +356,29 @@ public class MyLectureService {
 
 	}
 
-	public String checkLectureComplete(MemberEntity userEntity, Long lectureNo) {
-		Lecture lecture = lectureService.findByLectureID(lectureNo);
-		MyLecture myLecture = verifyUserHasLecture(userEntity, lecture);
-		if (myLecture.getLectureProgress() == 100) {
-			//유저 이름
-			return "This user has taken all the lectures.";
-		} else {
-			return "This user has not taken all of the lectures.";
-		}
+	public MylectureDTO2 checkLectureComplete(MemberEntity userEntity, int page) {
+		page = page <= 1 ? 0 : page;
+		PageRequest pageRequest = PageRequest.of(page, 10, Sort.Direction.DESC, "lastviewdate");
+		Page<MyLecture> mylecture = mylectureRepository.findByMemberentityAndLectureProgressEquals(userEntity, 100, pageRequest);
+		return convertMylectureDTO(mylecture);
+	}
 
+	public CertificateDto printCertificates(MemberEntity userEntity, Long lectureId) {
+		Lecture lecture = lectureService.findByLectureID(lectureId);
+		MyLecture my = verifyUserHasLecture(userEntity, lecture);
+		if(my.getLectureProgress() == 100) {
+		CertificateDto dto = new CertificateDto();
+		dto.setBirthday(userEntity.getBirthday());
+		dto.setLectureName(lecture.getLectureName());
+		dto.setStart(my.getLectureStartDate());
+		dto.setEnd(my.getLastviewdate());
+		dto.setUserName(userEntity.getName());
+		return dto;
+		} else {
+			throw new NoSuchElementException("This User isn't complete this Lecture!");
+		}
+		
+		
 	}
 
 }

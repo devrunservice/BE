@@ -16,6 +16,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Comment;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -54,7 +55,12 @@ public class MyLecture {
 	@JoinColumn(name = "lectureNo")
 	@JsonBackReference
 	@Comment("강의")
-	private Lecture lecture;	
+	private Lecture lecture;
+	
+	@Column(name="lecture_start_date")
+	@CreatedDate
+    @Temporal(TemporalType.DATE)
+	private Date lectureStartDate;
 	
 	@Column(name="lecture_expiry_date")
     @Temporal(TemporalType.DATE)

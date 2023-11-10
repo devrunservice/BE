@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.devrun.dto.CertificateDto;
 import com.devrun.dto.MyLectureNoteDTO;
 import com.devrun.dto.MyLectureNoteDTO2;
 import com.devrun.dto.MycouresDTO;
@@ -85,13 +86,13 @@ public class MyLectureController {
 			@ApiImplicitParam(example = "All", value = "강의 완강 여부", name = "status", dataTypeClass = String.class),
 			@ApiImplicitParam(example = "1", value = "요청 페이지", name = "page", dataTypeClass = String.class) })
 	public MylectureDTO2 mylecturelist(HttpServletRequest httpServletRequest,
-			@RequestParam(name = "status", required = false , defaultValue = "All") String status,
+			@RequestParam(name = "status", required = false, defaultValue = "All") String status,
 			@RequestParam(name = "page", required = false, defaultValue = "0") int page) {
 //		String accessToken = httpServletRequest.getHeader("Access_token");
 //		MemberEntity userEntity = memberService.findById(userId);
 		MemberEntity userEntity = memberService.findById("seokhwan2");
 
-		return mylectureService.mylecturelist(userEntity, page , status);
+		return mylectureService.mylecturelist(userEntity, page, status);
 
 	}
 
@@ -201,12 +202,19 @@ public class MyLectureController {
 	}
 
 	@GetMapping("/certificates")
-	@ApiOperation(value = "수료증 자격 확인", notes = "수료증 자격을 확인합니다.")
-	public String lectureCertificates(HttpServletRequest httpServletRequest,
-			@RequestParam(name = "lectureId", defaultValue = "22", required = false) Long lectureId) {
+	@ApiOperation(value = "수료한 강의 목록", notes = "수료증 자격을 확인하고, 수료증을 받을 수 있는 강의 목록을 출력")
+	public MylectureDTO2 lectureCertificates(HttpServletRequest httpServletRequest , @RequestParam(name = "page", defaultValue = "0", required = false) int page) {
 //		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));
 //		MemberEntity userEntity = memberService.findById(userId);
 		MemberEntity userEntity = memberService.findById("seokhwan2");
-		return mylectureService.checkLectureComplete(userEntity, lectureId);
+		return mylectureService.checkLectureComplete(userEntity , page);
+	}
+	@PostMapping("/certificates/print")
+	@ApiOperation(value = "수료증 자격 확인", notes = "강의 Id를 보내면 수료 자격을 확인합니다.")
+	public CertificateDto printCertificates(HttpServletRequest httpServletRequest , @RequestBody(required = true) Long lectureId) {
+//		String userId = JWTUtil.getUserIdFromToken(httpServletRequest.getHeader("Access_token"));
+//		MemberEntity userEntity = memberService.findById(userId);
+		MemberEntity userEntity = memberService.findById("seokhwan2");
+		return mylectureService.printCertificates(userEntity , lectureId);
 	}
 }

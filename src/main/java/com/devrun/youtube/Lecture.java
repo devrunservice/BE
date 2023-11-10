@@ -75,6 +75,9 @@ public class Lecture {
 
 	@Column(nullable = true)
 	private float lectureRating;
+	
+	@Column(nullable = true)
+	private int buyCount = 0;
 
 	@ElementCollection
 	private List<String> lectureTag;
