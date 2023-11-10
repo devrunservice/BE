@@ -11,6 +11,8 @@ import lombok.Data;
 public class QueryLectureByKeywordDTO {
 
 	// 일부 속성(강의명 , 강의 소개글, 강사명, 강의 평점, 강의 가격, 썸네일 URI , 카테고리 분류 중-소 , 속성)
+	@ApiModelProperty(value = "강의 식별 번호")
+	private Long lectureId;
 	@ApiModelProperty(value = "강의 제목")
 	private String lectureName;
 	@ApiModelProperty(value = "강의 소개")
@@ -27,6 +29,7 @@ public class QueryLectureByKeywordDTO {
 	private int lectureprice;
 
 	public QueryLectureByKeywordDTO(Lecture leture) {
+		this.lectureId = leture.getLectureid();
 		this.lectureName = leture.getLectureName();
 		this.lectureIntro = leture.getLectureIntro();
 		this.lectureThumbnail = leture.getLectureThumbnail();
