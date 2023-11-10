@@ -41,4 +41,10 @@ public interface LectureRepository extends JpaRepository<Lecture, Long>, JpaSpec
 
 	Optional<Lecture> findByLectureid(Long lectureid);
 
+    
+
+
+
+
+
 }

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.devrun.dto.PaymentDTO;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.PaymentEntity;
@@ -34,6 +35,8 @@ import com.devrun.repository.PointRepository;
 import com.devrun.service.MemberService;
 import com.devrun.service.PaymentService;
 import com.devrun.util.JWTUtil;
+import com.devrun.youtube.Lecture;
+import com.devrun.youtube.LectureRepository;
 
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -62,11 +65,14 @@ public class PaymentController {
 	
 	@Autowired
 	private PointHistoryRepository pointHistoryRepository;
+	
+	@Autowired
+	private LectureRepository lectureRepository;
 
 	// 결제 정보 db에 저장
-			@PostMapping("/savePaymentInfo")
-			@ApiOperation("결제 완료 시 db에 필요한 정보들을 저장합니다.")
-	        public ResponseEntity<String> savePaymentInfo(@RequestBody List<PaymentDTO> paymentDTOList) {
+	@PostMapping("/savePaymentInfo")
+	@ApiOperation("결제 완료 시 db에 필요한 정보들을 저장합니다.")
+	 public ResponseEntity<String> savePaymentInfo(@RequestBody List<PaymentDTO> paymentDTOList) {
 				
 				LocalDateTime dateTime = LocalDateTime.now();
 				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd a hh:mm:ss", new Locale("ko"));
@@ -113,6 +119,9 @@ public class PaymentController {
 			    //결제 정보 사용자 이름으로 memberEntity에서 찾은후, 밑에 추가해주기. 
 			    //외래키가 user_no지만 memberEntity로 정의해서 저렇게 넣어줘야함.
 			    MemberEntity memberEntity = memberEntityRepository.findByUserNo(usrno);
+			    String lecturename = paymentDTOList.get(0).getName();
+			    Lecture lecture = lectureRepository.findByLectureName(lecturename);
+			    System.err.println(lecture);
 			    System.err.println(memberEntity);
 				
 				try {			
@@ -131,11 +140,12 @@ public class PaymentController {
 					paymentEntity.setStatus("0");	
 					System.out.println(paymentEntity);	
 					paymentEntity.setMemberEntity(memberEntity);
+					paymentEntity.setLecture(lecture);					
 					
 		            paymentList.add(paymentEntity);	            
 			       }		    
 				    pointRepository.save(pointEntity);			    
-			        
+			        	System.err.println("-----------------정보저장--------------");
 				        System.err.println(paymentList);
 						paymentService.savePaymentInfo(paymentList);
 						System.err.println(pointEntity);				

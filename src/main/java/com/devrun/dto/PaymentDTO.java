@@ -19,6 +19,5 @@ public class PaymentDTO {
 	public int paid_amount;
 	public String receipt_url;
 	public int userno;
-	public int mypoint;	
-	
+	public int mypoint;		
 }
