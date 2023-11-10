@@ -12,6 +12,6 @@ public class lectureNoteListDTO2 {
 	@ApiModelProperty(value = "특정 강의의 노트 데이터")
 	private List<lectureNoteListDTO> dtolist;
 	@ApiModelProperty(value = "전체 페이지 수")
-	private int totalpages;
+	private int totalPages;
 
 }

@@ -50,7 +50,7 @@ public class LectureSearchController {
 			page = 1;
 		}
 		Direction direction = Direction.DESC;
-		PageRequest pageRequest = PageRequest.of(page - 1, 10, direction, order);
+		PageRequest pageRequest = PageRequest.of(page - 1, 12, direction, order);
 		// 카테고리 검색
 		if (bigcategory.isEmpty() && midcategory.isEmpty()) { // 키워드 검색으로 이동
 		} else if (!bigcategory.isEmpty() && midcategory.isEmpty()) {// 대분류+(키워드) 검색
