@@ -27,18 +27,24 @@ public class QueryLectureByKeywordDTO {
 	private String mentoId;
 	@ApiModelProperty(value = "강의 가격")
 	private int lectureprice;
+	@ApiModelProperty(value = "구입자 수")
+	private int buycount;
+	@ApiModelProperty(value = "평점")
+	private float rating;
 
-	public QueryLectureByKeywordDTO(Lecture leture) {
-		this.lectureId = leture.getLectureid();
-		this.lectureName = leture.getLectureName();
-		this.lectureIntro = leture.getLectureIntro();
-		this.lectureThumbnail = leture.getLectureThumbnail();
-		this.lectureprice = leture.getLecturePrice();
+	public QueryLectureByKeywordDTO(Lecture lecture) {
+		this.lectureId = lecture.getLectureid();
+		this.lectureName = lecture.getLectureName();
+		this.lectureIntro = lecture.getLectureIntro();
+		this.lectureThumbnail = lecture.getLectureThumbnail();
+		this.lectureprice = lecture.getLecturePrice();
 
-		this.lectureBigCategory = leture.getLectureCategory().getLectureBigCategory();
-		this.lectureMidCategory = leture.getLectureCategory().getLectureMidCategory();
+		this.lectureBigCategory = lecture.getLectureCategory().getLectureBigCategory();
+		this.lectureMidCategory = lecture.getLectureCategory().getLectureMidCategory();
 
-		this.mentoId = leture.getMentoId().getId();
+		this.mentoId = lecture.getMentoId().getId();
+		this.buycount = lecture.getBuyCount();
+		this.rating = lecture.getLectureRating();
 	}
 
 	public QueryLectureByKeywordDTO() {

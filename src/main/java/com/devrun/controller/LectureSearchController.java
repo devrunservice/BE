@@ -39,7 +39,7 @@ public class LectureSearchController {
 			@ApiImplicitParam(example = "sky", value = "검색 키워드", name = "q", dataTypeClass = String.class),
 			@ApiImplicitParam(example = "lecture_start", value = "정렬 옵션", name = "order", dataTypeClass = String.class),
 			@ApiImplicitParam(example = "1", value = "요청 페이지", name = "page", dataTypeClass = String.class) })
-	@ApiOperation(value = "강의 조회 API", notes = "파라미터로 키워드를 입력하면 강의를 반환합니다. 각 파라미터로 키워드, 정렬 옵션, 페이지 를 요청할 수 있고, 각 페이지 당 10개의 항목이 반환됩니다. 정렬 옵션은 lectureStart (등록날짜순) 또는 lecturePrice (가격순) 이며 추후 제약 조건들을 추가하고, 평점 기능이 도입되면 평점순도 추가할 예정입니다. 정렬 옵션을 입력하지 않으면 기본적으론 등록순이며 모든 정렬은 내림차순입니다.")
+	@ApiOperation(value = "강의 조회 API", notes = "파라미터로 키워드를 입력하면 강의를 반환합니다. 각 파라미터로 키워드, 정렬 옵션, 페이지 를 요청할 수 있고, 각 페이지 당 10개의 항목이 반환됩니다. 정렬 옵션은 lecture_start (등록날짜순) , lecture_price (가격순) , buy_count (구매자순)이며 추후 제약 조건들을 추가하고, 평점 기능이 도입되면 평점순도 추가할 예정입니다. 정렬 옵션을 입력하지 않으면 기본적으론 등록순이며 모든 정렬은 내림차순입니다.")
 	public QueryLectureByKeywordDTO2 testmethod1(
 			@RequestParam(value = "bigcategory", defaultValue = "", required = false) String bigcategory,
 			@RequestParam(value = "midcategory", defaultValue = "", required = false) String midcategory,
