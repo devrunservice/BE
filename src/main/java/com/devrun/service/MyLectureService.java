@@ -210,7 +210,7 @@ public class MyLectureService {
 		
 		MyLectureNoteDTO2 dtos = new MyLectureNoteDTO2();
 		dtos.setDtolist(lectureNoteDTOs);
-		dtos.setTotalpages(TotalPages);
+		dtos.setTotalPages(TotalPages);
 		return dtos;
 		
 	}
@@ -255,7 +255,7 @@ public class MyLectureService {
 		}
 		lectureNoteListDTO2 list = new lectureNoteListDTO2();
 		list.setDtolist(noteDetilas);
-		list.setTotalpages(myNoteList.get().getTotalPages());
+		list.setTotalPages(myNoteList.get().getTotalPages());
 		return list;
 	}
 	
