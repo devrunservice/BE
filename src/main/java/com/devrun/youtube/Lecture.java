@@ -101,7 +101,10 @@ public class Lecture {
 	// lecturesections을 주석처리하면 오류 X 
 	// 고민중..
 	
-	public void setLectureSection(List<LectureSection> sections) {
+	
+	
+	public void setLectureSections(List<LectureSection> sections) {
+	    this.lectureSections = sections;
 	}
 
 	public HttpServletResponse getId() {

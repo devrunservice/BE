@@ -9,7 +9,10 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -185,5 +188,18 @@ public class TestController {
 		return ResponseEntity.ok(lectureQnADTOlist);
 	}
 
+	@PostMapping("/testpost")
+	public Object testpost(@RequestParam(name = "post") String post) {
+		return post;
+	}
 	
+	@PutMapping("/testput")
+	public Object testput(@RequestParam(name = "post") String post) {
+		return post;
+	}
+	
+	@DeleteMapping("/testdelete")
+	public Object testdelete(@RequestParam(name = "post") String post) {
+		return post;
+	}
 }

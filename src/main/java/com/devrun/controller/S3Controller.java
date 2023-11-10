@@ -48,7 +48,7 @@ public class S3Controller {
 	@ApiOperation("파일을 업로드할 pre-signUrl을 반환합니다.")
 	@ApiImplicitParams({
 		@ApiImplicitParam(name = "path", value = "첨부파일 경로" , example = "profile" , dataTypeClass = String.class),
-		@ApiImplicitParam(name = "fileinfo", value = "첨부할 파일의 정보입니다. 키값은 fileName , fileExt 로 각각 첨부 파일의 파일명과, 파일의 확장자를 의미합니다." , dataTypeClass = Object.class)
+		@ApiImplicitParam(name = "fileinfo", value = "첨부할 파일의 정보입니다. 키값은 fileName , fileExt 로 각각 첨부 파일의 파일명과, 파일의 확장자를 의미합니다. path : profile,lectuer_thumbnail,notice,lecture_note,lecture_qa,lecture_comment" , dataTypeClass = Object.class)
 		})
 	@ApiResponse(message = "파일을 업로드할 url을 담은 JSON 객체입니다. 키값은 presignUrl 입니다.", code = 200 , response = JSONObject.class)
 	public ResponseEntity<?> getPresignUrlForUploadImage(@PathVariable String path , @RequestBody Map<String , String> fileinfo) throws IOException {

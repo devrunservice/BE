@@ -24,5 +24,7 @@ public interface MylectureProgressRepository extends JpaRepository<MyLectureProg
 
 	MyLectureProgress findByMyLectureInAndVideo(List<MyLecture> mylecture, Video videoentity);
 
+	MyLectureProgress findByMyLectureAndVideo(MyLecture myLecture, Video video);
+
 
 }

@@ -13,6 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Comment;
 import org.springframework.data.annotation.CreatedDate;
@@ -20,15 +21,24 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.devrun.youtube.Lecture;
-import com.devrun.youtube.Video;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 
 @Entity
+@Table(
+		name="mylecture",
+	    uniqueConstraints={
+	        @UniqueConstraint(
+	            columnNames={"lectureNo", "userNo"}
+	        )
+	    }
+	)
 @Data
-@Table(name = "mylecture")
 @EntityListeners(AuditingEntityListener.class)
-public class MyLecture {
+public class MyLecture {	
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,15 +53,21 @@ public class MyLecture {
 
 	@ManyToOne
 	@JoinColumn(name = "lectureNo")
+	@JsonBackReference
 	@Comment("강의")
-	private Lecture lecture;	
+	private Lecture lecture;
+	
+	@Column(name="lecture_start_date")
+	@CreatedDate
+    @Temporal(TemporalType.DATE)
+	private Date lectureStartDate;
 	
 	@Column(name="lecture_expiry_date")
     @Temporal(TemporalType.DATE)
 	private Date lectureExpiryDate;
 	
 	@Column(name="wholeprogress")
-	private int lectureProgress;
+	private int lectureProgress = 0;
 	
 	@Column(name = "lastviewdate" , nullable = false)
 	@Comment("마지막으로 해당 강의를 학습한 날짜")

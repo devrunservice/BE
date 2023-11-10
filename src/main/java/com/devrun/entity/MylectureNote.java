@@ -18,6 +18,10 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import lombok.Data;
 
 @Entity
@@ -31,8 +35,9 @@ public class MylectureNote {
 	private Long noteNo;
 
 	@ManyToOne
-	@JoinColumn(name = "mylecture_no")
-	private MyLecture myLecture;
+	@JoinColumn(name = "mylecture_progress_no")
+	@JsonBackReference
+	private MyLectureProgress myLectureProgress;
 
 	@LastModifiedDate
     @Temporal(TemporalType.DATE)

@@ -1,10 +1,13 @@
-package com.devrun.youtube;
+package com.devrun.repository;
 
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface VideoRepository extends JpaRepository<Video, Long> {
+import com.devrun.youtube.Video;
+import com.devrun.youtube.LectureSection;
+
+public interface VideoSearchRepository extends JpaRepository<Video, Long> {
 
 	Video findByVideoNo(Long videoNo);
 
@@ -17,8 +20,6 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 	Video findNextVideoByVideoIdGreaterThan(Long videoId);
 
 	List<Video> findByLectureSection(LectureSection lectureSection);
-
-	List<Video> findByLecture(Lecture lecture);
 
 
 }
