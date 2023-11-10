@@ -17,6 +17,7 @@ import com.devrun.dto.MyLectureNoteDTO;
 import com.devrun.dto.MyLectureNoteDTO2;
 import com.devrun.dto.MycouresDTO;
 import com.devrun.dto.MylectureDTO;
+import com.devrun.dto.MylectureDTO2;
 import com.devrun.dto.NoteRequest;
 import com.devrun.dto.NoteUpdateRequest;
 import com.devrun.dto.QaDTO;
@@ -172,19 +173,32 @@ public class MyLectureService {
 
 	}
 
-	public List<MylectureDTO> mylecturelist(MemberEntity userEntity, int page) {
-		if (page <= 1) {
-			page = 0;
-		}
+	public MylectureDTO2 mylecturelist(MemberEntity userEntity, int page, String option) {
+		page = page <= 1 ? 0 : page;
 		PageRequest pageRequest = PageRequest.of(page, 9, Direction.DESC, "lastviewdate");
-		Page<MyLecture> pageMylecture = mylectureRepository.findByMemberentity(userEntity, pageRequest);
+		if(option.equals("Completed")) {
+		Page<MyLecture> pageMylecture = mylectureRepository.findByMemberentityAndLectureProgressEquals(userEntity, 100 ,pageRequest);
+		return convertMylectureDTO(pageMylecture);
+		} else if(option.equals("Inprogress")) {
+		Page<MyLecture> pageMylecture = mylectureRepository.findByMemberentityAndLectureProgressLessThan(userEntity, 100 ,pageRequest);
+		return convertMylectureDTO(pageMylecture);
+		} else {
+		Page<MyLecture> pageMylecture = mylectureRepository.findByMemberentity(userEntity,pageRequest);
+		return convertMylectureDTO(pageMylecture);
+		}
+	}
+	
+	public MylectureDTO2 convertMylectureDTO(Page<MyLecture> pageMylecture){
 		List<MylectureDTO> mylectureDTOList = new ArrayList<MylectureDTO>();
 		for (MyLecture mylecture : pageMylecture) {
 			MylectureDTO dto = new MylectureDTO(mylecture);
 			mylectureDTOList.add(dto);
 		}
-		return mylectureDTOList;
-
+		
+		MylectureDTO2 dtolist = new MylectureDTO2(mylectureDTOList, pageMylecture.getTotalPages());
+		
+		
+		return dtolist;
 	}
 	
 	public MyLectureNoteDTO2 packageDto(Page<MyLecture> myLectureList , int TotalPages) {

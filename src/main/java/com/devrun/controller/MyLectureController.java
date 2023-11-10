@@ -15,6 +15,7 @@ import com.devrun.dto.MyLectureNoteDTO;
 import com.devrun.dto.MyLectureNoteDTO2;
 import com.devrun.dto.MycouresDTO;
 import com.devrun.dto.MylectureDTO;
+import com.devrun.dto.MylectureDTO2;
 import com.devrun.dto.NoteRequest;
 import com.devrun.dto.NoteUpdateRequest;
 import com.devrun.dto.ProgressInfo;
@@ -81,16 +82,16 @@ public class MyLectureController {
 	@GetMapping("/mylecturelist")
 	@ApiOperation(value = "내 학습 불러오기", notes = "파라미터로 액세스 토큰과 강의 완강 여부(status), 페이지(page)를 요청할 수 있고, 각 페이지 당 10개의 항목이 반환됩니다. 정렬순서는 최근 학습 순입니다.")
 	@ApiImplicitParams({
-			@ApiImplicitParam(example = "Inprogress", value = "강의 완강 여부", name = "status", dataTypeClass = String.class),
+			@ApiImplicitParam(example = "All", value = "강의 완강 여부", name = "status", dataTypeClass = String.class),
 			@ApiImplicitParam(example = "1", value = "요청 페이지", name = "page", dataTypeClass = String.class) })
-	public List<MylectureDTO> mylecturelist(HttpServletRequest httpServletRequest,
-			@RequestParam(name = "status", required = false) String status,
+	public MylectureDTO2 mylecturelist(HttpServletRequest httpServletRequest,
+			@RequestParam(name = "status", required = false , defaultValue = "All") String status,
 			@RequestParam(name = "page", required = false, defaultValue = "0") int page) {
-		String accessToken = httpServletRequest.getHeader("Access_token");
-		System.out.println("/mylecturelist Access_token" + accessToken);
+//		String accessToken = httpServletRequest.getHeader("Access_token");
+//		MemberEntity userEntity = memberService.findById(userId);
 		MemberEntity userEntity = memberService.findById("seokhwan2");
 
-		return mylectureService.mylecturelist(userEntity, page);
+		return mylectureService.mylecturelist(userEntity, page , status);
 
 	}
 
@@ -207,11 +208,5 @@ public class MyLectureController {
 //		MemberEntity userEntity = memberService.findById(userId);
 		MemberEntity userEntity = memberService.findById("seokhwan2");
 		return mylectureService.checkLectureComplete(userEntity, lectureId);
-	}
-
-	@GetMapping("/save")
-	public void lectureSave() {
-		MemberEntity userEntity = memberService.findById("sunho1234");
-		mylectureService.registLecture(userEntity, 22L);
 	}
 }

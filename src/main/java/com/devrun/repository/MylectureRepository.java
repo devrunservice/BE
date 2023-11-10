@@ -19,4 +19,8 @@ public interface MylectureRepository extends JpaRepository<MyLecture, Long> {
 
 	Page<MyLecture> findByMemberentity(MemberEntity userEntity, PageRequest pageRequest);
 
+	Page<MyLecture> findByMemberentityAndLectureProgressLessThan(MemberEntity userEntity, int i, PageRequest pageRequest);
+
+	Page<MyLecture> findByMemberentityAndLectureProgressEquals(MemberEntity userEntity, int i, PageRequest pageRequest);
+
 }
