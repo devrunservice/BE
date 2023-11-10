@@ -81,6 +81,9 @@ public class Lecture {
 	@ElementCollection
 	private List<String> lectureTag;
 	
+
+	@Column(nullable = true)
+	private int buyCount = 0;	
 	
 	@ManyToOne
 	@JoinColumn(name = "categoryNo")
