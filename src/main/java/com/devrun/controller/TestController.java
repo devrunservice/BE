@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.devrun.entity.MemberEntity;
+import com.devrun.exception.ErrorCode;
+import com.devrun.exception.RestApiException;
+import com.devrun.exception.UserErrorCode;
 import com.devrun.service.MemberService;
 import com.devrun.service.TestService;
 import com.devrun.util.CaffeineCache;
@@ -188,18 +191,11 @@ public class TestController {
 		return ResponseEntity.ok(lectureQnADTOlist);
 	}
 
-	@PostMapping("/testpost")
-	public Object testpost(@RequestParam(name = "post") String post) {
-		return post;
+	@GetMapping("/testpost")
+	public void testpost(@RequestParam(name = "post") String post) {
+		 throw new RestApiException(UserErrorCode.INACTIVE_USER);
 	}
 	
-	@PutMapping("/testput")
-	public Object testput(@RequestParam(name = "post") String post) {
-		return post;
-	}
 	
-	@DeleteMapping("/testdelete")
-	public Object testdelete(@RequestParam(name = "post") String post) {
-		return post;
-	}
+	
 }
