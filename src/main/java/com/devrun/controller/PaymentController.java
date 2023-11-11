@@ -33,6 +33,7 @@ import com.devrun.repository.PaymentRepository;
 import com.devrun.repository.PointHistoryRepository;
 import com.devrun.repository.PointRepository;
 import com.devrun.service.MemberService;
+import com.devrun.service.MyLectureService;
 import com.devrun.service.PaymentService;
 import com.devrun.util.JWTUtil;
 import com.devrun.youtube.Lecture;
@@ -68,6 +69,9 @@ public class PaymentController {
 	
 	@Autowired
 	private LectureRepository lectureRepository;
+	
+	@Autowired
+	private MyLectureService myLectureService;
 
 	// 결제 정보 db에 저장
 	@PostMapping("/savePaymentInfo")
@@ -121,9 +125,7 @@ public class PaymentController {
 			    MemberEntity memberEntity = memberEntityRepository.findByUserNo(usrno);
 			    String lecturename = paymentDTOList.get(0).getName();
 			    Lecture lecture = lectureRepository.findByLectureName(lecturename);
-			    System.err.println(lecture);
-			    System.err.println(memberEntity);
-				
+			    System.err.println(memberEntity);				
 				try {			
 					List<PaymentEntity> paymentList = new ArrayList<>();
 			        for (PaymentDTO paymentDTO : paymentDTOList) {
@@ -146,11 +148,7 @@ public class PaymentController {
 			       }		    
 				    pointRepository.save(pointEntity);			    
 			        	System.err.println("-----------------정보저장--------------");
-				        System.err.println(paymentList);
 						paymentService.savePaymentInfo(paymentList);
-						System.err.println(pointEntity);				
-					   
-					  
 					    //포인트 사용했으면 실행
 					    if(userPoint > 0) {
 					    	
@@ -195,6 +193,10 @@ public class PaymentController {
 			            pointHistoryRepository.save(historyEntityGain); 
 			            
 					   }
+					    
+					   //구매한 강의를 내 수강 목록 DB에 등록
+					   //Mylecture 와 MylectureProgress 등록
+					    myLectureService.registLecture(memberEntity, lecture);
 					
 					return ResponseEntity.ok("결제 정보가 성공적으로 저장되었습니다.");
 				} catch (Exception e) {

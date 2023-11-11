@@ -17,7 +17,6 @@ public class PaymentService {
 
 	public void savePaymentInfo(List<PaymentEntity> paymentList) {
 		System.err.println("----서비스----");
-		System.err.println(paymentList);
 		paymentRepository.saveAll(paymentList);
 		
 	}	
