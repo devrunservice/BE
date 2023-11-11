@@ -129,6 +129,7 @@ public class PaymentController {
 				   
 
 				 // 리스트로 들어오는 모든 강의 정보 먼저 저장시킴
+			     // Map 활용
 				   Map<String, Lecture> lectureMap = new HashMap<>();				    
 				   for (PaymentDTO paymentDTO : paymentDTOList) {
 				        String lectureName = paymentDTO.getName();
