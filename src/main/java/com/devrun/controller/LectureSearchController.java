@@ -1,19 +1,13 @@
 package com.devrun.controller;
 
-import java.util.List;
-
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.devrun.dto.QueryLectureByKeywordDTO2;
-import com.devrun.entity.MemberEntity;
 import com.devrun.service.MemberService;
-import com.devrun.youtube.Lecture;
-import com.devrun.youtube.LectureCategory;
 import com.devrun.youtube.LectureService;
 import com.devrun.youtube.LecutureCategoryService;
 
@@ -51,37 +45,14 @@ public class LectureSearchController {
 		}
 		Direction direction = Direction.DESC;
 		PageRequest pageRequest = PageRequest.of(page - 1, 12, direction, order);
-		// 카테고리 검색
-		if (bigcategory.isEmpty() && midcategory.isEmpty()) { // 키워드 검색으로 이동
-		} else if (!bigcategory.isEmpty() && midcategory.isEmpty()) {// 대분류+(키워드) 검색
-			List<LectureCategory> categorys = categoryService.findcategory(bigcategory);
-			QueryLectureByKeywordDTO2 p1 = lectureService.findLecturesWithCategroys(categorys, keyword, pageRequest);
-			return p1;
-		} else if (!bigcategory.isEmpty() && !midcategory.isEmpty()) { // 대분류+중분류+(키워드) 검색
-			LectureCategory category = categoryService.findcategory(bigcategory, midcategory);
-			QueryLectureByKeywordDTO2 p1 = lectureService.findLecturesWithCategroy(category, keyword, pageRequest);
+		if (bigcategory.isBlank() && midcategory.isBlank() && keyword.isBlank()) {
+			QueryLectureByKeywordDTO2 p1 = lectureService.findAll(pageRequest);
 			return p1;
 		} else {
-			List<LectureCategory> categorys = categoryService.findcategory(midcategory);
-			QueryLectureByKeywordDTO2 p1 = lectureService.findLecturesWithCategroys(categorys, keyword, pageRequest);
+			QueryLectureByKeywordDTO2 p1 = lectureService.searchLectures(bigcategory, midcategory, keyword,
+					pageRequest);
 			return p1;
-		} // 키워드 검색
-
-		// 키워드 검색
-		if (keyword.isEmpty()) {
-			QueryLectureByKeywordDTO2 p1 = lectureService.QueryLectureByKeyword(keyword, pageRequest);
-			return p1;
-		} else {
-			List<MemberEntity> m1 = memberService.findByIdContains(keyword);
-			if (m1.size() == 0) {
-				QueryLectureByKeywordDTO2 p1 = lectureService.QueryLectureByKeyword(keyword, pageRequest);
-				return p1;
-			} else {
-				QueryLectureByKeywordDTO2 p1 = lectureService.QueryLectureByKeyword(keyword, m1, pageRequest);
-				return p1;
-			}
 		}
-
 	}
 
 }

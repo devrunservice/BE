@@ -33,6 +33,8 @@ import com.devrun.entity.MyLecture;
 import com.devrun.entity.MyLectureProgress;
 import com.devrun.entity.MylectureNote;
 import com.devrun.entity.MylectureQa;
+import com.devrun.exception.RestApiException;
+import com.devrun.exception.UserErrorCode;
 import com.devrun.repository.MylectureNoteRepository;
 import com.devrun.repository.MylectureProgressRepository;
 import com.devrun.repository.MylectureQaRepository;
@@ -132,7 +134,7 @@ public class MyLectureService {
 		if (optional.isPresent()) {
 			return optional.get();
 		} else {
-			throw new NoSuchElementException("This User isn't taking this Lecture!");
+			throw new RestApiException(UserErrorCode.USERHASNOTLECTURE);
 		}
 	}
 
@@ -372,7 +374,7 @@ public class MyLectureService {
 		dto.setUserName(userEntity.getName());
 		return dto;
 		} else {
-			throw new NoSuchElementException("This User isn't complete this Lecture!");
+			throw new RestApiException(UserErrorCode.NOT_QUALIFIED);
 		}
 		
 		

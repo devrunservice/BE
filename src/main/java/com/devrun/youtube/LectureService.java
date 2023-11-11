@@ -6,7 +6,6 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,23 +15,23 @@ import org.springframework.stereotype.Service;
 import com.devrun.dto.QueryLectureByKeywordDTO;
 import com.devrun.dto.QueryLectureByKeywordDTO2;
 import com.devrun.entity.MemberEntity;
+import com.devrun.exception.CommonErrorCode;
+import com.devrun.exception.RestApiException;
+import com.devrun.exception.UserErrorCode;
+import com.devrun.service.MemberService;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class LectureService {
 
 	private final LectureRepository lectureRepository;
 	private final LectureSectionRepository sectionRepository;
 	private final LecturecategoryRepository categoryRepository;
 	private final VideoRepository videoRepository;
-
-	@Autowired
-	public LectureService(LectureRepository lectureRepository, LectureSectionRepository sectionRepository,
-			LecturecategoryRepository categoryRepository, VideoRepository videoRepository) {
-		this.lectureRepository = lectureRepository;
-		this.sectionRepository = sectionRepository;
-		this.categoryRepository = categoryRepository;
-		this.videoRepository = videoRepository;
-	}
+	private final LecutureCategoryService categoryService;
+	private final MemberService memberService;
 
 	private LectureCategory convertToLectureCategoryEntity(LecturecategoryDto categoryDto) {
 		// 앞단에서 선택한 옵션값인 categoryDto를 사용하여 DB에서 해당 카테고리를 조회합니다.
@@ -126,7 +125,78 @@ public class LectureService {
 	 * 데이터베이스에 저장된 강의 entity 중 강의명, 강의 소갯글, 강사명 속성에 특정한 검색어를 포함하는 entity의 일부 속성(강의명
 	 * , 강의 소개글, 강사명, 강의 평점, 강의 가격, 썸네일 URI , 카테고리 분류 중-소 , 속성) 집합을 가져옴
 	 */
-	
+	public QueryLectureByKeywordDTO2 searchLectures(String bigcategory, String midcategory, String keyword,
+			PageRequest pageRequest) {
+		if (isCategoryEmpty(bigcategory, midcategory)) {
+			return handleEmptyCategories(keyword, pageRequest);
+		} else if (midcategory.isEmpty()) {
+			return searchByBigCategory(bigcategory, keyword, pageRequest);
+		} else {
+			return searchByBigAndMidCategory(bigcategory, midcategory, keyword, pageRequest);
+		}
+	}
+
+	private boolean isCategoryEmpty(String bigcategory, String midcategory) {
+		return bigcategory.isEmpty() && midcategory.isEmpty();
+	}
+
+	private QueryLectureByKeywordDTO2 handleEmptyCategories(String keyword, PageRequest pageRequest) {
+		if (keyword.isEmpty()) {
+			return QueryLectureByKeyword(keyword, pageRequest);
+		}
+		List<MemberEntity> members = memberService.findByIdContains(keyword);
+		if (members.isEmpty()) {
+			return QueryLectureByKeyword(keyword, pageRequest);
+		} else {
+			return QueryLectureByKeyword(keyword, members, pageRequest);
+		}
+	}
+
+	private QueryLectureByKeywordDTO2 searchByBigCategory(String bigcategory, String keyword, PageRequest pageRequest) {
+		List<LectureCategory> categories = categoryService.findcategory(bigcategory);
+		if (keyword.isBlank()) {
+			return findLecturesWithCategroys(categories, keyword, pageRequest);
+		}
+		List<MemberEntity> members = memberService.findByIdContains(keyword);
+		if (members.isEmpty()) {
+			return findLecturesWithCategroys(categories, keyword, pageRequest);
+		} else {
+			return findLecturesWithCategroysWithUser(categories, keyword, members, pageRequest);
+		}
+	}
+
+	private QueryLectureByKeywordDTO2 findLecturesWithCategroysWithUser(List<LectureCategory> categories,
+			String keyword, List<MemberEntity> members, PageRequest pageRequest) {
+		Page<Lecture> l1 = lectureRepository.findCategoryInAndKeywordIn(categories, keyword, members, pageRequest);
+		return packageingDto(l1);
+	}
+
+	private QueryLectureByKeywordDTO2 searchByBigAndMidCategory(String bigcategory, String midcategory, String keyword,
+			PageRequest pageRequest) {
+		LectureCategory category = categoryService.findcategory(bigcategory, midcategory);
+		if (keyword.isBlank()) {
+			return findLecturesWithCategroy(category, keyword, pageRequest);
+		}
+		List<MemberEntity> members = memberService.findByIdContains(keyword);
+		if (members.isEmpty()) {
+			return findLecturesWithCategroy(category, keyword, pageRequest);
+		} else {
+			return findLecturesWithCategroysWithUser(category, keyword, members, pageRequest);
+		}
+	}
+
+	private QueryLectureByKeywordDTO2 findLecturesWithCategroysWithUser(LectureCategory category, String keyword,
+			List<MemberEntity> members, PageRequest pageRequest) {
+		Page<Lecture> l1 = lectureRepository.findCategoryInAndKeywordIn(category, keyword, members, pageRequest);
+		return packageingDto(l1);
+	}
+
+	// 카테고리 유무
+
+	// 카테고리가 진짜 있는지?
+	// 검색어 유무
+	// 검색어가 사람인지?
+
 	// 유저가 없는 경우
 	public QueryLectureByKeywordDTO2 QueryLectureByKeyword(String keyword, PageRequest pageable) {
 		Page<Lecture> l1 = lectureRepository.findByLectureNameContainsOrLectureIntroContains(keyword, pageable);
@@ -134,14 +204,12 @@ public class LectureService {
 	};
 
 	// 유저가 있는 경우
-	public QueryLectureByKeywordDTO2 QueryLectureByKeyword(String keyword, List<MemberEntity> m1,
-			Pageable pageable) {
+	public QueryLectureByKeywordDTO2 QueryLectureByKeyword(String keyword, List<MemberEntity> m1, Pageable pageable) {
 
 		Page<Lecture> l1 = lectureRepository.findByLectureNameContainsOrLectureIntroContainsOrMentoIdIn(keyword, m1,
 				pageable);
 		return packageingDto(l1);
 	}
-
 
 	public QueryLectureByKeywordDTO2 findLecturesWithCategroys(List<LectureCategory> categorys, String keyword,
 			PageRequest pageRequest) {
@@ -154,7 +222,7 @@ public class LectureService {
 		Page<Lecture> l1 = lectureRepository.findLecturesWithCategroy(category, keyword, pageRequest);
 		return packageingDto(l1);
 	}
-	
+
 	public QueryLectureByKeywordDTO2 packageingDto(Page<Lecture> l1) {
 		List<QueryLectureByKeywordDTO> list0 = convertLectureToDTO(l1);
 		QueryLectureByKeywordDTO2 list = new QueryLectureByKeywordDTO2();
@@ -165,9 +233,9 @@ public class LectureService {
 	}
 
 	public List<QueryLectureByKeywordDTO> convertLectureToDTO(Page<Lecture> lectureList) {
+		if(lectureList.isEmpty()) {throw new RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND);}
 		return lectureList.stream().map(QueryLectureByKeywordDTO::new).collect(Collectors.toList());
 	}
-
 
 	public CreateLectureRequestDto getLectureDetails(Long lectureId) throws NotFoundException {
 		Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new NotFoundException());
@@ -190,6 +258,11 @@ public class LectureService {
 		} else {
 			throw new NoSuchElementException("Lecture Not Found!");
 		}
+	}
+
+	public QueryLectureByKeywordDTO2 findAll(PageRequest pageRequest) {
+		Page<Lecture> l1 = lectureRepository.findAll(pageRequest);
+		return packageingDto(l1);
 	}
 
 //	 public CreateLectureRequestDto getLectureDetailsMapping(Long lectureId) {
