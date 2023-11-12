@@ -23,4 +23,5 @@ public interface MylectureRepository extends JpaRepository<MyLecture, Long> {
 
 	Page<MyLecture> findByMemberentityAndLectureProgressEquals(MemberEntity userEntity, int i, PageRequest pageRequest);
 
+
 }

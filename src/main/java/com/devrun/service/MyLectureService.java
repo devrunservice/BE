@@ -33,6 +33,7 @@ import com.devrun.entity.MyLecture;
 import com.devrun.entity.MyLectureProgress;
 import com.devrun.entity.MylectureNote;
 import com.devrun.entity.MylectureQa;
+import com.devrun.exception.CommonErrorCode;
 import com.devrun.exception.RestApiException;
 import com.devrun.exception.UserErrorCode;
 import com.devrun.repository.MylectureNoteRepository;
@@ -378,6 +379,19 @@ public class MyLectureService {
 		}
 		
 		
+	}
+
+	public String lastvideo(MemberEntity userEntity, Long lectureId) {
+		Lecture lecture = lectureService.findByLectureID(lectureId);
+		verifyUserHasLecture(userEntity, lecture);
+		Optional<MyLecture> my = mylectureRepository.findByMemberentityAndLecture(userEntity, lecture);
+		if (my.isPresent()) {
+			PageRequest pageRequest = PageRequest.of(0, 1, Sort.Direction.DESC, "lastviewdate");
+			Page<MyLectureProgress> one = mylectureProgressRepository.findByMyLecture(my.get(), pageRequest);
+			return one.getContent().get(0).getVideo().getVideoId();
+		} else {
+			throw new RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND);
+		}
 	}
 
 }
