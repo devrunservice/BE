@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.devrun.dto.CouponListInCart;
@@ -60,7 +60,6 @@ public class CartService {
 		String username = userEntity.getName();
 		int userNo = userEntity.getUserNo();
 
-
 		BuyerInfo.put("userName", username);
 		BuyerInfo.put("userEmail", userEmail);
 		BuyerInfo.put("userPhonumber", userPhonumber);
@@ -83,15 +82,13 @@ public class CartService {
 
 	}
 
-	public String putInCart(MemberEntity userEntity, String lectureName) {
+	public String putInCart(MemberEntity userEntity, Long lectureId) {
 		String resultMsg;
 
 		if (userEntity != null) {
-			Lecture lecture = lectureRepository.findByLectureName(lectureName);
-			if (lecture == null) {// 강의가 존재하지 않는 경우
-				return resultMsg = "존재하지 않는 강의입니다.";
-			} else {
-				Cart cart = cartRepo.findByMemberEntityAndLecture(userEntity, lecture);
+			Optional<Lecture> lecture = lectureRepository.findById(lectureId);
+			if (lecture.isPresent()) {
+				Cart cart = cartRepo.findByMemberEntityAndLecture(userEntity, lecture.get());
 				if (cart != null && cart.isDeleteop()) {// 장바구니에 담겨 있으나 삭제 처리 됐던 경우
 					cart.setDeleteop(false);
 					cartRepo.save(cart);
@@ -100,13 +97,15 @@ public class CartService {
 					resultMsg = "장바구니에 이미 존재합니다.";
 				} else {// 처음 장바구니에 등록하는 경우
 					Cart newcart = new Cart();
-					newcart.setLecture(lecture);
+					newcart.setLecture(lecture.get());
 					newcart.setDeleteop(false);
 					newcart.setMemberEntity(userEntity);
 					cartRepo.save(newcart);
 					resultMsg = "장바구니에 담았습니다.";
 
 				}
+			} else {
+				return resultMsg = "존재하지 않는 강의입니다.";
 			}
 		} else {// 유저가 존재하지 않는 경우
 			resultMsg = "사용자가 확인되지 않았으므로, 저장 실패";
@@ -117,26 +116,29 @@ public class CartService {
 
 	}
 
-	public String deleteInCart(MemberEntity userEntity, String lectureName) {
+	public String deleteInCart(MemberEntity userEntity, Long lectureId) {
 
 		String resultMsg = null;
+		Optional<Lecture> lecture = lectureRepository.findById(lectureId);
+		if (lecture.isPresent()) {
+			Cart cartEntity = cartRepo.findByMemberEntityAndLecture(userEntity, lecture.get());
+			if (cartEntity != null) {
 
-		List<Cart> cartEntity = cartRepo.findAllByMemberEntity(userEntity);
-		for (Cart cart : cartEntity) {
-			if (cart.getLecture().getLectureName().equals(lectureName)) {
-				if (cart.isDeleteop()) {
-					resultMsg = "이미 삭제된 강의입니다.";
-				} else {
-					cart.setDeleteop(true);
-					cartRepo.save(cart);
-					resultMsg = "삭제 완료";
+				if (cartEntity.getLecture().getLectureid().equals(lectureId)) {
+					if (cartEntity.isDeleteop()) {
+						resultMsg = "이미 삭제된 강의입니다.";
+					} else {
+						cartEntity.setDeleteop(true);
+						cartRepo.save(cartEntity);
+						resultMsg = "삭제 완료";
+					}
 				}
-				break;
 			} else {
 				resultMsg = "장바구니에 존재하지 않는 강의입니다.";
 			}
+		} else {
+			resultMsg = "존재하지 않는 강의입니다.";
 		}
-
 		return resultMsg;
 
 	}
