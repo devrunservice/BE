@@ -10,7 +10,7 @@ public enum UserErrorCode implements ErrorCode {
 
     INACTIVE_USER(HttpStatus.FORBIDDEN, "User is inactive"),
     NOT_QUALIFIED(HttpStatus.UNAUTHORIZED, "User did not complete the lecture."),
-    USERHASNOTLECTURE(HttpStatus.NOT_FOUND, "User has not this lecture.")
+    USERHASNOTLECTURE(HttpStatus.OK, "User has not this lecture.")
     ;
 
     private final HttpStatus httpStatus;
