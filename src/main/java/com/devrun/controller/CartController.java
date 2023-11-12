@@ -38,8 +38,7 @@ public class CartController {
 	@ApiImplicitParam(name = "lectureId", value = "강의 식별 번호", example = "22" , dataTypeClass = Long.class)
 	public ResponseEntity<?> putCart(@RequestBody(required = true) Long lectureId) {
 		String userid = SecurityContextHolder.getContext().getAuthentication().getName();
-//		MemberEntity userEntity = memberService.findById(userid);
-		MemberEntity userEntity = memberService.findById("seokhwan2");
+		MemberEntity userEntity = memberService.findById(userid);
 		String msg = cartService.putInCart(userEntity, lectureId);
 		return ResponseEntity.ok(msg);
 	}
@@ -49,8 +48,7 @@ public class CartController {
 	@ApiImplicitParam(name = "lectureId", value = "강의 식별 번호", example = "22" , dataTypeClass = Long.class)
 	public String deleteInCart(@RequestBody(required = true) Long lectureId) {
 		String userid = SecurityContextHolder.getContext().getAuthentication().getName();
-//		MemberEntity userEntity = memberService.findById(userid);
-		MemberEntity userEntity = memberService.findById("seokhwan2");
+		MemberEntity userEntity = memberService.findById(userid);
 		String msg = cartService.deleteInCart(userEntity, lectureId);
 		return msg;
 	}
@@ -59,8 +57,7 @@ public class CartController {
 	@ApiOperation("장바구니 화면에 출력할 모든 데이터를 전달합니다.")
 	public ResponseEntity<?> cartopen() {
 		String userid = SecurityContextHolder.getContext().getAuthentication().getName();
-//		MemberEntity userEntity = memberService.findById(userid);
-		MemberEntity userEntity = memberService.findById("seokhwan2");
+		MemberEntity userEntity = memberService.findById(userid);
 		List<LectureInfo> lectureInfoList = cartService.showlectureInfo(userEntity);
 		Map<String, Object> buyerInfo = cartService.showBuyerInfo(userEntity);
 		List<CouponListInCart> couponListInCart = cartService.showUserCoupon(userEntity);
