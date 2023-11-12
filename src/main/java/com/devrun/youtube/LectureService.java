@@ -256,7 +256,7 @@ public class LectureService {
 		if (lecutre.isPresent()) {
 			return lecutre.get();
 		} else {
-			throw new NoSuchElementException("Lecture Not Found!");
+			throw new RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND);
 		}
 	}
 
