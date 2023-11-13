@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -112,9 +113,8 @@ public class LectureregistController {
 	}
 
 	@PostMapping("/lectureregitest")
-	public String lecturetest(@Valid @ModelAttribute CreateLectureRequestDto requestDto,
-			@RequestParam("accessToken") String googleAccessToken, HttpServletResponse httpServletResponse,
-			@RequestParam("jwtToken") String jwtToken) throws Exception {
+	public String lecturetest(HttpServletRequest httpServletRequest,@Valid @ModelAttribute CreateLectureRequestDto requestDto,
+			@RequestParam("accessToken") String googleAccessToken, HttpServletResponse httpServletResponse) throws Exception {
 		System.out
 				.println("--------------------------------lectureregitest Controller --------------------------------");
 		System.out.println(requestDto.getLectureName());
@@ -129,7 +129,8 @@ public class LectureregistController {
 		System.out.println("----------------------------채널 업로드 종료---------------------------------------");
 		// JWT 토큰에서 사용자 아이디 추출
 		System.out.println("----------------------------JWT 토큰에서 사용자 아이디 추출---------------------------------------");
-		String userId = JWTUtil.getUserIdFromToken(jwtToken);
+		String userAccessToken = httpServletRequest.getHeader("Access_token");
+		String userId = JWTUtil.getUserIdFromToken(userAccessToken);
 		System.out.println("----------------------------멘토(사용자) 정보 조회---------------------------------------");
 		// 멘토(사용자) 정보 조회
 		MemberEntity mento = memberEntityRepository.findById(userId);
