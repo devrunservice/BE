@@ -32,6 +32,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.YouTubeScopes;
 import com.google.api.services.youtube.model.Video;
+import com.google.api.services.youtube.model.VideoListResponse;
 import com.google.api.services.youtube.model.VideoSnippet;
 import com.google.api.services.youtube.model.VideoStatus;
 
@@ -153,18 +154,24 @@ public class YouTubeUploader {
 
 			// 업로드된 비디오의 정보를 VideoInfo 객체로 생성하여 반환
 			String videoId = returnedVideo.getId();
-
+			System.out.println("--------------------------------비디오 정보 받아오기----------------------------------------------");
+			YouTube.Videos.List request = youtube.videos()
+		            .list("snippet,contentDetails,statistics");
+		    VideoListResponse response = request.setId(videoId).execute();
+		        
 			String videoUrl = "https://www.youtube.com/watch?v=" + videoId;
 			videoDto.setVideoId(videoId);
 			videoDto.setVideoLink(videoUrl);
 
-			String videoTotalPlayTime = returnedVideo.getContentDetails().getDuration();
+			String videoTotalPlayTime = response.getItems().get(0).getContentDetails().getDuration();
 			String period = videoTotalPlayTime;
 			Duration duration = Duration.parse(period);
 			int totalSeconds = (int) duration.getSeconds();
 
 			videoDto.setTotalPlayTime(totalSeconds);
-
+			System.out.println("totalSeconds : " + totalSeconds);
+			System.out.println("videoUrl : " + videoUrl);
+			System.out.println("--------------------------------비디오 정보 받아오기 완료----------------------------------------------");
 			return videoDto;
 		} catch (IOException e) {
 			throw new IOException("비디오 업로드 중 오류가 발생했습니다.", e);
