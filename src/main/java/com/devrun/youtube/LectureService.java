@@ -14,10 +14,12 @@ import org.springframework.stereotype.Service;
 
 import com.devrun.dto.QueryLectureByKeywordDTO;
 import com.devrun.dto.QueryLectureByKeywordDTO2;
+import com.devrun.entity.LectureIntroduce;
 import com.devrun.entity.MemberEntity;
 import com.devrun.exception.CommonErrorCode;
 import com.devrun.exception.RestApiException;
 import com.devrun.exception.UserErrorCode;
+import com.devrun.repository.LectureIntroduceRepository;
 import com.devrun.service.MemberService;
 
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ public class LectureService {
 	private final LecturecategoryRepository categoryRepository;
 	private final VideoRepository videoRepository;
 	private final LecutureCategoryService categoryService;
+	private final LectureIntroduceRepository introduceRepository;
 	private final MemberService memberService;
 
 	private LectureCategory convertToLectureCategoryEntity(LecturecategoryDto categoryDto) {
@@ -263,6 +266,11 @@ public class LectureService {
 	public QueryLectureByKeywordDTO2 findAll(PageRequest pageRequest) {
 		Page<Lecture> l1 = lectureRepository.findAll(pageRequest);
 		return packageingDto(l1);
+	}
+
+	public LectureIntroduce getlecturedetail(Long lectureId) {
+		Lecture lecture = findByLectureID(lectureId);
+		return introduceRepository.findByLecture(lecture);
 	}
 
 //	 public CreateLectureRequestDto getLectureDetailsMapping(Long lectureId) {
