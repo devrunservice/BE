@@ -175,7 +175,7 @@ public class MyLectureService {
 	}
 
 	public MylectureDTO2 mylecturelist(MemberEntity userEntity, int page, String option) {
-		page = page <= 1 ? 0 : page;
+		page = page <= 1 ? 0 : page-1;
 		PageRequest pageRequest = PageRequest.of(page, 9, Direction.DESC, "lastviewdate");
 		if(option.equals("Completed")) {
 		Page<MyLecture> pageMylecture = mylectureRepository.findByMemberentityAndLectureProgressEquals(userEntity, 100 ,pageRequest);
@@ -231,7 +231,7 @@ public class MyLectureService {
 	}
 	
 	public MyLectureNoteDTO2 myNotelist(MemberEntity userEntity, int page) {
-		page = page <= 1 ? 0 : page;
+		page = page <= 1 ? 0 : page-1;
 		int size = 10;
 		PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "lastviewdate");
 		Page<MyLecture> myLectureList = mylectureRepository.findByMemberentity(userEntity, pageRequest);
@@ -241,7 +241,7 @@ public class MyLectureService {
 	}
 
 	public lectureNoteListDTO2 noteDetaiList(MemberEntity userEntity, Long lectureId, int page) {
-		page = page <= 1 ? 0 : page;
+		page = page <= 1 ? 0 : page-1;
 		int size = 10;
 		PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "date");
 		Lecture lecture = lectureService.findByLectureID(lectureId);
@@ -337,7 +337,7 @@ public class MyLectureService {
 	}
 
 	public List<QaDTO> Qalist(MemberEntity userEntity, int page) {
-		page = page <= 1 ? 0 : page;
+		page = page <= 1 ? 0 : page-1;
 		PageRequest pageRequest = PageRequest.of(page, 3, Sort.Direction.DESC, "lastviewdate");
 		Page<MyLecture> mylecture = mylectureRepository.findByMemberentity(userEntity, pageRequest);
 		List<MylectureQa> qaList = mylectureQaRepository.findByMyLectureIn(mylecture.toList());
@@ -357,7 +357,7 @@ public class MyLectureService {
 	}
 
 	public MylectureDTO2 checkLectureComplete(MemberEntity userEntity, int page) {
-		page = page <= 1 ? 0 : page;
+		page = page <= 1 ? 0 : page-1;
 		PageRequest pageRequest = PageRequest.of(page, 10, Sort.Direction.DESC, "lastviewdate");
 		Page<MyLecture> mylecture = mylectureRepository.findByMemberentityAndLectureProgressEquals(userEntity, 100, pageRequest);
 		return convertMylectureDTO(mylecture);
