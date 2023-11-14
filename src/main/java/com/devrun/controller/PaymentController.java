@@ -143,12 +143,9 @@ public class PaymentController {
 			        PaymentEntity paymentEntity = new PaymentEntity();
 			        paymentEntity.setName(paymentDTO.getName());
 			        paymentEntity.setPaid_amount(paymentDTO.getPaid_amount());
-		            paymentEntity.setBuyer_email(paymentDTO.getBuyer_email());
-		            paymentEntity.setBuyer_name(paymentDTO.getBuyer_name());
 		            paymentEntity.setImp_uid(paymentDTO.getImp_uid());
 		            paymentEntity.setMerchant_uid(paymentDTO.getMerchant_uid());
 		            paymentEntity.setReceipt_url(paymentDTO.getReceipt_url());
-		            paymentEntity.setBuyer_tel(paymentDTO.getBuyer_tel()); 
 					paymentEntity.setPaymentDate(paymentDate);
 					paymentEntity.setStatus("0");					
 					
@@ -259,7 +256,8 @@ public class PaymentController {
 		        }
 
 		        return ResponseEntity.ok(paymentsPage);
-		}
+		}		
+		
 
 		
 	

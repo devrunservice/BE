@@ -22,7 +22,7 @@ public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
 	PaymentEntity findByPaidAmount(@Param("paid_amount") String imp_uid);
 	
 	@Query(value = "SELECT p.name AS name, p.receipt_url AS receipturl, "
-	        + "p.pay_no AS payno, p.merchant_uid AS merchantUid, p.paid_amount AS paidamount, p.status AS status, p.buyer_name AS buyername, p.payment_date As paymentDate, "
+	        + "p.pay_no AS payno, p.merchant_uid AS merchantUid, p.paid_amount AS paidamount, p.status AS status, p.payment_date As paymentDate, "
 	        + "ROW_NUMBER() OVER(ORDER BY paymentDate DESC) AS userpayno "
 	        + "FROM payment p WHERE p.user_no = :usrno", nativeQuery = true)    
 	Page<PaymentInfo> findAllbyPaymentEntity(@Param("usrno") int usrno, PageRequest pageRequest);	
