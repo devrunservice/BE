@@ -252,7 +252,7 @@ public class PaymentController {
 
 		        if (paymentsPage.isEmpty()) {
 		            // 결제 정보가 없을 경우에 대한 처리
-		            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("결제 정보가 없습니다.");
+		            return ResponseEntity.status(HttpStatus.OK).body("결제 정보가 없습니다.");
 		        }
 
 		        return ResponseEntity.ok(paymentsPage);

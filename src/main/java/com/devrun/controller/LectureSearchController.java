@@ -3,10 +3,12 @@ package com.devrun.controller;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.devrun.dto.QueryLectureByKeywordDTO2;
+import com.devrun.entity.LectureIntroduce;
 import com.devrun.service.MemberService;
 import com.devrun.youtube.LectureService;
 import com.devrun.youtube.LecutureCategoryService;
@@ -22,9 +24,7 @@ import lombok.RequiredArgsConstructor;
 @Api(tags = "강의 검색 API")
 public class LectureSearchController {
 
-	private final LecutureCategoryService categoryService;
 	private final LectureService lectureService;
-	private final MemberService memberService;
 
 	@GetMapping("/q/lecture")
 	@ApiImplicitParams({
@@ -53,6 +53,13 @@ public class LectureSearchController {
 					pageRequest);
 			return p1;
 		}
+	}
+	
+	@GetMapping("/api/lectures/detailtest/{id}")
+	@ApiOperation(value = "강의 상세 소개 컨텐츠" , notes = "샘플 데이터는 22 ~ 43번 까지만 유효합니다.")
+	public LectureIntroduce lecturedetail(@PathVariable(name = "id" , required = true) Long lectureId) {
+		if(lectureId == null) {lectureId = 22l;}
+		return lectureService.getlecturedetail(lectureId);
 	}
 
 }

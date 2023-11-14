@@ -49,7 +49,7 @@ public class PointhistoryController {
         Page<PointHis> PointhistoryPage = pointHistoryRepository.findAllbyPointHistoryEntity(usrno,pageRequest);
 
         if (PointhistoryPage.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("결제 정보가 없습니다.");
+            return ResponseEntity.status(HttpStatus.OK).body("결제 정보가 없습니다.");
         }
 	    PointEntity PointEntity = pointRepository.findByMemberEntity_userNo(usrno);
         int mypoint = PointEntity.getMypoint();

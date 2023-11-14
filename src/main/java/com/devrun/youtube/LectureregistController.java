@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -112,9 +113,8 @@ public class LectureregistController {
 	}
 
 	@PostMapping("/lectureregitest")
-	public String lecturetest(@Valid @ModelAttribute CreateLectureRequestDto requestDto,
-			@RequestParam("accessToken") String googleAccessToken, HttpServletResponse httpServletResponse,
-			@RequestParam("jwtToken") String jwtToken) throws Exception {
+	public String lecturetest(HttpServletRequest httpServletRequest,@Valid @ModelAttribute CreateLectureRequestDto requestDto,
+			@RequestParam("accessToken") String googleAccessToken, HttpServletResponse httpServletResponse) throws Exception {
 		System.out
 				.println("--------------------------------lectureregitest Controller --------------------------------");
 		System.out.println(requestDto.getLectureName());
@@ -126,26 +126,30 @@ public class LectureregistController {
 			VideoDto uploadedVideo = youTubeUploader.uploadVideo(video, httpServletResponse, googleAccessToken);
 			uploadedVideos.add(uploadedVideo);
 		}
-
+		System.out.println("----------------------------채널 업로드 종료---------------------------------------");
 		// JWT 토큰에서 사용자 아이디 추출
-		String userId = JWTUtil.getUserIdFromToken(jwtToken);
-
+		System.out.println("----------------------------JWT 토큰에서 사용자 아이디 추출---------------------------------------");
+		String userAccessToken = httpServletRequest.getHeader("Access_token");
+		String userId = JWTUtil.getUserIdFromToken(userAccessToken);
+		System.out.println("----------------------------멘토(사용자) 정보 조회---------------------------------------");
 		// 멘토(사용자) 정보 조회
 		MemberEntity mento = memberEntityRepository.findById(userId);
-
+		System.out.println("----------------------------S3 업로드 시작---------------------------------------");
 		// 썸네일 S3 저장
 		// S3에가서 이미지를 업로드하고, 썸네일 URL 받아오기
 		String lectureThumnailUrl = awsS3UploadService.putS3(requestDto.getLectureThumbnail(), "lectuer_thumbnail",
 				requestDto.getLectureName());
-
+		System.out.println("----------------------------S3 업로드 종료---------------------------------------");
+		System.out.println("----------------------------강의 엔티티 객체 생성 및 매핑---------------------------------------");
 		// 강의 엔티티 객체 생성 및 매핑
 		Lecture savedlecture = lectureService.saveLecture(mento, requestDto, lectureThumnailUrl);
-
+		System.out.println("----------------------------섹션 엔티티 객체 생성 및 매핑---------------------------------------");
 		// 섹션 엔티티 객체 생성 및 매핑
 		List<LectureSection> savedlectureSeciton = lectureService.saveLectureSection(savedlecture,
 				requestDto.getLectureSectionList());
+		System.out.println("----------------------------비디오 엔티티 객체 생성 및 매핑---------------------------------------");
 		// 비디오 엔티티 객체 생성 및 매핑
-		for (VideoDto videoDto : requestDto.getVideoList()) {
+		for (VideoDto videoDto : uploadedVideos) {
 			for (LectureSection section : savedlectureSeciton) {
 				if (videoDto.getSectionNumber() == section.getSectionNumber()
 						&& videoDto.getSectionTitle().equals(section.getSectionTitle())) {

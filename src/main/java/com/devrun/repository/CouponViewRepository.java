@@ -25,6 +25,7 @@ public interface CouponViewRepository extends JpaRepository<CouponViewEntity, Lo
 	
 	@Query(value = "SELECT"	
 			+ " cm.target AS lecturename,\r\n"
+			+ "	cm.targetid AS lectureid,\r\n"
 			+ "	cm.discountrate AS discountrate,\r\n"
 			+ "	cm.expirydate AS expirydate,\r\n"
 			+ "	cm.state AS state,\r\n"
