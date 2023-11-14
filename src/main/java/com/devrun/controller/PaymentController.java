@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.devrun.dto.PaymentDTO;
+import com.devrun.dto.FreeDTO;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.PaymentEntity;
 import com.devrun.entity.PointEntity;
@@ -237,7 +239,7 @@ public class PaymentController {
 		        return new ResponseEntity<>("Access token is required", HttpStatus.BAD_REQUEST);
 		    }
 
-		    String id = JWTUtil.getUserIdFromToken(accessToken);
+		     	String id = JWTUtil.getUserIdFromToken(accessToken);
 		    
 		        MemberEntity member = memberService.findById(id);	
 		        
@@ -256,7 +258,24 @@ public class PaymentController {
 		        }
 
 		        return ResponseEntity.ok(paymentsPage);
-		}		
+		}
+		
+		@PostMapping("/Free")
+		@ApiOperation("무료 강의 API 입니다")
+		public ResponseEntity<?> freelecture(@RequestBody FreeDTO freeDTO) {
+		        
+		        String userid = SecurityContextHolder.getContext().getAuthentication().getName();
+				MemberEntity memberEntity = memberService.findById(userid);
+				
+		        System.err.println(memberEntity);
+		        String lectureName = freeDTO.getLectureName();
+		        Lecture lecture = lectureRepository.findByLectureName(lectureName);
+		        myLectureService.registLecture(memberEntity, lecture);
+		        
+		        return ResponseEntity.ok("성공");		        
+		   
+		}
+
 		
 
 		
