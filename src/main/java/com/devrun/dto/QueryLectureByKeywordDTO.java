@@ -26,9 +26,9 @@ public class QueryLectureByKeywordDTO {
 	@ApiModelProperty(value = "강사 아이디")
 	private String mentoId;
 	@ApiModelProperty(value = "강의 가격")
-	private int lectureprice;
+	private int lecturePrice;
 	@ApiModelProperty(value = "구입자 수")
-	private int buycount;
+	private int buyCount;
 	@ApiModelProperty(value = "평점")
 	private float rating;
 
@@ -37,13 +37,13 @@ public class QueryLectureByKeywordDTO {
 		this.lectureName = lecture.getLectureName();
 		this.lectureIntro = lecture.getLectureIntro();
 		this.lectureThumbnail = lecture.getLectureThumbnail();
-		this.lectureprice = lecture.getLecturePrice();
+		this.lecturePrice = lecture.getLecturePrice();
 
 		this.lectureBigCategory = lecture.getLectureCategory().getLectureBigCategory();
 		this.lectureMidCategory = lecture.getLectureCategory().getLectureMidCategory();
 
 		this.mentoId = lecture.getMentoId().getId();
-		this.buycount = lecture.getBuyCount();
+		this.buyCount = lecture.getBuyCount();
 		this.rating = lecture.getLectureRating();
 	}
 
