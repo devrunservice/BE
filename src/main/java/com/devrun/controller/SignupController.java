@@ -326,7 +326,7 @@ public class SignupController {
 	
 	// 회원가입 인증 확인
 	@ResponseBody
-	@CrossOrigin(origins = {"https://mail.naver.com", "https://mail.daum.net", "https://mail.google.com","https://mail.nate.com"})
+	@CrossOrigin(origins = {"https://mail.naver.com", "https://mail.daum.net", "https://mail.google.com", "https://mail.nate.com"})
 	@PostMapping("/verify/signupEmail")
 	public ResponseEntity<?> signupOk(@RequestParam("data") String encryptedData){
 		HttpHeaders headers = new HttpHeaders();

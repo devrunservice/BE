@@ -33,7 +33,7 @@ public class LoginInfo {
     private MemberEntity memberEntity;
 
     @Column(name = "lastlogin", nullable = true)
-	@Comment("마지막 로그인 날짜 ( 휴면 전환은 서버의 온오프로 발생 )")
+	@Comment("마지막 로그인 날짜")
 	private Date lastlogin;
 
     @Column(name = "logintry", nullable = false, length = 2)

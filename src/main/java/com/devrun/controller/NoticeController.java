@@ -157,7 +157,7 @@ public class NoticeController {
 		                            .httpOnly(true)
 		                            .maxAge(Duration.ofDays(1))
 		                            .build();
-		                }		              
+		                }
 		                
 		                isCookie = true;
 		                break;

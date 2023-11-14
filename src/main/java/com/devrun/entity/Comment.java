@@ -41,7 +41,7 @@ public class Comment {
     private int commentNo;
 
     @ManyToOne
-    @JoinColumn(name = "noticeNo")
+    @JoinColumn(name = "noticeNo", referencedColumnName = "noticeNo",nullable = false)
     @org.hibernate.annotations.Comment("댓글이 달린 공지사항의 번호")
     private Notice notice;
     
@@ -50,7 +50,9 @@ public class Comment {
     @org.hibernate.annotations.Comment("댓글이 달린 댓글의 번호")
     private Comment parentComment;
 
-    @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "parentComment"
+//    		, cascade = CascadeType.ALL								// 부모 댓글이 삭제되면 같이 삭제되도록 만드는 속성인데 현재 status로 관리하는 방식으로 변경되었기 때문에 필요없어졌다.
+    		)
     @org.hibernate.annotations.Comment("자식 댓글과의 관계 설정")
     private List<Comment> childComments = new ArrayList<>();
 
