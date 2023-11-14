@@ -18,6 +18,9 @@ import javax.persistence.TemporalType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.devrun.youtube.Lecture;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +35,17 @@ public class MylectureReview {
 	private Long mylectureReviewNo;
 
 	@ManyToOne
-	@JoinColumn(name = "mylecture_no")
-	private final MyLecture myLecture;
+	@JoinColumn(name = "user_no")
+	@JsonBackReference
+	private MemberEntity userNo;
+	
+	@ManyToOne
+	@JoinColumn(name = "lecture_id")
+	@JsonBackReference
+	private Lecture lecture;
 	
 	@Column(name = "review_content", columnDefinition = "TEXT", nullable = false)
-	private final String reviewContent;
+	private String reviewContent;
 
 	@Column(name = "review_day", nullable = false)
 	@CreatedDate
@@ -44,6 +53,6 @@ public class MylectureReview {
 	private Date reviewDate;
 
 	@Column(name = "review_rating", nullable = false)
-	private final float reviewRating;
+	private float reviewRating;
 
 }

@@ -5,7 +5,9 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,6 +19,7 @@ import com.devrun.dto.MyLectureNoteDTO2;
 import com.devrun.dto.MycouresDTO;
 import com.devrun.dto.MylectureDTO;
 import com.devrun.dto.MylectureDTO2;
+import com.devrun.dto.MylectureReviewDTO;
 import com.devrun.dto.NoteRequest;
 import com.devrun.dto.NoteUpdateRequest;
 import com.devrun.dto.ProgressInfo;
@@ -28,6 +31,7 @@ import com.devrun.dto.lectureNoteListDTO;
 import com.devrun.dto.lectureNoteListDTO2;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.MylectureQa;
+import com.devrun.entity.MylectureReview;
 import com.devrun.service.MemberService;
 import com.devrun.service.MyLectureService;
 import com.devrun.service.MylectureReviewService;
@@ -115,6 +119,13 @@ public class MyLectureController {
 		reviewService.saveReview(userEntity, reviewRequest);
 		return "작성 완료";
 	}
+	
+	@GetMapping("/review/{lectureId}/{pageNumber}")
+	@ApiOperation(value = "해당 강의에 대한 수강평 보기", notes = "파라미터로 lectureId를 요청하면 해당 강의의 수강평을 반환합니다.")
+	public List<MylectureReviewDTO> reviewList(@PathVariable Long lectureId , @PathVariable int pageNumber) {
+		return reviewService.reviewList(lectureId , pageNumber);
+	}
+	
 
 	@PostMapping("/lecture/progress")
 	@ApiOperation(value = "영상 진행률 저장하기", notes = "파라미터로 액세스 토큰과 현재 시청중인 videoid(videoid)와, 현재 재생 누적 시간(currenttime)를 요청하면, 데이터베이스에 저장하고, 결과값을 반환합니다.")

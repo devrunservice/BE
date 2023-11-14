@@ -1,14 +1,14 @@
 package com.devrun.repository;
 
-import java.util.Optional;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.devrun.entity.MyLecture;
 import com.devrun.entity.MylectureReview;
+import com.devrun.youtube.Lecture;
 
 public interface MyLectureReviewRepository extends JpaRepository<MylectureReview, Long> {
 
-	Optional<MylectureReview> findByMyLectureAndMylectureReviewNo(MyLecture userEntity, Long mylectureReviewNo);
+	Page<MylectureReview> findAllByLecture(Lecture lecture, PageRequest pageRequest);
 
 }
