@@ -155,21 +155,24 @@ public class YouTubeUploader {
 			// 업로드된 비디오의 정보를 VideoInfo 객체로 생성하여 반환
 			String videoId = returnedVideo.getId();
 			System.out.println("--------------------------------비디오 정보 받아오기----------------------------------------------");
-			YouTube.Videos.List request = youtube.videos()
-		            .list("snippet,contentDetails,statistics");
-		    VideoListResponse response = request.setId(videoId).execute();
-		        
+//			YouTube.Videos.List request = youtube.videos()
+//		            .list("snippet,contentDetails,statistics");
+//			System.out.println("--------------------------------비디오 정보 받아오기 1----------------------------------------------");
+//		    VideoListResponse response = request.setId(videoId).execute();
+//		    System.out.println("--------------------------------비디오 정보 받아오기 2----------------------------------------------");		        
 			String videoUrl = "https://www.youtube.com/watch?v=" + videoId;
 			videoDto.setVideoId(videoId);
 			videoDto.setVideoLink(videoUrl);
 
-			String videoTotalPlayTime = response.getItems().get(0).getContentDetails().getDuration();
-			String period = videoTotalPlayTime;
-			Duration duration = Duration.parse(period);
-			int totalSeconds = (int) duration.getSeconds();
+//			String videoTotalPlayTime = response.getItems().get(0).getContentDetails().getDuration();
+//			System.out.println("--------------------------------비디오 정보 받아오기 3----------------------------------------------");
+//			String period = videoTotalPlayTime;
+//			Duration duration = Duration.parse(period);
+//			System.out.println("--------------------------------비디오 정보 받아오기 4----------------------------------------------");
+//			int totalSeconds = (int) duration.getSeconds();
 
-			videoDto.setTotalPlayTime(totalSeconds);
-			System.out.println("totalSeconds : " + totalSeconds);
+//			videoDto.setTotalPlayTime(totalSeconds);
+//			System.out.println("totalSeconds : " + totalSeconds);
 			System.out.println("videoUrl : " + videoUrl);
 			System.out.println("--------------------------------비디오 정보 받아오기 완료----------------------------------------------");
 			return videoDto;
