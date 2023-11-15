@@ -42,6 +42,7 @@ public class LectureregistController {
 	private final LectureService lectureService;
 	private final AwsS3UploadService awsS3UploadService;
 	private final YouTubeUploader youTubeUploader;
+	private final YouTubeVideoInfo youTubeVideoInfo;
 	private final LecutureCategoryService categoryService;
 	public static final HttpTransport httpTransport = new NetHttpTransport();
 	public static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
@@ -56,11 +57,12 @@ public class LectureregistController {
 	@Autowired
 	public LectureregistController(MemberService memberService, LectureService lectureService,
 			AwsS3UploadService awsS3UploadService, YouTubeUploader youTubeUploader,
-			LecutureCategoryService categoryService, MyLectureProgressService myLectureProgressService) {
+			LecutureCategoryService categoryService, MyLectureProgressService myLectureProgressService ,YouTubeVideoInfo youTubeVideoInfo) {
 		this.categoryService = categoryService;
 		this.lectureService = lectureService;
 		this.awsS3UploadService = awsS3UploadService;
 		this.youTubeUploader = youTubeUploader;
+		this.youTubeVideoInfo = youTubeVideoInfo;
 	}
 
 	// GET 요청을 통해 카테고리 목록을 가져오는 엔드포인트
@@ -147,8 +149,11 @@ public class LectureregistController {
 		// 섹션 엔티티 객체 생성 및 매핑
 		List<LectureSection> savedlectureSeciton = lectureService.saveLectureSection(savedlecture,
 				requestDto.getLectureSectionList());
-		System.out.println("----------------------------비디오 엔티티 객체 생성 및 매핑---------------------------------------");
+		System.out.println("----------------------------비디오 메타 데이터 조회하기---------------------------------------");
 		// 비디오 엔티티 객체 생성 및 매핑
+		uploadedVideos = youTubeVideoInfo.getVideoInfo(uploadedVideos, httpServletResponse, userAccessToken);
+		System.out.println("----------------------------비디오 엔티티 객체 생성 및 매핑---------------------------------------");
+		
 		for (VideoDto videoDto : uploadedVideos) {
 			for (LectureSection section : savedlectureSeciton) {
 				if (videoDto.getSectionNumber() == section.getSectionNumber()
