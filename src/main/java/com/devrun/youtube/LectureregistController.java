@@ -116,11 +116,11 @@ public class LectureregistController {
 
 	@PostMapping("/lectureregitest")
 	public String lecturetest(HttpServletRequest httpServletRequest,@Valid @ModelAttribute CreateLectureRequestDto requestDto,
-			@RequestParam("accessToken") String googleAccessToken, HttpServletResponse httpServletResponse) throws Exception {
+			@RequestParam("oauth2") String googleAccessToken, HttpServletResponse httpServletResponse) throws Exception {
 		System.out
 				.println("--------------------------------lectureregitest Controller --------------------------------");
 		System.out.println(requestDto.getLectureName());
-		System.out.println("accessToken :" + googleAccessToken);
+		System.out.println("oauth2 :" + googleAccessToken);
 		System.err.println(requestDto);
 		// 리스트의 각 비디오에 대해 업로드 작업을 수행합니다.
 		List<VideoDto> uploadedVideos = new ArrayList<>(); // 업로드된 비디오 정보를 저장할 리스트를 생성합니다.
@@ -151,7 +151,7 @@ public class LectureregistController {
 				requestDto.getLectureSectionList());
 		System.out.println("----------------------------비디오 메타 데이터 조회하기---------------------------------------");
 		// 비디오 엔티티 객체 생성 및 매핑
-		uploadedVideos = youTubeVideoInfo.getVideoInfo(uploadedVideos, httpServletResponse, userAccessToken);
+		uploadedVideos = youTubeVideoInfo.getVideoInfo(uploadedVideos, httpServletResponse, googleAccessToken);
 		System.out.println("----------------------------비디오 엔티티 객체 생성 및 매핑---------------------------------------");
 		
 		for (VideoDto videoDto : uploadedVideos) {
