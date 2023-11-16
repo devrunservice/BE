@@ -28,19 +28,7 @@ public class PaymentEntity {
 	@Column(name = "pay_no", length = 5)
 	@Comment("결제 번호")
 	private int pay_no;
-	
-	@Column(name = "buyerEmail", nullable = true, length = 20)
-	@Comment("구매자 이메일")
-	private String buyer_email;
-
-	@Column(name = "buyerName", nullable = true, length = 20)
-	@Comment("구매자 이름")
-	private String buyer_name;
-
-	@Column(name = "buyerTel", nullable = true, length = 20)
-	@Comment("구매자 연락처")
-	private String buyer_tel;
-	
+			
 	@Column(name = "name", nullable = true, length = 20)
 	@Comment("강의 이름")
 	private String name;
