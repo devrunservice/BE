@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -97,7 +98,7 @@ public class LectureregistController {
 
 			// OAuth 2.0 인증 코드로부터 액세스 토큰을 교환하기 위한 GoogleAuthorizationCodeFlow 객체를 생성합니다.
 			GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY,
-					clientSecrets, Collections.singleton(YouTubeScopes.YOUTUBE_UPLOAD)).setAccessType("offline")
+					clientSecrets, (Collection<String>) Collections.singletonMap(YouTubeScopes.YOUTUBE_UPLOAD , YouTubeScopes.YOUTUBE_READONLY)).setAccessType("offline")
 							.build();
 
 			// 'code' 값을 사용하여 액세스 토큰을 요청하고, GoogleTokenResponse를 받습니다.
