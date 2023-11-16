@@ -21,7 +21,9 @@ import com.devrun.dto.MylectureDTO;
 import com.devrun.dto.MylectureDTO2;
 import com.devrun.dto.NoteRequest;
 import com.devrun.dto.NoteUpdateRequest;
-import com.devrun.dto.QaDTO;
+import com.devrun.dto.QaDetailDTO;
+import com.devrun.dto.QaListDTO;
+import com.devrun.dto.QaListDTOs;
 import com.devrun.dto.QaRequest;
 import com.devrun.dto.SectionInfo;
 import com.devrun.dto.VideoInfo;
@@ -175,34 +177,35 @@ public class MyLectureService {
 	}
 
 	public MylectureDTO2 mylecturelist(MemberEntity userEntity, int page, String option) {
-		page = page <= 1 ? 0 : page-1;
+		page = page <= 1 ? 0 : page - 1;
 		PageRequest pageRequest = PageRequest.of(page, 9, Direction.DESC, "lastviewdate");
-		if(option.equals("Completed")) {
-		Page<MyLecture> pageMylecture = mylectureRepository.findByMemberentityAndLectureProgressEquals(userEntity, 100 ,pageRequest);
-		return convertMylectureDTO(pageMylecture);
-		} else if(option.equals("Inprogress")) {
-		Page<MyLecture> pageMylecture = mylectureRepository.findByMemberentityAndLectureProgressLessThan(userEntity, 100 ,pageRequest);
-		return convertMylectureDTO(pageMylecture);
+		if (option.equals("Completed")) {
+			Page<MyLecture> pageMylecture = mylectureRepository.findByMemberentityAndLectureProgressEquals(userEntity,
+					100, pageRequest);
+			return convertMylectureDTO(pageMylecture);
+		} else if (option.equals("Inprogress")) {
+			Page<MyLecture> pageMylecture = mylectureRepository.findByMemberentityAndLectureProgressLessThan(userEntity,
+					100, pageRequest);
+			return convertMylectureDTO(pageMylecture);
 		} else {
-		Page<MyLecture> pageMylecture = mylectureRepository.findByMemberentity(userEntity,pageRequest);
-		return convertMylectureDTO(pageMylecture);
+			Page<MyLecture> pageMylecture = mylectureRepository.findByMemberentity(userEntity, pageRequest);
+			return convertMylectureDTO(pageMylecture);
 		}
 	}
-	
-	public MylectureDTO2 convertMylectureDTO(Page<MyLecture> pageMylecture){
+
+	public MylectureDTO2 convertMylectureDTO(Page<MyLecture> pageMylecture) {
 		List<MylectureDTO> mylectureDTOList = new ArrayList<MylectureDTO>();
 		for (MyLecture mylecture : pageMylecture) {
 			MylectureDTO dto = new MylectureDTO(mylecture);
 			mylectureDTOList.add(dto);
 		}
-		
+
 		MylectureDTO2 dtolist = new MylectureDTO2(mylectureDTOList, pageMylecture.getTotalPages());
-		
-		
+
 		return dtolist;
 	}
-	
-	public MyLectureNoteDTO2 packageDto(Page<MyLecture> myLectureList , int TotalPages) {
+
+	public MyLectureNoteDTO2 packageDto(Page<MyLecture> myLectureList, int TotalPages) {
 		List<MyLectureProgress> myprogressList = mylectureProgressRepository.findByMyLectureIn(myLectureList.toList());
 		List<MylectureNote> myNoteList = mylectureNoteRepository
 				.findByMyLectureProgressInAndNoteDeleteFalseOrderByDateDesc(myprogressList);
@@ -222,33 +225,33 @@ public class MyLectureService {
 			}
 			lectureNoteDTOs.add(myLectureNoteDto);
 		}
-		
+
 		MyLectureNoteDTO2 dtos = new MyLectureNoteDTO2();
 		dtos.setDtolist(lectureNoteDTOs);
 		dtos.setTotalPages(TotalPages);
 		return dtos;
-		
+
 	}
-	
+
 	public MyLectureNoteDTO2 myNotelist(MemberEntity userEntity, int page) {
-		page = page <= 1 ? 0 : page-1;
+		page = page <= 1 ? 0 : page - 1;
 		int size = 10;
 		PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "lastviewdate");
 		Page<MyLecture> myLectureList = mylectureRepository.findByMemberentity(userEntity, pageRequest);
-		
-		
-		return packageDto(myLectureList , myLectureList.getTotalPages());
+
+		return packageDto(myLectureList, myLectureList.getTotalPages());
 	}
 
 	public lectureNoteListDTO2 noteDetaiList(MemberEntity userEntity, Long lectureId, int page) {
-		page = page <= 1 ? 0 : page-1;
+		page = page <= 1 ? 0 : page - 1;
 		int size = 10;
 		PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "date");
 		Lecture lecture = lectureService.findByLectureID(lectureId);
 		MyLecture myLecture = verifyUserHasLecture(userEntity, lecture);
 		List<MyLectureProgress> myprogressList = mylectureProgressRepository.findByMyLecture(myLecture);
 		List<lectureNoteListDTO> noteDetilas = new ArrayList<lectureNoteListDTO>();
-		Optional<Page<MylectureNote>> myNoteList = mylectureNoteRepository.findByMyLectureProgressInAndNoteDeleteFalse(myprogressList, pageRequest);
+		Optional<Page<MylectureNote>> myNoteList = mylectureNoteRepository
+				.findByMyLectureProgressInAndNoteDeleteFalse(myprogressList, pageRequest);
 		if (myNoteList.isPresent()) {
 		} else {
 			throw new NoSuchElementException("There are no note");
@@ -257,8 +260,8 @@ public class MyLectureService {
 		for (MylectureNote my : myNoteList.get()) {
 			lectureNoteListDTO noteDetail = new lectureNoteListDTO();
 			noteDetail.setChapter(my.getChapter());
-			String ContentPreview = my.getNoteContext().replaceAll("<[^>]*>","");
-			if(cutsize < ContentPreview.length()) {
+			String ContentPreview = my.getNoteContext().replaceAll("<[^>]*>", "");
+			if (cutsize < ContentPreview.length()) {
 				ContentPreview = ContentPreview.substring(0, cutsize);
 			}
 			noteDetail.setContentPreview(ContentPreview);
@@ -273,7 +276,6 @@ public class MyLectureService {
 		list.setTotalPages(myNoteList.get().getTotalPages());
 		return list;
 	}
-	
 
 	public lectureNoteDetailDTO noteDetaiOpen(MemberEntity userEntity, Long noteNo) {
 		MylectureNote mylectureNote = mylectureNoteRepository.findByNoteNo(noteNo);
@@ -308,7 +310,7 @@ public class MyLectureService {
 		mylectureNote.setNoteContext(noteUpdateRequest.getNoteContent());
 		mylectureNote.setNoteTitle(noteUpdateRequest.getNoteTitle());
 		mylectureNoteRepository.save(mylectureNote);
-		
+
 		lectureNoteDetailDTO noteDetail = new lectureNoteDetailDTO();
 		noteDetail.setChapter(mylectureNote.getChapter());
 		noteDetail.setContent(mylectureNote.getNoteContext());
@@ -318,8 +320,8 @@ public class MyLectureService {
 		noteDetail.setNoteId(mylectureNote.getNoteNo());
 		return noteDetail;
 	}
-	
-	public void myNoteDelete(MemberEntity userEntity , Long noteNo) {
+
+	public void myNoteDelete(MemberEntity userEntity, Long noteNo) {
 		MylectureNote mylectureNote = mylectureNoteRepository.findByNoteNo(noteNo);
 		mylectureNote.setNoteDelete(true);
 		mylectureNoteRepository.save(mylectureNote);
@@ -329,56 +331,36 @@ public class MyLectureService {
 		Lecture lecture = lectureService.findByLectureID(qaRequest.getLectureId());
 		MyLecture myLecture = verifyUserHasLecture(userEntity, lecture);
 		MylectureQa mylectureQa = new MylectureQa();
-		mylectureQa.setMento(lecture.getMentoId());
-		mylectureQa.setMyLecture(myLecture);
+		mylectureQa.setUserNo(lecture.getMentoId());
+		mylectureQa.setLectureId(myLecture.getLecture());
 		mylectureQa.setQuestionContent(qaRequest.getQuestionContent());
 		mylectureQa.setQuestionTitle(qaRequest.getQuestionTitle());
 		mylectureQaRepository.save(mylectureQa);
 	}
 
-	public List<QaDTO> Qalist(MemberEntity userEntity, int page) {
-		page = page <= 1 ? 0 : page-1;
-		PageRequest pageRequest = PageRequest.of(page, 3, Sort.Direction.DESC, "lastviewdate");
-		Page<MyLecture> mylecture = mylectureRepository.findByMemberentity(userEntity, pageRequest);
-		List<MylectureQa> qaList = mylectureQaRepository.findByMyLectureIn(mylecture.toList());
-		List<QaDTO> qaDtos = new ArrayList<QaDTO>();
-		for (MylectureQa q : qaList) {
-			QaDTO qaDto = new QaDTO();
-			qaDto.setLectureQaNo(q.getLectureQaNo());
-			qaDto.setLectureTitle(q.getMyLecture().getLecture().getLectureName());
-			qaDto.setMentoId(q.getMento().getId());
-			qaDto.setQuestionTitle(q.getQuestionTitle());
-			qaDto.setQuestionContent(q.getQuestionContent());
-			qaDto.setQuestionDate(q.getQuestionDate());
-			qaDtos.add(qaDto);
-		}
-		return qaDtos;
-
-	}
-
 	public MylectureDTO2 checkLectureComplete(MemberEntity userEntity, int page) {
-		page = page <= 1 ? 0 : page-1;
+		page = page <= 1 ? 0 : page - 1;
 		PageRequest pageRequest = PageRequest.of(page, 10, Sort.Direction.DESC, "lastviewdate");
-		Page<MyLecture> mylecture = mylectureRepository.findByMemberentityAndLectureProgressEquals(userEntity, 100, pageRequest);
+		Page<MyLecture> mylecture = mylectureRepository.findByMemberentityAndLectureProgressEquals(userEntity, 100,
+				pageRequest);
 		return convertMylectureDTO(mylecture);
 	}
 
 	public CertificateDto printCertificates(MemberEntity userEntity, Long lectureId) {
 		Lecture lecture = lectureService.findByLectureID(lectureId);
 		MyLecture my = verifyUserHasLecture(userEntity, lecture);
-		if(my.getLectureProgress() == 100) {
-		CertificateDto dto = new CertificateDto();
-		dto.setBirthday(userEntity.getBirthday());
-		dto.setLectureName(lecture.getLectureName());
-		dto.setStart(my.getLectureStartDate());
-		dto.setEnd(my.getLastviewdate());
-		dto.setUserName(userEntity.getName());
-		return dto;
+		if (my.getLectureProgress() == 100) {
+			CertificateDto dto = new CertificateDto();
+			dto.setBirthday(userEntity.getBirthday());
+			dto.setLectureName(lecture.getLectureName());
+			dto.setStart(my.getLectureStartDate());
+			dto.setEnd(my.getLastviewdate());
+			dto.setUserName(userEntity.getName());
+			return dto;
 		} else {
 			throw new RestApiException(UserErrorCode.NOT_QUALIFIED);
 		}
-		
-		
+
 	}
 
 	public String lastvideo(MemberEntity userEntity, Long lectureId) {
@@ -392,6 +374,120 @@ public class MyLectureService {
 		} else {
 			throw new RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND);
 		}
+	}
+
+	public QaListDTOs QalistBylecture(Long lectureId, int page) {
+		Lecture lecture = lectureService.findByLectureID(lectureId);
+		page = page <= 1 ? 0 : page - 1;
+		PageRequest pageRequest = PageRequest.of(page, 10, Sort.Direction.DESC, "questionDate");
+		Page<MylectureQa> myqs = mylectureQaRepository.findByLectureId(lecture, pageRequest);
+		return QaListDTOsBuilder(myqs);
+	}
+
+	public QaListDTOs QalistByMemberHandler(MemberEntity userEntity, int page, String sort) {
+
+		page = page <= 1 ? 0 : page - 1;
+		PageRequest pageRequest = PageRequest.of(page, 10, Sort.Direction.DESC, "questionDate");
+
+		if (sort.equals("trueAnswer")) {
+			Page<MylectureQa> qas = mylectureQaRepository.findByUserNoAndAnswerNotNull(userEntity, pageRequest);
+			return QaListDTOsBuilder(qas);
+		} else if (sort.equals("falseAnswer")) {
+			Page<MylectureQa> qas = mylectureQaRepository.findByUserNoAndAnswerIsNull(userEntity, pageRequest);
+			return QaListDTOsBuilder(qas);
+		} else {
+			Page<MylectureQa> qas = mylectureQaRepository.findByUserNo(userEntity, pageRequest);
+			return QaListDTOsBuilder(qas);
+		}
+
+	}
+
+	public QaListDTOs QalistBySearch(MemberEntity userEntity, int page, String keyword, String sort) {
+		page = page <= 1 ? 0 : page - 1;
+		PageRequest pageRequest = PageRequest.of(page, 10, Sort.Direction.DESC, "questionDate");
+		if (sort.equals("trueAnswer")) {
+			Page<MylectureQa> qas = mylectureQaRepository
+					.findByUserNoAndAnswerNotNullAndQuestionTitleContainingOrUserNoAndAnswerNotNullAndQuestionContentContaining(
+							userEntity, keyword, userEntity, keyword, pageRequest);
+			return QaListDTOsBuilder(qas);
+		} else if (sort.equals("falseAnswer")) {
+			Page<MylectureQa> qas = mylectureQaRepository
+					.findByUserNoAndAnswerIsNullAndQuestionTitleContainingOrUserNoAndAnswerIsNullAndQuestionContentContaining(
+							userEntity, keyword, userEntity, keyword, pageRequest);
+			return QaListDTOsBuilder(qas);
+		} else {
+			Page<MylectureQa> qas = mylectureQaRepository
+					.findByUserNoAndQuestionTitleContainingOrUserNoAndQuestionContentContaining(userEntity, keyword, userEntity, keyword,
+							pageRequest);
+			return QaListDTOsBuilder(qas);
+		}
+
+	}
+
+	private QaListDTOs QaListDTOsBuilder(Page<MylectureQa> qas) {
+		int cutsize = 100;
+		List<QaListDTO> qldtolist = new ArrayList<QaListDTO>();
+		for (MylectureQa q : qas) {
+			QaListDTO qldto = new QaListDTO();
+			if(q.getAnswer() != null) {qldto.setAnswer(1);}
+			qldto.setQuestionId(q.getLectureQaNo());
+			qldto.setQuestionLectureTitle(q.getLectureId().getLectureName());
+			qldto.setQuestionTitle(q.getQuestionTitle());
+			qldto.setQuestionDate(q.getQuestionDate());
+			String Preview = q.getQuestionContent().replaceAll("<[^>]*>", "");
+			if (cutsize < Preview.length()) {
+				Preview = Preview.substring(0, cutsize);
+			}
+			qldto.setQuestionContentPreview(Preview);
+			qldtolist.add(qldto);
+		}
+
+		QaListDTOs list = new QaListDTOs();
+		list.setDtolist(qldtolist);
+		list.setTotalPages(qas.getTotalPages());
+		list.setQuestionCount(qas.getTotalElements());
+		return list;
+	}
+
+	public QaDetailDTO getQaDetail(Long questionId) {
+		MylectureQa qaList = mylectureQaRepository.findByLectureQaNo(questionId);
+
+		return QaDetailDTOBuilder(qaList);
+
+	}
+
+	public QaDetailDTO QaDetailDTOBuilder(MylectureQa q) {
+		QaDetailDTO qaDto = new QaDetailDTO();
+		qaDto.setQuestionId(q.getLectureQaNo());
+		qaDto.setLectureTitle(q.getLectureId().getLectureName());
+		qaDto.setStudentId(q.getUserNo().getId());
+		qaDto.setQuestionTitle(q.getQuestionTitle());
+		qaDto.setContent(q.getQuestionContent());
+		qaDto.setDate(q.getQuestionDate());
+		if(q.getAnswer() != null) {qaDto.setAnswer(q.getAnswer().getAnswer());} 
+		return qaDto;
+	}
+
+	public QaDetailDTO QaUpdate(MemberEntity userEntity, QaRequest qaRequest) {
+		Lecture lecture = lectureService.findByLectureID(qaRequest.getLectureId());
+		MylectureQa q = mylectureQaRepository.findByUserNoAndLectureId(userEntity, lecture);
+		q.setQuestionContent(qaRequest.getQuestionContent());
+		q.setQuestionTitle(qaRequest.getQuestionTitle());
+		MylectureQa savedq = mylectureQaRepository.save(q);
+		QaDetailDTO dto = new QaDetailDTO();
+		dto.setQuestionId(savedq.getLectureQaNo());
+		dto.setQuestionTitle(savedq.getQuestionTitle());
+		dto.setStudentId(savedq.getUserNo().getId());
+		dto.setContent(savedq.getQuestionContent());
+		dto.setDate(savedq.getQuestionDate());
+		dto.setLectureTitle(savedq.getLectureId().getLectureName());
+		dto.setLectureId(savedq.getLectureId().getLectureid());
+		dto.setVideoId(savedq.getVideoId().getVideoNo());
+		return dto;
+	}
+
+	public QaDetailDTO QaDelete(MemberEntity userEntity, Long lectureQaNo) {
+		return null;
 	}
 
 }

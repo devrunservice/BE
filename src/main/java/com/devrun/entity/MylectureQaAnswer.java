@@ -18,48 +18,31 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.devrun.youtube.Lecture;
-import com.devrun.youtube.Video;
-
 import lombok.Data;
 
 @Entity
 @Data
 @EntityListeners(AuditingEntityListener.class)
-public class MylectureQa {
+public class MylectureQaAnswer {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "lecture_qa_no")
-	private Long lectureQaNo;
+	@Column(name = "answer_no")
+	private int answerNo;
+
+	@OneToOne
+	@JoinColumn(name = "qa_no")
+	private MylectureQa qaNo;
 
 	@ManyToOne
-	@JoinColumn(name = "lecture_id")
-	private Lecture lectureId;
+	@JoinColumn(name = "mento_no")
+	private MemberEntity mentoNo;
 
-	@ManyToOne
-	@JoinColumn(name = "video_id")
-	private Video videoId;
+	@Column(name = "answer")
+	private String answer;
 
-	@ManyToOne
-	@JoinColumn(name = "user_no")
-	private MemberEntity userNo;
-
-	@Column(name = "question_content", columnDefinition = "TEXT", nullable = false)
-	private String questionContent;
-
-	@Column(name = "question_date", nullable = false)
+	@Column(name = "answer_date")
 	@CreatedDate
 	@LastModifiedDate
 	@Temporal(TemporalType.DATE)
-	private Date questionDate;
-	
-	@OneToOne
-	@JoinColumn(name = "answer_no")
-	private MylectureQaAnswer answer;
-
-	@Column(name = "question_title", nullable = false)
-	private String questionTitle;
-
-	@Column(name = "question_delete", nullable = false)
-	private boolean questionDelete = false;
+	private Date answerDate;
 }

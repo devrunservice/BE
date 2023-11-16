@@ -106,7 +106,7 @@ public class YouTubeUploader {
 
 			// 업로드 명령에는 다음이 포함됩니다: 파일이 성공적으로 업로드된 후 반환되는 정보, 업로드된 비디오와 연결되는 메타데이터, 비디오 파일
 			// 자체.
-			YouTube.Videos.Insert videoInsert = youtube.videos().insert("snippet,statistics,status,contentDetails",
+			YouTube.Videos.Insert videoInsert = youtube.videos().insert("snippet,statistics,status",
 					videoObjectDefiningMetadata, mediaContent);
 
 			// 업로드 유형을 설정하고 이벤트 리스너를 추가합니다.

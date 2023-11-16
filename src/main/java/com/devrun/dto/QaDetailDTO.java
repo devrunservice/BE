@@ -8,12 +8,15 @@ import javax.persistence.TemporalType;
 import lombok.Data;
 
 @Data
-public class QaDTO {
-	private Long lectureQaNo;
+public class QaDetailDTO {
+	private Long questionId;
+	private Long lectureId;
+	private Long videoId;
 	private String lectureTitle;
-	private String mentoId;
+	private String studentId;
 	private String questionTitle;
-	private String questionContent;
+	private String content;
+	private String answer;
 	@Temporal(TemporalType.DATE)
-	private Date questionDate;
+	private Date date;
 }

@@ -5,7 +5,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,29 +13,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.devrun.dto.CertificateDto;
-import com.devrun.dto.MyLectureNoteDTO;
 import com.devrun.dto.MyLectureNoteDTO2;
 import com.devrun.dto.MycouresDTO;
-import com.devrun.dto.MylectureDTO;
 import com.devrun.dto.MylectureDTO2;
 import com.devrun.dto.MylectureReviewDTO;
 import com.devrun.dto.NoteRequest;
 import com.devrun.dto.NoteUpdateRequest;
 import com.devrun.dto.ProgressInfo;
-import com.devrun.dto.QaDTO;
+import com.devrun.dto.QaDetailDTO;
+import com.devrun.dto.QaListDTOs;
 import com.devrun.dto.QaRequest;
 import com.devrun.dto.ReviewRequest;
 import com.devrun.dto.lectureNoteDetailDTO;
-import com.devrun.dto.lectureNoteListDTO;
 import com.devrun.dto.lectureNoteListDTO2;
 import com.devrun.entity.MemberEntity;
-import com.devrun.entity.MylectureQa;
-import com.devrun.entity.MylectureReview;
 import com.devrun.service.MemberService;
 import com.devrun.service.MyLectureService;
 import com.devrun.service.MylectureReviewService;
 import com.devrun.util.JWTUtil;
-import com.devrun.youtube.Lecture;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -210,15 +204,57 @@ public class MyLectureController {
 
 	}
 
-	@GetMapping("/lectureQaDetailOpen")
-	@ApiOperation(value = "강의 질문 가져오기", notes = "유저가 올린 질문을 가져옵니다.")
-	public List<QaDTO> lectureQaList(HttpServletRequest httpServletRequest,
+	@GetMapping("/lectureQaDetailOpen/{questionId}")
+	@ApiOperation(value = "질문 디테일 가져오기", notes = "질문 디테일을 가져옵니다.")
+	public QaDetailDTO lectureQaList(HttpServletRequest httpServletRequest,
+			@PathVariable(name = "questionId") Long questionId) {
+		return mylectureService.getQaDetail(questionId);
+
+	}
+	
+	@GetMapping("/lectureQalistOpen")
+	@ApiOperation(value = "강의 질문 목록 가져오기", notes = "영상을 시청하는 화면에서 해당 강의 질문 목록을 가져옵니다.")
+	public QaListDTOs lectureQaListBylecture(HttpServletRequest httpServletRequest, @RequestParam(name = "lectureId") Long lectureId,
 			@RequestParam(name = "page", defaultValue = "0", required = false) int page) {
+		return mylectureService.QalistBylecture(lectureId,page);
+
+	}
+	
+	@GetMapping("/mylectureQalistOpen")
+	@ApiOperation(value = "유저가 질문한 질문 목록 가져오기", notes = "로그인한 유저가 작성한 질문 목록을 가져옵니다.")
+	@ApiImplicitParams({
+		@ApiImplicitParam(example = "trueAnswer", value = "답변 여부 (trueAnswer or falseAnswer)", name = "answer", dataTypeClass = String.class),
+		@ApiImplicitParam(example = "1", value = "요청 페이지", name = "page", dataTypeClass = String.class) })
+	public QaListDTOs lectureQaListBylecture(HttpServletRequest httpServletRequest,
+			@RequestParam(name = "page", defaultValue = "0", required = false) int page,
+			@RequestParam(name = "answer", defaultValue = "", required = false) String sort) {
 		String userAccessToken = httpServletRequest.getHeader("Access_token");
 		String userId = JWTUtil.getUserIdFromToken(userAccessToken);
 		MemberEntity userEntity = memberService.findById(userId);
-		return mylectureService.Qalist(userEntity, page);
+		return mylectureService.QalistByMemberHandler(userEntity,page,sort);
 
+	}
+	
+	@GetMapping("/mylectureQalistOpen/seach")
+	@ApiOperation(value = "유저가 질문한 질문 목록 가져오기", notes = "로그인한 유저가 작성한 질문 목록을 가져옵니다.")
+	public QaListDTOs lectureQaListBylecture(HttpServletRequest httpServletRequest,
+			@RequestParam(name = "page", defaultValue = "0", required = false) int page,
+			@RequestParam(name = "answer", defaultValue = "", required = false) String sort,
+			@RequestParam(name = "keyword", defaultValue = "", required = false) String keyword) {
+		String userAccessToken = httpServletRequest.getHeader("Access_token");
+		String userId = JWTUtil.getUserIdFromToken(userAccessToken);
+		MemberEntity userEntity = memberService.findById(userId);
+		return mylectureService.QalistBySearch(userEntity,page,sort,keyword);
+
+	}
+	
+	@PostMapping("/lectureQa/update")
+	@ApiOperation(value = "작성한 질문을 수정합니다.")
+	public QaDetailDTO lectureQaUpdate(HttpServletRequest httpServletRequest, @RequestBody(required = true) QaRequest qaRequest) {
+		String userAccessToken = httpServletRequest.getHeader("Access_token");
+		String userId = JWTUtil.getUserIdFromToken(userAccessToken);
+		MemberEntity userEntity = memberService.findById(userId);
+		return mylectureService.QaUpdate(userEntity,qaRequest);
 	}
 
 	@GetMapping("/certificates")
