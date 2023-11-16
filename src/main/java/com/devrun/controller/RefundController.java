@@ -33,7 +33,6 @@ public class RefundController {
 	 @ApiOperation("아임포트 api를 이용하여 환불정보와 Key,Secret값들을 이용하여 환불합니다.")
 
 	 public ResponseEntity<String> refundPay(@RequestBody RefundDTO refundDTO) {
-		 System.err.println(refundDTO);
 		 
 	     try {	    	 
 	         refundService.refundPayment(refundDTO, KEY, SECRET);	     		

@@ -58,7 +58,6 @@ public class RefundService {
 
             List<PaymentEntity> paymentEntity = paymentRepository.findByListMerchantUidAndName(merchantUid, name);
 
-            System.err.println(paymentEntity);
 
             if (paymentEntity.isEmpty()) {
                 throw new Exception("해당 거래 번호 또는 상품 이름이 없습니다.");
@@ -128,7 +127,7 @@ public class RefundService {
 		        System.out.println("결제 취소가 완료되었습니다.");
 			
     	 } catch (Exception e) {
-    	        System.err.println("환불 처리 중 오류가 발생했습니다1111: " + e.getMessage());
+    	        System.err.println("환불 처리 중 오류가 발생했습니다. " + e.getMessage());
     	        //서비스단에서 예외처리 할 경우 앞단은 컨트롤단이랑 통신하니깐 한번 더 예외처리를 해준다
     	        throw e;  
     	}
@@ -149,7 +148,6 @@ public class RefundService {
             // 부분 환불 상태 처리
             // 2개 이상 결제 시 거래번호가 중복되므로 list로 불러옴
             List<PaymentEntity> paymentEntities = paymentRepository.findByListMerchantUidAndName(merchantUid, name);
-            System.err.println(paymentEntities);
             
             // for문을 돌려서 앞에서 날려준 amount 부분환불값을 찾아주어서 맞는 배열로 로직 진행.
             for (PaymentEntity paymentEntity : paymentEntities) {
@@ -192,7 +190,7 @@ public class RefundService {
             String explanation="환불 처리 포인트 회수";
             historyEntity.setProductname(name);
             historyEntity.setExplanation(explanation);			   
-            pointHistoryRepository.save(historyEntity);         
+            pointHistoryRepository.save(historyEntity);     
 		    		    
             
         } catch (Exception ex) {
