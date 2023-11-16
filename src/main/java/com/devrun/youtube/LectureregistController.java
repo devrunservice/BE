@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +49,11 @@ public class LectureregistController {
 	public static final HttpTransport httpTransport = new NetHttpTransport();
 	public static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 	private static final String CREDENTIALS_DIRECTORY = ".oauth-credentials";
+	
+	   private static final Collection<String> SCOPES = Arrays.asList(
+	            YouTubeScopes.YOUTUBE_UPLOAD,
+	            YouTubeScopes.YOUTUBE_READONLY
+	    );
 
 	GoogleClientSecrets clientSecrets = loadClientSecretsFromFile(); // 파일로부터 클라이언트 비밀 정보 로드하는 예시 메서드
 	private static final String redirectUri = "http://localhost:3000/auth/google/callback";
@@ -98,7 +104,7 @@ public class LectureregistController {
 
 			// OAuth 2.0 인증 코드로부터 액세스 토큰을 교환하기 위한 GoogleAuthorizationCodeFlow 객체를 생성합니다.
 			GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY,
-					clientSecrets, (Collection<String>) Collections.singletonMap(YouTubeScopes.YOUTUBE_UPLOAD , YouTubeScopes.YOUTUBE_READONLY)).setAccessType("offline")
+					clientSecrets, SCOPES).setAccessType("offline")
 							.build();
 
 			// 'code' 값을 사용하여 액세스 토큰을 요청하고, GoogleTokenResponse를 받습니다.
