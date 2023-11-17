@@ -50,10 +50,10 @@ public class LectureregistController {
 	public static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 	private static final String CREDENTIALS_DIRECTORY = ".oauth-credentials";
 	
-	   private static final Collection<String> SCOPES = Arrays.asList(
-	            YouTubeScopes.YOUTUBE_UPLOAD,
-	            YouTubeScopes.YOUTUBE_READONLY
-	    );
+	/*
+	 * private static final Collection<String> SCOPES = Arrays.asList(
+	 * YouTubeScopes.YOUTUBE_UPLOAD, YouTubeScopes.YOUTUBE_READONLY );
+	 */
 
 	GoogleClientSecrets clientSecrets = loadClientSecretsFromFile(); // 파일로부터 클라이언트 비밀 정보 로드하는 예시 메서드
 	private static final String redirectUri = "http://localhost:3000/auth/google/callback";
@@ -104,7 +104,7 @@ public class LectureregistController {
 
 			// OAuth 2.0 인증 코드로부터 액세스 토큰을 교환하기 위한 GoogleAuthorizationCodeFlow 객체를 생성합니다.
 			GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY,
-					clientSecrets, SCOPES).setAccessType("offline")
+					clientSecrets, Collections.singleton(YouTubeScopes.YOUTUBE_UPLOAD)).setAccessType("offline")
 							.build();
 
 			// 'code' 값을 사용하여 액세스 토큰을 요청하고, GoogleTokenResponse를 받습니다.
@@ -158,7 +158,7 @@ public class LectureregistController {
 				requestDto.getLectureSectionList());
 		System.out.println("----------------------------비디오 메타 데이터 조회하기---------------------------------------");
 		// 비디오 엔티티 객체 생성 및 매핑
-		uploadedVideos = youTubeVideoInfo.getVideoInfo(uploadedVideos, httpServletResponse, googleAccessToken);
+		//uploadedVideos = youTubeVideoInfo.getVideoInfo(uploadedVideos, httpServletResponse, googleAccessToken);
 		System.out.println("----------------------------비디오 엔티티 객체 생성 및 매핑---------------------------------------");
 		
 		for (VideoDto videoDto : uploadedVideos) {
