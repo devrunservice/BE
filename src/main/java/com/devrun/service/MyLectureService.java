@@ -25,6 +25,7 @@ import com.devrun.dto.QaDetailDTO;
 import com.devrun.dto.QaListDTO;
 import com.devrun.dto.QaListDTOs;
 import com.devrun.dto.QaRequest;
+import com.devrun.dto.QaUpdateRequest;
 import com.devrun.dto.SectionInfo;
 import com.devrun.dto.VideoInfo;
 import com.devrun.dto.lectureNoteDetailDTO;
@@ -137,7 +138,7 @@ public class MyLectureService {
 		if (optional.isPresent()) {
 			return optional.get();
 		} else {
-			throw new RestApiException(UserErrorCode.USERHASNOTLECTURE);
+			throw new RestApiException(UserErrorCode.POSSESSION);
 		}
 	}
 
@@ -327,15 +328,18 @@ public class MyLectureService {
 		mylectureNoteRepository.save(mylectureNote);
 	}
 
-	public void QaSave(MemberEntity userEntity, QaRequest qaRequest) {
+	public QaDetailDTO QaSave(MemberEntity userEntity, QaRequest qaRequest) {
 		Lecture lecture = lectureService.findByLectureID(qaRequest.getLectureId());
 		MyLecture myLecture = verifyUserHasLecture(userEntity, lecture);
+		Video video = videoRepository.findByVideoId(qaRequest.getVideoId());
 		MylectureQa mylectureQa = new MylectureQa();
-		mylectureQa.setUserNo(lecture.getMentoId());
+		mylectureQa.setUserNo(userEntity);
 		mylectureQa.setLectureId(myLecture.getLecture());
 		mylectureQa.setQuestionContent(qaRequest.getQuestionContent());
 		mylectureQa.setQuestionTitle(qaRequest.getQuestionTitle());
+		mylectureQa.setVideoId(video);
 		mylectureQaRepository.save(mylectureQa);
+		return QaDetailDTOBuilder(mylectureQa);
 	}
 
 	public MylectureDTO2 checkLectureComplete(MemberEntity userEntity, int page) {
@@ -402,9 +406,10 @@ public class MyLectureService {
 
 	}
 
-	public QaListDTOs QalistBySearch(MemberEntity userEntity, int page, String keyword, String sort) {
+	public QaListDTOs QalistBySearch(MemberEntity userEntity, int page, String sort, String keyword) {
 		page = page <= 1 ? 0 : page - 1;
 		PageRequest pageRequest = PageRequest.of(page, 10, Sort.Direction.DESC, "questionDate");
+
 		if (sort.equals("trueAnswer")) {
 			Page<MylectureQa> qas = mylectureQaRepository
 					.findByUserNoAndAnswerNotNullAndQuestionTitleContainingOrUserNoAndAnswerNotNullAndQuestionContentContaining(
@@ -417,8 +422,8 @@ public class MyLectureService {
 			return QaListDTOsBuilder(qas);
 		} else {
 			Page<MylectureQa> qas = mylectureQaRepository
-					.findByUserNoAndQuestionTitleContainingOrUserNoAndQuestionContentContaining(userEntity, keyword, userEntity, keyword,
-							pageRequest);
+					.findByUserNoAndQuestionTitleContainingOrUserNoAndQuestionContentContaining(userEntity, keyword,
+							userEntity, keyword, pageRequest);
 			return QaListDTOsBuilder(qas);
 		}
 
@@ -429,7 +434,9 @@ public class MyLectureService {
 		List<QaListDTO> qldtolist = new ArrayList<QaListDTO>();
 		for (MylectureQa q : qas) {
 			QaListDTO qldto = new QaListDTO();
-			if(q.getAnswer() != null) {qldto.setAnswer(1);}
+			if (q.getAnswer() != null) {
+				qldto.setAnswer(1);
+			}
 			qldto.setQuestionId(q.getLectureQaNo());
 			qldto.setQuestionLectureTitle(q.getLectureId().getLectureName());
 			qldto.setQuestionTitle(q.getQuestionTitle());
@@ -460,34 +467,51 @@ public class MyLectureService {
 		QaDetailDTO qaDto = new QaDetailDTO();
 		qaDto.setQuestionId(q.getLectureQaNo());
 		qaDto.setLectureTitle(q.getLectureId().getLectureName());
+		qaDto.setLectureId(q.getLectureId().getLectureid());
 		qaDto.setStudentId(q.getUserNo().getId());
 		qaDto.setQuestionTitle(q.getQuestionTitle());
 		qaDto.setContent(q.getQuestionContent());
+		qaDto.setVideoId(q.getVideoId().getVideoId());
 		qaDto.setDate(q.getQuestionDate());
-		if(q.getAnswer() != null) {qaDto.setAnswer(q.getAnswer().getAnswer());} 
+		if (q.getAnswer() != null) {
+			qaDto.setAnswer(q.getAnswer().getAnswer());
+			qaDto.setMentoId(q.getAnswer().getMentoNo().getId());
+			qaDto.setMentoProfileImg(q.getAnswer().getMentoNo().getProfileimgsrc());
+			qaDto.setAnswerDate(q.getAnswer().getAnswerDate());
+		}
 		return qaDto;
 	}
 
-	public QaDetailDTO QaUpdate(MemberEntity userEntity, QaRequest qaRequest) {
-		Lecture lecture = lectureService.findByLectureID(qaRequest.getLectureId());
-		MylectureQa q = mylectureQaRepository.findByUserNoAndLectureId(userEntity, lecture);
-		q.setQuestionContent(qaRequest.getQuestionContent());
-		q.setQuestionTitle(qaRequest.getQuestionTitle());
-		MylectureQa savedq = mylectureQaRepository.save(q);
-		QaDetailDTO dto = new QaDetailDTO();
-		dto.setQuestionId(savedq.getLectureQaNo());
-		dto.setQuestionTitle(savedq.getQuestionTitle());
-		dto.setStudentId(savedq.getUserNo().getId());
-		dto.setContent(savedq.getQuestionContent());
-		dto.setDate(savedq.getQuestionDate());
-		dto.setLectureTitle(savedq.getLectureId().getLectureName());
-		dto.setLectureId(savedq.getLectureId().getLectureid());
-		dto.setVideoId(savedq.getVideoId().getVideoNo());
-		return dto;
+	public QaDetailDTO QaUpdate(MemberEntity userEntity, QaUpdateRequest qaRequest) {
+		Optional<MylectureQa> q = mylectureQaRepository.findById(qaRequest.getQuestionId());
+		if (q.isPresent()) {
+			if (q.get().getUserNo().equals(userEntity)) {
+				q.get().setQuestionContent(qaRequest.getQuestionContent());
+				q.get().setQuestionTitle(qaRequest.getQuestionTitle());
+				MylectureQa savedq = mylectureQaRepository.save(q.get());
+				return QaDetailDTOBuilder(savedq);
+			} else {
+				throw new RestApiException(UserErrorCode.POSSESSION);
+			}
+		} else {
+			throw new RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND);
+		}
+
 	}
 
-	public QaDetailDTO QaDelete(MemberEntity userEntity, Long lectureQaNo) {
-		return null;
+	public String QaDelete(MemberEntity userEntity, Long lectureQaNo) {
+		Optional<MylectureQa> q = mylectureQaRepository.findById(lectureQaNo);
+		if (q.isPresent()) {
+			if (q.get().getUserNo().equals(userEntity)) {
+
+				mylectureQaRepository.delete(q.get());
+				return "delete complete";
+			} else {
+				throw new RestApiException(UserErrorCode.POSSESSION);
+			}
+		} else {
+			throw new RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND);
+		}
 	}
 
 }
