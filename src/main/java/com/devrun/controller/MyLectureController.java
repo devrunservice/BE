@@ -204,10 +204,10 @@ public class MyLectureController {
 
 	}
 
-	@GetMapping("/lectureQaDetailOpen/{questionId}")
+	@GetMapping("/lectureQaDetailOpen")
 	@ApiOperation(value = "질문 디테일 가져오기", notes = "질문 디테일을 가져옵니다.")
 	public QaDetailDTO lectureQaList(HttpServletRequest httpServletRequest,
-			@PathVariable(name = "questionId") Long questionId) {
+			@RequestParam(name = "questionId") Long questionId) {
 		return mylectureService.getQaDetail(questionId);
 
 	}
