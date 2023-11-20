@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.json.simple.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,22 +28,20 @@ import com.devrun.service.CouponSerivce;
 import com.devrun.service.MemberService;
 import com.devrun.util.JWTUtil;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@Api(tags = "쿠폰 API")
+@RequiredArgsConstructor
 public class CouponController {
-
-	@Autowired
-	private CouponSerivce couponSerivce;
-
-	@Autowired
-	private MemberService memberService;
-
-	@Autowired
-	private CouponViewRepository couponViewRepository;
+	private final CouponSerivce couponSerivce;
+	private final MemberService memberService;
+	private final CouponViewRepository couponViewRepository;
 
 	@GetMapping({ "/coupon/readmycoupon" })
 	@ApiOperation(value = "쿠폰 조회하기", notes = "로그인 한 회원이 가진 쿠폰을 조회합니다.")
@@ -69,7 +66,7 @@ public class CouponController {
 
 	@PostMapping("/coupon/publish")
 	@ApiOperation(value = "쿠폰 생성기", notes = "쿠폰을 생성하여 DB에 저장합니다.")
-	@ApiImplicitParam(name = "couponIssuanceRequestDTO", value = "생성할 쿠폰 디테일" , required = true , dataTypeClass = Object.class)
+	@ApiImplicitParam(name = "couponIssuanceRequestDTO", value = "생성할 쿠폰 디테일", required = true, dataTypeClass = Object.class)
 	public ResponseEntity<?> couponGeneration(@RequestBody @Valid CouponIssuanceRequestDTO couponIssuanceRequestDTO,
 			HttpServletRequest request) {
 		String userid = JWTUtil.getUserIdFromToken(request.getHeader("Access_token"));
@@ -98,7 +95,7 @@ public class CouponController {
 
 	@PostMapping("/coupon/shrewder")
 	@ApiOperation(value = "쿠폰 파쇄기", notes = "특정 쿠폰을 사용 정지 처리하거나 복구합니다. 단건별로 처리합니다.")
-	@ApiImplicitParam(name = "codelist", value = "사용 정지할 쿠폰 코드", example = "{\"code\" : \"31267-ydi2OLCKFOaz\"}", required = true , dataTypeClass = Object.class)
+	@ApiImplicitParam(name = "codelist", value = "사용 정지할 쿠폰 코드", example = "{\"code\" : \"31267-ydi2OLCKFOaz\"}", required = true, dataTypeClass = Object.class)
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "성공적으로 처리되었습니다"),
 			@ApiResponse(code = 400, message = "옳지 않은 키 값입니다. 키 값 : code") })
 	public ResponseEntity<?> couponremove(@RequestBody Map<String, String> codelist) {
@@ -115,7 +112,7 @@ public class CouponController {
 
 	@GetMapping({ "/coupon/mento/couponmanaging", "/coupon/mento/couponmanaging/{pageno}" })
 	@ApiOperation(value = "멘토가 발행한 쿠폰 조회", notes = "멘토가 발행한 쿠폰을 개별적으로 조회합니다.", response = CouponListForMento.class)
-	@ApiImplicitParam(name = "pageno", value = "조회할 페이지", example = "1", required = false , dataTypeClass = Integer.class)
+	@ApiImplicitParam(name = "pageno", value = "조회할 페이지", example = "1", required = false, dataTypeClass = Integer.class)
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "성공적으로 처리되었습니다") })
 	public ResponseEntity<?> couponmanagingByMento(@PathVariable(required = false) Integer pageno) {
 		if (pageno == null || pageno <= 0) {

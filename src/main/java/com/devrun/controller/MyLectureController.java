@@ -154,9 +154,9 @@ public class MyLectureController {
 		return mylectureService.myNoteUpdate(userEntity, noteRequest);
 	}
 
-	@PostMapping("/lecturenoteDelete")
+	@DeleteMapping("/lecturenoteDelete")
 	@ApiOperation(value = "강의 노트 삭제하기", notes = "작성한 강의 노트를 삭제합니다.")
-	public void lectureNoteDelte(HttpServletRequest httpServletRequest, @RequestBody(required = true) Long noteNo) {
+	public void lectureNoteDelte(HttpServletRequest httpServletRequest, @RequestParam(name = "noteNo", defaultValue = "1",required = true) Long noteNo) {
 		String userAccessToken = httpServletRequest.getHeader("Access_token");
 		String userId = JWTUtil.getUserIdFromToken(userAccessToken);
 		MemberEntity userEntity = memberService.findById(userId);
