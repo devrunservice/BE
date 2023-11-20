@@ -5,12 +5,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class LectureInfo {
 
 	public LectureInfo(String lecture_thumbnail, String lecture_name, String lecture_intro, int lecture_price,
-			Long lecture_id) {
+			Long lecture_id , Long cartId) {
 		this.lectureThumbnail = lecture_thumbnail;
 		this.lectureName = lecture_name;
 		this.lectureIntro = lecture_intro;
 		this.lecturePrice = lecture_price;
 		this.lectureId = lecture_id;
+		this.cartId = cartId;
 	}
 
 	// 썸네일
@@ -28,4 +29,8 @@ public class LectureInfo {
 	// 강의ID
 	@JsonProperty
 	private Long lectureId;
+	// 장바구니ID
+	@JsonProperty
+	private Long cartId;
+	
 }
