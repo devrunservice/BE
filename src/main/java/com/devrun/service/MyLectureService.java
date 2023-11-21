@@ -393,10 +393,10 @@ public class MyLectureService {
 		page = page <= 1 ? 0 : page - 1;
 		PageRequest pageRequest = PageRequest.of(page, 10, Sort.Direction.DESC, "questionDate");
 
-		if (sort.equals("trueAnswer")) {
+		if (sort.equals("completed")) {
 			Page<MylectureQa> qas = mylectureQaRepository.findByUserNoAndAnswerNotNull(userEntity, pageRequest);
 			return QaListDTOsBuilder(qas);
-		} else if (sort.equals("falseAnswer")) {
+		} else if (sort.equals("waiting")) {
 			Page<MylectureQa> qas = mylectureQaRepository.findByUserNoAndAnswerIsNull(userEntity, pageRequest);
 			return QaListDTOsBuilder(qas);
 		} else {
@@ -410,12 +410,12 @@ public class MyLectureService {
 		page = page <= 1 ? 0 : page - 1;
 		PageRequest pageRequest = PageRequest.of(page, 10, Sort.Direction.DESC, "questionDate");
 
-		if (sort.equals("trueAnswer")) {
+		if (sort.equals("completed")) {
 			Page<MylectureQa> qas = mylectureQaRepository
 					.findByUserNoAndAnswerNotNullAndQuestionTitleContainingOrUserNoAndAnswerNotNullAndQuestionContentContaining(
 							userEntity, keyword, userEntity, keyword, pageRequest);
 			return QaListDTOsBuilder(qas);
-		} else if (sort.equals("falseAnswer")) {
+		} else if (sort.equals("waiting")) {
 			Page<MylectureQa> qas = mylectureQaRepository
 					.findByUserNoAndAnswerIsNullAndQuestionTitleContainingOrUserNoAndAnswerIsNullAndQuestionContentContaining(
 							userEntity, keyword, userEntity, keyword, pageRequest);

@@ -224,28 +224,32 @@ public class MyLectureController {
 	@GetMapping("/mylectureQalistOpen")
 	@ApiOperation(value = "유저가 질문한 질문 목록 가져오기", notes = "로그인한 유저가 작성한 질문 목록을 가져옵니다.")
 	@ApiImplicitParams({
-			@ApiImplicitParam(example = "trueAnswer", value = "답변 여부 (trueAnswer or falseAnswer)", name = "answer", dataTypeClass = String.class),
+			@ApiImplicitParam(example = "waiting", value = "답변 여부 (completed or waiting)", name = "status", dataTypeClass = String.class),
 			@ApiImplicitParam(example = "1", value = "요청 페이지", name = "page", dataTypeClass = String.class) })
 	public QaListDTOs lectureQaListBylecture(HttpServletRequest httpServletRequest,
 			@RequestParam(name = "page", defaultValue = "0", required = false) int page,
-			@RequestParam(name = "answer", defaultValue = "", required = false) String sort) {
+			@RequestParam(name = "status", defaultValue = "waiting", required = false) String status) {
 		String userAccessToken = httpServletRequest.getHeader("Access_token");
 		String userId = JWTUtil.getUserIdFromToken(userAccessToken);
 		MemberEntity userEntity = memberService.findById(userId);
-		return mylectureService.QalistByMemberHandler(userEntity, page, sort);
+		return mylectureService.QalistByMemberHandler(userEntity, page, status);
 
 	}
 
 	@GetMapping("/mylectureQalistOpen/seach")
-	@ApiOperation(value = "유저가 질문한 질문 목록 가져오기", notes = "로그인한 유저가 작성한 질문 목록을 가져옵니다.")
+	@ApiOperation(value = "유저가 질문한 질문 검색하기", notes = "로그인한 유저가 작성한 질문을 검색합니다.")
+	@ApiImplicitParams({
+		@ApiImplicitParam(example = "waiting", value = "답변 여부 (completed or waiting)", name = "status", dataTypeClass = String.class),
+		@ApiImplicitParam(example = "1", value = "요청 페이지", name = "page", dataTypeClass = String.class),
+		@ApiImplicitParam(example = "질문", value = "검색어", name = "keyword", dataTypeClass = String.class)})
 	public QaListDTOs lectureQaListBylecture(HttpServletRequest httpServletRequest,
 			@RequestParam(name = "page", defaultValue = "0", required = false) int page,
-			@RequestParam(name = "answer", defaultValue = "", required = false) String sort,
+			@RequestParam(name = "status", defaultValue = "", required = false) String status,
 			@RequestParam(name = "keyword", defaultValue = "", required = false) String keyword) {
 		String userAccessToken = httpServletRequest.getHeader("Access_token");
 		String userId = JWTUtil.getUserIdFromToken(userAccessToken);
 		MemberEntity userEntity = memberService.findById(userId);
-		return mylectureService.QalistBySearch(userEntity, page, sort, keyword);
+		return mylectureService.QalistBySearch(userEntity, page, status, keyword);
 
 	}
 
