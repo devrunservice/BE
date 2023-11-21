@@ -31,6 +31,8 @@ public class QueryLectureByKeywordDTO {
 	private int buyCount;
 	@ApiModelProperty(value = "평점")
 	private float rating;
+	@ApiModelProperty(value = "구매 여부")
+	private boolean purchaseStatus = false;
 
 	public QueryLectureByKeywordDTO(Lecture lecture) {
 		this.lectureId = lecture.getLectureid();
