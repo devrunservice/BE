@@ -54,5 +54,7 @@ public class MylectureReview {
 
 	@Column(name = "review_rating", nullable = false)
 	private float reviewRating;
+	
+	
 
 }

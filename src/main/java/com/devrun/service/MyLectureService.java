@@ -14,6 +14,8 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import com.devrun.dto.CertificateDto;
+import com.devrun.dto.CommentDTO;
+import com.devrun.dto.CommentDTO.Status;
 import com.devrun.dto.MyLectureNoteDTO;
 import com.devrun.dto.MyLectureNoteDTO2;
 import com.devrun.dto.MycouresDTO;
@@ -21,6 +23,8 @@ import com.devrun.dto.MylectureDTO;
 import com.devrun.dto.MylectureDTO2;
 import com.devrun.dto.NoteRequest;
 import com.devrun.dto.NoteUpdateRequest;
+import com.devrun.dto.QaCommentQuest;
+import com.devrun.dto.QaCommentUpdateDto;
 import com.devrun.dto.QaDetailDTO;
 import com.devrun.dto.QaListDTO;
 import com.devrun.dto.QaListDTOs;
@@ -36,11 +40,13 @@ import com.devrun.entity.MyLecture;
 import com.devrun.entity.MyLectureProgress;
 import com.devrun.entity.MylectureNote;
 import com.devrun.entity.MylectureQa;
+import com.devrun.entity.MylectureQaAnswer;
 import com.devrun.exception.CommonErrorCode;
 import com.devrun.exception.RestApiException;
 import com.devrun.exception.UserErrorCode;
 import com.devrun.repository.MylectureNoteRepository;
 import com.devrun.repository.MylectureProgressRepository;
+import com.devrun.repository.MylectureQaAnswerRepository;
 import com.devrun.repository.MylectureQaRepository;
 import com.devrun.repository.MylectureRepository;
 import com.devrun.youtube.Lecture;
@@ -61,6 +67,7 @@ public class MyLectureService {
 	private final VideoRepository videoRepository;
 	private final MylectureNoteRepository mylectureNoteRepository;
 	private final MylectureQaRepository mylectureQaRepository;
+	private final MylectureQaAnswerRepository mylectureQaAnswerRepository;
 
 	public void registLecture(MemberEntity userEntity, Lecture lecture) {
 		MyLecture myLecture = new MyLecture();
@@ -394,10 +401,10 @@ public class MyLectureService {
 		PageRequest pageRequest = PageRequest.of(page, 10, Sort.Direction.DESC, "questionDate");
 
 		if (sort.equals("completed")) {
-			Page<MylectureQa> qas = mylectureQaRepository.findByUserNoAndAnswerNotNull(userEntity, pageRequest);
+			Page<MylectureQa> qas = mylectureQaRepository.findByUserNoAndCountGreaterThan(userEntity, 0, pageRequest);
 			return QaListDTOsBuilder(qas);
 		} else if (sort.equals("waiting")) {
-			Page<MylectureQa> qas = mylectureQaRepository.findByUserNoAndAnswerIsNull(userEntity, pageRequest);
+			Page<MylectureQa> qas = mylectureQaRepository.findByUserNoAndCountIs(userEntity, 0,pageRequest);
 			return QaListDTOsBuilder(qas);
 		} else {
 			Page<MylectureQa> qas = mylectureQaRepository.findByUserNo(userEntity, pageRequest);
@@ -412,13 +419,13 @@ public class MyLectureService {
 
 		if (sort.equals("completed")) {
 			Page<MylectureQa> qas = mylectureQaRepository
-					.findByUserNoAndAnswerNotNullAndQuestionTitleContainingOrUserNoAndAnswerNotNullAndQuestionContentContaining(
-							userEntity, keyword, userEntity, keyword, pageRequest);
+					.findByUserNoAndCountGreaterThanAndQuestionTitleContainingOrUserNoAndCountGreaterThanAndQuestionContentContaining(
+							userEntity, 0,keyword, userEntity,0, keyword, pageRequest);
 			return QaListDTOsBuilder(qas);
 		} else if (sort.equals("waiting")) {
 			Page<MylectureQa> qas = mylectureQaRepository
-					.findByUserNoAndAnswerIsNullAndQuestionTitleContainingOrUserNoAndAnswerIsNullAndQuestionContentContaining(
-							userEntity, keyword, userEntity, keyword, pageRequest);
+					.findByUserNoAndCountIsAndQuestionTitleContainingOrUserNoAndCountIsAndQuestionContentContaining(
+							userEntity, 0,keyword, userEntity,0, keyword, pageRequest);
 			return QaListDTOsBuilder(qas);
 		} else {
 			Page<MylectureQa> qas = mylectureQaRepository
@@ -432,11 +439,11 @@ public class MyLectureService {
 	private QaListDTOs QaListDTOsBuilder(Page<MylectureQa> qas) {
 		int cutsize = 100;
 		List<QaListDTO> qldtolist = new ArrayList<QaListDTO>();
+		
 		for (MylectureQa q : qas) {
 			QaListDTO qldto = new QaListDTO();
-			if (q.getAnswer() != null) {
-				qldto.setAnswer(1);
-			}
+			Long count = mylectureQaAnswerRepository.countByQaNoAndStatus(q, Status.ACTIVE);
+			qldto.setAnswer(count.intValue());
 			qldto.setQuestionId(q.getLectureQaNo());
 			qldto.setQuestionLectureTitle(q.getLectureId().getLectureName());
 			qldto.setQuestionTitle(q.getQuestionTitle());
@@ -462,6 +469,15 @@ public class MyLectureService {
 		return QaDetailDTOBuilder(qaList);
 
 	}
+	
+    // 댓글 목록 가져오기 (Status가 ACTIVE인 것만)
+    public List<MylectureQaAnswer> getActiveCommentsByNotice(Long questionId) {
+    	MylectureQa qa = mylectureQaRepository.findByLectureQaNo(questionId);
+    	List<MylectureQaAnswer> qal = mylectureQaAnswerRepository.findByQaNoAndStatus(qa, Status.ACTIVE);
+    	
+        return qal; 
+        
+    }
 
 	public QaDetailDTO QaDetailDTOBuilder(MylectureQa q) {
 		QaDetailDTO qaDto = new QaDetailDTO();
@@ -473,45 +489,85 @@ public class MyLectureService {
 		qaDto.setContent(q.getQuestionContent());
 		qaDto.setVideoId(q.getVideoId().getVideoId());
 		qaDto.setDate(q.getQuestionDate());
-		if (q.getAnswer() != null) {
-			qaDto.setAnswer(q.getAnswer().getAnswer());
-			qaDto.setMentoId(q.getAnswer().getMentoNo().getId());
-			qaDto.setMentoProfileImg(q.getAnswer().getMentoNo().getProfileimgsrc());
-			qaDto.setAnswerDate(q.getAnswer().getAnswerDate());
-		}
 		return qaDto;
 	}
 
 	public QaDetailDTO QaUpdate(MemberEntity userEntity, QaUpdateRequest qaRequest) {
-		Optional<MylectureQa> q = mylectureQaRepository.findById(qaRequest.getQuestionId());
-		if (q.isPresent()) {
-			if (q.get().getUserNo().equals(userEntity)) {
-				q.get().setQuestionContent(qaRequest.getQuestionContent());
-				q.get().setQuestionTitle(qaRequest.getQuestionTitle());
-				MylectureQa savedq = mylectureQaRepository.save(q.get());
-				return QaDetailDTOBuilder(savedq);
-			} else {
-				throw new RestApiException(UserErrorCode.POSSESSION);
-			}
+		MylectureQa q = QaCRUDConfirm(qaRequest.getQuestionId());
+		if (q.getUserNo().equals(userEntity)) {
+			q.setQuestionContent(qaRequest.getQuestionContent());
+			q.setQuestionTitle(qaRequest.getQuestionTitle());
+			MylectureQa savedq = mylectureQaRepository.save(q);
+			return QaDetailDTOBuilder(savedq);
 		} else {
-			throw new RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND);
+			throw new RestApiException(UserErrorCode.POSSESSION);
 		}
-
 	}
 
 	public String QaDelete(MemberEntity userEntity, Long lectureQaNo) {
+		MylectureQa q = QaCRUDConfirm(lectureQaNo);
+		if (q.getUserNo().equals(userEntity)) {
+			mylectureQaRepository.delete(q);
+			return "delete complete";
+		} else {
+			throw new RestApiException(UserErrorCode.POSSESSION);
+		}
+	}
+	//Create
+	public CommentDTO writeComment(MemberEntity userEntity, QaCommentQuest commentQuest) {
+		MylectureQa q = QaCRUDConfirm(commentQuest.getQuestionId());
+		MylectureQaAnswer entity = new MylectureQaAnswer();
+		entity.setQaNo(q);
+		entity.setMemberEntity(userEntity);
+		entity.setContent(commentQuest.getContent());
+		//entity.setParentComment(entity);
+		mylectureQaAnswerRepository.save(entity);
+		return commentDTOpackger(entity);
+	}
+
+	public CommentDTO commentDTOpackger(MylectureQaAnswer entity) {
+		CommentDTO commentDTO = entity.toDTO();
+		return commentDTO;
+	}
+	//
+	
+	public MylectureQa QaCRUDConfirm(Long lectureQaNo) {
 		Optional<MylectureQa> q = mylectureQaRepository.findById(lectureQaNo);
 		if (q.isPresent()) {
-			if (q.get().getUserNo().equals(userEntity)) {
-
-				mylectureQaRepository.delete(q.get());
-				return "delete complete";
-			} else {
-				throw new RestApiException(UserErrorCode.POSSESSION);
-			}
+			return q.get();
 		} else {
 			throw new RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND);
 		}
 	}
+	
+	public MylectureQaAnswer QaCommentConfirm(int commentId) {
+		Optional<MylectureQaAnswer> comment = mylectureQaAnswerRepository.findById(commentId);
+		if (comment.isPresent())
+			return comment.get();
+		else {
+			throw new RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND);
+		}
+	}
 
+	public String QaCommentDelete(MemberEntity userEntity, int commentId) {
+		MylectureQaAnswer comment = QaCommentConfirm(commentId);
+		if (comment.getMemberEntity().equals(userEntity)) {
+			comment.setStatus(Status.INACTIVE);
+			mylectureQaAnswerRepository.save(comment);
+			return "delete complete";
+		} else {
+			throw new RestApiException(UserErrorCode.POSSESSION);
+		}
+	}
+
+	public String QaCommentUpdate(MemberEntity userEntity, int commentId, QaCommentUpdateDto dto) {
+		MylectureQaAnswer comment = QaCommentConfirm(commentId);
+		if (comment.getMemberEntity().equals(userEntity)) {
+			comment.setContent(dto.getContent());
+			mylectureQaAnswerRepository.save(comment);
+			return "update complete";
+		} else {
+			throw new RestApiException(UserErrorCode.POSSESSION);
+		}
+	}
 }

@@ -16,18 +16,18 @@ public interface MylectureQaRepository extends JpaRepository<MylectureQa, Long> 
 
 	MylectureQa findByUserNoAndLectureId(MemberEntity userEntity, Lecture lecture);
 
-	Page<MylectureQa> findByUserNoAndAnswerNotNull(MemberEntity userEntity, PageRequest pageRequest);
+	Page<MylectureQa> findByUserNoAndCountIs(MemberEntity userEntity, int i ,PageRequest pageRequest);
 
-	Page<MylectureQa> findByUserNoAndAnswerIsNull(MemberEntity userEntity, PageRequest pageRequest);
+	Page<MylectureQa> findByUserNoAndCountGreaterThan(MemberEntity userEntity, int i , PageRequest pageRequest);
 
 	Page<MylectureQa> findByUserNoAndQuestionTitleContainingOrUserNoAndQuestionContentContaining(
 			MemberEntity userEntity, String keyword, MemberEntity userEntity2, String keyword2, PageRequest pageRequest);
 
-	Page<MylectureQa> findByUserNoAndAnswerNotNullAndQuestionTitleContainingOrUserNoAndAnswerNotNullAndQuestionContentContaining(
-			MemberEntity userEntity, String keyword, MemberEntity userEntity2, String keyword2, PageRequest pageRequest);
+	Page<MylectureQa> findByUserNoAndCountGreaterThanAndQuestionTitleContainingOrUserNoAndCountGreaterThanAndQuestionContentContaining(
+			MemberEntity userEntity, int i ,String keyword, MemberEntity userEntity2, int i2 ,String keyword2, PageRequest pageRequest);
 
-	Page<MylectureQa> findByUserNoAndAnswerIsNullAndQuestionTitleContainingOrUserNoAndAnswerIsNullAndQuestionContentContaining(
-			MemberEntity userEntity, String keyword, MemberEntity userEntity2, String keyword2, PageRequest pageRequest);
+	Page<MylectureQa> findByUserNoAndCountIsAndQuestionTitleContainingOrUserNoAndCountIsAndQuestionContentContaining(
+			MemberEntity userEntity, int i ,String keyword, MemberEntity userEntity2, int i2 ,String keyword2, PageRequest pageRequest);
 
 	MylectureQa findByLectureQaNo(Long questionId);
 

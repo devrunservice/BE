@@ -53,9 +53,9 @@ public class MylectureQa {
 	@Temporal(TemporalType.DATE)
 	private Date questionDate;
 	
-	@OneToOne
-	@JoinColumn(name = "answer_no")
-	private MylectureQaAnswer answer;
+
+	@Column(name = "comment_count")
+	private int count=0;
 
 	@Column(name = "question_title", nullable = false)
 	private String questionTitle;

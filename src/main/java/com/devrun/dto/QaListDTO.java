@@ -17,6 +17,6 @@ public class QaListDTO {
 	private Date questionDate;
 	private String questionContentPreview;
 	private Long questionId;
-	@ApiModelProperty(value = "1 = 답변 완료 , 0 = 답변 대기 중")
+	@ApiModelProperty(value = "댓글 수 , 0 = 답변 대기 중")
 	private int answer;
 }

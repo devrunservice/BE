@@ -15,13 +15,8 @@ public class QaDetailDTO {
 	private String videoId;
 	private String lectureTitle;
 	private String studentId;
-	private String mentoId;
-	private String mentoProfileImg;
 	private String questionTitle;
 	private String content;
-	private String answer;
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date date;
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private Date answerDate;
 }
