@@ -26,7 +26,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 
 @RestController
-@Api(tags = "S3Upload Controller", description = "API endpoints for uploading to S3 Storage")
+@Api(tags = "S3업로드 API")
 public class S3Controller {
 
 	@Autowired
