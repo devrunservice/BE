@@ -73,7 +73,7 @@ public VideoDetailsDto getVideoPageData(@PathVariable Long videoId) throws NotFo
     return videoDetailsDto;
 }
 
-@GetMapping("/detailtest/{lectureid}")
+@GetMapping("/detailtest/{id}")
 @ApiOperation(value = "강의 상세 소개 컨텐츠")
 public LectureIntroduceDTO lecturedetailopen(@PathVariable(name = "id" , required = true) Long lectureId) {
 	return lectureService.getlecturedetail(lectureId);
