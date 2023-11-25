@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.devrun.dto.LectureIntroduceDTO;
 import com.devrun.dto.QueryLectureByKeywordDTO;
 import com.devrun.dto.QueryLectureByKeywordDTO2;
 import com.devrun.entity.LectureIntroduce;
@@ -274,9 +275,13 @@ public class LectureService {
 		return packageingDto(l1);
 	}
 
-	public LectureIntroduce getlecturedetail(Long lectureId) {
+	public LectureIntroduceDTO getlecturedetail(Long lectureId) {
 		Lecture lecture = findByLectureID(lectureId);
-		return introduceRepository.findByLecture(lecture);
+		LectureIntroduce li = introduceRepository.findByLecture(lecture);
+		LectureIntroduceDTO dto = new LectureIntroduceDTO();
+		dto.setContent(li.getContent());
+		dto.setLectureId(li.getLecture().getLectureid());
+		return dto;
 	}
 
 	public QueryLectureByKeywordDTO2 checkAlreadyHasLecture(MemberEntity userEntity, QueryLectureByKeywordDTO2 p1) {
@@ -299,6 +304,30 @@ public class LectureService {
 		} else {
 			return p1;
 		}
+	}
+
+	public LectureIntroduceDTO getlecturedetailupdate(String userid, LectureIntroduceDTO request) {
+		MemberEntity user = memberService.findById(userid);
+		Lecture lecture = findByLectureID(request.getLectureId());
+		Optional<MyLecture> check = mylectureRepository.findByMemberentityAndLecture(user, lecture);
+		if(check.isPresent()) {
+		LectureIntroduce li = introduceRepository.findByLecture(lecture);
+		li.setContent(request.getContent());
+		introduceRepository.save(li);
+		LectureIntroduceDTO dto = new LectureIntroduceDTO();
+		dto.setContent(li.getContent());
+		dto.setLectureId(li.getLecture().getLectureid());
+		return dto;
+		} else {
+			throw new RestApiException(UserErrorCode.USERHASNOTLECTURE);
+		}
+	}
+
+	public void fullintrosave(Lecture savedlecture, String lectureFullIntro) {
+		LectureIntroduce intro = new LectureIntroduce();
+		intro.setLecture(savedlecture);
+		intro.setContent(lectureFullIntro);
+		introduceRepository.save(intro);
 	}
 
 //	 public CreateLectureRequestDto getLectureDetailsMapping(Long lectureId) {

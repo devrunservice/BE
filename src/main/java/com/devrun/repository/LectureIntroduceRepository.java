@@ -9,7 +9,5 @@ import com.devrun.youtube.Lecture;
 public interface LectureIntroduceRepository extends JpaRepository<LectureIntroduce, Long> {
 
 	LectureIntroduce findByLecture(Lecture lecture);
-	
-	
-	
+
 }

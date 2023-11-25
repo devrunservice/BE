@@ -17,8 +17,10 @@ import lombok.Data;
 public class CreateLectureRequestDto {
 	@NotBlank(message = "강의 이름을 작성하세요")
 	private String lectureName;
-	@NotBlank(message = "강의 소개를 작성하세요")
+	@NotBlank(message = "강의 한줄 소개를 작성하세요")
 	private String lectureIntro;
+	@NotBlank(message = "강의 전체 소개를 작성하세요")
+	private String lectureFullIntro;
 	@NotNull(message = "강의 가격을 작성하세요")
 	@Min(value = 0)
 	@Max(value = 9999999)
