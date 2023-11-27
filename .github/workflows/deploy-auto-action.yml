@@ -58,6 +58,8 @@ jobs:
           echo "spring.redis.host=${{ secrets.SPRING_REDIS_HOST }}" >> application.properties
           echo "spring.redis.port=${{ secrets.SPRING_REDIS_PORT }}" >> application.properties
           echo "" >> application.properties
+          echo "spring.servlet.multipart.enabled=true" >> application.properties
+          echo "spring.servlet.multipart.location=/home/ubuntu/devrun/temp"  >> application.properties
           echo "spring.servlet.multipart.max-file-size=1000MB" >> application.properties
           echo "spring.servlet.multipart.max-request-size=1000MB" >> application.properties
           echo "" >> application.properties
