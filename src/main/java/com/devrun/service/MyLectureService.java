@@ -452,6 +452,7 @@ public class MyLectureService {
 			qldto.setQuestionLectureTitle(q.getLectureId().getLectureName());
 			qldto.setQuestionTitle(q.getQuestionTitle());
 			qldto.setQuestionDate(q.getQuestionDate());
+			qldto.setStudentId(q.getUserNo().getId());
 			String Preview = q.getQuestionContent().replaceAll("<[^>]*>", "");
 			if (cutsize < Preview.length()) {
 				Preview = Preview.substring(0, cutsize);
