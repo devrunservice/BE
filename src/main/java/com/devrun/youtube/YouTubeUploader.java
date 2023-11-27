@@ -43,7 +43,7 @@ import com.google.api.services.youtube.model.VideoStatus;
  */
 @Component
 public class YouTubeUploader {
-
+	
 	private static final String CLIENT_SECRETS_FILE = "client_secrets.json";
 	private static final String REDIRECT_URI = "https://devrun.site/lectureregitest"; // 이 부분을 본인의 리디렉션 URI로 수정하세요.
 	private static final String VIDEO_FILE_FORMAT = "video/*";
@@ -163,6 +163,7 @@ public class YouTubeUploader {
 			String videoUrl = "https://www.youtube.com/watch?v=" + videoId;
 			videoDto.setVideoId(videoId);
 			videoDto.setVideoLink(videoUrl);
+			
 
 //			String videoTotalPlayTime = response.getItems().get(0).getContentDetails().getDuration();
 //			System.out.println("--------------------------------비디오 정보 받아오기 3----------------------------------------------");

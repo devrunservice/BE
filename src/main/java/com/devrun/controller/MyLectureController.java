@@ -96,7 +96,8 @@ public class MyLectureController {
 		String userAccessToken = httpServletRequest.getHeader("Access_token");
 		String userId = JWTUtil.getUserIdFromToken(userAccessToken);
 		MemberEntity userEntity = memberService.findById(userId);
-
+		System.out.println("Currenttime : "+prgressinfo.getCurrenttime());
+		System.out.println("Videoid : "+prgressinfo.getVideoid());
 		return mylectureService.progress(userEntity, prgressinfo.getVideoid(), prgressinfo.getCurrenttime());
 
 	}

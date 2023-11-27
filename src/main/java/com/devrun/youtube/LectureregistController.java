@@ -1,12 +1,12 @@
 package com.devrun.youtube;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,15 +14,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.jcodec.api.FrameGrab;
+import org.jcodec.api.JCodecException;
+import org.jcodec.common.io.FileChannelWrapper;
+import org.jcodec.common.io.NIOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.devrun.entity.MemberEntity;
 import com.devrun.repository.MemberEntityRepository;
@@ -42,6 +47,8 @@ import com.google.api.services.youtube.YouTubeScopes;
 @RestController
 public class LectureregistController {
 
+	private final DurationExtractor durationExtractor;
+
 	private final LectureService lectureService;
 	private final AwsS3UploadService awsS3UploadService;
 	private final YouTubeUploader youTubeUploader;
@@ -50,7 +57,7 @@ public class LectureregistController {
 	public static final HttpTransport httpTransport = new NetHttpTransport();
 	public static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 	private static final String CREDENTIALS_DIRECTORY = ".oauth-credentials";
-	
+
 	/*
 	 * private static final Collection<String> SCOPES = Arrays.asList(
 	 * YouTubeScopes.YOUTUBE_UPLOAD, YouTubeScopes.YOUTUBE_READONLY );
@@ -65,7 +72,9 @@ public class LectureregistController {
 	@Autowired
 	public LectureregistController(MemberService memberService, LectureService lectureService,
 			AwsS3UploadService awsS3UploadService, YouTubeUploader youTubeUploader,
-			LecutureCategoryService categoryService, MyLectureProgressService myLectureProgressService ,YouTubeVideoInfo youTubeVideoInfo) {
+			LecutureCategoryService categoryService, MyLectureProgressService myLectureProgressService,
+			YouTubeVideoInfo youTubeVideoInfo) {
+		this.durationExtractor = new DurationExtractor();
 		this.categoryService = categoryService;
 		this.lectureService = lectureService;
 		this.awsS3UploadService = awsS3UploadService;
@@ -134,6 +143,12 @@ public class LectureregistController {
 		List<VideoDto> uploadedVideos = new ArrayList<>(); // 업로드된 비디오 정보를 저장할 리스트를 생성합니다.
 		for (VideoDto video : requestDto.getVideoList()) {
 			VideoDto uploadedVideo = youTubeUploader.uploadVideo(video, httpServletResponse, googleAccessToken);
+			File file = new File("/home/ubuntu/devrun/temp/" + video.getVideofile().getOriginalFilename());
+			video.getVideofile().transferTo(file);
+			int duration = (int)durationExtractor.extract(file);
+			video.setTotalPlayTime(duration);
+			file.delete();
+			
 			uploadedVideos.add(uploadedVideo);
 		}
 		System.out.println("----------------------------채널 업로드 종료---------------------------------------");
@@ -172,5 +187,51 @@ public class LectureregistController {
 		}
 		lectureService.fullintrosave(savedlecture, requestDto.getLectureFullIntro());
 		return "수신완료"; // Redirect to a success page
+	}
+
+	@PostMapping("/videotime")
+	public void videotime(@RequestParam(name = "file") MultipartFile videofile) {
+		System.out.println("originalfilename : " + videofile.getOriginalFilename());
+		File file = new File("/home/ubuntu/devrun/temp/" + videofile.getOriginalFilename());
+		try {
+			videofile.transferTo(file);
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		try {
+			double sdf;
+			sdf = durationExtractor.extract(file);
+			System.err.println("총 재생 시간 : " + (int) sdf);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JCodecException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		file.delete();
+//		try {
+//			FileChannelWrapper channel = NIOUtils.readableChannel(file);
+//			FrameGrab frameGrab = FrameGrab.createFrameGrab(channel);
+//			double durationInSeconds = frameGrab.getVideoTrack().getMeta().getTotalDuration();
+//			System.err.println("총 재생 시간 : " + (int)durationInSeconds);
+//			channel.close();
+//			file.delete();
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (JCodecException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 }
