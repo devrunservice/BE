@@ -142,7 +142,7 @@ public class QnAController {
 
 	@DeleteMapping("/lectureQa/comment/delete/{commentId}")
 	@ApiOperation(value = "작성한 질문에 대한 댓글을 삭제합니다.")
-	public String lectureQaanswerDelete(HttpServletRequest httpServletRequest, @PathVariable int commentId) {
+	public String lectureQaanswerDelete(HttpServletRequest httpServletRequest, @PathVariable(name = "commentId") int commentId) {
 		String userAccessToken = httpServletRequest.getHeader("Access_token");
 		String userId = JWTUtil.getUserIdFromToken(userAccessToken);
 		MemberEntity userEntity = memberService.findById(userId);
@@ -151,7 +151,7 @@ public class QnAController {
 
 	@PostMapping("/lectureQa/comment/edit/{commentId}")
 	@ApiOperation(value = "작성한 질문에 대한 댓글을 수정합니다.")
-	public String lectureQaanswerUpdate(HttpServletRequest httpServletRequest, @PathVariable int commentId,
+	public String lectureQaanswerUpdate(HttpServletRequest httpServletRequest, @PathVariable(name = "commentId") int commentId,
 			@RequestBody QaCommentUpdateDto dto) {
 		String userAccessToken = httpServletRequest.getHeader("Access_token");
 		String userId = JWTUtil.getUserIdFromToken(userAccessToken);
