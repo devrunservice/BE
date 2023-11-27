@@ -86,7 +86,7 @@ public class MemberEntity implements Serializable {
     @Column(name = "profileimgsrc", nullable = false)
     @NotBlank(message = "information cannot be null or empty")
     @Comment("유저 프로필 이미지 주소")
-    private String profileimgsrc = "profile.png";
+    private String profileimgsrc = "https://devrun-dev-bucket.s3.ap-northeast-2.amazonaws.com/profile.png";
 
 //	데이터베이스에 Enum 값을 저장할 때, 일반적으로 두 가지 전략을 사용할 수 있습니다:
 //

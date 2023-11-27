@@ -133,12 +133,6 @@ public class QnAController {
 	// 댓글 작성
 	@PostMapping("/lectureQaComment")
 	@ApiOperation(value = "질문 디테일의 댓글 작성", notes = "질문 디테일에 댓글을 작성합니다.")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "noticeNo", value = "공지사항 번호", required = true, paramType = "body", dataTypeClass = Integer.class, example = "0"),
-			@ApiImplicitParam(name = "content", value = "댓글 내용", required = true, paramType = "body", dataTypeClass = String.class),
-			@ApiImplicitParam(name = "id", value = "작성자 아이디", required = true, paramType = "body", dataTypeClass = String.class) })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "댓글이 성공적으로 작성되었습니다."),
-			@ApiResponse(code = 400, message = "잘못된 공지사항 번호입니다.") })
 	public CommentDTO writeComment(HttpServletRequest httpServletRequest, @RequestBody QaCommentQuest commentQuest) {
 		String userAccessToken = httpServletRequest.getHeader("Access_token");
 		String userId = JWTUtil.getUserIdFromToken(userAccessToken);
@@ -155,7 +149,7 @@ public class QnAController {
 		return mylectureService.QaCommentDelete(userEntity, commentId);
 	}
 
-	@PostMapping("/lectureQa/comment/edit/{commentNo}")
+	@PostMapping("/lectureQa/comment/edit/{commentId}")
 	@ApiOperation(value = "작성한 질문에 대한 댓글을 수정합니다.")
 	public String lectureQaanswerUpdate(HttpServletRequest httpServletRequest, @PathVariable int commentId,
 			@RequestBody QaCommentUpdateDto dto) {

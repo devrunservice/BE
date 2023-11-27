@@ -35,6 +35,7 @@ import com.devrun.dto.VideoInfo;
 import com.devrun.dto.lectureNoteDetailDTO;
 import com.devrun.dto.lectureNoteListDTO;
 import com.devrun.dto.lectureNoteListDTO2;
+import com.devrun.entity.MylectureQa.removed;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.MyLecture;
 import com.devrun.entity.MyLectureProgress;
@@ -391,7 +392,7 @@ public class MyLectureService {
 		Lecture lecture = lectureService.findByLectureID(lectureId);
 		page = page <= 1 ? 0 : page - 1;
 		PageRequest pageRequest = PageRequest.of(page, 10, Sort.Direction.DESC, "questionDate");
-		Page<MylectureQa> myqs = mylectureQaRepository.findByLectureId(lecture, pageRequest);
+		Page<MylectureQa> myqs = mylectureQaRepository.findByDeleteopAndLectureId(removed.DISABLE ,lecture, pageRequest);
 		return QaListDTOsBuilder(myqs);
 	}
 
@@ -401,13 +402,16 @@ public class MyLectureService {
 		PageRequest pageRequest = PageRequest.of(page, 10, Sort.Direction.DESC, "questionDate");
 
 		if (sort.equals("completed")) {
-			Page<MylectureQa> qas = mylectureQaRepository.findByUserNoAndCountGreaterThan(userEntity, 0, pageRequest);
+			Page<MylectureQa> qas = mylectureQaRepository.findByDeleteopAndUserNoAndCountGreaterThan(removed.DISABLE,
+					userEntity, 0, pageRequest);
 			return QaListDTOsBuilder(qas);
 		} else if (sort.equals("waiting")) {
-			Page<MylectureQa> qas = mylectureQaRepository.findByUserNoAndCountIs(userEntity, 0,pageRequest);
+			Page<MylectureQa> qas = mylectureQaRepository.findByDeleteopAndUserNoAndCountIs(removed.DISABLE, userEntity,
+					0, pageRequest);
 			return QaListDTOsBuilder(qas);
 		} else {
-			Page<MylectureQa> qas = mylectureQaRepository.findByUserNo(userEntity, pageRequest);
+			Page<MylectureQa> qas = mylectureQaRepository.findByDeleteopAndUserNo(removed.DISABLE, userEntity,
+					pageRequest);
 			return QaListDTOsBuilder(qas);
 		}
 
@@ -419,18 +423,18 @@ public class MyLectureService {
 
 		if (sort.equals("completed")) {
 			Page<MylectureQa> qas = mylectureQaRepository
-					.findByUserNoAndCountGreaterThanAndQuestionTitleContainingOrUserNoAndCountGreaterThanAndQuestionContentContaining(
-							userEntity, 0,keyword, userEntity,0, keyword, pageRequest);
+					.findByDeleteopAndUserNoAndCountGreaterThanAndQuestionTitleContainingOrUserNoAndCountGreaterThanAndQuestionContentContaining(
+							removed.DISABLE, userEntity, 0, keyword, userEntity, 0, keyword, pageRequest);
 			return QaListDTOsBuilder(qas);
 		} else if (sort.equals("waiting")) {
 			Page<MylectureQa> qas = mylectureQaRepository
-					.findByUserNoAndCountIsAndQuestionTitleContainingOrUserNoAndCountIsAndQuestionContentContaining(
-							userEntity, 0,keyword, userEntity,0, keyword, pageRequest);
+					.findByDeleteopAndUserNoAndCountIsAndQuestionTitleContainingOrUserNoAndCountIsAndQuestionContentContaining(
+							removed.DISABLE, userEntity, 0, keyword, userEntity, 0, keyword, pageRequest);
 			return QaListDTOsBuilder(qas);
 		} else {
 			Page<MylectureQa> qas = mylectureQaRepository
-					.findByUserNoAndQuestionTitleContainingOrUserNoAndQuestionContentContaining(userEntity, keyword,
-							userEntity, keyword, pageRequest);
+					.findByDeleteopAndUserNoAndQuestionTitleContainingOrUserNoAndQuestionContentContaining(
+							removed.DISABLE, userEntity, keyword, 0, userEntity, keyword, pageRequest);
 			return QaListDTOsBuilder(qas);
 		}
 
@@ -464,7 +468,7 @@ public class MyLectureService {
 	}
 
 	public QaDetailDTO getQaDetail(Long questionId) {
-		MylectureQa qaList = mylectureQaRepository.findByLectureQaNo(questionId);
+		MylectureQa qaList = mylectureQaRepository.findByDeleteopAndLectureQaNo(removed.DISABLE,questionId);
 
 		return QaDetailDTOBuilder(qaList);
 
@@ -472,7 +476,7 @@ public class MyLectureService {
 	
     // 댓글 목록 가져오기 (Status가 ACTIVE인 것만)
     public List<MylectureQaAnswer> getActiveCommentsByNotice(Long questionId) {
-    	MylectureQa qa = mylectureQaRepository.findByLectureQaNo(questionId);
+    	MylectureQa qa = mylectureQaRepository.findByDeleteopAndLectureQaNo(removed.DISABLE,questionId);
     	List<MylectureQaAnswer> qal = mylectureQaAnswerRepository.findByQaNoAndStatus(qa, Status.ACTIVE);
     	
         return qal; 
@@ -507,7 +511,8 @@ public class MyLectureService {
 	public String QaDelete(MemberEntity userEntity, Long lectureQaNo) {
 		MylectureQa q = QaCRUDConfirm(lectureQaNo);
 		if (q.getUserNo().equals(userEntity)) {
-			mylectureQaRepository.delete(q);
+			q.setDeleteop(removed.ENABLE);
+			mylectureQaRepository.save(q);
 			return "delete complete";
 		} else {
 			throw new RestApiException(UserErrorCode.POSSESSION);

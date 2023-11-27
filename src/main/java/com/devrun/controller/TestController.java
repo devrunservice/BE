@@ -22,6 +22,7 @@ import com.devrun.service.MemberService;
 import com.devrun.service.TestService;
 import com.devrun.util.CaffeineCache;
 import com.devrun.util.JWTUtil;
+import com.devrun.util.RedisCache;
 
 @RestController
 public class TestController {
@@ -33,8 +34,8 @@ public class TestController {
 	MemberService memberService;
 
 	@Autowired
-	private CaffeineCache redisCache;
-//    private RedisCache redisCache;
+//	private CaffeineCache redisCache;
+    private RedisCache redisCache;
 
 	@PostMapping("/videotest")
 	public void videotest(@RequestParam(name = "video") MultipartFile videoFile)
@@ -80,7 +81,7 @@ public class TestController {
 
 	@GetMapping("/removeCache")
 	public String cache(@RequestParam("id") String id) {
-		redisCache.removeCaffeine(id);
+		//redisCache.removeCaffeine(id);
 		redisCache.removeJti(id);
 		return "Removed cache for " + id;
 	}
