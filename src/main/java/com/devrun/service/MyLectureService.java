@@ -565,12 +565,12 @@ public class MyLectureService {
 		}
 	}
 
-	public String QaCommentUpdate(MemberEntity userEntity, int commentId, QaCommentUpdateDto dto) {
+	public CommentDTO QaCommentUpdate(MemberEntity userEntity, int commentId, QaCommentUpdateDto dto) {
 		MylectureQaAnswer comment = QaCommentConfirm(commentId);
 		if (comment.getMemberEntity().equals(userEntity)) {
 			comment.setContent(dto.getContent());
 			mylectureQaAnswerRepository.save(comment);
-			return "update complete";
+			return commentDTOpackger(comment);
 		} else {
 			throw new RestApiException(UserErrorCode.POSSESSION);
 		}
