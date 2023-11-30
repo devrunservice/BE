@@ -113,9 +113,10 @@ public class MyLectureService {
 		int wholePlayTime = 0;
 		int wholeVideoTime = 0;
 		for (MyLectureProgress myLectureProgress : mylectureProgressEntity) {
-			if (myLectureProgress.getVideo().getVideoId().equals(videoid)) {
+			if (myLectureProgress.getVideo().getVideoId().equals(videoid) &&
+					myLectureProgress.getTimecheck() <= currenttime) {
 				int totalplaytime = myLectureProgress.getVideo().getTotalPlayTime();
-				if (currenttime > totalplaytime) {
+				if (currenttime >= totalplaytime - 10) {
 					currenttime = totalplaytime;
 				}
 				int progressInt = (int) ((double) currenttime / (double) totalplaytime * 100);
