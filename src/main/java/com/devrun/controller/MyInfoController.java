@@ -5,10 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +27,7 @@ import com.devrun.service.AwsS3DeleteService;
 import com.devrun.service.AwsS3ReadService;
 import com.devrun.service.AwsS3UploadService;
 import com.devrun.service.MemberService;
+import com.devrun.util.JWTUtil;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -218,14 +221,17 @@ public class MyInfoController {
 			return ResponseEntity.status(409).body(result);
 
 		}
-
-//        memberService.insert(m);
-//
-//        memberService.removeSmsCode(editdata.getPhonenumber());
-//        return ResponseEntity.ok("프로필 이미지를 포함한 수정 성공");
-
-//
-//
-//        }
+	}
+	
+	@DeleteMapping("/member/leave")
+	@ApiOperation(value = "회원 탈퇴 요청", notes = "해당 요청에 유효한 액세스 토큰을 넘겨주시면 됩니다.")
+	public ResponseEntity<?> memberout(HttpServletRequest request){
+		String accesstoken = request.getHeader("Access_token");
+		String userid = JWTUtil.getUserIdFromToken(accesstoken);
+		memberService.memberLeave(userid);
+		
+		
+		return ResponseEntity.ok(null);
+		
 	}
 }
