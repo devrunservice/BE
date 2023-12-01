@@ -52,7 +52,6 @@ public class LectureregistController {
 	private final LectureService lectureService;
 	private final AwsS3UploadService awsS3UploadService;
 	private final YouTubeUploader youTubeUploader;
-	private final YouTubeVideoInfo youTubeVideoInfo;
 	private final LecutureCategoryService categoryService;
 	public static final HttpTransport httpTransport = new NetHttpTransport();
 	public static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
@@ -72,14 +71,13 @@ public class LectureregistController {
 	@Autowired
 	public LectureregistController(MemberService memberService, LectureService lectureService,
 			AwsS3UploadService awsS3UploadService, YouTubeUploader youTubeUploader,
-			LecutureCategoryService categoryService, MyLectureProgressService myLectureProgressService,
-			YouTubeVideoInfo youTubeVideoInfo) {
+			LecutureCategoryService categoryService, MyLectureProgressService myLectureProgressService
+			) {
 		this.durationExtractor = new DurationExtractor();
 		this.categoryService = categoryService;
 		this.lectureService = lectureService;
 		this.awsS3UploadService = awsS3UploadService;
 		this.youTubeUploader = youTubeUploader;
-		this.youTubeVideoInfo = youTubeVideoInfo;
 	}
 
 	// GET 요청을 통해 카테고리 목록을 가져오는 엔드포인트
