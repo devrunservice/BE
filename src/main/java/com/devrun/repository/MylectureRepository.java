@@ -15,7 +15,7 @@ public interface MylectureRepository extends JpaRepository<MyLecture, Long> {
 
 	Optional<MyLecture> findByMemberentityAndLecture(MemberEntity userEntity, Lecture lecture);
 
-	Optional<List<MyLecture>> findByMemberentity(MemberEntity userEntity);
+	List<MyLecture> findByMemberentity(MemberEntity userEntity);
 
 	Page<MyLecture> findByMemberentity(MemberEntity userEntity, PageRequest pageRequest);
 

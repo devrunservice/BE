@@ -5,27 +5,32 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class LectureInfo {
 
 	public LectureInfo(String lecture_thumbnail, String lecture_name, String lecture_intro, int lecture_price,
-			Long lecture_id) {
-		this.lecture_thumbnail = lecture_thumbnail;
-		this.lecture_name = lecture_name;
-		this.lecture_intro = lecture_intro;
-		this.lecture_price = lecture_price;
-		this.lecture_id = lecture_id;
+			Long lecture_id , Long cartId) {
+		this.lectureThumbnail = lecture_thumbnail;
+		this.lectureName = lecture_name;
+		this.lectureIntro = lecture_intro;
+		this.lecturePrice = lecture_price;
+		this.lectureId = lecture_id;
+		this.cartId = cartId;
 	}
 
 	// 썸네일
 	@JsonProperty
-	private String lecture_thumbnail;
+	private String lectureThumbnail;
 	// 제목
 	@JsonProperty
-	private String lecture_name;
+	private String lectureName;
 	// 한줄소개글
 	@JsonProperty
-	private String lecture_intro;
+	private String lectureIntro;
 	// 가격
 	@JsonProperty
-	private int lecture_price;
+	private int lecturePrice;
 	// 강의ID
 	@JsonProperty
-	private Long lecture_id;
+	private Long lectureId;
+	// 장바구니ID
+	@JsonProperty
+	private Long cartId;
+	
 }

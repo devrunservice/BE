@@ -58,6 +58,8 @@ jobs:
           echo "spring.redis.host=${{ secrets.SPRING_REDIS_HOST }}" >> application.properties
           echo "spring.redis.port=${{ secrets.SPRING_REDIS_PORT }}" >> application.properties
           echo "" >> application.properties
+          echo "spring.servlet.multipart.enabled=true" >> application.properties
+          echo "spring.servlet.multipart.location=/home/ubuntu/devrun/temp"  >> application.properties
           echo "spring.servlet.multipart.max-file-size=1000MB" >> application.properties
           echo "spring.servlet.multipart.max-request-size=1000MB" >> application.properties
           echo "" >> application.properties
@@ -74,8 +76,8 @@ jobs:
           echo "logging.level.root=INFO" >> application.properties
           echo "logging.file.name=${{ secrets.LOGGING_FILE_NAME }}" >> application.properties
           echo "" >> application.properties
-          echo "spring.security.oauth2.client.registration.google.client-id=${{ secrets.GOOGLE_CLIENT_ID }}" >> application.properties
-          echo "spring.security.oauth2.client.registration.google.client-secret=${{ secrets.GOOGLE_SECRET_KEY }}" >> application.properties
+          echo "spring.security.oauth2.client.registration.google.client-id=${{ secrets.GOOGLE_CLIENT_ID_KSH }}" >> application.properties
+          echo "spring.security.oauth2.client.registration.google.client-secret=${{ secrets.GOOGLE_SECRET_KEY_KSH }}" >> application.properties
           echo "" >> application.properties
           echo "aes.secretKey=${{ secrets.AES_SECRET_KEY }}" >> application.properties
           

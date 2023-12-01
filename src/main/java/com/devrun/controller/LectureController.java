@@ -1,28 +1,39 @@
 package com.devrun.controller;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.devrun.youtube.Lecture;
+import com.devrun.youtube.LectureService;
 import com.devrun.youtube.Video;
+
+import io.swagger.annotations.ApiOperation;
+
+import com.devrun.dto.LectureIntroduceDTO;
 import com.devrun.dto.VideoDetailsDto;
 import com.devrun.service.LecuturesearchService;
 import com.devrun.service.VideoSearchService;
+import com.devrun.util.JWTUtil;
 
 @RestController
 @RequestMapping("/api/lectures")
 public class LectureController {
-
+	private final LectureService lectureService;
     private final LecuturesearchService lecuturesearchService;
     private final VideoSearchService videoSearchService;
     
 
-    public LectureController(LecuturesearchService lecuturesearchService ,VideoSearchService videoSearchService ) {
+    public LectureController(LectureService lectureService, LecuturesearchService lecuturesearchService ,VideoSearchService videoSearchService ) {
         this.lecuturesearchService = lecuturesearchService;
 		this.videoSearchService = videoSearchService;
+		this.lectureService = lectureService;
     }
 
 
@@ -62,5 +73,18 @@ public VideoDetailsDto getVideoPageData(@PathVariable Long videoId) throws NotFo
     return videoDetailsDto;
 }
 
+@GetMapping("/detailtest/{id}")
+@ApiOperation(value = "강의 상세 소개 컨텐츠")
+public LectureIntroduceDTO lecturedetailopen(@PathVariable(name = "id" , required = true) Long lectureId) {
+	return lectureService.getlecturedetail(lectureId);
+}
+
+@PostMapping("/detailupdate")
+@ApiOperation(value = "강의 상세 소개 수정")
+public LectureIntroduceDTO lecturedetailupdate(HttpServletRequest request,@RequestBody LectureIntroduceDTO introDto) {
+	String Accesstoken = request.getHeader("Access_token");
+	String userid = JWTUtil.getUserIdFromToken(Accesstoken);
+	return lectureService.getlecturedetailupdate(userid, introDto);
+}
 
 }

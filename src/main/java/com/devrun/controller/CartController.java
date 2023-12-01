@@ -15,27 +15,24 @@ import org.springframework.web.bind.annotation.RestController;
 import com.devrun.dto.CouponListInCart;
 import com.devrun.dto.LectureInfo;
 import com.devrun.entity.MemberEntity;
-import com.devrun.exception.RestApiException;
-import com.devrun.exception.UserErrorCode;
 import com.devrun.service.CartService;
 import com.devrun.service.MemberService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 
 @RestController
-@Api(tags = "Devrun.Cart")
+@Api(tags = "장바구니 API")
+@RequiredArgsConstructor
 public class CartController {
-	@Autowired
-	private CartService cartService;
-
-	@Autowired
-	private MemberService memberService;
+	private final CartService cartService;
+	private final MemberService memberService;
 
 	@PostMapping("/cart/insert")
-	@ApiOperation("장바구니에 강의를 추가합니다.")
-	@ApiImplicitParam(name = "lectureId", value = "강의 식별 번호", example = "22" , dataTypeClass = Long.class)
+	@ApiOperation(value = "장바구니에 강의를 추가합니다." , notes = "이미 구입한 강의일 경우 알림 메세지를 반환합니다.")
+	@ApiImplicitParam(name = "lectureId", value = "강의 식별 번호", example = "22", dataTypeClass = Long.class)
 	public ResponseEntity<?> putCart(@RequestBody(required = true) Long lectureId) {
 		String userid = SecurityContextHolder.getContext().getAuthentication().getName();
 		MemberEntity userEntity = memberService.findById(userid);
@@ -44,12 +41,13 @@ public class CartController {
 	}
 
 	@PostMapping("/cart/delete")
-	@ApiOperation("장바구니에서 강의를 삭제합니다.")
-	@ApiImplicitParam(name = "lectureId", value = "강의 식별 번호", example = "22" , dataTypeClass = Long.class)
-	public String deleteInCart(@RequestBody(required = true) Long lectureId) {
+	@ApiOperation(value = "장바구니에서 강의를 삭제합니다." , notes = "lectureId 가 아닌 cartId 배열을 요청하면 강의를 삭제 처리합니다.")
+	@ApiImplicitParam(name = "cartId", value = "장바구니 식별 번호 배열", example = "[1,2]", dataTypeClass = Long.class)
+	public String deleteInCart(@RequestBody(required = true) List<Long> cartId) {
 		String userid = SecurityContextHolder.getContext().getAuthentication().getName();
 		MemberEntity userEntity = memberService.findById(userid);
-		String msg = cartService.deleteInCart(userEntity, lectureId);
+		cartService.deleteInCart(userEntity, cartId);
+		String msg = "처리 완료";
 		return msg;
 	}
 

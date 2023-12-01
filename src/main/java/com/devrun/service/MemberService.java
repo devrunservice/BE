@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.devrun.dto.member.MemberDTO.Status;
 import com.devrun.entity.Consent;
 import com.devrun.entity.Contact;
 import com.devrun.entity.LoginInfo;
@@ -229,6 +230,12 @@ public class MemberService {
 	public List<MemberEntity> findByIdContains(String keyword) {
 		// TODO Auto-generated method stub
 		return memberEntityRepository.findByIdContains(keyword);
+	}
+
+	public void memberLeave(String userid) {
+		MemberEntity member = memberEntityRepository.findById(userid);
+		member.setStatus(Status.WITHDRAWN);
+		memberEntityRepository.save(member);
 	}
 
 //    public boolean isUserIdEquals(String id) {

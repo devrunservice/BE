@@ -43,7 +43,7 @@ import com.google.api.services.youtube.model.VideoStatus;
  */
 @Component
 public class YouTubeUploader {
-
+	
 	private static final String CLIENT_SECRETS_FILE = "client_secrets.json";
 	private static final String REDIRECT_URI = "https://devrun.site/lectureregitest"; // 이 부분을 본인의 리디렉션 URI로 수정하세요.
 	private static final String VIDEO_FILE_FORMAT = "video/*";
@@ -106,7 +106,7 @@ public class YouTubeUploader {
 
 			// 업로드 명령에는 다음이 포함됩니다: 파일이 성공적으로 업로드된 후 반환되는 정보, 업로드된 비디오와 연결되는 메타데이터, 비디오 파일
 			// 자체.
-			YouTube.Videos.Insert videoInsert = youtube.videos().insert("snippet,statistics,status,contentDetails",
+			YouTube.Videos.Insert videoInsert = youtube.videos().insert("snippet,statistics,status",
 					videoObjectDefiningMetadata, mediaContent);
 
 			// 업로드 유형을 설정하고 이벤트 리스너를 추가합니다.
@@ -155,21 +155,25 @@ public class YouTubeUploader {
 			// 업로드된 비디오의 정보를 VideoInfo 객체로 생성하여 반환
 			String videoId = returnedVideo.getId();
 			System.out.println("--------------------------------비디오 정보 받아오기----------------------------------------------");
-			YouTube.Videos.List request = youtube.videos()
-		            .list("snippet,contentDetails,statistics");
-		    VideoListResponse response = request.setId(videoId).execute();
-		        
+//			YouTube.Videos.List request = youtube.videos()
+//		            .list("snippet,contentDetails,statistics");
+//			System.out.println("--------------------------------비디오 정보 받아오기 1----------------------------------------------");
+//		    VideoListResponse response = request.setId(videoId).execute();
+//		    System.out.println("--------------------------------비디오 정보 받아오기 2----------------------------------------------");		        
 			String videoUrl = "https://www.youtube.com/watch?v=" + videoId;
 			videoDto.setVideoId(videoId);
 			videoDto.setVideoLink(videoUrl);
+			
 
-			String videoTotalPlayTime = response.getItems().get(0).getContentDetails().getDuration();
-			String period = videoTotalPlayTime;
-			Duration duration = Duration.parse(period);
-			int totalSeconds = (int) duration.getSeconds();
+//			String videoTotalPlayTime = response.getItems().get(0).getContentDetails().getDuration();
+//			System.out.println("--------------------------------비디오 정보 받아오기 3----------------------------------------------");
+//			String period = videoTotalPlayTime;
+//			Duration duration = Duration.parse(period);
+//			System.out.println("--------------------------------비디오 정보 받아오기 4----------------------------------------------");
+//			int totalSeconds = (int) duration.getSeconds();
 
-			videoDto.setTotalPlayTime(totalSeconds);
-			System.out.println("totalSeconds : " + totalSeconds);
+//			videoDto.setTotalPlayTime(totalSeconds);
+//			System.out.println("totalSeconds : " + totalSeconds);
 			System.out.println("videoUrl : " + videoUrl);
 			System.out.println("--------------------------------비디오 정보 받아오기 완료----------------------------------------------");
 			return videoDto;

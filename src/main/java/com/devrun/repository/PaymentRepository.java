@@ -27,7 +27,6 @@ public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
 	        + "FROM payment p WHERE p.user_no = :usrno", nativeQuery = true)    
 	Page<PaymentInfo> findAllbyPaymentEntity(@Param("usrno") int usrno, PageRequest pageRequest);	
 	
-	
 	@Query("SELECT p FROM PaymentEntity p WHERE p.merchant_uid = :merchant_uid")
 	PaymentEntity findByMerchantUid(@Param("merchant_uid") String merchant_uid);
 

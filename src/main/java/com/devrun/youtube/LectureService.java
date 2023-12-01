@@ -1,10 +1,14 @@
 package com.devrun.youtube;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.print.attribute.HashAttributeSet;
 
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.data.domain.Page;
@@ -12,14 +16,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.devrun.dto.LectureIntroduceDTO;
 import com.devrun.dto.QueryLectureByKeywordDTO;
 import com.devrun.dto.QueryLectureByKeywordDTO2;
 import com.devrun.entity.LectureIntroduce;
 import com.devrun.entity.MemberEntity;
+import com.devrun.entity.MyLecture;
 import com.devrun.exception.CommonErrorCode;
 import com.devrun.exception.RestApiException;
 import com.devrun.exception.UserErrorCode;
 import com.devrun.repository.LectureIntroduceRepository;
+import com.devrun.repository.MylectureRepository;
 import com.devrun.service.MemberService;
 
 import lombok.RequiredArgsConstructor;
@@ -27,7 +34,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class LectureService {
-
+	private final MylectureRepository mylectureRepository;
 	private final LectureRepository lectureRepository;
 	private final LectureSectionRepository sectionRepository;
 	private final LecturecategoryRepository categoryRepository;
@@ -120,6 +127,10 @@ public class LectureService {
 		savevideo.setLectureSection(savedlectureSeciton);
 		savevideo.setVideoTitle(videoDto.getVideoTitle());
 		savevideo.setVideoLink(videoDto.getVideoLink());
+		String link = videoDto.getVideoLink();
+		int cutnum = link.indexOf("=");
+        String videoid = link.substring(cutnum + 1);
+		savevideo.setVideoId(videoid);
 		savevideo.setTotalPlayTime(videoDto.getTotalPlayTime());
 		videoRepository.save(savevideo);
 	}
@@ -268,9 +279,59 @@ public class LectureService {
 		return packageingDto(l1);
 	}
 
-	public LectureIntroduce getlecturedetail(Long lectureId) {
+	public LectureIntroduceDTO getlecturedetail(Long lectureId) {
 		Lecture lecture = findByLectureID(lectureId);
-		return introduceRepository.findByLecture(lecture);
+		LectureIntroduce li = introduceRepository.findByLecture(lecture);
+		LectureIntroduceDTO dto = new LectureIntroduceDTO();
+		dto.setContent(li.getContent());
+		dto.setLectureId(li.getLecture().getLectureid());
+		return dto;
+	}
+
+	public QueryLectureByKeywordDTO2 checkAlreadyHasLecture(MemberEntity userEntity, QueryLectureByKeywordDTO2 p1) {
+		List<MyLecture> userhas = mylectureRepository.findByMemberentity(userEntity);
+		if(!userhas.isEmpty()) {
+			List<Long> idlist = new ArrayList<Long>();
+			for(MyLecture myLecture : userhas) {
+				idlist.add(myLecture.getLecture().getLectureid());
+			}
+			userhas.clear();
+			for( QueryLectureByKeywordDTO p : p1.getDtolist()) {
+				if(idlist.contains(p.getLectureId())) {
+					p.setPurchaseStatus(true);
+				} else {
+					continue;
+				}
+			}
+			
+			return p1;
+		} else {
+			return p1;
+		}
+	}
+
+	public LectureIntroduceDTO getlecturedetailupdate(String userid, LectureIntroduceDTO request) {
+		MemberEntity user = memberService.findById(userid);
+		Lecture lecture = findByLectureID(request.getLectureId());
+		Optional<MyLecture> check = mylectureRepository.findByMemberentityAndLecture(user, lecture);
+		if(check.isPresent()) {
+		LectureIntroduce li = introduceRepository.findByLecture(lecture);
+		li.setContent(request.getContent());
+		introduceRepository.save(li);
+		LectureIntroduceDTO dto = new LectureIntroduceDTO();
+		dto.setContent(li.getContent());
+		dto.setLectureId(li.getLecture().getLectureid());
+		return dto;
+		} else {
+			throw new RestApiException(UserErrorCode.USERHASNOTLECTURE);
+		}
+	}
+
+	public void fullintrosave(Lecture savedlecture, String lectureFullIntro) {
+		LectureIntroduce intro = new LectureIntroduce();
+		intro.setLecture(savedlecture);
+		intro.setContent(lectureFullIntro);
+		introduceRepository.save(intro);
 	}
 
 //	 public CreateLectureRequestDto getLectureDetailsMapping(Long lectureId) {
