@@ -2,7 +2,7 @@ package com.devrun.dto;
 
 import java.util.Date;
 
-import com.devrun.entity.Couponregicode.couponstate;
+import com.devrun.entity.CouponViewEntity.couponstate;
 
 public interface CouponListInCart {
 	Long getlectureid();

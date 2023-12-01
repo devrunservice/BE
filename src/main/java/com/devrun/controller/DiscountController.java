@@ -63,7 +63,7 @@ public class DiscountController {
                     // couponstate를 viewentity에다 만들어서 직접 호출
                     // 3. 쿠폰 상태 검증
                     if (couponstate.ACTIVE.equals(state)) {
-                    	String target = coupon.getTarget();
+                    	String target = coupon.getLecturename();
                         int discountRate = coupon.getDiscountrate();
                         System.err.println(discountRate);
                         System.err.println(target);

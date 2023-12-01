@@ -34,7 +34,11 @@ public class CartService {
 	private final MyLectureService myLectureService;
 	private final PointRepository pointRepository;
 	private final CouponViewRepository couponViewRepository;
-
+	/**
+	 * 유저의 장바구니에 담긴 강의들을 보여줍니다.
+	 * @param userEntity
+	 * @return
+	 */
 	public List<LectureInfo> showlectureInfo(MemberEntity userEntity) {
 
 		List<Cart> Carts = cartRepo.findAllByMemberEntity(userEntity);
@@ -49,7 +53,13 @@ public class CartService {
 
 		return lecutreInfolist;
 	}
-
+	
+	/**
+	 * 장바구니 화면에 보여질 유저의 정보를 보여줍니다.
+	 * 유저의 이름 , 이메일 , 연락처 , 보유 포인트, 유저구별코드
+	 * @param userEntity
+	 * @return
+	 */
 	public Map<String, Object> showBuyerInfo(MemberEntity userEntity) {
 
 		Map<String, Object> BuyerInfo = new HashMap<String, Object>();
@@ -75,15 +85,29 @@ public class CartService {
 		return BuyerInfo;
 
 	}
-
+	
+	/**
+	 * 유저가 가지고 있는 쿠폰에 대한 정보를 보여줍니다.
+	 * 강의 고유 아이디 , 강의명 , 쿠폰코드 , 할인율 , 만료일 , 쿠폰상태(사용 가능 , 사용 불가 , 기간 만료 , 사용됨)
+	 * @param userEntity
+	 * @return
+	 */
 	public List<CouponListInCart> showUserCoupon(MemberEntity userEntity) {
-
-		List<CouponListInCart> couponListInCart = couponViewRepository.showUserCouponByUserno(userEntity.getUserNo());
-
+		List<CouponListInCart> couponListInCart = couponViewRepository.findByUserno(userEntity.getUserNo());
 		return couponListInCart;
 
 	}
-
+	/**
+	 * 장바구니에 강의를 추가합니다.
+	 * 해당 작업 시 예외가 발생하면 해당 처리 후 관련된 메세지를 반환합니다.
+	 * 예외 :
+	 * 이미 구매한 강의인 경우
+	 * 강의를 장바구니에서 삭제했다가 다시 담은 경우
+	 * 강의를 장바구니에 이미 담은 경우
+	 * @param userEntity
+	 * @param lectureId
+	 * @return
+	 */
 	public String putInCart(MemberEntity userEntity, Long lectureId) {
 		String resultMsg;
 		Lecture lecture = lectureservice.findByLectureID(lectureId);
@@ -110,7 +134,11 @@ public class CartService {
 			return resultMsg;
 		}
 	}
-
+	/**
+	 * 장바구니에서 보이지 않도록 삭제 처리합니다.
+	 * @param userEntity
+	 * @param cartId
+	 */
 	public void deleteInCart(MemberEntity userEntity, List<Long> cartId) {
 		List<Cart> cartEntitys = cartRepo.findByMemberEntityAndCartnoIn(userEntity, cartId);
 		for (Cart c : cartEntitys) {
