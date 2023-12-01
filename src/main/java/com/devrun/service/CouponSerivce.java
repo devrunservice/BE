@@ -16,6 +16,8 @@ import com.devrun.dto.CouponListForStudent;
 import com.devrun.entity.CouponIssued;
 import com.devrun.entity.Couponregicode;
 import com.devrun.entity.MemberEntity;
+import com.devrun.exception.CommonErrorCode;
+import com.devrun.exception.RestApiException;
 import com.devrun.repository.CouponIssuedRepository;
 import com.devrun.repository.CouponViewRepository;
 import com.devrun.repository.CouponregicodeRepository;
@@ -33,15 +35,20 @@ public class CouponSerivce {
 	private final CouponregicodeRepository couponregicodeRepository;
 	private final CouponViewRepository couponviewRepositroy;
 	private final LectureRepository lectureRepository;
-
+	
+	/**
+	 * 요청된 정보를 바탕으로 쿠폰 데이터를 생성하고 데이터베이스에 저장합니다.
+	 * @param couponIssuanceRequestDTO
+	 * @param mentoEntity
+	 * @return
+	 */
 	public CouponIssuanceRequestDTO saveCouponDetail(CouponIssuanceRequestDTO couponIssuanceRequestDTO,
 			MemberEntity mentoEntity) {
 		Lecture lectureEntity = lectureRepository.findByLectureNameAndMentoId(couponIssuanceRequestDTO.getLectureName(),
 				mentoEntity);
 		if (lectureEntity == null) {
-			throw new NullPointerException("Lecture not found");
+			throw new RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND);
 		}
-		;
 
 		CouponIssued couponeIssued = new CouponIssued();
 		couponeIssued.setIssueduser(mentoEntity);
@@ -52,43 +59,69 @@ public class CouponSerivce {
 		couponeIssued.setQuantity(couponIssuanceRequestDTO.getQuantity());
 
 		couponIssuedRepository.save(couponeIssued);
-
+		saveCouponCode(couponeIssued);
 		return couponIssuanceRequestDTO;
 	}
-
-	public void saveCouponCode(int q, CouponIssued couponBlueprint) {
+	
+	/**
+	 * 발행 수 만큼 랜덤한 쿠폰 코드를 생성하여 데이터베이스에 저장합니다.<br>
+	 * 생성 규칙(총17자) : 앞5글자는 숫자 - 뒤12글자는 숫자, 알파벳 대문자, 알파벳 소문자 조합
+	 * @param couponeIssued
+	 */
+	public void saveCouponCode(CouponIssued couponeIssued) {
 
 		List<Couponregicode> codelist = new ArrayList<Couponregicode>();
 
 		int i = 1;
-		while (i <= q) {
+		while (i <= couponeIssued.getQuantity()) {
 			Couponregicode couponregicode = new Couponregicode();
 			String code = new CouponCodeGenerator().toString();
 			couponregicode.setCouponcode(code);
-			couponregicode.setIssuedno(couponBlueprint);
+			couponregicode.setIssuedno(couponeIssued);
 			codelist.add(couponregicode);
 			i++;
 		}
 		couponregicodeRepository.saveAll(codelist);
 	}
-
+	
+	/**
+	 * 쿠폰 코드가 코드 생성 규칙을 위배하는 지를 확인합니다.<br>
+	 * 생성 규칙(총17자) : 앞5글자는 숫자 - 뒤12글자는 숫자, 알파벳 대문자, 알파벳 소문자 조합
+	 * @param code
+	 * @return
+	 */
 	public boolean validate(String code) {
 		Pattern pattern = Pattern.compile("\\d{5}-[A-Za-z0-9]{12}");
 		Matcher matcher = pattern.matcher(code);
 
 		return matcher.find();
 	}
-
+	
+	/**
+	 * 해당 쿠폰 코드가 존재하는 지 확인합니다.
+	 * @param code
+	 * @return
+	 */
 	public int isequal(String code) {
-		int i = couponregicodeRepository.countByCouponcode(code);
-		return i;
+		return couponregicodeRepository.countByCouponcode(code);
 	}
-
+	
+	/**
+	 * 해당 쿠폰을 등록하는 DB 프로시저를 실행하고 그 결과 메세지를 반환합니다.
+	 * @param code
+	 * @param user
+	 * @return
+	 */
 	public String checkcoupon(String code, String user) {
-		String res = couponregicodeRepository.getCouponStatus(code, user);
-		return res;
+		return couponregicodeRepository.getCouponStatus(code, user);
 	}
-
+	
+	/**
+	 * 해당 쿠폰이 사용자가 발행한 쿠폰인지 검증하고, 삭제하거나, 복구합니다.
+	 * @param userEntity
+	 * @param TargetCouponCode
+	 * @return
+	 */
 	public String removecode(MemberEntity userEntity, String TargetCouponCode) {
 
 		List<CouponIssued> couponIssuedlist = couponIssuedRepository.findAllByIssueduser(userEntity);
@@ -103,7 +136,6 @@ public class CouponSerivce {
 		String rsl = "해당 멘토가 발행한 쿠폰이 아닙니다.";
 		for (Couponregicode couponregicode : couponcodes) {
 			if (couponregicode.getCouponcode().equals(TargetCouponCode)) {
-				System.out.println("해당 멘토가 발행한 쿠폰으로 확인 되었음");
 				if (couponregicode.getState().toString().equals("REMOVED")) {
 					couponregicodeRepository.removecode(TargetCouponCode, "ACTIVE");
 					rsl = "복구 처리 되었습니다.";
@@ -116,16 +148,23 @@ public class CouponSerivce {
 		}
 		return rsl;
 	}
-
+	
+	/**
+	 * 학생 사용자가 가진 쿠폰을 보여줍니다.
+	 * @param userEntity
+	 * @return
+	 */
 	public List<CouponListForStudent> readmycoupon(MemberEntity userEntity) {
-		List<CouponListForStudent> couponlist = couponviewRepositroy.findAllByUserno2(userEntity.getUserNo());
-		return couponlist;
+		return couponviewRepositroy.findByUserno2(userEntity.getUserNo());
 	}
-
+	
+	/**
+	 * 강사 사용자가 발행한 쿠폰을 보여줍니다.
+	 * @param userEntity
+	 * @param pageable
+	 * @return
+	 */
 	public Page<CouponListForMento> readCouponMadeByMento(MemberEntity userEntity, Pageable pageable) {
-		Page<CouponListForMento> couponcodes = couponregicodeRepository.findCouponsByIssuedUser(userEntity.getUserNo(),
-				pageable);
-		return couponcodes;
-
+		return couponregicodeRepository.findCouponsByIssuedUser(userEntity.getUserNo(),pageable);
 	}
 }

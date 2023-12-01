@@ -20,21 +20,8 @@ public interface CouponViewRepository extends JpaRepository<CouponViewEntity, Lo
 
 	List<CouponViewEntity> findAllByUserno(int userNo);
 	
-	@Query(value = "SELECT d.target AS lecturename, d.couponcode AS couponcode, d.discountrate AS discountrate , d.expirydate AS expirydate, d.issueddate AS issueddate, d.state AS state, ROW_NUMBER() OVER() AS issuedno FROM coupon_manage d WHERE d.userno = :userno ORDER BY target ASC, issueddate DESC", nativeQuery = true)
-	List<CouponListForStudent> findAllByUserno2(@Param("userno") int userNo);
+	List<CouponListInCart> findByUserno(int userNo);
 	
-	@Query(value = "SELECT"	
-			+ " cm.target AS lecturename,\r\n"
-			+ "	cm.targetid AS lectureid,\r\n"
-			+ "	cm.discountrate AS discountrate,\r\n"
-			+ "	cm.expirydate AS expirydate,\r\n"
-			+ "	cm.state AS state,\r\n"
-			+ "	cm.couponcode AS couponcode\r\n"
-			+ "FROM\r\n"
-			+ "(SELECT ca.lectureid , lt.lecture_name AS lecture_name, lt.lecture_thumbnail AS lecture_thumbnail, lt.lecture_intro AS lecture_intro, lt.lecture_price AS lecture_price, ca.user_no AS user_no\r\n"
-			+ "FROM lecture AS lt JOIN cart AS ca ON lt.lectureid = ca.lectureid WHERE ca.user_no= :userno) AS join_lt_ca RIGHT JOIN coupon_manage AS cm ON join_lt_ca.lecture_name = cm.target WHERE cm.userno = :userno", nativeQuery = true)
-	List<CouponListInCart> showUserCouponByUserno(@Param("userno") int userNo);
-
-
-
+	@Query(value = "SELECT lecturename, couponcode, discountrate , expirydate, issueddate, state, ROW_NUMBER() OVER() AS issuedno FROM coupon_manage WHERE userno = :userno ORDER BY lecturename ASC, issueddate DESC", nativeQuery = true)
+	List<CouponListForStudent> findByUserno2(@Param("userno") int userNo);
 }
