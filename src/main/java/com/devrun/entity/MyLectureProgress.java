@@ -59,6 +59,5 @@ public class MyLectureProgress {
 	@Column(name = "lastviewdate" , nullable = true)
 	@Comment("마지막 영상 시청 시간")
     @LastModifiedDate
-    @Temporal(TemporalType.DATE)
 	private Date lastviewdate;	
 }
