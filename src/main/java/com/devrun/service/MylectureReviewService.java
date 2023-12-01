@@ -28,24 +28,21 @@ public class MylectureReviewService {
 
 	public void saveReview(MemberEntity userEntity, ReviewRequest reviewRequest) {
 		Lecture lecture = lectureService.findByLectureID(reviewRequest.getLectureId());
-		myLectureService.verifyUserHasLecture(userEntity, lecture);
-		List<MyLecture> myLectureList = myLectureService.verifyUserHasLecture(userEntity , lecture);
-		if(myLectureList.size() == 1) {
+		MyLecture myLectureList = myLectureService.verifyUserHasLecture(userEntity , lecture);
+		if(myLectureList.getLectureProgress() == 100) {
 			MylectureReview mylectureReview = new MylectureReview(
-					myLectureList.get(0),
+					myLectureList,
 					reviewRequest.getReviewContent(), 
 					reviewRequest.getReviewRating()
 					);
 			reviewRepository.save(mylectureReview);
+		} else {
+			throw new NoSuchElementException("This User isn't complete this Lecture!");
 		}
 		
 	}
 	
-	public void removeReview(MemberEntity userEntity, Long mylectureReviewNo) {
-		MylectureReview myReview = verifyUserHasReview(userEntity , mylectureReviewNo);
-		reviewRepository.delete(myReview);
-		
-	}
+
 	
 	public MylectureReview verifyUserHasReview(MemberEntity userEntity, Long mylectureReviewNo) {
 		Optional<List<MyLecture>> mylecture = mylectureRepository.findByMemberentity(userEntity);

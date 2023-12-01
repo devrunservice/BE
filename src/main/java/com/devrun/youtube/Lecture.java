@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.servlet.http.HttpServletResponse;
@@ -23,6 +24,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.devrun.entity.MemberEntity;
+import com.devrun.entity.PaymentEntity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.Data;
@@ -78,7 +80,11 @@ public class Lecture {
 
 	@ElementCollection
 	private List<String> lectureTag;
+	
 
+	@Column(nullable = true)
+	private int buyCount = 0;	
+	
 	@ManyToOne
 	@JoinColumn(name = "categoryNo")
 	private LectureCategory lectureCategory;
@@ -86,12 +92,22 @@ public class Lecture {
 	@ManyToOne
 	@JoinColumn(name = "userNo")
 	private MemberEntity mentoId;
-
+	
+	//연관 관계 스택오버플로우 발생------------------------------
+	
 	@OneToMany(mappedBy = "lecture", cascade = CascadeType.REMOVE)
-	@JsonManagedReference
-	private List<LectureSection> lectureSections;
-
-	public void setLectureSection(List<LectureSection> sections) {
+	@JsonManagedReference	
+	private List<LectureSection> lectureSections;	
+	
+	//---------------------------------------------------
+	// paymentEntity <-> lecture  <-> lectureSections 
+	// lecturesections을 주석처리하면 오류 X 
+	// 고민중..
+	
+	
+	
+	public void setLectureSections(List<LectureSection> sections) {
+	    this.lectureSections = sections;
 	}
 
 	public HttpServletResponse getId() {

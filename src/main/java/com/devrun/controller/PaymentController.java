@@ -4,8 +4,10 @@ package com.devrun.controller;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.devrun.dto.PaymentDTO;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.PaymentEntity;
@@ -32,8 +35,11 @@ import com.devrun.repository.PaymentRepository;
 import com.devrun.repository.PointHistoryRepository;
 import com.devrun.repository.PointRepository;
 import com.devrun.service.MemberService;
+import com.devrun.service.MyLectureService;
 import com.devrun.service.PaymentService;
 import com.devrun.util.JWTUtil;
+import com.devrun.youtube.Lecture;
+import com.devrun.youtube.LectureRepository;
 
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -62,11 +68,17 @@ public class PaymentController {
 	
 	@Autowired
 	private PointHistoryRepository pointHistoryRepository;
+	
+	@Autowired
+	private LectureRepository lectureRepository;
+	
+	@Autowired
+	private MyLectureService myLectureService;
 
 	// 결제 정보 db에 저장
-			@PostMapping("/savePaymentInfo")
-			@ApiOperation("결제 완료 시 db에 필요한 정보들을 저장합니다.")
-	        public ResponseEntity<String> savePaymentInfo(@RequestBody List<PaymentDTO> paymentDTOList) {
+	@PostMapping("/savePaymentInfo")
+	@ApiOperation("결제 완료 시 db에 필요한 정보들을 저장합니다.")
+	 public ResponseEntity<String> savePaymentInfo(@RequestBody List<PaymentDTO> paymentDTOList) {
 				
 				LocalDateTime dateTime = LocalDateTime.now();
 				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd a hh:mm:ss", new Locale("ko"));
@@ -113,34 +125,47 @@ public class PaymentController {
 			    //결제 정보 사용자 이름으로 memberEntity에서 찾은후, 밑에 추가해주기. 
 			    //외래키가 user_no지만 memberEntity로 정의해서 저렇게 넣어줘야함.
 			    MemberEntity memberEntity = memberEntityRepository.findByUserNo(usrno);
-			    System.err.println(memberEntity);
-				
-				try {			
-					List<PaymentEntity> paymentList = new ArrayList<>();
+			   
+				   
+
+				 // 리스트로 들어오는 모든 강의 정보 먼저 저장시킴
+			     // Map 활용
+				   Map<String, Lecture> lectureMap = new HashMap<>();				    
+				   for (PaymentDTO paymentDTO : paymentDTOList) {
+				        String lectureName = paymentDTO.getName();
+				        Lecture lecture = lectureRepository.findByLectureName(lectureName);
+				        lectureMap.put(lectureName, lecture);
+				    }
+			    System.err.println(memberEntity);		
+				try {		
+					List<PaymentEntity> paymentList = new ArrayList<>();					
 			        for (PaymentDTO paymentDTO : paymentDTOList) {
 			        PaymentEntity paymentEntity = new PaymentEntity();
 			        paymentEntity.setName(paymentDTO.getName());
 			        paymentEntity.setPaid_amount(paymentDTO.getPaid_amount());
-		            paymentEntity.setBuyer_email(paymentDTO.getBuyer_email());
-		            paymentEntity.setBuyer_name(paymentDTO.getBuyer_name());
 		            paymentEntity.setImp_uid(paymentDTO.getImp_uid());
 		            paymentEntity.setMerchant_uid(paymentDTO.getMerchant_uid());
 		            paymentEntity.setReceipt_url(paymentDTO.getReceipt_url());
-		            paymentEntity.setBuyer_tel(paymentDTO.getBuyer_tel()); 
 					paymentEntity.setPaymentDate(paymentDate);
-					paymentEntity.setStatus("0");	
-					System.out.println(paymentEntity);	
+					paymentEntity.setStatus("0");					
+					
 					paymentEntity.setMemberEntity(memberEntity);
 					
-		            paymentList.add(paymentEntity);	            
+					// 강의이름을 다시 가져오고 map key value값으로 사용해서 매핑되는 lectureid값 넣어줌
+				    String lectureName = paymentDTO.getName();
+				    Lecture lecture = lectureMap.get(lectureName);
+				    paymentEntity.setLecture(lecture);					
+		            paymentList.add(paymentEntity);
+		        
+		          //구매한 강의를 내 수강 목록 DB에 등록
+				  //Mylecture 와 MylectureProgress 등록
+		          //이부분도 한개 이상의 강의가 들어왔을 경우 처리해야해서 for문안으로 넣어줌
+				    myLectureService.registLecture(memberEntity, lecture);
+				    
 			       }		    
 				    pointRepository.save(pointEntity);			    
-			        
-				        System.err.println(paymentList);
-						paymentService.savePaymentInfo(paymentList);
-						System.err.println(pointEntity);				
-					   
-					  
+					paymentService.savePaymentInfo(paymentList);
+					
 					    //포인트 사용했으면 실행
 					    if(userPoint > 0) {
 					    	
@@ -184,8 +209,8 @@ public class PaymentController {
 			            historyEntityGain.setExplanation(gainExplanation);
 			            pointHistoryRepository.save(historyEntityGain); 
 			            
-					   }
-					
+					   }			    
+					  					
 					return ResponseEntity.ok("결제 정보가 성공적으로 저장되었습니다.");
 				} catch (Exception e) {
 					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("결제 정보 저장에 실패했습니다.");
@@ -227,11 +252,12 @@ public class PaymentController {
 
 		        if (paymentsPage.isEmpty()) {
 		            // 결제 정보가 없을 경우에 대한 처리
-		            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("결제 정보가 없습니다.");
+		            return ResponseEntity.status(HttpStatus.OK).body("결제 정보가 없습니다.");
 		        }
 
 		        return ResponseEntity.ok(paymentsPage);
-		}
+		}		
+		
 
 		
 	

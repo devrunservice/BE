@@ -26,4 +26,5 @@ public interface CartRepo extends JpaRepository<Cart, Long> {
 	Long countByMemberEntityAndLecture(MemberEntity userEntity, Lecture lecture);
 
 	Cart findByMemberEntityAndLecture(MemberEntity userEntity, Lecture lecture);
+
 }

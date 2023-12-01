@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.util.Base64;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -125,42 +126,50 @@ public class NoticeController {
 		    @ApiResponse(code = 404, message = "공지사항을 찾을 수 없습니다."),
 		    @ApiResponse(code = 500, message = "내부 서버 오류")})
 		public ResponseEntity<?> getNotice(@PathVariable int noticeNo, HttpServletRequest request, HttpServletResponse response) {
-		    try {
 		        Notice notice = noticeService.getNoticeByNoticeNo(noticeNo);
-		        System.out.println(notice);
+		        
 		        if (notice == null) {
 		            return ResponseEntity.status(404).body("Notice not found");
 		        }
 		        
 		        Cookie[] cookies = request.getCookies();
-		        ResponseCookie rescookie = null;
+		        ResponseCookie resCookie = null;
 		        boolean isCookie = false;
 
-		        for (int i = 0; cookies != null && i < cookies.length; i++) {
-		            if (cookies[i].getName().equals("postView")) {
-		                Cookie cookie = cookies[i];
+		        if (cookies != null) {
+		            for (Cookie cookie : cookies) {
+		                if ("postView".equals(cookie.getName())) {
+		                	
+		                    // 쿠키 값을 파싱하여 이미 본 게시물인지 확인
+		                    String cookieValue = cookie.getValue();
+		                    if (!cookieValue.contains("[" + notice.getNoticeNo() + "]")) {
+		                        // 조회수 증가
+		                        notice.setViewCount(notice.getViewCount() + 1);
+		                        noticeService.insert(notice);
 
-		                // 쿠키 값을 파싱하여 이미 본 게시물인지 확인
-		                String cookieValue = cookie.getValue();
-		                if (!cookieValue.contains("[" + notice.getNoticeNo() + "]")) {
-		                    // 조회수 증가
-		                    notice.setViewCount(notice.getViewCount() + 1);
-		                    noticeService.insert(notice);
+		                        // 쿠키 값에 해당 게시글 번호를 추가
+		                        cookieValue = cookieValue + "[" + notice.getNoticeNo() + "]";
+		                        resCookie = ResponseCookie
+		                                .from("postView", cookieValue)
+		                                .path("/")
+		                                .sameSite("None")
+		                                .secure(true)
+		                                .httpOnly(true)
+		                                .maxAge(Duration.ofDays(1))
+		                                .build();
+		                    } else {
+		    		            resCookie = ResponseCookie.from("postView", cookieValue)
+		    		                    .path("/")
+		    		                    .sameSite("None")
+		    		                    .secure(true)
+		    		                    .httpOnly(true)
+		    		                    .maxAge(Duration.ofDays(1))
+		    		                    .build();
+		                    }
 
-		                    // 쿠키 값에 해당 게시글 번호를 추가
-		                    cookieValue = cookieValue + "[" + notice.getNoticeNo() + "]";
-		                    rescookie = ResponseCookie
-		                    		.from("postView", cookieValue)
-		                            .path("/")
-		                            .sameSite("None")
-		                            .secure(true)
-		                            .httpOnly(true)
-		                            .maxAge(Duration.ofDays(1))
-		                            .build();
+		                    isCookie = true;
+		                    break;
 		                }
-		                
-		                isCookie = true;
-		                break;
 		            }
 		        }
 
@@ -169,7 +178,8 @@ public class NoticeController {
 		            // 조회수 증가
 		            notice.setViewCount(notice.getViewCount() + 1);
 		            noticeService.insert(notice);
-		            rescookie = ResponseCookie.from("postView", "[" + notice.getNoticeNo() + "]")
+
+		            resCookie = ResponseCookie.from("postView", "[" + notice.getNoticeNo() + "]")
 		                    .path("/")
 		                    .sameSite("None")
 		                    .secure(true)
@@ -179,12 +189,9 @@ public class NoticeController {
 		        }
 
 		        // ResponseCookie를 HTTP 응답 헤더에 추가
-		        response.addHeader("Set-Cookie", rescookie.toString());
+		        response.addHeader("Set-Cookie", resCookie.toString());
 
 		        return ResponseEntity.status(200).body(notice.toDTO());
-		    } catch (Exception e) {
-		        return ResponseEntity.status(500).body("Internal Server Error");
-		    }
 		}
 		
 	

@@ -1,4 +1,4 @@
-package com.devrun.youtube;
+package com.devrun.repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,21 +12,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.devrun.youtube.Lecture;
 import com.devrun.entity.MemberEntity;
+import com.devrun.youtube.LectureCategory;
 
 @Repository
-public interface LectureRepository extends JpaRepository<Lecture, Long>, JpaSpecificationExecutor<Lecture> {
-	
-	@Query(value = "SELECT * FROM lecture", nativeQuery = true)	
-	Page<Lecture> findAll(PageRequest pageRequest);
-	
+public interface LectureSearchRepository extends JpaRepository<Lecture, Long>, JpaSpecificationExecutor<Lecture> {
+
 	Lecture findByLectureName(String lecturename);
 
 	@Query(value = "SELECT * FROM lecture WHERE lecture_name LIKE %:keyword% OR lecture_intro LIKE %:keyword%", nativeQuery = true)
 	Page<Lecture> findByLectureNameContainsOrLectureIntroContains(@Param("keyword") String keyword,
 			PageRequest pageable);
 
-	@Query(value = "SELECT * FROM lecture WHERE lecture_name LIKE %:keyword% OR lecture_intro LIKE %:keyword% OR user_no IN :mentoIds", nativeQuery = true)
+	@Query(value = "SELECT * FROM lecture WHERE lecture_name LIKE %:keyword% OR lecture_intro LIKE %:keyword% OR mento_id IN :mentoIds", nativeQuery = true)
 	Page<Lecture> findByLectureNameContainsOrLectureIntroContainsOrMentoIdIn(@Param("keyword") String keyword,
 			@Param("mentoIds") List<MemberEntity> m1, Pageable pageable);
 
@@ -43,19 +42,5 @@ public interface LectureRepository extends JpaRepository<Lecture, Long>, JpaSpec
 	Lecture findByLectureNameAndMentoId(String lectureName, MemberEntity mentoEntity);
 
 	Optional<Lecture> findByLectureid(Long lectureid);
-	
-	@Query(value = "SELECT * FROM lecture WHERE category_no IN :categoryNumbers "
-			+ "AND (lecture_name LIKE %:keyword% OR lecture_intro LIKE %:keyword% OR user_no IN :mentoIds)", nativeQuery = true)
-	Page<Lecture> findCategoryInAndKeywordIn(@Param("categoryNumbers") List<LectureCategory> categories, @Param("keyword") String keyword, @Param("mentoIds") List<MemberEntity> members, PageRequest pageRequest);
-
-	@Query(value = "SELECT * FROM lecture WHERE category_no = :categoryNumber "
-			+ "AND (lecture_name LIKE %:keyword% OR lecture_intro LIKE %:keyword% OR user_no IN :mentoIds)", nativeQuery = true)
-	Page<Lecture> findCategoryInAndKeywordIn(@Param("categoryNumber") LectureCategory categories, @Param("keyword") String keyword, @Param("mentoIds") List<MemberEntity> members, PageRequest pageRequest);
-
-    
-
-
-
-
 
 }

@@ -17,7 +17,6 @@ public class VideoService {
             Video video = videoOptional.get();
             VideoDto videoDto = new VideoDto();
             //videoDto.setUploadDate(video.getUploadDate());
-            videoDto.setFileName(video.getFileName());
             videoDto.setVideoId(video.getVideoId());
             //videoDto.setTotalPlayTime(video.getTotalPlayTime());
             videoDto.setVideoLink(video.getVideoLink());
@@ -26,47 +25,10 @@ public class VideoService {
             return videoDto;
         } else {
             return null;
-        }
+        }        
     }
     
     
-    public VideoDto getVideoDetails(Long videoId) throws NotFoundException {
-	    Video video = videoRepository.findById(videoId)
-	        .orElseThrow(() -> new NotFoundException());
-	    
-	    VideoDto videoDto = new VideoDto();
-	    videoDto.setVideoId(video.getVideoId());
-	    return videoDto;
-	}
-
-	
-    public VideoDto getVideoPageData(Long videoId) throws NotFoundException {
-        Video video = videoRepository.findById(videoId)
-                .orElseThrow(() -> new NotFoundException());
-
-        VideoDto pageDataDto = new VideoDto();
-        pageDataDto.setVideoId(video.getVideoId());
-        pageDataDto.setVideoTitle(video.getVideoTitle());
-
-        // 관련 영상의 링크
-        String videoLink = video.getVideoLink();
-        pageDataDto.setVideoLink(videoLink);
-
-        // 이전 강의 영상을 확인하고 링크 설정
-        Video previousVideo = videoRepository.findPreviousVideoByVideoIdLessThan(videoId);
-        if (previousVideo != null) {
-            String previousVideoLink = previousVideo.getVideoLink();
-            pageDataDto.setVideoLink(previousVideoLink);
-        }
-
-        // 다음 강의 영상을 확인하고 링크 설정
-        Video nextVideo = videoRepository.findNextVideoByVideoIdGreaterThan(videoId);
-        if (nextVideo != null) {
-            String nextVideoLink = nextVideo.getVideoLink();
-            pageDataDto.setVideoLink(nextVideoLink);
-        }
-
-        return pageDataDto;
-    }
+   
     
 }

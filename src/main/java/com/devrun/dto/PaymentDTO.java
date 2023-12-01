@@ -10,15 +10,11 @@ import lombok.ToString;
 public class PaymentDTO {
 	
 	public String name;
-	public String buyer_email;
-	public String buyer_name;
-	public String buyer_tel;
 	public String merchant_uid;
 	public String imp_uid;
 	public String couponCode;
 	public int paid_amount;
 	public String receipt_url;
 	public int userno;
-	public int mypoint;	
-	
+	public int mypoint;		
 }

@@ -34,6 +34,8 @@ public class CouponViewEntity {
     private int quantity;
 
     private String target;
+    
+    private Long targetid;
    
     @Enumerated(EnumType.STRING)
     private couponstate state; // 이 부분 추가

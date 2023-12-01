@@ -37,23 +37,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(RestApiException.class)
-    public ResponseEntity<Object> handleQuizException(final RestApiException e) {
-        final ErrorCode errorCode = e.getErrorCode();
+    public ResponseEntity<Object> handleCustomException(RestApiException e) {
+        ErrorCode errorCode = e.getErrorCode();
         return handleExceptionInternal(errorCode);
     }
-
+    
     private ResponseEntity<Object> handleExceptionInternal(ErrorCode errorCode) {
         return ResponseEntity.status(errorCode.getHttpStatus())
                 .body(makeErrorResponse(errorCode));
     }
-
+    
     private ErrorResponse makeErrorResponse(ErrorCode errorCode) {
         return ErrorResponse.builder()
                 .code(errorCode.name())
                 .message(errorCode.getMessage())
                 .build();
     }
-
+    
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<Object> nullex(final NullPointerException e) {
         Map<String, String> responeMap = new HashMap<>();
@@ -64,20 +64,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         
         return ResponseEntity.badRequest().body(responeMap);
     }
-
-    @ExceptionHandler(value = ConstraintViolationException.class) // 유효성 검사 실패 시 발생하는 예외를 처리
-    protected ResponseEntity handleException(ConstraintViolationException exception) {
+    //not null 처리한 필드에 null이 들어가는 경우에도 ConstraintViolationException이 발생
+    //컬럼의 제약 조건 위배 시 발생하는 예외
+    @ExceptionHandler(value = ConstraintViolationException.class)
+    protected ResponseEntity<Object> handleException(ConstraintViolationException exception) {
         return ResponseEntity.badRequest().body("Failed validation\n" + getResultMessage(exception.getConstraintViolations().iterator()));
-    }
-
-//    @ExceptionHandler(value = HttpMessageNotReadableException.class)
-    @Override
-    protected ResponseEntity<Object> handleHttpMessageNotReadable(
-            HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-            Map<String ,String> responemap = new HashMap<>();
-            responemap.put("message" , "Can't Read HTTP Request, Check Your Request data type. ex json, xml, text, Number, Array, Object etc. -By DevRun");
-
-        return handleExceptionInternal(ex, responemap, headers, status, request);
     }
 
     protected String getResultMessage(final Iterator<ConstraintViolation<?>> violationIterator) {
@@ -101,19 +92,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return resultMessageBuilder.toString();
     }
 
+
+//    @ExceptionHandler(value = HttpMessageNotReadableException.class)
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+            Map<String ,String> responemap = new HashMap<>();
+            responemap.put("message" , "Can't Read HTTP Request, Check Your Request data type. ex json, xml, text, Number, Array, Object etc. -By DevRun");
+
+        return handleExceptionInternal(ex, responemap, headers, status, request);
+    }
+
     protected String getPopertyName(String propertyPath) {
         return propertyPath.substring(propertyPath.lastIndexOf('.') + 1); // 전체 속성 경로에서 속성 이름만 가져온다.
     }
 
-    @ExceptionHandler(value = StringIndexOutOfBoundsException.class)
-    protected ResponseEntity stringIndexOutOfBoundsException(final StringIndexOutOfBoundsException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
-
-    @ExceptionHandler(InvalidDataAccessResourceUsageException.class)
-    protected ResponseEntity InvalidDataAccessResourceUsageException(final InvalidDataAccessResourceUsageException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
 
 
 }

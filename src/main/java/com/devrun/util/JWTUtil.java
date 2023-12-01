@@ -49,8 +49,8 @@ public class JWTUtil {
     private CustomUserDetailsService userDetailsService;
     
     @Autowired
-//    private CaffeineCache redisCache;
-    private RedisCache redisCache;
+    private CaffeineCache redisCache;
+//    private RedisCache redisCache;
     
     // 시그니쳐 알고리즘 설정
     private static final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;

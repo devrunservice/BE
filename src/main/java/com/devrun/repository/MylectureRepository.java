@@ -13,10 +13,15 @@ import com.devrun.youtube.Lecture;
 
 public interface MylectureRepository extends JpaRepository<MyLecture, Long> {
 
-	Optional<List<MyLecture>> findByMemberentityAndLecture(MemberEntity userEntity, Lecture lecture);
+	Optional<MyLecture> findByMemberentityAndLecture(MemberEntity userEntity, Lecture lecture);
 
 	Optional<List<MyLecture>> findByMemberentity(MemberEntity userEntity);
 
 	Page<MyLecture> findByMemberentity(MemberEntity userEntity, PageRequest pageRequest);
+
+	Page<MyLecture> findByMemberentityAndLectureProgressLessThan(MemberEntity userEntity, int i, PageRequest pageRequest);
+
+	Page<MyLecture> findByMemberentityAndLectureProgressEquals(MemberEntity userEntity, int i, PageRequest pageRequest);
+
 
 }
