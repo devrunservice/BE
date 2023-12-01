@@ -1,6 +1,7 @@
 package com.devrun.controller;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -95,8 +97,10 @@ public class TestController {
 	
 	@GetMapping("/redirect_test")
 	public ResponseEntity<?> redirect_test(){
+		HttpHeaders headers = new HttpHeaders();
 		System.out.println("리다이렉트 테스트");
-		return ResponseEntity.ok().body("ok");
+		headers.setLocation(URI.create("https://devrun.net/redirect_test?status=success"));
+        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
 	}
 	
 	
