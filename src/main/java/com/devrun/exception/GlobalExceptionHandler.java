@@ -66,31 +66,31 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
     //not null 처리한 필드에 null이 들어가는 경우에도 ConstraintViolationException이 발생
     //컬럼의 제약 조건 위배 시 발생하는 예외
-    @ExceptionHandler(value = ConstraintViolationException.class)
-    protected ResponseEntity<Object> handleException(ConstraintViolationException exception) {
-        return ResponseEntity.badRequest().body("Failed validation\n" + getResultMessage(exception.getConstraintViolations().iterator()));
-    }
+//    @ExceptionHandler(value = ConstraintViolationException.class)
+//    protected ResponseEntity<Object> handleException(ConstraintViolationException exception) {
+//        return ResponseEntity.badRequest().body("Failed validation\n" + getResultMessage(exception.getConstraintViolations().iterator()));
+//    }
 
-    protected String getResultMessage(final Iterator<ConstraintViolation<?>> violationIterator) {
-        final StringBuilder resultMessageBuilder = new StringBuilder();
-        while (violationIterator.hasNext() == true) {
-            final ConstraintViolation<?> constraintViolation = violationIterator.next();
-            resultMessageBuilder
-                    .append("['")
-                    .append(getPopertyName(constraintViolation.getPropertyPath().toString())) // 유효성 검사가 실패한 속성
-                    .append("' is '")
-                    .append(constraintViolation.getInvalidValue()) // 유효하지 않은 값
-                    .append("'. ")
-                    .append(constraintViolation.getMessage()) // 유효성 검사 실패 시 메시지
-                    .append("]");
-
-            if (violationIterator.hasNext() == true) {
-                resultMessageBuilder.append(", ");
-            }
-        }
-
-        return resultMessageBuilder.toString();
-    }
+//    protected String getResultMessage(final Iterator<ConstraintViolation<?>> violationIterator) {
+//        final StringBuilder resultMessageBuilder = new StringBuilder();
+//        while (violationIterator.hasNext() == true) {
+//            final ConstraintViolation<?> constraintViolation = violationIterator.next();
+//            resultMessageBuilder
+//                    .append("['")
+//                    .append(getPopertyName(constraintViolation.getPropertyPath().toString())) // 유효성 검사가 실패한 속성
+//                    .append("' is '")
+//                    .append(constraintViolation.getInvalidValue()) // 유효하지 않은 값
+//                    .append("'. ")
+//                    .append(constraintViolation.getMessage()) // 유효성 검사 실패 시 메시지
+//                    .append("]");
+//
+//            if (violationIterator.hasNext() == true) {
+//                resultMessageBuilder.append(", ");
+//            }
+//        }
+//
+//        return resultMessageBuilder.toString();
+//    }
 
 
 //    @ExceptionHandler(value = HttpMessageNotReadableException.class)
