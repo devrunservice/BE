@@ -127,6 +127,10 @@ public class LectureService {
 		savevideo.setLectureSection(savedlectureSeciton);
 		savevideo.setVideoTitle(videoDto.getVideoTitle());
 		savevideo.setVideoLink(videoDto.getVideoLink());
+		String link = videoDto.getVideoLink();
+		int cutnum = link.indexOf("=");
+        String videoid = link.substring(cutnum + 1);
+		savevideo.setVideoId(videoid);
 		savevideo.setTotalPlayTime(videoDto.getTotalPlayTime());
 		videoRepository.save(savevideo);
 	}
