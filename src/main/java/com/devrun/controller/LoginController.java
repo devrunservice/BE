@@ -16,13 +16,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.devrun.dto.OAuthToken;
 import com.devrun.dto.member.KakaoProfileDTO;
@@ -48,32 +47,32 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import reactor.core.publisher.Mono;
 
-@Controller
+@RestController
 public class LoginController {
 
-    @Autowired
+	@Autowired
     private LoginService loginService;
-
-    @Autowired
+	
+	@Autowired
     private MemberService memberService;
-    
-    @Autowired
+	
+	@Autowired
 	private PasswordEncoder passwordEncoder;
-
-    @Autowired
+	
+	@Autowired
     private KakaoLoginService kakaoLoginService;
-    
-    @Autowired
+	
+	@Autowired
 	private EmailSenderService emailSenderService;
-    
-    @Autowired
+	
+	@Autowired
 //    private CaffeineCache redisCache;
     private RedisCache redisCache;
-    
-    @Autowired
+	
+	@Autowired
     private LoginRepository loginRepository;
-    
-    @Autowired
+	
+	@Autowired
 	private EntityManager entityManager;
     
     @Value("${kakao.client_id}")
@@ -82,7 +81,6 @@ public class LoginController {
     @Value("${kakao.redirect_url}")
     private String redirect_uri;
         
-    @ResponseBody
     @PostMapping("/login")
     @ApiOperation(value = "사용자 로그인", notes = "사용자 ID와 비밀번호를 사용하여 로그인합니다.")
     @ApiImplicitParam(name = "MemberEntity", value = "id, password 전송", required = true, paramType = "body", dataTypeClass = String.class)
@@ -110,6 +108,7 @@ public class LoginController {
 
     private MemberEntity createMemberEntityFromRequest(MemberEntity memberEntity) {
         MemberEntity member = loginRepository.findById(memberEntity.getId());
+        System.out.println(member);
         member.setId(memberEntity.getId());
         member.setPassword(memberEntity.getPassword());
         return member;
@@ -237,7 +236,6 @@ public class LoginController {
     }
 
     // 엑세스토큰 재발급
-    @ResponseBody
     @PostMapping("/authz/token/refresh")
     @ApiOperation(value = "토큰 리프레시", notes = "리프레시 토큰을 사용하여 새로운 액세스 토큰을 생성합니다. 리프레시 토큰은 HttpOnly 쿠키에 저장되어 있습니다.")
     @ApiImplicitParam(name = "Refresh_token", value = "리프레시 토큰", required = true, paramType = "header", dataTypeClass = String.class)
@@ -316,7 +314,6 @@ public class LoginController {
     }
     
     // 블랙리스트에 리프래시 토큰을 등록해 엑세스 토큰을 재발급 받지 못하도록 합니다.
-    @ResponseBody
     @PostMapping("/authz/logout")
     @ApiOperation(value = "로그아웃", notes = "현재 로그인된 사용자를 로그아웃합니다. 리프레시 토큰은 HttpOnly 쿠키에 저장되어 있습니다.")
     @ApiImplicitParam(name = "Refresh_token", value = "리프레시 토큰", required = true, paramType = "header", dataTypeClass = String.class)
@@ -370,7 +367,6 @@ public class LoginController {
         redisCache.blacklistToken(refreshToken);
     }
     
-    @ResponseBody
     @GetMapping("/auth/kakao/callback")
     @ApiOperation(value = "카카오 로그인 콜백", notes = "카카오 로그인 후 콜백 URL입니다.")
     @ApiImplicitParams({
@@ -466,7 +462,6 @@ public class LoginController {
         }
     }
 
-    @ResponseBody
     @PostMapping("/sns/logout/kakao")
     @ApiOperation(value = "카카오 로그아웃", notes = "카카오 로그아웃을 수행합니다.")
     @ApiImplicitParam(name = "Access_token_easy", value = "액세스 토큰", required = true, paramType = "header", dataTypeClass = String.class)
@@ -504,7 +499,6 @@ public class LoginController {
     }
 
 	// 회원의 핸드폰 번호가 맞는지 확인
-	@ResponseBody
 	@PostMapping("/users/{userId}/verify/phone")
 	@ApiOperation(value = "핸드폰 번호 검증", notes = "회원의 핸드폰 번호가 맞는지 검증합니다.")
 	@ApiImplicitParams({
@@ -523,7 +517,6 @@ public class LoginController {
 	}
 	
 	// 찾은 아이디를 핸드폰 번호로 전송
-	@ResponseBody
 	@PostMapping("/find-id/send-phone")
 	@ApiOperation(value = "아이디 핸드폰 번호로 전송", notes = "찾은 아이디를 핸드폰 번호로 전송합니다.")
 	@ApiImplicitParams({
@@ -537,7 +530,6 @@ public class LoginController {
 	public Mono<ResponseEntity<?>>sendIdBySms(@RequestBody SignupDTO signupDTO){
 		
         String id = loginRepository.findByPhonenumber(signupDTO.getPhonenumber());
-        System.out.println("찾은 아이디 : " + id + signupDTO.getCode());
         
         if(memberService.verifyCode(signupDTO.getPhonenumber(), signupDTO.getCode())){
         	
@@ -559,7 +551,6 @@ public class LoginController {
     }
 	
 	// 인증 완료 후 비밀번호 변경
-	@ResponseBody
 	@PostMapping("/users/{userId}/edit-password")
 	@ApiOperation(value = "비밀번호 변경", notes = "인증 완료 후 비밀번호를 변경합니다.")
 	@ApiImplicitParams({
@@ -576,7 +567,6 @@ public class LoginController {
 	public ResponseEntity<?> editPassword(@PathVariable String userId, @RequestBody SignupDTO signupDTO) {
 		
         MemberEntity memberEntity = loginRepository.findById(userId);
-        System.out.println("회원 : " + memberEntity);
         // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(signupDTO.getPassword());
         
@@ -586,16 +576,10 @@ public class LoginController {
 
         if (hasPhoneNumber ^ hasEmail) {  // XOR 연산
             key = hasPhoneNumber ? signupDTO.getPhonenumber() : signupDTO.getEmail();
-            System.out.println("hasPhoneNumber : " + hasPhoneNumber);
-            System.out.println("hasEmail : " + hasEmail);
-            System.out.println("key : " + key);
         } else {
         	// 400 : 이메일과 전화번호 중 하나만 제공되어야 함
             return new ResponseEntity<>("Either Email or Phonenumber should be provided, not both or none.", HttpStatus.BAD_REQUEST);
         }
-        System.out.println("1 : " + memberService.verifyCode(key, signupDTO.getCode()));
-        System.out.println("2 : " + memberService.validatePassword(signupDTO.getPassword()));
-        System.out.println("3 : " + memberEntity.getPassword());
         // 코드 검증, 비밀번호 유효성 검증, 현재 비밀번호와의 비교
         if (memberService.verifyCode(key, signupDTO.getCode())
         		&& memberService.validatePassword(signupDTO.getPassword())
@@ -623,7 +607,6 @@ public class LoginController {
     }
 	
 	// 회원의 이메일이 맞는지 확인
-	@ResponseBody
 	@PostMapping("/users/{userId}/verify/email")
 	@ApiOperation(value = "이메일 검증", notes = "회원의 이메일이 맞는지 검증합니다.")
 	@ApiImplicitParams({
@@ -642,7 +625,6 @@ public class LoginController {
 	}
 	
 	// 비밀번호 찾기 인증번호 이메일로 전송
-	@ResponseBody
 	@PostMapping("/auth/email")
 	@ApiOperation(value = "인증번호 이메일로 전송", notes = "비밀번호 찾기를 위한 인증번호를 이메일로 전송합니다.")
 	@ApiImplicitParams({
@@ -665,7 +647,6 @@ public class LoginController {
 	}
 	
 	// 이메일로 전송된 인증코드 맞는지 검증
-	@ResponseBody
 	@PostMapping("/verify/email")
 	@ApiOperation(value = "이메일 인증코드 검증", notes = "이메일로 전송된 인증코드가 맞는지 검증합니다.")
 	@ApiImplicitParams({
@@ -687,7 +668,6 @@ public class LoginController {
     }
 	
 	// 이메일로 아이디 전송
-	@ResponseBody
 	@PostMapping("/find-id/send-email")
 	@ApiOperation(value = "이메일로 아이디 전송", notes = "이메일로 사용자 아이디를 전송합니다.")
 	@ApiImplicitParams({
@@ -701,7 +681,6 @@ public class LoginController {
 	public ResponseEntity<?> findIdEmail(@RequestBody SignupDTO signupDTO){
 		
         String id = loginRepository.findByEmail(signupDTO.getEmail());
-        System.out.println("찾은 아이디 : " + id + signupDTO.getCode());
         
         if(memberService.verifyCode(signupDTO.getEmail(), signupDTO.getCode())){
 	        // id를 이메일로 발송
@@ -717,7 +696,6 @@ public class LoginController {
     }
 	
 	// 사용자 로그인 정보 조회
-	@ResponseBody
 	@GetMapping("/users/login-info")
 	@ApiOperation(value = "사용자 로그인 정보 조회", notes = "사용자의 로그인 정보를 조회하고 로그인 상태를 유지하기 위해 사용합니다.")
 	@ApiImplicitParams({
@@ -759,7 +737,6 @@ public class LoginController {
 	// 이것저것 섞인 것 같은데 비밀번호 변경이겠지 하고 일단 수정하고 냅둠
 	// 아닌데 뭐지 그냥 테스트 였나
 	// 얘 진짜 뭐야 진짜 테스트인가
-	@ResponseBody
 	@PostMapping("/signup/ok")
 	public ResponseEntity<?> signupOk(@RequestBody MemberDTO memberDTO
 										, @RequestParam("key") String key){

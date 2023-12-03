@@ -40,19 +40,23 @@ public class MemberEntity implements Serializable {
 	
 	@Column(name = "name", nullable = false, length = 20)						// 모든 컨트롤러에서 @Valid로 검증하는 것이 아니기 때문에 nullable = false를 사용할지 말지일단 Keep
 	@Comment("유저 이름")
+	@NotBlank(message = "information cannot be null or empty")
 	private String name;
 	
 	@Column(name = "id", nullable = false, length = 15)
 	@Comment("유저 아이디")
+	@NotBlank(message = "information cannot be null or empty")
 	private String id;
 	
 	@Column(name = "password", nullable = false, columnDefinition = "TEXT")
 	@Comment("유저 비밀번호")
+	@NotBlank(message = "information cannot be null or empty")
 	private String password;
 	
 	@Column(name = "birthday", nullable = false)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	@Comment("유저 생일(생일 축하 쿠폰 발급)")
+	@NotNull(message = "information cannot be null or empty")
 	private LocalDate birthday;
 	
 	@Enumerated(EnumType.STRING)
@@ -80,6 +84,7 @@ public class MemberEntity implements Serializable {
     private String kakaoEmailId;
 
     @Column(name = "profileimgsrc", nullable = false)
+    @NotBlank(message = "information cannot be null or empty")
     @Comment("유저 프로필 이미지 주소")
     private String profileimgsrc = "https://devrun-dev-bucket.s3.ap-northeast-2.amazonaws.com/profile.png";
 
