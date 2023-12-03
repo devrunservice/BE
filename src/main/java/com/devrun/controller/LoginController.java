@@ -67,8 +67,8 @@ public class LoginController {
 	private EmailSenderService emailSenderService;
     
     @Autowired
-    private CaffeineCache redisCache;
-//    private RedisCache redisCache;
+//    private CaffeineCache redisCache;
+    private RedisCache redisCache;
     
     @Autowired
     private LoginRepository loginRepository;
