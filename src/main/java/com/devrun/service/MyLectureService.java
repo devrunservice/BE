@@ -381,7 +381,7 @@ public class MyLectureService {
 		verifyUserHasLecture(userEntity, lecture);
 		Optional<MyLecture> my = mylectureRepository.findByMemberentityAndLecture(userEntity, lecture);
 		if (my.isPresent()) {
-			PageRequest pageRequest = PageRequest.of(0, 1, Sort.Direction.DESC, "lastviewdate");
+			PageRequest pageRequest = PageRequest.of(0, 1, Sort.by("lastviewdate").descending().and(Sort.by("video").ascending()));
 			Page<MyLectureProgress> one = mylectureProgressRepository.findByMyLecture(my.get(), pageRequest);
 			return one.getContent().get(0).getVideo().getVideoId();
 		} else {

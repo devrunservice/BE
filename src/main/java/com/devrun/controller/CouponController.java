@@ -41,14 +41,10 @@ import lombok.RequiredArgsConstructor;
 public class CouponController {
 	private final CouponSerivce couponSerivce;
 	private final MemberService memberService;
-	private final CouponViewRepository couponViewRepository;
 
 	@GetMapping({ "/coupon/readmycoupon" })
 	@ApiOperation(value = "쿠폰 조회하기", notes = "로그인 한 회원이 가진 쿠폰을 조회합니다.")
 	public ResponseEntity<?> readmycoupon() {
-		System.out.println(
-				"---------------------------------CouponController readmycoupon method start---------------------------------");
-
 		String userid = SecurityContextHolder.getContext().getAuthentication().getName();
 		MemberEntity userEntity = memberService.findById(userid);
 
@@ -65,7 +61,7 @@ public class CouponController {
 	}
 
 	@PostMapping("/coupon/publish")
-	@ApiOperation(value = "쿠폰 생성기", notes = "쿠폰을 생성하여 DB에 저장합니다.")
+	@ApiOperation(value = "쿠폰 생성", notes = "쿠폰을 생성하여 DB에 저장합니다.")
 	@ApiImplicitParam(name = "couponIssuanceRequestDTO", value = "생성할 쿠폰 디테일", required = true, dataTypeClass = Object.class)
 	public ResponseEntity<?> couponGeneration(@RequestBody @Valid CouponIssuanceRequestDTO couponIssuanceRequestDTO,
 			HttpServletRequest request) {
@@ -77,12 +73,15 @@ public class CouponController {
 	}
 
 	@PostMapping("/coupon/registration")
-	@ApiOperation(value = "쿠폰 등록기", notes = "유저가 쿠폰 코드를 입력하면 쿠폰을 검증하고, 쿠폰을 등록합니다.")
+	@ApiOperation(value = "쿠폰 등록", notes = "유저가 쿠폰 코드를 입력하면 쿠폰을 검증하고, 쿠폰을 등록합니다.")
 	@ApiImplicitParam(name = "map", value = "등록할 쿠폰코드", example = "{\"couponcode\" : \"31267-ydi2OLCKFOaz\"}", required = true, dataTypeClass = Object.class)
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "성공적으로 처리되었습니다"),
 			@ApiResponse(code = 400, message = "옳지 않은 키 값입니다. 키 값 : couponcode") })
 	public ResponseEntity<?> userGetCoupon(@RequestBody Map<String, String> map) {
 		String couponCode = map.get("couponcode");
+		if (couponCode.isEmpty()) {
+			return ResponseEntity.ok("쿠폰코드가 입력되지 않았습니다.");
+		}
 
 		if (couponSerivce.validate(couponCode)) {
 			String userid = SecurityContextHolder.getContext().getAuthentication().getName();
