@@ -95,13 +95,4 @@ public class TestController {
 		return ResponseEntity.ok(videoDTO);
 	}
 	
-	@GetMapping("/redirect_test")
-	public ResponseEntity<?> redirect_test(){
-		HttpHeaders headers = new HttpHeaders();
-		System.out.println("리다이렉트 테스트");
-		headers.setLocation(URI.create("https://devrun.net/redirect_test?status=success"));
-        return new ResponseEntity<>(headers, HttpStatus.SEE_OTHER);
-	}
-	
-	
 }

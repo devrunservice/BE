@@ -4,6 +4,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -72,6 +73,9 @@ public class LoginController {
     @Autowired
     private LoginRepository loginRepository;
     
+    @Autowired
+	private EntityManager entityManager;
+    
     @Value("${kakao.client_id}")
     private String client_id;
 
@@ -92,7 +96,6 @@ public class LoginController {
         logRequestInformation(request);
 
         MemberEntity member = createMemberEntityFromRequest(memberEntity);
-
         if (validateMember(member)) {
             return processLogin(member, request, response);
         } else {
@@ -106,14 +109,14 @@ public class LoginController {
     }
 
     private MemberEntity createMemberEntityFromRequest(MemberEntity memberEntity) {
-        MemberEntity member = new MemberEntity();
+        MemberEntity member = loginRepository.findById(memberEntity.getId());
         member.setId(memberEntity.getId());
         member.setPassword(memberEntity.getPassword());
         return member;
     }
 
     private boolean validateMember(MemberEntity member) {
-        return memberService.validateId(member.getId());
+        return memberService.validateId(member.getId()) && memberService.validatePassword(member.getPassword());
     }
 
     private ResponseEntity<?> processLogin(MemberEntity member, HttpServletRequest request, HttpServletResponse response) {
@@ -161,13 +164,14 @@ public class LoginController {
     }
     
     private boolean processEasyLogin(MemberEntity member, HttpServletRequest request, HttpServletResponse response) {
+    	String encodedPassword = passwordEncoder.encode(member.getPassword());
+    	member.setPassword(encodedPassword);
         String easyloginToken = request.getHeader("Easylogin_token");
         String kakaoId = JWTUtil.getUserIdFromToken(easyloginToken);
         String kakaoEmail = JWTUtil.getEmailFromEasyloginToken(easyloginToken);
-
         // 여러개의 아이디에 연동하는 것을 막기위해 한번 더 체크
         MemberEntity existingMember = loginRepository.findByKakaoEmailId(kakaoId + kakaoEmail);
-        
+        System.out.println("저장전 : " + member);
         if (existingMember == null) {
             member.setKakaoEmailId(kakaoId + kakaoEmail);
             loginService.saveKakaoId(member);

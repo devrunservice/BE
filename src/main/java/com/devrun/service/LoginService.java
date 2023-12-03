@@ -3,6 +3,7 @@ package com.devrun.service;
 import java.util.Base64;
 import java.util.Date;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,6 +40,9 @@ public class LoginService {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 	
+	@Autowired
+	private EntityManager entityManager;
+	
 	private LoginStatus loginStatus;
 
 	// 마지막 로그인 날짜 수정
@@ -55,7 +59,7 @@ public class LoginService {
 	}
 	
 	public LoginStatus validate(MemberEntity member) {
-		
+		entityManager.clear();
 		MemberEntity existingMember = loginRepository.findById(member.getId());
 		LoginInfo existingLoginInfo = loginInfoRepository.findByMemberEntity(existingMember);
         
@@ -78,7 +82,9 @@ public class LoginService {
 		}
 	}
 	public void saveKakaoId(MemberEntity memberEntity) {
+		System.out.println("Before saving to database: " + memberEntity);
 		memberEntityRepository.save(memberEntity);
+		System.out.println("After saving to database: " + memberEntity);
 	}
 	
 	public boolean verifyPhone(String id, String phonenumber) {
