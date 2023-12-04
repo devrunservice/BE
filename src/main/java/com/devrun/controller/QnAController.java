@@ -74,6 +74,7 @@ public class QnAController {
 	public QaListDTOs lectureQaListBylecture(HttpServletRequest httpServletRequest,
 			@RequestParam(name = "lectureId") Long lectureId,
 			@RequestParam(name = "page", defaultValue = "0", required = false) int page) {
+		page = page <= 1 ? 0 : page - 1;
 		return mylectureService.QalistBylecture(lectureId, page);
 
 	}
@@ -89,6 +90,7 @@ public class QnAController {
 		String userAccessToken = httpServletRequest.getHeader("Access_token");
 		String userId = JWTUtil.getUserIdFromToken(userAccessToken);
 		MemberEntity userEntity = memberService.findById(userId);
+		page = page <= 1 ? 0 : page - 1;
 		return mylectureService.QalistByMemberHandler(userEntity, page, status);
 
 	}

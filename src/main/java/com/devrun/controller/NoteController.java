@@ -69,6 +69,7 @@ public class NoteController {
 		String userAccessToken = httpServletRequest.getHeader("Access_token");
 		String userId = JWTUtil.getUserIdFromToken(userAccessToken);
 		MemberEntity userEntity = memberService.findById(userId);
+		page = page <= 1 ? 0 : page - 1;
 		return mylectureService.myNotelist(userEntity, page);
 	}
 
@@ -80,6 +81,7 @@ public class NoteController {
 		String userAccessToken = httpServletRequest.getHeader("Access_token");
 		String userId = JWTUtil.getUserIdFromToken(userAccessToken);
 		MemberEntity userEntity = memberService.findById(userId);
+		page = page <= 1 ? 0 : page - 1;
 		return mylectureService.noteDetaiList(userEntity, lectureId, page);
 	}
 
