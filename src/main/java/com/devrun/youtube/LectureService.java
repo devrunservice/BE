@@ -135,9 +135,14 @@ public class LectureService {
 		videoRepository.save(savevideo);
 	}
 
-	/*
-	 * 데이터베이스에 저장된 강의 entity 중 강의명, 강의 소갯글, 강사명 속성에 특정한 검색어를 포함하는 entity의 일부 속성(강의명
-	 * , 강의 소개글, 강사명, 강의 평점, 강의 가격, 썸네일 URI , 카테고리 분류 중-소 , 속성) 집합을 가져옴
+	/**
+	 * 지정된 카테고리, 강의명, 강의 소갯글, 강사명 중에 특정한 검색어를 포함하는 강의의 데이터<br>
+	 * (강의명, 강의 소개글, 강사명, 강의 평점, 강의 가격, 썸네일 URI , 카테고리 분류 중-소 , 속성)를 반환합니다.
+	 * @param bigcategory
+	 * @param midcategory
+	 * @param keyword
+	 * @param pageRequest
+	 * @return QueryLectureByKeywordDTO2
 	 */
 	public QueryLectureByKeywordDTO2 searchLectures(String bigcategory, String midcategory, String keyword,
 			PageRequest pageRequest) {
@@ -153,7 +158,12 @@ public class LectureService {
 	private boolean isCategoryEmpty(String bigcategory, String midcategory) {
 		return bigcategory.isEmpty() && midcategory.isEmpty();
 	}
-
+	/**
+	 * 검색 조건 중 카테고리를 설정하지 않은 검색을 수행합니다.
+	 * @param keyword
+	 * @param pageRequest
+	 * @return QueryLectureByKeywordDTO2
+	 */
 	private QueryLectureByKeywordDTO2 handleEmptyCategories(String keyword, PageRequest pageRequest) {
 		if (keyword.isEmpty()) {
 			return QueryLectureByKeyword(keyword, pageRequest);
@@ -165,7 +175,13 @@ public class LectureService {
 			return QueryLectureByKeyword(keyword, members, pageRequest);
 		}
 	}
-
+	/**
+	 * 검색 조건 중 대분류 카테고리만 설정한 경우의 검색을 수행합니다.
+	 * @param bigcategory
+	 * @param keyword
+	 * @param pageRequest
+	 * @return QueryLectureByKeywordDTO2
+	 */ 
 	private QueryLectureByKeywordDTO2 searchByBigCategory(String bigcategory, String keyword, PageRequest pageRequest) {
 		List<LectureCategory> categories = categoryService.findcategory(bigcategory);
 		if (keyword.isBlank()) {
@@ -178,13 +194,27 @@ public class LectureService {
 			return findLecturesWithCategroysWithUser(categories, keyword, members, pageRequest);
 		}
 	}
-
+	/**
+	 * 카테고리가 지정되어 있고, 검색 범위에 강사 아이디도 포함한 경우 강의 데이터를 반환합니다.
+	 * @param categories
+	 * @param keyword
+	 * @param members
+	 * @param pageRequest
+	 * @return
+	 */
 	private QueryLectureByKeywordDTO2 findLecturesWithCategroysWithUser(List<LectureCategory> categories,
 			String keyword, List<MemberEntity> members, PageRequest pageRequest) {
 		Page<Lecture> l1 = lectureRepository.findCategoryInAndKeywordIn(categories, keyword, members, pageRequest);
 		return packageingDto(l1);
 	}
-
+	/**
+	 * 대분류 카테고리와 중분류 카테고리를 지정한 검색을 수행합니다.
+	 * @param bigcategory
+	 * @param midcategory
+	 * @param keyword
+	 * @param pageRequest
+	 * @return
+	 */
 	private QueryLectureByKeywordDTO2 searchByBigAndMidCategory(String bigcategory, String midcategory, String keyword,
 			PageRequest pageRequest) {
 		LectureCategory category = categoryService.findcategory(bigcategory, midcategory);
@@ -198,26 +228,38 @@ public class LectureService {
 			return findLecturesWithCategroysWithUser(category, keyword, members, pageRequest);
 		}
 	}
-
+	/**
+	 * 카테고리가 지정되었고, 검색 범위에 강사 아이디도 포함한 경우 강의 데이터를 반환합니다.
+	 * @param category
+	 * @param keyword
+	 * @param members
+	 * @param pageRequest
+	 * @return
+	 */
 	private QueryLectureByKeywordDTO2 findLecturesWithCategroysWithUser(LectureCategory category, String keyword,
 			List<MemberEntity> members, PageRequest pageRequest) {
 		Page<Lecture> l1 = lectureRepository.findCategoryInAndKeywordIn(category, keyword, members, pageRequest);
 		return packageingDto(l1);
 	}
 
-	// 카테고리 유무
-
-	// 카테고리가 진짜 있는지?
-	// 검색어 유무
-	// 검색어가 사람인지?
-
-	// 유저가 없는 경우
+	/**
+	 * 검색 범위에 강사 아이디를 포함하지 않는 검색을 수행합니다.
+	 * @param keyword
+	 * @param pageable
+	 * @return
+	 */
 	public QueryLectureByKeywordDTO2 QueryLectureByKeyword(String keyword, PageRequest pageable) {
 		Page<Lecture> l1 = lectureRepository.findByLectureNameContainsOrLectureIntroContains(keyword, pageable);
 		return packageingDto(l1);
 	};
 
-	// 유저가 있는 경우
+	/**
+	 * 검색 범위에 강사 아이디를 포함하는 검색을 수행합니다.
+	 * @param keyword
+	 * @param m1
+	 * @param pageable
+	 * @return
+	 */
 	public QueryLectureByKeywordDTO2 QueryLectureByKeyword(String keyword, List<MemberEntity> m1, Pageable pageable) {
 
 		Page<Lecture> l1 = lectureRepository.findByLectureNameContainsOrLectureIntroContainsOrMentoIdIn(keyword, m1,
@@ -236,8 +278,12 @@ public class LectureService {
 		Page<Lecture> l1 = lectureRepository.findLecturesWithCategroy(category, keyword, pageRequest);
 		return packageingDto(l1);
 	}
-
-	public QueryLectureByKeywordDTO2 packageingDto(Page<Lecture> l1) {
+	/**
+	 * 강의 데이터와 페이지네이션 데이터를 함께 반환합니다.
+	 * @param l1
+	 * @return
+	 */
+	private QueryLectureByKeywordDTO2 packageingDto(Page<Lecture> l1) {
 		List<QueryLectureByKeywordDTO> list0 = convertLectureToDTO(l1);
 		QueryLectureByKeywordDTO2 list = new QueryLectureByKeywordDTO2();
 		list.setDtolist(list0);
@@ -245,7 +291,12 @@ public class LectureService {
 		list.setTotalpages(l1.getTotalPages());
 		return list;
 	}
-
+	
+	/**
+	 * 강의 데이터를 View에 맞게 가공한 데이터를 반환합니다. 
+	 * @param lectureList
+	 * @return
+	 */
 	public List<QueryLectureByKeywordDTO> convertLectureToDTO(Page<Lecture> lectureList) {
 		if(lectureList.isEmpty()) {throw new RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND);}
 		return lectureList.stream().map(QueryLectureByKeywordDTO::new).collect(Collectors.toList());
@@ -278,7 +329,12 @@ public class LectureService {
 		Page<Lecture> l1 = lectureRepository.findAll(pageRequest);
 		return packageingDto(l1);
 	}
-
+	
+	/**
+	 * 강의의 상세 설명 데이터를 반환합니다.
+	 * @param lectureId
+	 * @return
+	 */
 	public LectureIntroduceDTO getlecturedetail(Long lectureId) {
 		Lecture lecture = findByLectureID(lectureId);
 		LectureIntroduce li = introduceRepository.findByLecture(lecture);
@@ -287,7 +343,12 @@ public class LectureService {
 		dto.setLectureId(li.getLecture().getLectureid());
 		return dto;
 	}
-
+	/**
+	 * 강의 목록 중 유저가 이미 수강 중인 강의를 식별하여 표기합니다.
+	 * @param userEntity
+	 * @param p1
+	 * @return
+	 */
 	public QueryLectureByKeywordDTO2 checkAlreadyHasLecture(MemberEntity userEntity, QueryLectureByKeywordDTO2 p1) {
 		List<MyLecture> userhas = mylectureRepository.findByMemberentity(userEntity);
 		if(!userhas.isEmpty()) {
@@ -309,7 +370,12 @@ public class LectureService {
 			return p1;
 		}
 	}
-
+	/**
+	 * 강의 상세 설명을 갱신합니다.
+	 * @param userid
+	 * @param request
+	 * @return
+	 */
 	public LectureIntroduceDTO getlecturedetailupdate(String userid, LectureIntroduceDTO request) {
 		MemberEntity user = memberService.findById(userid);
 		Lecture lecture = findByLectureID(request.getLectureId());
@@ -326,7 +392,12 @@ public class LectureService {
 			throw new RestApiException(UserErrorCode.USERHASNOTLECTURE);
 		}
 	}
-
+	
+	/**
+	 * 강의 상세 설명을 등록합니다.
+	 * @param savedlecture
+	 * @param lectureFullIntro
+	 */
 	public void fullintrosave(Lecture savedlecture, String lectureFullIntro) {
 		LectureIntroduce intro = new LectureIntroduce();
 		intro.setLecture(savedlecture);

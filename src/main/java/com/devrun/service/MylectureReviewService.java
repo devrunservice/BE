@@ -27,10 +27,14 @@ import lombok.RequiredArgsConstructor;
 public class MylectureReviewService {
 	
 	private final MyLectureReviewRepository reviewRepository;
-	private final MylectureRepository mylectureRepository;
 	private final LectureService lectureService;
 	private final MyLectureService myLectureService;
-
+	
+	/**
+	 * 해당 강의를 100% 수강했는 지 확인하고 수강평을 DB에 저장합니다.
+	 * @param userEntity
+	 * @param reviewRequest
+	 */
 	public void saveReview(MemberEntity userEntity, ReviewRequest reviewRequest) {
 		Lecture lecture = lectureService.findByLectureID(reviewRequest.getLectureId());
 		MyLecture myLectureList = myLectureService.verifyUserHasLecture(userEntity , lecture);
@@ -47,7 +51,12 @@ public class MylectureReviewService {
 		
 	}
 	
-
+	/**
+	 * 요청한 강의의 다른 사용자들이 남긴 수강평을 보여줍니다.
+	 * @param lectureId
+	 * @param page
+	 * @return
+	 */
 	public List<MylectureReviewDTO> reviewList(Long lectureId , int page) {
 		page = page <= 1 ? 0 : page - 1;
 		PageRequest pageRequest = PageRequest.of(page, 10, Direction.DESC, "reviewDate");

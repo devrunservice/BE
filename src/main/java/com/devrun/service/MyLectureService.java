@@ -69,7 +69,11 @@ public class MyLectureService {
 	private final MylectureNoteRepository mylectureNoteRepository;
 	private final MylectureQaRepository mylectureQaRepository;
 	private final MylectureQaAnswerRepository mylectureQaAnswerRepository;
-
+	/**
+	 * 유저의 수강내역 데이터베이스에 해당 강의를 등록합니다.
+	 * @param userEntity
+	 * @param lecture
+	 */
 	public void registLecture(MemberEntity userEntity, Lecture lecture) {
 		MyLecture myLecture = new MyLecture();
 		myLecture.setMemberentity(userEntity);
@@ -78,8 +82,12 @@ public class MyLectureService {
 		mylectureRepository.save(myLecture);
 		registVideo(myLecture);
 	}
-
-	public void registVideo(MyLecture mylecture) {
+	
+	/**
+	 * 유저의 진도율 데이터베이스에 해당 강의의 영상들을 등록합니다.
+	 * @param mylecture
+	 */
+	private void registVideo(MyLecture mylecture) {
 		List<Video> videoList = videoRepository.findByLecture(mylecture.getLecture());
 		List<MyLectureProgress> saveList = new ArrayList<MyLectureProgress>();
 		for (Video v : videoList) {
@@ -92,20 +100,38 @@ public class MyLectureService {
 		mylectureProgressRepository.saveAll(saveList);
 	}
 
+	/**
+	 * 유저의 수강 목록 데이터베이스에서 해당 강의를 제거합니다.
+	 * @param userEntity
+	 * @param lectureId
+	 */
 	public void refundLecture(MemberEntity userEntity, Long lectureId) {
 		Lecture lecture = lectureService.findByLectureID(lectureId);
 		MyLecture myLecture = verifyUserHasLecture(userEntity, lecture);
 		mylectureRepository.delete(myLecture);
 
 	}
-
+	
+	/**
+	 * 해당 유저가 수강중인 강의 중 한개의 강의에 대한 세부 정보를 반환합니다.
+	 * @param userEntity
+	 * @param lectureId
+	 * @return MycouresDTO
+	 */
 	public MycouresDTO findMycoures(MemberEntity userEntity, Long lectureId) {
 		Lecture lecture = lectureService.findByLectureID(lectureId);
 		MyLecture myLecture = verifyUserHasLecture(userEntity, lecture);
 
 		return convertMyLectureToMycouresDTO(myLecture);
 	}
-
+	
+	/**
+	 * 진도율 데이터베이스에 현재의 진도율을 갱신합니다.
+	 * @param userEntity
+	 * @param videoid
+	 * @param currenttime
+	 * @return
+	 */
 	public Map<String, Object> progress(MemberEntity userEntity, String videoid, int currenttime) {
 		Video videoentity = videoRepository.findByVideoId(videoid);
 		MyLecture mylecture = verifyUserHasLecture(userEntity, videoentity.getLecture());
@@ -141,7 +167,13 @@ public class MyLectureService {
 		return map;
 
 	}
-
+	
+	/**
+	 * 해당 유저가 선택한 강의를 수강하고 있는 지 검증합니다.
+	 * @param userEntity
+	 * @param lecture
+	 * @return MyLecture
+	 */
 	public MyLecture verifyUserHasLecture(MemberEntity userEntity, Lecture lecture) {
 		Optional<MyLecture> optional = mylectureRepository.findByMemberentityAndLecture(userEntity, lecture);
 		if (optional.isPresent()) {
@@ -150,8 +182,13 @@ public class MyLectureService {
 			throw new RestApiException(UserErrorCode.POSSESSION);
 		}
 	}
-
-	public MycouresDTO convertMyLectureToMycouresDTO(MyLecture myLecture) {
+	
+	/**
+	 * 하나의 강의에 대한 진도율 데이터(총진도율과 전체 시청 시간)를 계산하고, 해당 강의의 섹션 정보, 영상 정보를 반환합니다. 
+	 * @param myLecture
+	 * @return MycouresDTO
+	 */
+	private MycouresDTO convertMyLectureToMycouresDTO(MyLecture myLecture) {
 		List<MyLectureProgress> myCouresList = mylectureProgressRepository.findByMyLecture(myLecture);
 		int wholeStudyTime = 0;
 		int wholeLectureTime = 0;
@@ -185,7 +222,14 @@ public class MyLectureService {
 		return mycouresList.get(0);
 
 	}
-
+	
+	/**
+	 * 유저가 수강 중인 강의의 목록을 반환합니다.
+	 * @param userEntity
+	 * @param page
+	 * @param option
+	 * @return MylectureDTO2
+	 */
 	public MylectureDTO2 mylecturelist(MemberEntity userEntity, int page, String option) {
 		page = page <= 1 ? 0 : page - 1;
 		PageRequest pageRequest = PageRequest.of(page, 9, Direction.DESC, "lastviewdate");
@@ -202,8 +246,12 @@ public class MyLectureService {
 			return convertMylectureDTO(pageMylecture);
 		}
 	}
-
-	public MylectureDTO2 convertMylectureDTO(Page<MyLecture> pageMylecture) {
+	/**
+	 * 수강 중인 강의 목록의 페이지네이션을 데이터를 추가합니다.
+	 * @param pageMylecture
+	 * @return
+	 */
+	private MylectureDTO2 convertMylectureDTO(Page<MyLecture> pageMylecture) {
 		List<MylectureDTO> mylectureDTOList = new ArrayList<MylectureDTO>();
 		for (MyLecture mylecture : pageMylecture) {
 			MylectureDTO dto = new MylectureDTO(mylecture);
@@ -214,8 +262,13 @@ public class MyLectureService {
 
 		return dtolist;
 	}
-
-	public MyLectureNoteDTO2 packageDto(Page<MyLecture> myLectureList, int TotalPages) {
+	/**
+	 * 강의 시청 중 작성한 노트와 페이지네이션 데이터를 추가합니다.
+	 * @param myLectureList
+	 * @param TotalPages
+	 * @return
+	 */
+	private MyLectureNoteDTO2 packageDto(Page<MyLecture> myLectureList, int TotalPages) {
 		List<MyLectureProgress> myprogressList = mylectureProgressRepository.findByMyLectureIn(myLectureList.toList());
 		List<MylectureNote> myNoteList = mylectureNoteRepository
 				.findByMyLectureProgressInAndNoteDeleteFalseOrderByDateDesc(myprogressList);
@@ -242,18 +295,28 @@ public class MyLectureService {
 		return dtos;
 
 	}
-
+	/**
+	 * 강의 시청 중 작성한 모든 노트의 집계 데이터를 반환합니다.
+	 * @param userEntity
+	 * @param page
+	 * @return
+	 */
 	public MyLectureNoteDTO2 myNotelist(MemberEntity userEntity, int page) {
-		page = page <= 1 ? 0 : page - 1;
 		int size = 10;
 		PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "lastviewdate");
 		Page<MyLecture> myLectureList = mylectureRepository.findByMemberentity(userEntity, pageRequest);
 
 		return packageDto(myLectureList, myLectureList.getTotalPages());
 	}
-
+	
+	/**
+	 * 선택한 강의에서 작성한 노트 데이터의 목록과 미리보기 데이터 , 페이지네이션 데이터를 반환합니다.
+	 * @param userEntity
+	 * @param lectureId
+	 * @param page
+	 * @return lectureNoteListDTO2
+	 */
 	public lectureNoteListDTO2 noteDetaiList(MemberEntity userEntity, Long lectureId, int page) {
-		page = page <= 1 ? 0 : page - 1;
 		int size = 10;
 		PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "date");
 		Lecture lecture = lectureService.findByLectureID(lectureId);
@@ -286,7 +349,13 @@ public class MyLectureService {
 		list.setTotalPages(myNoteList.get().getTotalPages());
 		return list;
 	}
-
+	
+	/**
+	 * 선택한 노트의 세부 데이터를 가져옵니다.
+	 * @param userEntity
+	 * @param noteNo
+	 * @return lectureNoteDetailDTO
+	 */
 	public lectureNoteDetailDTO noteDetaiOpen(MemberEntity userEntity, Long noteNo) {
 		MylectureNote mylectureNote = mylectureNoteRepository.findByNoteNo(noteNo);
 		lectureNoteDetailDTO dto = new lectureNoteDetailDTO();
@@ -336,7 +405,12 @@ public class MyLectureService {
 		mylectureNote.setNoteDelete(true);
 		mylectureNoteRepository.save(mylectureNote);
 	}
-
+	/**
+	 * 질문 게시물을 등록합니다.
+	 * @param userEntity
+	 * @param qaRequest
+	 * @return
+	 */
 	public QaDetailDTO QaSave(MemberEntity userEntity, QaRequest qaRequest) {
 		Lecture lecture = lectureService.findByLectureID(qaRequest.getLectureId());
 		MyLecture myLecture = verifyUserHasLecture(userEntity, lecture);
@@ -388,18 +462,26 @@ public class MyLectureService {
 			throw new RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND);
 		}
 	}
-
+	/**
+	 * 해당 강의에 대한 질문게시글 목록을 반환합니다.
+	 * @param lectureId
+	 * @param page
+	 * @return
+	 */
 	public QaListDTOs QalistBylecture(Long lectureId, int page) {
 		Lecture lecture = lectureService.findByLectureID(lectureId);
-		page = page <= 1 ? 0 : page - 1;
 		PageRequest pageRequest = PageRequest.of(page, 10, Sort.Direction.DESC, "questionDate");
 		Page<MylectureQa> myqs = mylectureQaRepository.findByDeleteopAndLectureId(removed.DISABLE ,lecture, pageRequest);
 		return QaListDTOsBuilder(myqs);
 	}
-
+	/**
+	 * 특정 유저의 질문 목록을 반환합니다.
+	 * @param userEntity
+	 * @param page
+	 * @param sort
+	 * @return
+	 */
 	public QaListDTOs QalistByMemberHandler(MemberEntity userEntity, int page, String sort) {
-
-		page = page <= 1 ? 0 : page - 1;
 		PageRequest pageRequest = PageRequest.of(page, 10, Sort.Direction.DESC, "questionDate");
 
 		if (sort.equals("completed")) {
@@ -417,7 +499,14 @@ public class MyLectureService {
 		}
 
 	}
-
+	/**
+	 * 해당 유저의 질문을 검색하여 반환합니다.
+	 * @param userEntity
+	 * @param page
+	 * @param sort
+	 * @param keyword
+	 * @return
+	 */
 	public QaListDTOs QalistBySearch(MemberEntity userEntity, int page, String sort, String keyword) {
 		page = page <= 1 ? 0 : page - 1;
 		PageRequest pageRequest = PageRequest.of(page, 10, Sort.Direction.DESC, "questionDate");
@@ -440,7 +529,11 @@ public class MyLectureService {
 		}
 
 	}
-
+	/**
+	 * 해당 강의의 질문 데이터와 페이지네이션 데이터를 반환합니다.
+	 * @param qas
+	 * @return QaListDTOs
+	 */
 	private QaListDTOs QaListDTOsBuilder(Page<MylectureQa> qas) {
 		int cutsize = 100;
 		List<QaListDTO> qldtolist = new ArrayList<QaListDTO>();
@@ -468,7 +561,11 @@ public class MyLectureService {
 		list.setQuestionCount(qas.getTotalElements());
 		return list;
 	}
-
+	/**
+	 * 질문 게시글의 세부내용을 반환합니다.
+	 * @param questionId
+	 * @return
+	 */
 	public QaDetailDTO getQaDetail(Long questionId) {
 		MylectureQa qaList = mylectureQaRepository.findByDeleteopAndLectureQaNo(removed.DISABLE,questionId);
 
@@ -484,8 +581,12 @@ public class MyLectureService {
         return qal; 
         
     }
-
-	public QaDetailDTO QaDetailDTOBuilder(MylectureQa q) {
+    /**
+     * 질문 데이터를 View에서 사용할 수 있도록 가공합니다.
+     * @param q
+     * @return QaDetailDTO
+     */
+	private QaDetailDTO QaDetailDTOBuilder(MylectureQa q) {
 		QaDetailDTO qaDto = new QaDetailDTO();
 		qaDto.setQuestionId(q.getLectureQaNo());
 		qaDto.setLectureTitle(q.getLectureId().getLectureName());
@@ -497,7 +598,12 @@ public class MyLectureService {
 		qaDto.setDate(q.getQuestionDate());
 		return qaDto;
 	}
-
+	/**
+	 * 작성한 질문을 갱신합니다.
+	 * @param userEntity
+	 * @param qaRequest
+	 * @return
+	 */
 	public QaDetailDTO QaUpdate(MemberEntity userEntity, QaUpdateRequest qaRequest) {
 		MylectureQa q = QaCRUDConfirm(qaRequest.getQuestionId());
 		if (q.getUserNo().equals(userEntity)) {
@@ -509,7 +615,12 @@ public class MyLectureService {
 			throw new RestApiException(UserErrorCode.POSSESSION);
 		}
 	}
-
+	/**
+	 * 해당 질문을 삭제합니다.
+	 * @param userEntity
+	 * @param lectureQaNo
+	 * @return
+	 */
 	public String QaDelete(MemberEntity userEntity, Long lectureQaNo) {
 		MylectureQa q = QaCRUDConfirm(lectureQaNo);
 		if (q.getUserNo().equals(userEntity)) {
@@ -520,7 +631,13 @@ public class MyLectureService {
 			throw new RestApiException(UserErrorCode.POSSESSION);
 		}
 	}
-	//Create
+
+	/**
+	 * 댓글을 작성합니다.
+	 * @param userEntity
+	 * @param commentQuest
+	 * @return
+	 */
 	public CommentDTO writeComment(MemberEntity userEntity, QaCommentQuest commentQuest) {
 		MylectureQa q = QaCRUDConfirm(commentQuest.getQuestionId());
 		MylectureQaAnswer entity = new MylectureQaAnswer();
@@ -536,9 +653,13 @@ public class MyLectureService {
 		CommentDTO commentDTO = entity.toDTO();
 		return commentDTO;
 	}
-	//
-	
-	public MylectureQa QaCRUDConfirm(Long lectureQaNo) {
+
+	/**
+	 * 해당 질문이 실제 존재하는 지 검증합니다.
+	 * @param lectureQaNo
+	 * @return
+	 */
+	private MylectureQa QaCRUDConfirm(Long lectureQaNo) {
 		Optional<MylectureQa> q = mylectureQaRepository.findById(lectureQaNo);
 		if (q.isPresent()) {
 			return q.get();
@@ -555,7 +676,12 @@ public class MyLectureService {
 			throw new RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND);
 		}
 	}
-
+	/**
+	 * 작성한 댓글을 삭제합니다.
+	 * @param userEntity
+	 * @param commentId
+	 * @return
+	 */
 	public String QaCommentDelete(MemberEntity userEntity, int commentId) {
 		MylectureQaAnswer comment = QaCommentConfirm(commentId);
 		if (comment.getMemberEntity().equals(userEntity)) {
@@ -566,7 +692,13 @@ public class MyLectureService {
 			throw new RestApiException(UserErrorCode.POSSESSION);
 		}
 	}
-
+	/**
+	 * 작성한 댓글을 수정합니다.
+	 * @param userEntity
+	 * @param commentId
+	 * @param dto
+	 * @return
+	 */
 	public CommentDTO QaCommentUpdate(MemberEntity userEntity, int commentId, QaCommentUpdateDto dto) {
 		MylectureQaAnswer comment = QaCommentConfirm(commentId);
 		if (comment.getMemberEntity().equals(userEntity)) {
