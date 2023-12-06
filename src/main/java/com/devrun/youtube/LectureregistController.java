@@ -160,7 +160,7 @@ public class LectureregistController {
 		System.out.println("----------------------------S3 업로드 시작---------------------------------------");
 		// 썸네일 S3 저장
 		// S3에가서 이미지를 업로드하고, 썸네일 URL 받아오기
-		String lectureThumnailUrl = awsS3UploadService.putS3(requestDto.getLectureThumbnail(), "lectuer_thumbnail",
+		String lectureThumnailUrl = awsS3UploadService.putS3(requestDto.getLectureThumbnail(), "lecture_thumbnail",
 				requestDto.getLectureName());
 		System.out.println("----------------------------S3 업로드 종료---------------------------------------");
 		System.out.println("----------------------------강의 엔티티 객체 생성 및 매핑---------------------------------------");
@@ -185,51 +185,5 @@ public class LectureregistController {
 		}
 		lectureService.fullintrosave(savedlecture, requestDto.getLectureFullIntro());
 		return "수신완료"; // Redirect to a success page
-	}
-
-	@PostMapping("/videotime")
-	public void videotime(@RequestParam(name = "file") MultipartFile videofile) {
-		System.out.println("originalfilename : " + videofile.getOriginalFilename());
-		File file = new File("/home/ubuntu/devrun/temp/" + videofile.getOriginalFilename());
-		try {
-			videofile.transferTo(file);
-		} catch (IllegalStateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		try {
-			double sdf;
-			sdf = durationExtractor.extract(file);
-			System.err.println("총 재생 시간 : " + (int) sdf);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JCodecException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		file.delete();
-//		try {
-//			FileChannelWrapper channel = NIOUtils.readableChannel(file);
-//			FrameGrab frameGrab = FrameGrab.createFrameGrab(channel);
-//			double durationInSeconds = frameGrab.getVideoTrack().getMeta().getTotalDuration();
-//			System.err.println("총 재생 시간 : " + (int)durationInSeconds);
-//			channel.close();
-//			file.delete();
-//		} catch (FileNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (JCodecException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 	}
 }
