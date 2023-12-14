@@ -1,5 +1,6 @@
 package com.devrun.util;
 
+import java.security.SecureRandom;
 import java.util.Random;
 
 /**
@@ -31,7 +32,7 @@ public class CouponCodeGenerator {
 
 	private static String generateRandomNumberString() {
 		StringBuilder sb = new StringBuilder();
-		Random random = new Random();
+		SecureRandom random = new SecureRandom();
 		// Generate 5-digit number
 		for (int i = 0; i < prefix; i++) {
 			char randomChar = NUMBER_CHARS.charAt(random.nextInt(NUMBER_CHARS.length()));
