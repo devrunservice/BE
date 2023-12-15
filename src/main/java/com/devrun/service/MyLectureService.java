@@ -155,8 +155,10 @@ public class MyLectureService {
 
 		}
 		int lectureProgress = (int) ((double) wholePlayTime / (double) wholeVideoTime * 100);
+		if(lectureProgress != 100) {
 		mylecture.setLectureProgress(lectureProgress);
 		mylectureRepository.save(mylecture);
+		}
 
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("user name", userEntity.getName());
