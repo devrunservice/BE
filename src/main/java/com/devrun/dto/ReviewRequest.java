@@ -13,6 +13,6 @@ public class ReviewRequest {
 	private String reviewContent;
 	
 	@ApiModelProperty(value = "후기 평점" , example = "1.5" , required = true)
-	private float reviewRating;
+	private double reviewRating;
 	
 }

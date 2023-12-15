@@ -9,5 +9,5 @@ public class MylectureReviewDTO {
 	private String userId;
 	private String reviewContent;
 	private Date reviewDate;
-	private float reviewRating;
+	private double reviewRating;
 }
