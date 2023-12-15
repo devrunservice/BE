@@ -15,6 +15,8 @@ import com.devrun.dto.ReviewRequest;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.MyLecture;
 import com.devrun.entity.MylectureReview;
+import com.devrun.exception.RestApiException;
+import com.devrun.exception.UserErrorCode;
 import com.devrun.repository.MyLectureReviewRepository;
 import com.devrun.repository.MylectureRepository;
 import com.devrun.youtube.Lecture;
@@ -46,7 +48,7 @@ public class MylectureReviewService {
 			mylectureReview.setUserNo(userEntity);
 			reviewRepository.save(mylectureReview);
 		} else {
-			throw new NoSuchElementException("This User isn't complete this Lecture!");
+			throw new RestApiException(UserErrorCode.NOT_QUALIFIED);
 		}
 		
 	}
