@@ -112,10 +112,10 @@ public class MyLectureController {
 		return mylectureService.checkLectureComplete(userEntity, page);
 	}
 
-	@PostMapping("/certificates/print")
+	@GetMapping("/certificates/print")
 	@ApiOperation(value = "수료증 자격 확인", notes = "강의 Id를 보내면 수료 자격을 확인합니다.")
 	public CertificateDto printCertificates(HttpServletRequest httpServletRequest,
-			@RequestBody(required = true) Long lectureId) {
+			@RequestParam(name = "lectureId" , required = true) Long lectureId) {
 		String userAccessToken = httpServletRequest.getHeader("Access_token");
 		String userId = JWTUtil.getUserIdFromToken(userAccessToken);
 		MemberEntity userEntity = memberService.findById(userId);
