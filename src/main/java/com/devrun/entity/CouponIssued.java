@@ -35,7 +35,7 @@ public class CouponIssued {
 	private Long issuedno; // 쿠폰발행번호
 
 	@Enumerated(EnumType.STRING)
-	private coupontype coupontype; // 쿠폰 종류 (카테고리 할인, 특정 강의 할인 , 특정 강사 할인, 모든 강의 할인)
+	private coupontypes coupontype= coupontypes.lecture; // 쿠폰 종류 (카테고리 할인, 특정 강의 할인 , 특정 강사 할인, 모든 강의 할인)
 
 	@Max(value = 99)
 	@Min(value = 1)
@@ -62,7 +62,7 @@ public class CouponIssued {
 	@JoinColumn(name = "lectureid")
 	private Lecture lectureid; // 쿠폰 적용 대상 (특정 강의 번호 또는 특정 강사 번호 또는 카테고리)
 
-	public enum coupontype {
+	public enum coupontypes {
 		all, category, lecture, mento,
 
 	}

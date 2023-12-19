@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -128,6 +129,15 @@ public class CouponController {
 		jsonObject.put("content", couponlist.getContent());
 
 		return ResponseEntity.ok(jsonObject);
+	}
+	
+	@GetMapping("/coupon/mento/lecture")
+	@ApiOperation(value = "멘토 강의 조회", notes = "멘토가 쿠폰을 발급하기 위해 자신이 만든 강의 리스트를 조회")
+	public List<Map<String, String>> getMentoLecture(HttpServletRequest request){
+		String userid = JWTUtil.getUserIdFromToken(request.getHeader("Access_token"));
+		MemberEntity userEntity = memberService.findById(userid);
+		return couponSerivce.findMentoLecture(userEntity);
+		
 	}
 
 }

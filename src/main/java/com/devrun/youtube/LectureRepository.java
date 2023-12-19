@@ -52,6 +52,8 @@ public interface LectureRepository extends JpaRepository<Lecture, Long>, JpaSpec
 			+ "AND (lecture_name LIKE %:keyword% OR lecture_intro LIKE %:keyword% OR user_no IN :mentoIds)", nativeQuery = true)
 	Page<Lecture> findCategoryInAndKeywordIn(@Param("categoryNumber") LectureCategory categories, @Param("keyword") String keyword, @Param("mentoIds") List<MemberEntity> members, PageRequest pageRequest);
 
+	List<Lecture> findByMentoId(MemberEntity userEntity);
+
     
 
 
