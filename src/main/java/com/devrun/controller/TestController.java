@@ -95,4 +95,18 @@ public class TestController {
 		return ResponseEntity.ok(videoDTO);
 	}
 	
+	@PostMapping("/promotion/mento")
+	public void metnoPromotion(HttpServletRequest request) {
+		String userid = JWTUtil.getUserIdFromToken(request.getHeader("Access_token"));
+		MemberEntity member = memberService.findById(userid);
+		memberService.promotionTomento(member,"mento");
+	}
+	
+	@PostMapping("/promotion/student")
+	public void studentPromotion(HttpServletRequest request) {
+		String userid = JWTUtil.getUserIdFromToken(request.getHeader("Access_token"));
+		MemberEntity member = memberService.findById(userid);
+		memberService.promotionTostudent(member,"student");
+	}
+	
 }

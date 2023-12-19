@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.devrun.dto.member.MemberDTO.Role;
 import com.devrun.dto.member.MemberDTO.Status;
 import com.devrun.entity.Consent;
 import com.devrun.entity.Contact;
@@ -236,6 +237,18 @@ public class MemberService {
 		MemberEntity member = memberEntityRepository.findById(userid);
 		member.setStatus(Status.WITHDRAWN);
 		memberEntityRepository.save(member);
+	}
+
+	public void promotionTomento(MemberEntity member, String string) {
+		member.setRole(Role.MENTO);
+		memberEntityRepository.save(member);
+		
+	}
+
+	public void promotionTostudent(MemberEntity member, String string) {
+		member.setRole(Role.STUDENT);
+		memberEntityRepository.save(member);
+		
 	}
 
 //    public boolean isUserIdEquals(String id) {
