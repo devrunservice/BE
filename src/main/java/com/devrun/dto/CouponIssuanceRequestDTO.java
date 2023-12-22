@@ -5,6 +5,10 @@ import java.util.Date;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -23,6 +27,7 @@ public class CouponIssuanceRequestDTO {
 	private int discountrate; // 쿠폰 할인율
 
 	@ApiModelProperty(value = "쿠폰 만료일", required = true, example = "2023-01-01")
+	@JsonFormat(pattern = "yyyy-MM-dd")
 	private Date expirydate; // 쿠폰 일괄 만료일
 
 	@Max(value = 99)

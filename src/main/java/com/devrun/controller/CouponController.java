@@ -63,7 +63,6 @@ public class CouponController {
 
 	@PostMapping("/coupon/publish")
 	@ApiOperation(value = "쿠폰 생성", notes = "쿠폰을 생성하여 DB에 저장합니다.")
-	@ApiImplicitParam(name = "couponIssuanceRequestDTO", value = "생성할 쿠폰 디테일", required = true, dataTypeClass = Object.class)
 	public ResponseEntity<?> couponGeneration(@RequestBody @Valid CouponIssuanceRequestDTO couponIssuanceRequestDTO,
 			HttpServletRequest request) {
 		String userid = JWTUtil.getUserIdFromToken(request.getHeader("Access_token"));
