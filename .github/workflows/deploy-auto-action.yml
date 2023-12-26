@@ -32,6 +32,10 @@ jobs:
           echo "spring.jpa.hibernate.ddl-auto=update" >> application.properties
           echo "spring.jpa.properties.hibernate.format_sql=true" >> application.properties
           echo "spring.jpa.properties.hibernate.show_sql=true" >> application.properties
+          echo "spring.jpa.properties.hibernate.default_batch_fetch_size=100" >> application.properties
+          echo "spring.jpa.properties.hibernate.cache.use_second_level_cache = true" >> application.properties
+          echo "spring.jpa.properties.hibernate.cache.region.factory_class = org.hibernate.cache.ehcache.EhCacheRegionFactory" >> application.properties
+          echo "spring.jpa.properties.hibernate.generate_statistics = true" >> application.properties
           echo "" >> application.properties
           echo "sens.accessKey=${{ secrets.SENS_ACCESSKEY }}" >> application.properties
           echo "sens.secretKey=${{ secrets.SENS_SECRETKEY }}" >> application.properties
