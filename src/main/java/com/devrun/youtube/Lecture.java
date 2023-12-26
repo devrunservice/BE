@@ -8,23 +8,23 @@ import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hibernate.annotations.BatchSize;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.devrun.entity.MemberEntity;
-import com.devrun.entity.PaymentEntity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.Data;
@@ -32,6 +32,7 @@ import lombok.Data;
 @Data
 @Entity
 @EntityListeners(AuditingEntityListener.class)
+@BatchSize(size = 100)
 public class Lecture {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -85,11 +86,12 @@ public class Lecture {
 	@Column(nullable = true)
 	private int buyCount = 0;	
 	
-	@ManyToOne
+	
 	@JoinColumn(name = "categoryNo")
+	@ManyToOne(fetch = FetchType.LAZY)
 	private LectureCategory lectureCategory;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "userNo")
 	private MemberEntity mentoId;
 	

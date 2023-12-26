@@ -8,10 +8,13 @@ import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.BatchSize;
+
 import lombok.Data;
 
 @Data
 @Entity
+@BatchSize(size = 100)
 public class LectureCategory {
 	 
     @Id

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Date;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -17,7 +18,12 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Comment;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.NaturalIdCache;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -29,6 +35,10 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "user")
+@BatchSize(size = 100)
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+@NaturalIdCache
 public class MemberEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -46,6 +56,7 @@ public class MemberEntity implements Serializable {
 	@Column(name = "id", nullable = false, length = 15)
 	@Comment("유저 아이디")
 	@NotBlank(message = "information cannot be null or empty")
+	@NaturalId
 	private String id;
 	
 	@Column(name = "password", nullable = false, columnDefinition = "TEXT")

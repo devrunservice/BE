@@ -87,6 +87,11 @@ dependencies {
     implementation 'javax.servlet:jstl:1.2'
     compileOnly 'org.apache.tomcat.embed:tomcat-embed-jasper'
     
+    
+    // https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-ehcache
+	implementation group: 'org.hibernate.orm', name: 'hibernate-ehcache', version: '6.0.0.Alpha7'
+    
+    
 	implementation 'org.jcodec:jcodec-javase:0.2.5'
     
 
