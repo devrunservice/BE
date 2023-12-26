@@ -1,22 +1,20 @@
 package com.devrun.youtube;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.print.attribute.HashAttributeSet;
 
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import com.devrun.dto.LectureIntroduceDTO;
+import com.devrun.dto.LectureOfMentoDto;
+import com.devrun.dto.LectureOfMentoDtos;
 import com.devrun.dto.QueryLectureByKeywordDTO;
 import com.devrun.dto.QueryLectureByKeywordDTO2;
 import com.devrun.entity.LectureIntroduce;
@@ -404,6 +402,30 @@ public class LectureService {
 		intro.setContent(lectureFullIntro);
 		introduceRepository.save(intro);
 	}
+
+	public LectureOfMentoDtos findByMentoId(MemberEntity userEntity, int page) {
+		page = page <= 0? 1 : page;
+		PageRequest pageRequest = PageRequest.of(page - 1, 10, Direction.DESC , "lectureStart");
+		Page<Lecture> pageLecture = lectureRepository.findByMentoId(userEntity , pageRequest);
+		List<LectureOfMentoDto> dtos = new ArrayList<LectureOfMentoDto>();
+		int noNum = pageRequest.getPageNumber()*pageRequest.getPageSize()+1;
+		for (Lecture lecture : pageLecture) {			
+			LectureOfMentoDto dto = new LectureOfMentoDto();
+			dto.setLectureName(lecture.getLectureName());
+			dto.setLecturePrice(lecture.getLecturePrice());
+			dto.setNo(noNum);
+			dto.setLectureStatus(lecture.getLectureStatus());
+			noNum++;
+			dtos.add(dto);
+		}
+		LectureOfMentoDtos list = new LectureOfMentoDtos();
+		list.setList(dtos);
+		list.setTotalPages(pageLecture.getTotalPages());
+		return list;
+	}
+	
+	
+	
 
 //	 public CreateLectureRequestDto getLectureDetailsMapping(Long lectureId) {
 //	        Lecture lecture = lectureRepository.findById(lectureId)

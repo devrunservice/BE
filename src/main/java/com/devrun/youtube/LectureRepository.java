@@ -54,6 +54,8 @@ public interface LectureRepository extends JpaRepository<Lecture, Long>, JpaSpec
 
 	List<Lecture> findByMentoId(MemberEntity userEntity);
 
+	Page<Lecture> findByMentoId(MemberEntity userEntity, PageRequest pageRequest);
+
     
 
 
