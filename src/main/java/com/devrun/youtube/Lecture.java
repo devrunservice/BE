@@ -88,10 +88,10 @@ public class Lecture {
 	
 	
 	@JoinColumn(name = "categoryNo")
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne
 	private LectureCategory lectureCategory;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name = "userNo")
 	private MemberEntity mentoId;
 	
