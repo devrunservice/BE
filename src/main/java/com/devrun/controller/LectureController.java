@@ -10,39 +10,46 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.devrun.dto.LectureIntroduceDTO;
+import com.devrun.dto.VideoDetailsDto;
+import com.devrun.dto.lectureDetailDto;
+import com.devrun.entity.MemberEntity;
+import com.devrun.service.LecuturesearchService;
+import com.devrun.service.MemberService;
+import com.devrun.service.VideoSearchService;
+import com.devrun.util.JWTUtil;
 import com.devrun.youtube.Lecture;
 import com.devrun.youtube.LectureService;
 import com.devrun.youtube.Video;
 
 import io.swagger.annotations.ApiOperation;
-
-import com.devrun.dto.LectureIntroduceDTO;
-import com.devrun.dto.VideoDetailsDto;
-import com.devrun.service.LecuturesearchService;
-import com.devrun.service.VideoSearchService;
-import com.devrun.util.JWTUtil;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/lectures")
+@RequiredArgsConstructor
 public class LectureController {
 	private final LectureService lectureService;
     private final LecuturesearchService lecuturesearchService;
     private final VideoSearchService videoSearchService;
-    
-
-    public LectureController(LectureService lectureService, LecuturesearchService lecuturesearchService ,VideoSearchService videoSearchService ) {
-        this.lecuturesearchService = lecuturesearchService;
-		this.videoSearchService = videoSearchService;
-		this.lectureService = lectureService;
-    }
-
-
-
-    
+    private final MemberService memberService;
+   
 @GetMapping("/{lectureId}")
-public Lecture getLectureDetails(@PathVariable Long lectureId) throws NotFoundException {
+public lectureDetailDto getLectureDetails(HttpServletRequest request , @PathVariable Long lectureId) throws NotFoundException {
 	Lecture lecture = lecuturesearchService.getLectureDetails(lectureId);
-    return lecture;
+	lectureDetailDto dto = null;
+	if(request.getHeader("Access_token") != null) {
+		String userAccessToken = request.getHeader("Access_token");
+		String userId = JWTUtil.getUserIdFromToken(userAccessToken);
+		MemberEntity userEntity = memberService.findById(userId);
+		dto = lectureService.getlecturedetail(userEntity, lectureId);
+	}
+	else 
+	{
+		MemberEntity userEntity = null;
+		dto = lectureService.getlecturedetail(userEntity, lectureId);
+	}
+    return dto;
 }
 
 @GetMapping("/{lectureId}/detail")
@@ -71,12 +78,6 @@ public VideoDetailsDto getVideoPageData(@PathVariable Long videoId) throws NotFo
     videoDetailsDto.setNextVideo(nextVideo);
 
     return videoDetailsDto;
-}
-
-@GetMapping("/detailtest/{id}")
-@ApiOperation(value = "강의 상세 소개 컨텐츠")
-public LectureIntroduceDTO lecturedetailopen(@PathVariable(name = "id" , required = true) Long lectureId) {
-	return lectureService.getlecturedetail(lectureId);
 }
 
 @PostMapping("/detailupdate")

@@ -17,6 +17,7 @@ import com.devrun.dto.LectureOfMentoDto;
 import com.devrun.dto.LectureOfMentoDtos;
 import com.devrun.dto.QueryLectureByKeywordDTO;
 import com.devrun.dto.QueryLectureByKeywordDTO2;
+import com.devrun.dto.lectureDetailDto;
 import com.devrun.entity.LectureIntroduce;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.MyLecture;
@@ -127,7 +128,7 @@ public class LectureService {
 		savevideo.setVideoLink(videoDto.getVideoLink());
 		String link = videoDto.getVideoLink();
 		int cutnum = link.indexOf("=");
-        String videoid = link.substring(cutnum + 1);
+		String videoid = link.substring(cutnum + 1);
 		savevideo.setVideoId(videoid);
 		savevideo.setTotalPlayTime(videoDto.getTotalPlayTime());
 		videoRepository.save(savevideo);
@@ -136,6 +137,7 @@ public class LectureService {
 	/**
 	 * 지정된 카테고리, 강의명, 강의 소갯글, 강사명 중에 특정한 검색어를 포함하는 강의의 데이터<br>
 	 * (강의명, 강의 소개글, 강사명, 강의 평점, 강의 가격, 썸네일 URI , 카테고리 분류 중-소 , 속성)를 반환합니다.
+	 * 
 	 * @param bigcategory
 	 * @param midcategory
 	 * @param keyword
@@ -156,8 +158,10 @@ public class LectureService {
 	private boolean isCategoryEmpty(String bigcategory, String midcategory) {
 		return bigcategory.isEmpty() && midcategory.isEmpty();
 	}
+
 	/**
 	 * 검색 조건 중 카테고리를 설정하지 않은 검색을 수행합니다.
+	 * 
 	 * @param keyword
 	 * @param pageRequest
 	 * @return QueryLectureByKeywordDTO2
@@ -173,13 +177,15 @@ public class LectureService {
 			return QueryLectureByKeyword(keyword, members, pageRequest);
 		}
 	}
+
 	/**
 	 * 검색 조건 중 대분류 카테고리만 설정한 경우의 검색을 수행합니다.
+	 * 
 	 * @param bigcategory
 	 * @param keyword
 	 * @param pageRequest
 	 * @return QueryLectureByKeywordDTO2
-	 */ 
+	 */
 	private QueryLectureByKeywordDTO2 searchByBigCategory(String bigcategory, String keyword, PageRequest pageRequest) {
 		List<LectureCategory> categories = categoryService.findcategory(bigcategory);
 		if (keyword.isBlank()) {
@@ -192,8 +198,10 @@ public class LectureService {
 			return findLecturesWithCategroysWithUser(categories, keyword, members, pageRequest);
 		}
 	}
+
 	/**
 	 * 카테고리가 지정되어 있고, 검색 범위에 강사 아이디도 포함한 경우 강의 데이터를 반환합니다.
+	 * 
 	 * @param categories
 	 * @param keyword
 	 * @param members
@@ -205,8 +213,10 @@ public class LectureService {
 		Page<Lecture> l1 = lectureRepository.findCategoryInAndKeywordIn(categories, keyword, members, pageRequest);
 		return packageingDto(l1);
 	}
+
 	/**
 	 * 대분류 카테고리와 중분류 카테고리를 지정한 검색을 수행합니다.
+	 * 
 	 * @param bigcategory
 	 * @param midcategory
 	 * @param keyword
@@ -226,8 +236,10 @@ public class LectureService {
 			return findLecturesWithCategroysWithUser(category, keyword, members, pageRequest);
 		}
 	}
+
 	/**
 	 * 카테고리가 지정되었고, 검색 범위에 강사 아이디도 포함한 경우 강의 데이터를 반환합니다.
+	 * 
 	 * @param category
 	 * @param keyword
 	 * @param members
@@ -242,6 +254,7 @@ public class LectureService {
 
 	/**
 	 * 검색 범위에 강사 아이디를 포함하지 않는 검색을 수행합니다.
+	 * 
 	 * @param keyword
 	 * @param pageable
 	 * @return
@@ -253,6 +266,7 @@ public class LectureService {
 
 	/**
 	 * 검색 범위에 강사 아이디를 포함하는 검색을 수행합니다.
+	 * 
 	 * @param keyword
 	 * @param m1
 	 * @param pageable
@@ -276,8 +290,10 @@ public class LectureService {
 		Page<Lecture> l1 = lectureRepository.findLecturesWithCategroy(category, keyword, pageRequest);
 		return packageingDto(l1);
 	}
+
 	/**
 	 * 강의 데이터와 페이지네이션 데이터를 함께 반환합니다.
+	 * 
 	 * @param l1
 	 * @return
 	 */
@@ -289,14 +305,17 @@ public class LectureService {
 		list.setTotalpages(l1.getTotalPages());
 		return list;
 	}
-	
+
 	/**
-	 * 강의 데이터를 View에 맞게 가공한 데이터를 반환합니다. 
+	 * 강의 데이터를 View에 맞게 가공한 데이터를 반환합니다.
+	 * 
 	 * @param lectureList
 	 * @return
 	 */
 	public List<QueryLectureByKeywordDTO> convertLectureToDTO(Page<Lecture> lectureList) {
-		if(lectureList.isEmpty()) {throw new RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND);}
+		if (lectureList.isEmpty()) {
+			throw new RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND);
+		}
 		return lectureList.stream().map(QueryLectureByKeywordDTO::new).collect(Collectors.toList());
 	}
 
@@ -327,49 +346,62 @@ public class LectureService {
 		Page<Lecture> l1 = lectureRepository.findAll(pageRequest);
 		return packageingDto(l1);
 	}
-	
+
 	/**
 	 * 강의의 상세 설명 데이터를 반환합니다.
+	 * 
 	 * @param lectureId
 	 * @return
 	 */
-	public LectureIntroduceDTO getlecturedetail(Long lectureId) {
+	public lectureDetailDto getlecturedetail(MemberEntity userEntity, Long lectureId) {
 		Lecture lecture = findByLectureID(lectureId);
 		LectureIntroduce li = introduceRepository.findByLecture(lecture);
-		LectureIntroduceDTO dto = new LectureIntroduceDTO();
-		dto.setContent(li.getContent());
-		dto.setLectureId(li.getLecture().getLectureid());
+		lectureDetailDto dto = new lectureDetailDto();
+		dto.setLecture(lecture);
+		dto.setLectureSections(lecture.getLectureSections());
+		dto.setLectureCategory(lecture.getLectureCategory());
+		dto.setLectureFullIntro(li.getContent());
+		if (userEntity != null) {
+			Optional<MyLecture> userhas = mylectureRepository.findByMemberentityAndLecture(userEntity, lecture);
+			if (userhas.isPresent())
+				dto.getLecture().setPurchaseStatus(true);
+			dto.getLecture().setProgress(userhas.get().getLectureProgress());
+		}
 		return dto;
 	}
+
 	/**
 	 * 강의 목록 중 유저가 이미 수강 중인 강의를 식별하여 표기합니다.
+	 * 
 	 * @param userEntity
 	 * @param p1
 	 * @return
 	 */
 	public QueryLectureByKeywordDTO2 checkAlreadyHasLecture(MemberEntity userEntity, QueryLectureByKeywordDTO2 p1) {
 		List<MyLecture> userhas = mylectureRepository.findByMemberentity(userEntity);
-		if(!userhas.isEmpty()) {
+		if (!userhas.isEmpty()) {
 			List<Long> idlist = new ArrayList<Long>();
-			for(MyLecture myLecture : userhas) {
+			for (MyLecture myLecture : userhas) {
 				idlist.add(myLecture.getLecture().getLectureid());
 			}
 			userhas.clear();
-			for( QueryLectureByKeywordDTO p : p1.getDtolist()) {
-				if(idlist.contains(p.getLectureId())) {
+			for (QueryLectureByKeywordDTO p : p1.getDtolist()) {
+				if (idlist.contains(p.getLectureId())) {
 					p.setPurchaseStatus(true);
 				} else {
 					continue;
 				}
 			}
-			
+
 			return p1;
 		} else {
 			return p1;
 		}
 	}
+
 	/**
 	 * 강의 상세 설명을 갱신합니다.
+	 * 
 	 * @param userid
 	 * @param request
 	 * @return
@@ -378,21 +410,22 @@ public class LectureService {
 		MemberEntity user = memberService.findById(userid);
 		Lecture lecture = findByLectureID(request.getLectureId());
 		Optional<MyLecture> check = mylectureRepository.findByMemberentityAndLecture(user, lecture);
-		if(check.isPresent()) {
-		LectureIntroduce li = introduceRepository.findByLecture(lecture);
-		li.setContent(request.getContent());
-		introduceRepository.save(li);
-		LectureIntroduceDTO dto = new LectureIntroduceDTO();
-		dto.setContent(li.getContent());
-		dto.setLectureId(li.getLecture().getLectureid());
-		return dto;
+		if (check.isPresent()) {
+			LectureIntroduce li = introduceRepository.findByLecture(lecture);
+			li.setContent(request.getContent());
+			introduceRepository.save(li);
+			LectureIntroduceDTO dto = new LectureIntroduceDTO();
+			dto.setContent(li.getContent());
+			dto.setLectureId(li.getLecture().getLectureid());
+			return dto;
 		} else {
 			throw new RestApiException(UserErrorCode.USERHASNOTLECTURE);
 		}
 	}
-	
+
 	/**
 	 * 강의 상세 설명을 등록합니다.
+	 * 
 	 * @param savedlecture
 	 * @param lectureFullIntro
 	 */
@@ -404,12 +437,12 @@ public class LectureService {
 	}
 
 	public LectureOfMentoDtos findByMentoId(MemberEntity userEntity, int page) {
-		page = page <= 0? 1 : page;
-		PageRequest pageRequest = PageRequest.of(page - 1, 10, Direction.DESC , "lectureStart");
-		Page<Lecture> pageLecture = lectureRepository.findByMentoId(userEntity , pageRequest);
+		page = page <= 0 ? 1 : page;
+		PageRequest pageRequest = PageRequest.of(page - 1, 10, Direction.DESC, "lectureStart");
+		Page<Lecture> pageLecture = lectureRepository.findByMentoId(userEntity, pageRequest);
 		List<LectureOfMentoDto> dtos = new ArrayList<LectureOfMentoDto>();
-		int noNum = pageRequest.getPageNumber()*pageRequest.getPageSize()+1;
-		for (Lecture lecture : pageLecture) {			
+		int noNum = pageRequest.getPageNumber() * pageRequest.getPageSize() + 1;
+		for (Lecture lecture : pageLecture) {
 			LectureOfMentoDto dto = new LectureOfMentoDto();
 			dto.setLectureName(lecture.getLectureName());
 			dto.setLecturePrice(lecture.getLecturePrice());
@@ -423,9 +456,6 @@ public class LectureService {
 		list.setTotalPages(pageLecture.getTotalPages());
 		return list;
 	}
-	
-	
-	
 
 //	 public CreateLectureRequestDto getLectureDetailsMapping(Long lectureId) {
 //	        Lecture lecture = lectureRepository.findById(lectureId)

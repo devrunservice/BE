@@ -4,8 +4,9 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.devrun.youtube.Video;
+import com.devrun.youtube.Lecture;
 import com.devrun.youtube.LectureSection;
+import com.devrun.youtube.Video;
 
 public interface VideoSearchRepository extends JpaRepository<Video, Long> {
 
@@ -21,5 +22,6 @@ public interface VideoSearchRepository extends JpaRepository<Video, Long> {
 
 	List<Video> findByLectureSection(LectureSection lectureSection);
 
+	List<Video> findByLecture(Lecture lecture);
 
 }
