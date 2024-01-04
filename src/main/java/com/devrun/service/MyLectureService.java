@@ -177,14 +177,10 @@ public class MyLectureService {
 	 * @return MyLecture
 	 */
 	public MyLecture verifyUserHasLecture(MemberEntity userEntity, Lecture lecture) {
-		Optional<MyLecture> optional = mylectureRepository.findByMemberentityAndLecture(userEntity, lecture);
-		if (optional.isPresent()) {
-			return optional.get();
-		} else {
-			throw new RestApiException(UserErrorCode.POSSESSION);
-		}
-	}
-	
+		MyLecture myLecnture = mylectureRepository.findByMemberentityAndLecture(userEntity, lecture).orElseThrow(() -> new RestApiException(CommonErrorCode.RESOURCE_NOT_FOUND));
+		return myLecnture;
+	}	
+
 	/**
 	 * 하나의 강의에 대한 진도율 데이터(총진도율과 전체 시청 시간)를 계산하고, 해당 강의의 섹션 정보, 영상 정보를 반환합니다. 
 	 * @param myLecture
