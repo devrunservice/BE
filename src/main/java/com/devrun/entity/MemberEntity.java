@@ -37,7 +37,7 @@ import lombok.Data;
 @Table(name = "user")
 @BatchSize(size = 100)
 @Cacheable
-@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 @NaturalIdCache
 public class MemberEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
