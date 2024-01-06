@@ -42,7 +42,6 @@ public interface LectureRepository extends JpaRepository<Lecture, Long>, JpaSpec
 
 	Lecture findByLectureNameAndMentoId(String lectureName, MemberEntity mentoEntity);
 
-	Optional<Lecture> findByLectureid(Long lectureid);
 	
 	@Query(value = "SELECT * FROM lecture WHERE category_no IN :categoryNumbers "
 			+ "AND (lecture_name LIKE %:keyword% OR lecture_intro LIKE %:keyword% OR user_no IN :mentoIds)", nativeQuery = true)
@@ -55,6 +54,12 @@ public interface LectureRepository extends JpaRepository<Lecture, Long>, JpaSpec
 	List<Lecture> findByMentoId(MemberEntity userEntity);
 
 	Page<Lecture> findByMentoId(MemberEntity userEntity, PageRequest pageRequest);
+
+	Optional<Lecture> findByLectureid(Long lectureid);
+	
+    @Query("SELECT l.lectureid FROM Lecture l WHERE l.mentoId.userNo = :userNo")
+	List<Long> findLectureIdsByUserNo(@Param("userNo") int usrno);
+
 
     
 

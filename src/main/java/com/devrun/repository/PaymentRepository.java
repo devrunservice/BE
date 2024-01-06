@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,6 +30,26 @@ public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
 	
 	@Query("SELECT p FROM PaymentEntity p WHERE p.merchant_uid = :merchant_uid")
 	PaymentEntity findByMerchantUid(@Param("merchant_uid") String merchant_uid);
+
+	// 최근 결제 순 으로 페이징
+	@Query(value = "SELECT p.name AS name, p.paid_amount AS paidamount, p.payment_date AS paymentDate, ROW_NUMBER() OVER(ORDER BY paymentDate DESC) AS moneyNo " +
+	        "FROM payment p " +
+	        "WHERE p.lectureid IN :lectureIds", nativeQuery = true)
+	Page<MentoMoney> findPaymentsByLectureIds(@Param("lectureIds") List<Long> lectureIds, Pageable pageable);
+
+
+	
+	
+
+
+
+
+
+	 
+
+
+
+
 
 
 

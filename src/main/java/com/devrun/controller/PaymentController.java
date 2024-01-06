@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.devrun.dto.PaymentDTO;
 import com.devrun.dto.FreeDTO;
+import com.devrun.dto.MentoMoneyDTO;
 import com.devrun.entity.MemberEntity;
 import com.devrun.entity.PaymentEntity;
 import com.devrun.entity.PointEntity;
@@ -37,6 +38,7 @@ import com.devrun.repository.PaymentRepository;
 import com.devrun.repository.PointHistoryRepository;
 import com.devrun.repository.PointRepository;
 import com.devrun.service.MemberService;
+import com.devrun.service.MentoMoneyService;
 import com.devrun.service.MyLectureService;
 import com.devrun.service.PaymentService;
 import com.devrun.util.JWTUtil;
@@ -76,6 +78,9 @@ public class PaymentController {
 	
 	@Autowired
 	private MyLectureService myLectureService;
+	
+	@Autowired
+	private MentoMoneyService mentoMoneyService;
 
 	// 결제 정보 db에 저장
 	@PostMapping("/savePaymentInfo")
@@ -274,6 +279,18 @@ public class PaymentController {
 		        
 		        return ResponseEntity.ok("성공");		        
 		   
+		}
+		
+		@GetMapping("/MentoMoney")
+		public ResponseEntity<?> mentoMoney(@RequestParam("page") int page){
+	        String userid = SecurityContextHolder.getContext().getAuthentication().getName();
+	        MemberEntity member = memberService.findById(userid);	 
+	        int usrno = member.getUserNo();
+	        Pageable pageable = PageRequest.of(page - 1, 10);
+		    Page<MentoMoneyDTO> resultPage = mentoMoneyService.searchMoney(usrno, pageable);
+		    
+			return ResponseEntity.ok(resultPage);
+		
 		}
 
 		
