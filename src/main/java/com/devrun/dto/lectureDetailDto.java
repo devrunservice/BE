@@ -58,6 +58,7 @@ public class lectureDetailDto {
 				vi.setTotalPlayTime(v.getTotalPlayTime());
 				vi.setVideoId(v.getVideoId());
 				vi.setVideoNo(v.getVideoNo());
+				vi.setVideoTitle(v.getVideoTitle());
 				list.add(vi);
 			}
 			this.videos = list;
@@ -91,6 +92,7 @@ public class lectureDetailDto {
 @Data
 class video {
 	private String videoId;
+	private String videoTitle;
 	private Long videoNo;
 	private int totalPlayTime;
 }
