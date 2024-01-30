@@ -42,7 +42,7 @@ DEVRUN은 프로그래밍과 관련된 강의를 들을 수 있는 온라인 교
 - i’m port (간편 결제)
 - AWS SDK
 - Youtube Data API V3
-- Gamil
+- Gmail
 - [Jcodec](https://github.com/jcodec/jcodec) (A pure java implementation of video/audio codecs.)
 
 ## 🛠 기타 협업 툴
