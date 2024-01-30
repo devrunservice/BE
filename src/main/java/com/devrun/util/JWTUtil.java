@@ -123,6 +123,7 @@ public class JWTUtil {
     
     // 주어진 token으로부터 alg를 추출하여 검증
     public static boolean isAlgorithmValid(String token) {
+    	System.out.println("주어진 token으로부터 alg를 추출하여 검증");
         Jws<Claims> jwsClaims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
         String algorithmUsed = jwsClaims.getHeader().getAlgorithm();
         return SIGNATURE_ALGORITHM.getValue().equals(algorithmUsed);
@@ -185,18 +186,24 @@ public class JWTUtil {
  	
     // 오류 응답 전송
     public void sendErrorResponse(HttpServletResponse response, int status, String message) throws IOException {
-        response.sendError(status, message);
+    	System.out.println("오류 응답 전송");
+    	response.sendError(status, message);
+    	System.out.println("오류 응답 전송 완료");
     }
  	
     // 토큰 유효성 검사 및 처리
  	private boolean validateAndHandleToken(String token, String tokenType, HttpServletRequest request, HttpServletResponse response, FilterChain chain)
  	        throws ServletException, IOException {
- 		
+ 		System.out.println("토큰 유효성 검사 및 처리");
  	    if (token != null && token.startsWith("Bearer ")) {
  	        String jwt = token.substring(7);
+ 	       System.out.println("토큰 유효성 검사 및 처리 1");
  	        String userId = getUserIdFromToken(token);
+ 	       System.out.println("토큰 유효성 검사 및 처리 2");
  	        String requestJti = getJtiFromToken(token);
+ 	       System.out.println("토큰 유효성 검사 및 처리 3");
  	        String storedJti = redisCache.getJti(userId);
+ 	       System.out.println("토큰 유효성 검사 및 처리 4");
  	        
  	        if ( !isValidAlgorithm(jwt, response) || isBlacklistedRefreshToken(tokenType, token, response) ) return true;
  	        if (isValidateJti(requestJti, storedJti, userId)) {
@@ -216,6 +223,7 @@ public class JWTUtil {
  	
  	// 중복 로그인 방지를 위해 jti 검증
  	private boolean isValidateJti(String requestJti, String storedJti, String userId) throws IOException {
+ 		System.out.println("중복 로그인 방지를 위해 jti 검증");
  		if (storedJti == null || requestJti.equals(storedJti)) {
  			// redis에 jti 등록
 			redisCache.setJti(userId, requestJti);
@@ -226,6 +234,7 @@ public class JWTUtil {
  	
  	// 주어진 token으로부터 alg를 추출하여 검증
  	private boolean isValidAlgorithm(String token, HttpServletResponse response) throws IOException {
+ 		System.out.println("주어진 token으로부터 alg를 추출하여 검증");
  	    if (!JWTUtil.isAlgorithmValid(token)) {
  	    	// 잘못된 서명 알고리즘
  	        sendErrorResponse(response, 403, "Invalid token signature algorithm");
@@ -236,7 +245,8 @@ public class JWTUtil {
  	
 	// 블랙리스트에 등록된 토큰인지 검증
 	private boolean isBlacklistedRefreshToken(String tokenType, String token, HttpServletResponse response) throws IOException {
-	    if (tokenType.equals("Refresh_token") && redisCache.isTokenBlacklisted(token)) {
+		System.out.println("블랙리스트에 등록된 토큰인지 검증");
+		if (tokenType.equals("Refresh_token") && redisCache.isTokenBlacklisted(token)) {
 	    	// 블랙리스트에 등록된 토큰 사용
 	        sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "Logout user");
 	        return true;
@@ -246,6 +256,7 @@ public class JWTUtil {
 	
 	// 토큰을 검증하고 인증 프로세스를 처리
 	private boolean validateAndProcessToken(String token, HttpServletRequest request) {
+		System.out.println("토큰을 검증하고 인증 프로세스를 처리");
 		String subToken = token.substring(7);
 	    if (token != null && token.startsWith("Bearer ")) {
 	        String username = extractUsername(subToken);
@@ -267,6 +278,7 @@ public class JWTUtil {
 	
 	// Security Context에 사용자 인증 정보를 설정
     public void setAuthenticationInSecurityContext(UserDetails userDetails, HttpServletRequest request) {
+    	System.out.println("Security Context에 사용자 인증 정보를 설정");
     	// UsernamePasswordAuthenticationToken은 Spring Security에서 제공하는 Authentication의 구현체로
     	// 사용자의 인증 정보를 나타냄 이 객체는 주로 사용자의 ID, 비밀번호, 그리고 권한 정보를 포함
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken 

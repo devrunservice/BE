@@ -26,7 +26,7 @@ public class RedisCache {
 
     // 토큰이 블랙리스트에 있는지 확인
     public boolean isTokenBlacklisted(String token) {
-    	
+    	System.out.println("토큰이 블랙리스트에 있는지 확인");
     	// Redis의 hasKey() 메소드를 사용하여 토큰이 Redis에 저장되어 있는지 확인
         return redisTemplate.hasKey(token);
     }

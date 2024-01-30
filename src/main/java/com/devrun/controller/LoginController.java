@@ -193,12 +193,12 @@ public class LoginController {
         // 액세스 토큰 생성
         String access_token = JWTUtil.generateAccessToken(member.getId(), member.getName(), jti);
         // 리프레시 토큰 생성
-        String refresh_token = JWTUtil.generateRefreshToken(member.getId(), member.getName(), jti);
+        //String refresh_token = JWTUtil.generateRefreshToken(member.getId(), member.getName(), jti);
 
         // 토큰들을 맵에 저장
         Map<String, String> tokens = new HashMap<>();
         tokens.put("access_token", access_token);
-        tokens.put("refresh_token", refresh_token);
+        //tokens.put("refresh_token", refresh_token);
 
         return tokens;
     }
@@ -255,9 +255,10 @@ public class LoginController {
 
         // 토큰에서 사용자 ID 추출
         String userId = JWTUtil.getUserIdFromToken(refreshToken);
+        System.out.println("토큰에서 사용자 ID 추출 종료");
         // DB에서 사용자 정보 조회
         MemberEntity memberEntity = loginRepository.findById(userId);
-
+        System.out.println("DB에서 사용자 정보 조회 종료");
         // 사용자 유효성 검사
         if (memberEntity == null) {
             return new ResponseEntity<>("User not found", HttpStatus.UNAUTHORIZED);
@@ -265,12 +266,12 @@ public class LoginController {
 
         // Redis에서 jti 업데이트
         String jti = updateJtiInRedis(userId);
-
+        System.out.println("Redis에서 jti 업데이트 종료");
         // 새 토큰 생성
         Map<String, String> newTokens = generateNewTokens(memberEntity, jti);
         // 새 리프레시 토큰으로 쿠키 설정
         HttpHeaders headers = setNewRefreshCookie(newTokens.get("refresh_token"));
-
+        System.out.println("새 리프레시 토큰으로 쿠키 설정 종료");
         // 응답 바디 설정
         Map<String, String> responseBody = new HashMap<>();
         responseBody.put("Access_token", "Bearer " + newTokens.get("access_token"));
@@ -286,10 +287,13 @@ public class LoginController {
 
     private String updateJtiInRedis(String userId) {
         // Redis에서 기존 jti 삭제
+    	System.out.println(" Redis에서 기존 jti 삭제");
         redisCache.removeJti(userId);
         // 새 jti 생성
+        System.out.println(" 새 jti 생성");
         String newJti = JWTUtil.generateJti();
         // Redis에 새 jti 저장
+        System.out.println("Redis에 새 jti 저장");
         redisCache.setJti(userId, newJti);
         return newJti;
     }
