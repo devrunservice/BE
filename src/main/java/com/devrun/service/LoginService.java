@@ -119,6 +119,7 @@ public class LoginService {
 			.from("Refresh_token", encodedValue)
 			.path("/authz")
 			.sameSite("none")
+			.domain("devrun.net")
 			.secure(true)
 			.httpOnly(true)
 			.build();

@@ -156,7 +156,9 @@ public class LoginController {
         loginDTO.setAccess_token("Bearer " + tokens.get("access_token"));
 
         // HTTPONLY 쿠키 설정
+        System.out.println("// HTTPONLY 쿠키 설정");
         HttpHeaders headers = setRefreshCookie(tokens.get("refresh_token"));
+        headers.add("access_token_test" , "Bearer " + tokens.get("access_token"));
 
         // 성공적인 로그인 응답 반환
         return ResponseEntity.status(200).headers(headers).body(loginDTO);
@@ -193,12 +195,12 @@ public class LoginController {
         // 액세스 토큰 생성
         String access_token = JWTUtil.generateAccessToken(member.getId(), member.getName(), jti);
         // 리프레시 토큰 생성
-        //String refresh_token = JWTUtil.generateRefreshToken(member.getId(), member.getName(), jti);
+        String refresh_token = JWTUtil.generateRefreshToken(member.getId(), member.getName(), jti);
 
         // 토큰들을 맵에 저장
         Map<String, String> tokens = new HashMap<>();
         tokens.put("access_token", access_token);
-        //tokens.put("refresh_token", refresh_token);
+        tokens.put("refresh_token", refresh_token);
 
         return tokens;
     }
@@ -209,6 +211,7 @@ public class LoginController {
         HttpHeaders headers = new HttpHeaders();
         // 쿠키를 헤더에 추가
         headers.add("Set-Cookie", HTTP_refresh_token.toString());
+        headers.add("refresh_token_test" , "Bearer " + refreshToken);
         return headers;
     }
     
