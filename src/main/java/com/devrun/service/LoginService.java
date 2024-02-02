@@ -118,8 +118,8 @@ public class LoginService {
 		ResponseCookie refresh_token = ResponseCookie
 			.from("Refresh_token", encodedValue)
 			.path("/authz")
-			.sameSite("none")
-			.domain("devrun.net")
+			.sameSite("Lax")
+			.domain(".devrun.net")
 			.secure(true)
 			.httpOnly(true)
 			.build();

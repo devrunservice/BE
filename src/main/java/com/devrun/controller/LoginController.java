@@ -316,6 +316,8 @@ public class LoginController {
         // 새 리프레시 토큰으로 HTTPONLY 쿠키 생성
         ResponseCookie newCookie = loginService.setRefeshCookie(newRefreshToken);
         HttpHeaders headers = new HttpHeaders();
+        headers.setAccessControlAllowCredentials(true);
+        headers.setAccessControlAllowOrigin(".devrun.net");
         headers.add("Set-Cookie", newCookie.toString());
         return headers;
     }
