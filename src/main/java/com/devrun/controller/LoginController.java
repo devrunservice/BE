@@ -11,10 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -159,7 +156,8 @@ public class LoginController {
         System.out.println("// HTTPONLY 쿠키 설정");
         HttpHeaders headers = setRefreshCookie(tokens.get("refresh_token"));
         headers.add("access_token_test" , "Bearer " + tokens.get("access_token"));
-
+        headers.setAccessControlAllowOrigin(".devrun.net");
+        headers.setAccessControlAllowCredentials(true);
         // 성공적인 로그인 응답 반환
         return ResponseEntity.status(200).headers(headers).body(loginDTO);
     }
@@ -209,9 +207,9 @@ public class LoginController {
         // HTTPONLY 쿠키 생성
         ResponseCookie HTTP_refresh_token = loginService.setRefeshCookie(refreshToken);
         HttpHeaders headers = new HttpHeaders();
+
         // 쿠키를 헤더에 추가
-        headers.add("Set-Cookie", HTTP_refresh_token.toString());
-        headers.add("refresh_token_test" , "Bearer " + refreshToken);
+        headers.add(HttpHeaders.SET_COOKIE, HTTP_refresh_token.toString());
         return headers;
     }
     
