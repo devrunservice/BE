@@ -155,7 +155,6 @@ public class LoginController {
         // HTTPONLY 쿠키 설정
         System.out.println("// HTTPONLY 쿠키 설정");
         HttpHeaders headers = setRefreshCookie(tokens.get("refresh_token"));
-        headers.add("access_token_test" , "Bearer " + tokens.get("access_token"));
         // 성공적인 로그인 응답 반환
         return ResponseEntity.status(200).headers(headers).body(loginDTO);
     }
