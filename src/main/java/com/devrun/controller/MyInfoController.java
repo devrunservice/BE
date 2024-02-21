@@ -206,7 +206,7 @@ public class MyInfoController {
 
 				String uploadpath = awsS3UploadService.putS3(editimg.get(0), "profile", v);
 				MemberEntity m = memberService.findById(v);
-				String keyname = m.getProfileimgsrc().substring(57);
+				String keyname = m.getProfileimgsrc().substring(58);
 				awsS3DeleteService.DeleteObject(keyname);
 				m.setProfileimgsrc(uploadpath);
 				memberService.insert(m);
