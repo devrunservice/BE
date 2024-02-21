@@ -18,7 +18,7 @@ public class AwsS3DeleteService extends AWSS3Service {
         try {
             DeleteObjectRequest multiObjectDeleteRequest = DeleteObjectRequest.builder()
                 .bucket(bucketName)
-                .key("profile/"+keyname)
+                .key(keyname)
                 .build();
 
             s3Client.deleteObject(multiObjectDeleteRequest);
