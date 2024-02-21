@@ -14,11 +14,11 @@ public class AwsS3DeleteService extends AWSS3Service {
 	
 	
 	public void DeleteObject(String keyname) {		
-
+	System.out.println("삭제할 파일명" + keyname);
         try {
             DeleteObjectRequest multiObjectDeleteRequest = DeleteObjectRequest.builder()
                 .bucket(bucketName)
-                .key(keyname)
+                .key("profile/"+keyname)
                 .build();
 
             s3Client.deleteObject(multiObjectDeleteRequest);
