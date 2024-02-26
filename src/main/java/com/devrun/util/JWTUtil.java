@@ -56,8 +56,8 @@ public class JWTUtil {
     private static final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
     
 	// 토큰 만료시간 설정
-    private static final long EASYLOGIN_TOKEN_EXPIRATION_TIME = 15 * 60 * 1000;		// 15분
-    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 15 * 60 * 1000;		// 15분
+    private static final long EASYLOGIN_TOKEN_EXPIRATION_TIME = 30 * 60 * 1000;		// 30분
+    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 30 * 60 * 1000;		// 30분
     private static final long REFRESH_TOKEN_EXPIRATION_TIME = 24 * 60 * 60 * 1000;	// 24시간, 24시간/일 * 60분/시간 * 60초/분 * 1000밀리초/초
     
     // jti 생성
@@ -123,7 +123,6 @@ public class JWTUtil {
     
     // 주어진 token으로부터 alg를 추출하여 검증
     public static boolean isAlgorithmValid(String token) {
-    	System.out.println("주어진 token으로부터 alg를 추출하여 검증");
         Jws<Claims> jwsClaims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
         String algorithmUsed = jwsClaims.getHeader().getAlgorithm();
         return SIGNATURE_ALGORITHM.getValue().equals(algorithmUsed);
@@ -186,25 +185,18 @@ public class JWTUtil {
  	
     // 오류 응답 전송
     public void sendErrorResponse(HttpServletResponse response, int status, String message) throws IOException {
-    	System.out.println("오류 응답 전송");
     	response.sendError(status, message);
-    	System.out.println("오류 응답 전송 완료");
     }
  	
     // 토큰 유효성 검사 및 처리
  	private boolean validateAndHandleToken(String token, String tokenType, HttpServletRequest request, HttpServletResponse response, FilterChain chain)
  	        throws ServletException, IOException {
- 		System.out.println("토큰 유효성 검사 및 처리");
  	    if (token != null && token.startsWith("Bearer ")) {
  	        String jwt = token.substring(7);
- 	       System.out.println("토큰 유효성 검사 및 처리 1");
  	        String userId = getUserIdFromToken(token);
- 	       System.out.println("토큰 유효성 검사 및 처리 2");
  	        String requestJti = getJtiFromToken(token);
- 	       System.out.println("토큰 유효성 검사 및 처리 3");
  	        String storedJti = redisCache.getJti(userId);
- 	       System.out.println("토큰 유효성 검사 및 처리 4");
- 	        
+
  	        if ( !isValidAlgorithm(jwt, response) || isBlacklistedRefreshToken(tokenType, token, response) ) return true;
  	        if (isValidateJti(requestJti, storedJti, userId)) {
 				if (validateAndProcessToken(token, request)) {
@@ -214,7 +206,9 @@ public class JWTUtil {
 				}
  	        } else {
  	            // 중복 로그인 처리
- 	            sendErrorResponse(response, 403, "Duplicate login detected");
+                // 임시로 중복 로그인 제한 비활성화
+ 	            // sendErrorResponse(response, 403, "Duplicate login detected");
+                chain.doFilter(request, response);
  	            return true;
  	        }
  	    }
