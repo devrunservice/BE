@@ -9,6 +9,7 @@ DEVRUN은 프로그래밍과 관련된 강의를 들을 수 있는 온라인 교
 
 프로젝트 명은 **개발을 향해 달리자**라는 의미로 Dev(Development)와 Run을 결합하여 지었습니다.
 
+Test ID : studentTest1 , Password : qwer1234!
 ## 👫 팀 소개
 
 | 역할 | 이름 |
