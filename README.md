@@ -30,7 +30,7 @@ Test ID : studentTest1 , Password : qwer1234!
 - MariaDB(MySQL) 10.6.10
 - JPA
 - Tomcat
-- Gardle
+- Gradle
 - JWT
 - OAuth2.0 (Google Youtube , Kakao login)
 - AWS EC2 (Ubuntu 22.0.4.3 LTS / 1GiB RAM / 1 Virtual Core CPU )
